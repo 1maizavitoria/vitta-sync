@@ -6,7 +6,7 @@ import {
     Button
 } from "@mui/material";
 
-export default function Dialog({
+export default function DialogUI({
     open,
     onClose,
     title,

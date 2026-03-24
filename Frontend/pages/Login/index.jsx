@@ -1,68 +1,126 @@
-import { Box, Button, Paper } from "@mui/material";
+import { Box, Button, Grid, Paper, Typography } from "@mui/material";
 import ButtonUI from "../../components/ui/Button";
-import Input from "../../components/ui/Input";
 import Link from "../../components/ui/Link";
 import { useState } from "react";
-import Dialog from "../../components/ui/Dialog";
+import { useNavigate } from "react-router-dom";
+import InputUI from "../../components/ui/Input";
+import DialogUI from "../../components/ui/Dialog";
+import AlertUI from "../../components/ui/Alert";
+import LinkUI from "../../components/ui/Link";
 
 export default function Login() {
+
     const [open, setOpen] = useState(false);
+    const [error, setError] = useState(false);
+    const [password, setPassword] = useState("");
+    const [login, setLogin] = useState("");
+    const [errorMessage, setErrorMessage] = useState("");
+    const [typeError, setTypeError] = useState("error");
+
+    const navigate = useNavigate();
+
+    const canLogin = () => {
+        if (login !== "" && password !== "") {
+            setError(false);
+            setErrorMessage("Sucesso");
+            setTypeError("success");
+            return true;
+        } else {
+            setError(true);
+            setErrorMessage("Preencha todos os campos");
+            setTypeError("error");
+            return false;
+        }
+    };
+
+    function handleLogin() {
+        if (canLogin()) {
+            navigate("/home");
+        }
+    }
 
     return (
-        <Box
-            sx={{
-                minHeight: "100vh",
-                width: "100vw",
-                bgcolor: "#ffffff",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-            }}
-        >
-            <Paper elevation={5} sx={{ p: 4, width: 360, }}>
-                <Box
-                    display="flex"
-                    flexDirection="column"
-                    alignItems="center"
-                    gap={2}
+        <Box>
+            {error &&
+                <AlertUI
+                    type={typeError}
+                    message={errorMessage}
+                />
+            }
 
-                >
-                    <h1> Login </h1>
-                    <Input
-                        placeholder="Login"
-                    >
-                    </Input>
-                    <Input
-                        placeholder="Senha"
-                    >
-                    </Input>
+            <Grid
+                container
+                justifyContent="center"
+                alignItems="center"
+                sx={{ minHeight: "95vh" }}
+            >
+                <Grid item>
 
-                    <ButtonUI>
-                        Entrar
-                    </ButtonUI>
+                    <Paper elevation={5} sx={{ p: 4, width: 360, }}>
+                        <Box
+                            display="flex"
+                            flexDirection="column"
+                            alignItems="center"
+                            gap={2}
 
-                    <Link onClick={() => setOpen(true)}>
-                        Esqueceu a senha ?
-                    </Link>
+                        >
+                            <Typography variant="h4" gutterBottom>
+                                Login
+                            </Typography>
 
-                    <Dialog
-                        open={open}
-                        onClose={() => setOpen(false)}
-                        title="Este é seu email ?"
-                        onConfirm={() => {
-                            console.log("Confirmado!");
-                            setOpen(false);
-                        }}
-                    >
-                        Você recebera um email para trocar a senha.
-                    </Dialog>
+                            <InputUI
+                                placeholder="Login"
+                                error={error && login === ""}
+                                value={login}
+                                onChange={(e) => (
+                                    setLogin(e.target.value),
+                                    setError(false),
+                                    setOpen(false)
+                                )}
+                            />
 
-                    <Link to="/register" >
-                        Não tem conta ? Clique aqui.
-                    </Link>
-                </Box>
-            </Paper >
-        </Box >
+                            <InputUI
+                                type="password"
+                                error={error && password === ""}
+                                value={password}
+                                placeholder="Senha"
+                                onChange={(e) => (
+                                    setPassword(e.target.value),
+                                    setError(false)
+                                )}
+                            />
+
+                            <ButtonUI
+                                onClick={handleLogin}
+                            >
+                                Entrar
+                            </ButtonUI>
+
+                            <LinkUI onClick={() => setOpen(true)}>
+                                Esqueceu a senha ?
+                            </LinkUI>
+
+                            <DialogUI
+                                open={open && login !== ""}
+                                onClose={() => setOpen(false)}
+                                title={"Confirmar Email"}
+                                onConfirm={() => {
+                                    setOpen(false);
+                                }}
+                            >
+                                Este é seu email? <br /> <br />
+                                <strong>{login}</strong>
+                            </DialogUI>
+
+                            <Link to="/register" >
+                                Não tem conta ? Clique aqui.
+                            </Link>
+
+                        </Box>
+                    </Paper >
+                </Grid >
+            </Grid>
+        </Box>
     )
 
 }
