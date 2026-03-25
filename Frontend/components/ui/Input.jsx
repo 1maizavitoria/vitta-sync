@@ -9,6 +9,7 @@ export default function InputUI({
     value,
     onChange,
     placeholder,
+    limit,
     showPasswordToggle = false,
     ...props
 }) {
@@ -30,7 +31,9 @@ export default function InputUI({
             margin="normal"
             placeholder={placeholder}
             {...props}
+
             slotProps={{
+                htmlInput: { maxLength: limit },
                 input: {
                     ...props.slotProps?.input,
                     endAdornment:
@@ -44,6 +47,7 @@ export default function InputUI({
                                 </IconButton>
                             </InputAdornment>
                         ) : null
+
                 }
             }}
         />

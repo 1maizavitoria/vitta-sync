@@ -1,19 +1,29 @@
-import { Box, Grid, Paper, Tooltip, Typography } from "@mui/material";
+import { Box, FormGroup, Grid, Paper, Tooltip, Typography } from "@mui/material";
 import ButtonUI from "../../components/ui/Button";
 import InputUI from "../../components/ui/Input";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import AlertUI from "../../components/ui/Alert";
 import { createUser } from "../../services/userService"
+import AutocompleteUI from "../../components/ui/Autocomplete";
+import DatePickerUI from "../../components/ui/DatePicker";
+import CheckboxUI from "../../components/ui/Checkbox";
 
 
 export default function Register() {
     const [error, setError] = useState(false);
+    const [name, setName] = useState("");
     const [password, setPassword] = useState("");
+    const [CPF, setCPF] = useState("");
+    const [userType, setUserType] = useState(null);
+    const [birthDate, setBirthDate] = useState(null);
+    const [privateShareDaily, setPrivateShareDaily] = useState(false);
+    const [privateShareHabits, setPrivateShareHabits] = useState(false);
     const [email, setEmail] = useState("");
     const [repeatPassword, setRepeatPassword] = useState("");
     const [errorMessage, setErrorMessage] = useState("");
     const [typeError, setTypeError] = useState("error");
+
 
     const navigate = useNavigate();
 
@@ -84,23 +94,23 @@ export default function Register() {
 
     };
 
-    // function handleRegister() {
-    //     if (canRegister()) {
-    //         navigate("/");
-    //     }
-    // }
-
     async function handleRegister() {
 
         if (!canRegister()) return;
 
-        const userData = {
-            email,
-            senha: password
+        const data = {
+            nome: name,           // coletar no form
+            email: email,
+            senha: password,
+            cpf: CPF,            // coletar no form
+            tipo: userType.value,           // "paciente", "responsavel" ou "saude"
+            dataNascimento: birthDate, // formato "yyyy-MM-dd", ex: "2000-01-25"
+            privCompartilharDiario: privateShareDaily,
+            privCompartilharHabitos: privateShareHabits,
         };
 
         try {
-            const response = await createUser(userData);
+            const response = await createUser(data);
 
             setError(false);
             setErrorMessage("Cadastro realizado com sucesso");
@@ -186,6 +196,48 @@ export default function Register() {
                             </Typography>
 
                             <InputUI
+                                placeholder="Nome"
+                                type="string"
+                                error={error && (name === "")}
+                                value={name}
+                                onChange={(e) => (
+                                    setName(e.target.value),
+                                    setError(false)
+                                )}
+                            >
+                            </InputUI>
+
+                            <InputUI
+                                placeholder="CPF apenas numeros"
+                                limit={11}
+                                error={error && (CPF === "")}
+                                value={CPF}
+                                onChange={(e) => {
+                                    setCPF(e.target.value.replace(/\D/g, ""));
+                                    setError(false);
+                                }
+                                }
+                            >
+                            </InputUI>
+
+                            <AutocompleteUI
+                                label="Tipo de usuário"
+                                value={userType}
+                                onChange={(newValue) => setUserType(newValue)}
+                                options={[
+                                    { value: "paciente", label: "Paciente" },
+                                    { value: "responsavel", label: "Responsável" },
+                                    { value: "saude", label: "Saúde" }
+                                ]}
+                            />
+
+                            <DatePickerUI
+                                label="Data de nascimento"
+                                value={birthDate}
+                                onChange={setBirthDate}
+                            />
+
+                            <InputUI
                                 placeholder="exemplo@gmail.com"
                                 type="email"
                                 error={error && (email === "" || !isValidEmail(email))}
@@ -226,6 +278,19 @@ export default function Register() {
                                 >
                                 </InputUI>
                             </Tooltip>
+                            <FormGroup>
+                                <CheckboxUI
+                                    label="Permitir compartilhar dados diarios"
+                                    checked={privateShareDaily}
+                                    onChange={setPrivateShareDaily}
+                                />
+
+                                <CheckboxUI
+                                    label="Permitir compartilhar dados do hábitos"
+                                    checked={privateShareHabits}
+                                    onChange={setPrivateShareHabits}
+                                />
+                            </FormGroup>
 
                             <ButtonUI
                                 onClick={handleRegister}

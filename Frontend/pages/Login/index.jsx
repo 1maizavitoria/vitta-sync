@@ -1,4 +1,4 @@
-import { Box, Button, Grid, Paper, Typography } from "@mui/material";
+import { Box, Button, Grid, Paper, Tooltip, Typography } from "@mui/material";
 import ButtonUI from "../../components/ui/Button";
 import Link from "../../components/ui/Link";
 import { useState } from "react";
@@ -7,20 +7,29 @@ import InputUI from "../../components/ui/Input";
 import DialogUI from "../../components/ui/Dialog";
 import AlertUI from "../../components/ui/Alert";
 import LinkUI from "../../components/ui/Link";
+import { login, validadeCode, validadeCodePassword, changePassword } from "../../services/userService"
 
 export default function Login() {
 
-    const [open, setOpen] = useState(false);
+    const [openForgotDialog, setOpenForgotDialog] = useState(false);
+    const [openLoginDialog, setOpenLoginDialog] = useState(false);
+
     const [error, setError] = useState(false);
     const [password, setPassword] = useState("");
-    const [login, setLogin] = useState("");
+    const [newPassword, setNewPassword] = useState("");
+    const [email, setEmail] = useState("");
+    const [sendEmail, setSendEmail] = useState(false);
+
+    const [CPF, setCPF] = useState("");
     const [errorMessage, setErrorMessage] = useState("");
     const [typeError, setTypeError] = useState("error");
+
+    const [code, setCode] = useState("");
 
     const navigate = useNavigate();
 
     const canLogin = () => {
-        if (login !== "" && password !== "") {
+        if (CPF !== "" && password !== "") {
             setError(false);
             setErrorMessage("Sucesso");
             setTypeError("success");
@@ -33,11 +42,106 @@ export default function Login() {
         }
     };
 
-    function handleLogin() {
-        if (canLogin()) {
-            navigate("/home");
+    async function handleLogin() {
+        if (!canLogin()) return;
+
+        const data = {
+            cpf: CPF,
+            senha: password
+        };
+
+        try {
+            await login(data);
+            setOpenLoginDialog(true);
+
+        } catch (error) {
+            console.error(error);
         }
     }
+
+    async function hadleValidateCode() {
+        const data = {
+            codigo: code,
+        };
+
+        try {
+            await validadeCode(data);
+            navigate("/home");
+        } catch (error) {
+            console.log(error);
+        }
+    }
+
+    async function handleValidateCodePassword() {
+        const data = {
+            email: email,
+        };
+
+        try {
+            await validadeCodePassword(data);
+            setSendEmail(true);
+        } catch (error) {
+            console.log(error);
+        }
+    }
+
+    async function handleChangeCodePassword() {
+
+        const data = {
+            codigo: code,
+            novaSenha: newPassword
+        };
+
+        try {
+            await changePassword(data);
+        } catch (error) {
+            console.log(error);
+        }
+    }
+
+    // Regras senha
+    const hasMinLength = (password) => password.length >= 8;
+    const hasUppercase = (password) => /[A-Z]/.test(password);
+    const hasLowercase = (password) => /[a-z]/.test(password);
+    const hasNumber = (password) => /\d/.test(password);
+    const hasSpecialChar = (password) => /[^A-Za-z\d]/.test(password);
+
+    function validatePassword(password) {
+        const result = {
+            minLength: hasMinLength(password),
+            upperCase: hasUppercase(password),
+            lowerCase: hasLowercase(password),
+            number: hasNumber(password),
+            specialChar: hasSpecialChar(password)
+        }
+
+        return {
+            ...result,
+            isValid: Object.values(result).every(Boolean)
+        };
+    }
+
+    const rulesPassword = validatePassword(newPassword);
+
+    const titlePasswordTooltip = (
+        <Box>
+            <Box style={{ color: rulesPassword.minLength ? "lightgreen" : "#ff6b6b" }}>
+                • 8 caracteres
+            </Box>
+            <Box style={{ color: rulesPassword.upperCase ? "lightgreen" : "#ff6b6b" }}>
+                • Letra maiúscula
+            </Box>
+            <Box style={{ color: rulesPassword.lowerCase ? "lightgreen" : "#ff6b6b" }}>
+                • Letra minúscula
+            </Box>
+            <Box style={{ color: rulesPassword.number ? "lightgreen" : "#ff6b6b" }}>
+                • Número
+            </Box>
+            <Box style={{ color: rulesPassword.specialChar ? "lightgreen" : "#ff6b6b" }}>
+                • Caractere especial
+            </Box>
+        </Box>
+    )
 
     return (
         <Box>
@@ -69,19 +173,21 @@ export default function Login() {
                             </Typography>
 
                             <InputUI
-                                placeholder="Login"
-                                error={error && login === ""}
-                                value={login}
+                                placeholder="CPF"
+                                limit={11}
+                                error={error && CPF === ""}
+                                value={CPF}
                                 onChange={(e) => (
-                                    setLogin(e.target.value),
+                                    setCPF(e.target.value),
                                     setError(false),
-                                    setOpen(false)
+                                    setOpenForgotDialog(false)
                                 )}
                             />
 
                             <InputUI
                                 type="password"
                                 error={error && password === ""}
+                                showPasswordToggle={true}
                                 value={password}
                                 placeholder="Senha"
                                 onChange={(e) => (
@@ -96,20 +202,78 @@ export default function Login() {
                                 Entrar
                             </ButtonUI>
 
-                            <LinkUI onClick={() => setOpen(true)}>
+                            <LinkUI onClick={() => setOpenForgotDialog(true)}>
                                 Esqueceu a senha ?
                             </LinkUI>
 
                             <DialogUI
-                                open={open && login !== ""}
-                                onClose={() => setOpen(false)}
-                                title={"Confirmar Email"}
+                                open={openForgotDialog}
+                                onClose={() => setOpenForgotDialog(false)}
+                                title={"Trocar de senha"}
                                 onConfirm={() => {
-                                    setOpen(false);
+                                    handleChangeCodePassword();
+                                    setOpenForgotDialog(false);
                                 }}
                             >
-                                Este é seu email? <br /> <br />
-                                <strong>{login}</strong>
+                                <Box display="flex" gap={2} alignItems="center">
+                                    <InputUI
+                                        style={{ flex: 1 }}
+                                        type="text"
+                                        placeholder="Digite seu email"
+                                        value={email}
+                                        onChange={(e) => setEmail(e.target.value)}
+                                    />
+
+                                    <ButtonUI
+                                        onClick={handleValidateCodePassword}
+                                    >
+                                        Enviar Código
+                                    </ButtonUI>
+                                </Box>
+
+                                {sendEmail && <p>Foi enviado para seu email um código de verificação.</p>}
+
+                                <InputUI
+                                    type="text"
+                                    placeholder="Digite o código"
+                                    value={code}
+                                    onChange={(e) => setCode(e.target.value)}
+
+                                />
+                                <Tooltip title={titlePasswordTooltip} placement="right" arrow>
+                                    <InputUI
+                                        type="password"
+                                        placeholder="Digite sua nova senha"
+                                        showPasswordToggle={true}
+                                        value={newPassword}
+                                        onChange={(e) => setNewPassword(e.target.value)}
+
+                                    />
+                                </Tooltip>
+                            </DialogUI>
+
+                            <DialogUI
+                                open={openLoginDialog}
+                                onClose={() => setOpenLoginDialog(false)}
+                                title={"Digite seu código"}
+                                onConfirm={() => {
+                                    if (!code) {
+                                        alert("Digite o código");
+                                        return;
+                                    }
+                                    hadleValidateCode();
+                                    setOpenLoginDialog(false);
+                                }}
+                            >
+                                <p>Foi enviado para seu email um código de verificação.</p>
+
+                                <InputUI
+                                    type="text"
+                                    placeholder="Digite o código"
+                                    value={code}
+                                    onChange={(e) => setCode(e.target.value)}
+
+                                />
                             </DialogUI>
 
                             <Link to="/register" >
@@ -120,7 +284,7 @@ export default function Login() {
                     </Paper >
                 </Grid >
             </Grid>
-        </Box>
+        </Box >
     )
 
 }
