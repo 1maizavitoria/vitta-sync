@@ -8,6 +8,7 @@ export default function DatePickerUI({
     label,
     value,
     onChange,
+    error,
     format = "DD/MM/YYYY", // yyyy-MM-dd
     ...props
 }) {
@@ -20,14 +21,12 @@ export default function DatePickerUI({
                     onChange(newValue ? newValue.format("YYYY-MM-DD") : null);
                 }}
                 format={format}
-                // slots={{
-                //     textField: TextField
-                // }}
                 slotProps={{
                     textField: {
                         variant: "standard",
                         fullWidth: true,
-                        margin: "normal"
+                        margin: "normal",
+                        error: error
                     }
                 }}
                 {...props}

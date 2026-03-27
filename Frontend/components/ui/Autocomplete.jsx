@@ -4,6 +4,8 @@ export default function AutocompleteUI({
     label,
     value,
     onChange,
+    error = "false",
+    //helperText,
     options = [],
     placeholder = "Selecione...",
     getOptionLabel = (option) => option.label || "",
@@ -24,6 +26,8 @@ export default function AutocompleteUI({
                     label={label}
                     placeholder={placeholder}
                     variant="standard"
+                    error={error}
+                //helperText={error ? helperText : ""}
                 />
             )}
             {...props}

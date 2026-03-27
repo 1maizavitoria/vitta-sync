@@ -8,13 +8,18 @@ import { createUser } from "../../services/userService"
 import AutocompleteUI from "../../components/ui/Autocomplete";
 import DatePickerUI from "../../components/ui/DatePicker";
 import CheckboxUI from "../../components/ui/Checkbox";
-
+import { formatCPF, isValidCpf } from "../../utils/formatters/formatCPF"
+import { useAlert } from "../../hooks/useAlert";
+import { isValidEmail } from "../../utils/formatters/formatEmail";
 
 export default function Register() {
+    const { showAlert } = useAlert();
+
     const [error, setError] = useState(false);
     const [name, setName] = useState("");
     const [password, setPassword] = useState("");
     const [CPF, setCPF] = useState("");
+    const [advice, setAdvice] = useState("");
     const [userType, setUserType] = useState(null);
     const [birthDate, setBirthDate] = useState(null);
     const [privateShareDaily, setPrivateShareDaily] = useState(false);
@@ -24,13 +29,7 @@ export default function Register() {
     const [errorMessage, setErrorMessage] = useState("");
     const [typeError, setTypeError] = useState("error");
 
-
     const navigate = useNavigate();
-
-    // Regras email
-    const isValidEmail = (email) => {
-        return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-    };
 
     // Regras senha
     const hasMinLength = (password) => password.length >= 8;
@@ -58,12 +57,19 @@ export default function Register() {
     }
 
     const canRegister = () => {
-
-        if (email == "" && password == "" && repeatPassword == "") {
+        if (email == "" || CPF == "" || name == "" || userType == null || birthDate == null || password == "" || repeatPassword == "" || (userType.value === "saude" && advice == "")) {
             setError(true);
             setErrorMessage("Preencha todos os campos");
             setTypeError("error");
             return false;
+        }
+
+        if (!isValidCpf(CPF)) {
+            setError(true);
+            setErrorMessage("CPF incorreto");
+            setTypeError("error");
+            return false;
+
         }
 
         if (!isValidEmail(email)) {
@@ -97,13 +103,13 @@ export default function Register() {
     async function handleRegister() {
 
         if (!canRegister()) return;
-
         const data = {
-            nome: name,           // coletar no form
+            nome: name,
             email: email,
             senha: password,
-            cpf: CPF,            // coletar no form
-            tipo: userType.value,           // "paciente", "responsavel" ou "saude"
+            cpf: CPF,
+            conselho: advice,
+            tipo: userType.value, // "paciente", "responsavel" ou "saude"
             dataNascimento: birthDate, // formato "yyyy-MM-dd", ex: "2000-01-25"
             privCompartilharDiario: privateShareDaily,
             privCompartilharHabitos: privateShareHabits,
@@ -112,16 +118,19 @@ export default function Register() {
         try {
             const response = await createUser(data);
 
-            setError(false);
+            setError(true);
             setErrorMessage("Cadastro realizado com sucesso");
             setTypeError("success");
 
             console.log("Usuário criado:", response);
 
+            showAlert("success", "Cadastro realizado com sucesso");
+
             navigate("/");
 
         } catch (error) {
-            console.error(error);
+
+            console.log(error);
 
             setError(true);
             setErrorMessage("Erro ao cadastrar usuário");
@@ -169,6 +178,8 @@ export default function Register() {
         </Box>
     )
 
+
+
     return (
         <Box>
             {error &&
@@ -189,14 +200,15 @@ export default function Register() {
                             display="flex"
                             flexDirection="column"
                             alignItems="center"
-                            gap={2}
+                            gap={3}
                         >
                             <Typography variant="h4" gutterBottom>
                                 Cadastro
                             </Typography>
 
                             <InputUI
-                                placeholder="Nome"
+                                label="Nome"
+                                placeholder="Ex: João Silva"
                                 type="string"
                                 error={error && (name === "")}
                                 value={name}
@@ -208,10 +220,11 @@ export default function Register() {
                             </InputUI>
 
                             <InputUI
-                                placeholder="CPF apenas numeros"
-                                limit={11}
-                                error={error && (CPF === "")}
-                                value={CPF}
+                                label="CPF"
+                                placeholder="999.999.999-99"
+                                limit={14}
+                                error={error && (CPF === "" || !isValidCpf(CPF))}
+                                value={formatCPF(CPF)}
                                 onChange={(e) => {
                                     setCPF(e.target.value.replace(/\D/g, ""));
                                     setError(false);
@@ -222,8 +235,12 @@ export default function Register() {
 
                             <AutocompleteUI
                                 label="Tipo de usuário"
+                                error={error && userType == null}
+                                //helperText="Selecione um tipo válido"
                                 value={userType}
-                                onChange={(newValue) => setUserType(newValue)}
+                                onChange={(newValue) =>
+                                    setUserType(newValue)
+                                }
                                 options={[
                                     { value: "paciente", label: "Paciente" },
                                     { value: "responsavel", label: "Responsável" },
@@ -231,13 +248,28 @@ export default function Register() {
                                 ]}
                             />
 
+                            {userType?.value === "saude" && <InputUI
+                                label="Conselho"
+                                placeholder="CRM, etc"
+                                error={error && (advice === "")}
+                                value={advice}
+                                onChange={(e) => {
+                                    setAdvice(e.target.value);
+                                    setError(false);
+                                }
+                                }
+                            >
+                            </InputUI>}
+
                             <DatePickerUI
                                 label="Data de nascimento"
+                                error={error && birthDate == null}
                                 value={birthDate}
                                 onChange={setBirthDate}
                             />
 
                             <InputUI
+                                label="Email"
                                 placeholder="exemplo@gmail.com"
                                 type="email"
                                 error={error && (email === "" || !isValidEmail(email))}
@@ -251,6 +283,7 @@ export default function Register() {
 
                             <Tooltip title={titlePasswordTooltip} placement="right" arrow>
                                 <InputUI
+                                    label="Senha"
                                     placeholder="Digite sua senha"
                                     type="password"
                                     showPasswordToggle={true}
@@ -266,6 +299,7 @@ export default function Register() {
 
                             <Tooltip title={titleRepeatPasswordTooltip} placement="right" arrow>
                                 <InputUI
+                                    label="Repetir senha"
                                     placeholder="Repita sua senha"
                                     type="password"
                                     showPasswordToggle={true}
@@ -286,7 +320,7 @@ export default function Register() {
                                 />
 
                                 <CheckboxUI
-                                    label="Permitir compartilhar dados do hábitos"
+                                    label="Permitir compartilhar dados dos hábitos"
                                     checked={privateShareHabits}
                                     onChange={setPrivateShareHabits}
                                 />

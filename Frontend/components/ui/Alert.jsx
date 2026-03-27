@@ -18,7 +18,7 @@ export default function AlertUI({ type = "info", message, ...props }) {
 
             <MuiAlert
                 severity={type}
-                variant="outlined"
+                variant="standard"
                 sx={{
                     display: "flex",
                     alignItems: "center",
