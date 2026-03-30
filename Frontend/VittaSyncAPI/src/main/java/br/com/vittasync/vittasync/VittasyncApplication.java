@@ -1,0 +1,15 @@
+package br.com.vittasync.vittasync;
+
+
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+
+
+@SpringBootApplication
+public class VittasyncApplication {
+
+	public static void main(String[] args) {
+		SpringApplication.run(VittasyncApplication.class, args);
+	}
+
+}

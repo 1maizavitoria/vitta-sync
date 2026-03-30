@@ -1,0 +1,12 @@
+package br.com.vittasync.vittasync.DTO;
+
+
+import lombok.Getter;
+import lombok.Setter;
+
+
+@Getter
+@Setter
+public class AlterarEmailDTO {
+    private String novoEmail;
+}
