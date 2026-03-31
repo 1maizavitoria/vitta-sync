@@ -10,15 +10,15 @@ import LinkUI from "../../components/ui/Link";
 import { login, validadeCode, validadeCodePassword, changePassword } from "../../services/userService"
 import { formatCPF, isValidCpf } from "../../utils/formatters/formatCPF";
 import { isValidEmail } from "../../utils/formatters/formatEmail";
+import { useAlert } from "../../hooks/useAlert";
 
 export default function Login() {
+    const { showAlert } = useAlert();
 
     const [openForgotDialog, setOpenForgotDialog] = useState(false);
     const [openLoginDialog, setOpenLoginDialog] = useState(false);
 
     const [error, setError] = useState(false);
-    const [errorMessage, setErrorMessage] = useState("");
-    const [typeError, setTypeError] = useState("error");
     const [errorCode, setErrorCode] = useState(false);
     const [password, setPassword] = useState("");
     const [CPF, setCPF] = useState("");
@@ -27,9 +27,9 @@ export default function Login() {
 
     // estado exclusivo do dialog de troca de senha
     const [forgotError, setForgotError] = useState(false);
-    const [forgotErrorMessage, setForgotErrorMessage] = useState("");
-    const [forgotTypeError, setForgotTypeError] = useState("error");
     const [forgotErrorCode, setForgotErrorCode] = useState(false);
+    const [forgotEmailError, setForgotEmailError] = useState(false);
+    const [forgotEmailConfirm, setForgotEmailConfirm] = useState(false);
 
     const [forgotEmail, setForgotEmail] = useState("");
     const [forgotCode, setForgotCode] = useState("");
@@ -38,21 +38,18 @@ export default function Login() {
     const canLogin = () => {
         if (CPF === "" && password === "") {
             setError(true);
-            setErrorMessage("Preencha todos os campos");
-            setTypeError("error");
+            showAlert("error", "Preencha todos os campos");
             return false;
         }
 
         if (!isValidCpf(CPF)) {
             setError(true);
-            setErrorMessage("CPF incorreto");
-            setTypeError("error");
+            showAlert("error", "CPF incorreto");
             return false;
         }
 
         setError(false);
-        setErrorMessage("Sucesso");
-        setTypeError("success");
+        // showAlert("success", "Sucesso");
         return true;
 
     };
@@ -66,13 +63,13 @@ export default function Login() {
         };
 
         try {
-            await login(data);
             setOpenLoginDialog(true);
+            showAlert("success", "Um código foi enviado para seu email");
+            await login(data);
 
         } catch (error) {
             setError(true);
-            setTypeError("error");
-            setErrorMessage("CPF ou senha inválidos");
+            showAlert("error", "CPF ou senha inválidos");
             console.error(error);
         }
     }
@@ -81,8 +78,7 @@ export default function Login() {
 
         if (code === "") {
             setError(true);
-            setTypeError("error");
-            setErrorMessage("Coloque o código enviado por email");
+            showAlert("error", "Coloque o código enviado por email");
             return;
         }
 
@@ -98,68 +94,68 @@ export default function Login() {
             console.log(error);
             setErrorCode(true);
             setError(true);
-            setTypeError("error");
-            setErrorMessage("Código inválido");
+            showAlert("error", "Código inválido");
         }
     }
 
     //Troca de senha
 
-    const canChangePassword = (email, code, newPassword) => {
-        if (!email || !code || !newPassword) {
-            setForgotError(true);
-            setForgotErrorMessage("Preencha todos os campos");
-            return;
-        }
+    const canChangePassword = (code, newPassword) => {
 
-        if (!isValidEmail(email)) {
+        if (!code || !newPassword) {
             setForgotError(true);
-            setForgotTypeError("error");
-            setForgotErrorMessage("Email incorreto");
-            return false;
+            showAlert("error", "Preencha todos os campos");
+            return;
         }
 
         if (!rulesPassword.isValid) {
             setForgotError(true);
-            setForgotTypeError("error");
-            setForgotErrorMessage("Verifique as regras de senha");
+            showAlert("error", "Verifique as regras de senha");
             return false;
         }
 
-        // if (code) {
-        //     setForgotErrorCode(true);
-        //     setForgotError(true);
-        //     setForgotTypeError("error");
-        //     setForgotErrorMessage("Código errado");
-        //     return false;
-        // }
-
         setForgotError(false);
-        setForgotTypeError("success");
-        setForgotErrorMessage("Sucesso");
         return true;
 
     };
 
+    const sendEmail = (email) => {
+        if (!email) {
+            setForgotEmailError(true);
+            showAlert("error", "Preencha o email");
+            return;
+        }
+
+        if (!isValidEmail(email)) {
+            setForgotEmailError(true);
+            showAlert("error", "Email incorreto");
+            return false;
+        }
+
+        return true;
+    };
+
     async function handleValidateCodePassword(emailParam) {
+        if (!sendEmail(emailParam)) return;
+
         const data = { email: emailParam };
 
         try {
+            showAlert("success", "Um código foi enviado para seu email");
+            setForgotEmailError(true);
+            setForgotEmailConfirm(true);
             await validadeCodePassword(data);
-            setForgotError(true);
-            setForgotTypeError("success");
-            setForgotErrorMessage("Um código foi enviado para seu email");
         } catch (error) {
             console.log(error);
-            setForgotError(true);
-            setForgotTypeError("error");
-            setForgotErrorMessage("Erro ao Enviar o código");
+            setForgotEmailError(true);
+            showAlert("error", "Erro ao Enviar o código");
+            setForgotEmailConfirm(false);
         }
     }
 
-    async function handleChangeCodePassword({ email, code, newPassword }) {
+    async function handleChangeCodePassword({ code, newPassword }) {
 
-        if (!canChangePassword(email, code, newPassword)) return;
+        if (!canChangePassword(code, newPassword)) return;
 
         const data = {
             codigo: code,
@@ -170,14 +166,13 @@ export default function Login() {
             await changePassword(data);
             setOpenForgotDialog(false);
             setForgotError(true);
-            setForgotTypeError("success");
-            setForgotErrorMessage("Senha alterada com sucesso");
+            setForgotEmailConfirm(false);
+            showAlert("success", "Senha alterada com sucesso");
 
         } catch (error) {
             console.log(error)
             setForgotError(true);
-            setForgotTypeError("error");
-            setForgotErrorMessage("Erro ao trocar senha");
+            showAlert("error", "Erro ao trocar senha");
         }
     }
 
@@ -225,25 +220,8 @@ export default function Login() {
         </Box>
     )
 
-    const activeError = forgotError || error;
-
-    const activeMessage = forgotError
-        ? forgotErrorMessage
-        : errorMessage;
-
-    const activeType = forgotError
-        ? forgotTypeError
-        : typeError;
-
     return (
         <Box>
-            {activeError && (
-                <AlertUI
-                    type={activeType}
-                    message={activeMessage}
-                />
-            )}
-
             <Grid
                 container
                 justifyContent="center"
@@ -315,23 +293,24 @@ export default function Login() {
                                     setForgotError(false),
                                     setForgotErrorCode(false),
                                     setForgotError(false),
+                                    setForgotEmailError(false),
+                                    setForgotEmailConfirm(false),
                                     setForgotCode(""),
                                     setForgotEmail(""),
                                     setForgotNewPassword("")
                                 )}
                                 onConfirm={() => {
                                     handleChangeCodePassword({
-                                        email: forgotEmail,
                                         code: forgotCode,
                                         newPassword: forgotNewPassword
                                     });
                                 }}
                             >
-                                <Box display="flex" gap={2} alignItems="center">
+                                {!forgotEmailConfirm && <Box display="flex" gap={2} alignItems="center">
                                     <InputUI
                                         label="Email"
                                         style={{ flex: 1 }}
-                                        error={forgotError && (forgotEmail === "" || !isValidEmail(forgotEmail))}
+                                        error={forgotEmailError && (forgotEmail === "" || !isValidEmail(forgotEmail))}
                                         type="text"
                                         placeholder="Digite seu email"
                                         value={forgotEmail}
@@ -343,18 +322,18 @@ export default function Login() {
                                     >
                                         Enviar Código
                                     </ButtonUI>
-                                </Box>
+                                </Box>}
 
-                                <InputUI
+                                {forgotEmailConfirm && <InputUI
                                     label="Código"
                                     error={forgotError && (forgotCode === "" || forgotErrorCode)}
                                     type="text"
                                     placeholder="Digite o código"
                                     value={forgotCode}
                                     onChange={(e) => setForgotCode(e.target.value)}
-                                />
+                                />}
 
-                                <Tooltip title={forgotTitlePasswordTooltip} placement="right" arrow>
+                                {forgotEmailConfirm && <Tooltip title={forgotTitlePasswordTooltip} placement="right" arrow>
                                     <InputUI
                                         label="Nova senha"
                                         error={forgotError && (forgotNewPassword === "" || !rulesPassword.isValid)}
@@ -366,7 +345,8 @@ export default function Login() {
                                             setForgotNewPassword(e.target.value)
                                         }}
                                     />
-                                </Tooltip>
+                                </Tooltip>}
+
                             </DialogUI>
 
                             {/* Diálogo para de verificação de 2 fatores no login */}
@@ -381,14 +361,15 @@ export default function Login() {
                                 onConfirm={() => {
                                     if (!code) {
                                         setError(true);
-                                        setErrorMessage("Digite o código verificador");
-                                        setTypeError("error");
+                                        showAlert("error", "Erro ao trocar senha");
+
+                                        // setErrorMessage("Digite o código verificador");
+                                        // setTypeError("error");
                                         return;
                                     }
                                     hadleValidateCode();
                                 }}
                             >
-                                <p>Foi enviado um código de verificação para seu email .</p>
 
                                 <InputUI
                                     type="text"

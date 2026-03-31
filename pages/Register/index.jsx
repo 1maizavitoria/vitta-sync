@@ -26,8 +26,6 @@ export default function Register() {
     const [privateShareHabits, setPrivateShareHabits] = useState(false);
     const [email, setEmail] = useState("");
     const [repeatPassword, setRepeatPassword] = useState("");
-    const [errorMessage, setErrorMessage] = useState("");
-    const [typeError, setTypeError] = useState("error");
 
     const navigate = useNavigate();
 
@@ -59,43 +57,37 @@ export default function Register() {
     const canRegister = () => {
         if (email == "" || CPF == "" || name == "" || userType == null || birthDate == null || password == "" || repeatPassword == "" || (userType.value === "saude" && advice == "")) {
             setError(true);
-            setErrorMessage("Preencha todos os campos");
-            setTypeError("error");
+            showAlert("error", "Preencha todos os campos");
             return false;
         }
 
         if (!isValidCpf(CPF)) {
             setError(true);
-            setErrorMessage("CPF incorreto");
-            setTypeError("error");
+            showAlert("error", "CPF incorreto");
             return false;
 
         }
 
         if (!isValidEmail(email)) {
             setError(true);
-            setErrorMessage("Email inválido");
-            setTypeError("error");
+            showAlert("error", "Email inválido");
             return false;
         }
 
         if (!rulesPassword.isValid || !repeatRulesPassword.isValid) {
             setError(true);
-            setErrorMessage("Verifique as regras de senha");
-            setTypeError("error");
+            showAlert("error", "Verifique as regras de senha");
             return false;
         }
 
         if (password !== repeatPassword) {
             setError(true);
-            setErrorMessage("As senhas devem ser iguais");
-            setTypeError("error");
+            showAlert("error", "As senhas devem ser iguais");
             return false;
         }
 
         setError(false);
-        setErrorMessage("Sucesso");
-        setTypeError("success");
+        showAlert("success", "Sucesso");
         return true;
 
     };
@@ -103,6 +95,7 @@ export default function Register() {
     async function handleRegister() {
 
         if (!canRegister()) return;
+
         const data = {
             nome: name,
             email: email,
@@ -118,9 +111,9 @@ export default function Register() {
         try {
             const response = await createUser(data);
 
-            setError(true);
-            setErrorMessage("Cadastro realizado com sucesso");
-            setTypeError("success");
+            // setError(true);
+            // setErrorMessage("Cadastro realizado com sucesso");
+            // setTypeError("success");
 
             console.log("Usuário criado:", response);
 
@@ -133,8 +126,9 @@ export default function Register() {
             console.log(error);
 
             setError(true);
-            setErrorMessage("Erro ao cadastrar usuário");
-            setTypeError("error");
+            showAlert("error", "Erro ao cadastrar usuário");
+            // setErrorMessage("Erro ao cadastrar usuário");
+            // setTypeError("error");
         }
     }
 
@@ -178,16 +172,14 @@ export default function Register() {
         </Box>
     )
 
-
-
     return (
         <Box>
-            {error &&
+            {/* {error &&
                 <AlertUI
                     type={typeError}
                     message={errorMessage}
                 />
-            }
+            } */}
             <Grid
                 container
                 justifyContent="center"
@@ -233,6 +225,19 @@ export default function Register() {
                             >
                             </InputUI>
 
+                            <InputUI
+                                label="Email"
+                                placeholder="exemplo@gmail.com"
+                                type="email"
+                                error={error && (email === "" || !isValidEmail(email))}
+                                value={email}
+                                onChange={(e) => (
+                                    setEmail(e.target.value),
+                                    setError(false)
+                                )}
+                            >
+                            </InputUI>
+
                             <AutocompleteUI
                                 label="Tipo de usuário"
                                 error={error && userType == null}
@@ -244,7 +249,7 @@ export default function Register() {
                                 options={[
                                     { value: "paciente", label: "Paciente" },
                                     { value: "responsavel", label: "Responsável" },
-                                    { value: "saude", label: "Saúde" }
+                                    { value: "saude", label: "Profissional da Saúde" }
                                 ]}
                             />
 
@@ -267,19 +272,6 @@ export default function Register() {
                                 value={birthDate}
                                 onChange={setBirthDate}
                             />
-
-                            <InputUI
-                                label="Email"
-                                placeholder="exemplo@gmail.com"
-                                type="email"
-                                error={error && (email === "" || !isValidEmail(email))}
-                                value={email}
-                                onChange={(e) => (
-                                    setEmail(e.target.value),
-                                    setError(false)
-                                )}
-                            >
-                            </InputUI>
 
                             <Tooltip title={titlePasswordTooltip} placement="right" arrow>
                                 <InputUI
@@ -312,6 +304,7 @@ export default function Register() {
                                 >
                                 </InputUI>
                             </Tooltip>
+
                             <FormGroup>
                                 <CheckboxUI
                                     label="Permitir compartilhar dados diarios"

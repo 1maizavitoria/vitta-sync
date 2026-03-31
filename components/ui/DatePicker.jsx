@@ -17,6 +17,7 @@ export default function DatePickerUI({
             <DatePicker
                 label={label}
                 value={value && dayjs(value).isValid() ? dayjs(value) : null}
+                maxDate={dayjs()}
                 onChange={(newValue) => {
                     onChange(newValue ? newValue.format("YYYY-MM-DD") : null);
                 }}
