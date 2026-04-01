@@ -35,7 +35,7 @@ public class JwtFilter extends OncePerRequestFilter {
         if (request.getMethod().equals("OPTIONS")) {
             filterChain.doFilter(request, response);
             return;
-        } // adicionado config pro CORS funcionar -- Lucas
+        }
 
         final String authHeader = request.getHeader("Authorization");
 

@@ -1,6 +1,5 @@
 package br.com.vittasync.vittasync.Security;
 
-
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.info.Info;
 import io.swagger.v3.oas.models.security.SecurityRequirement;
@@ -12,7 +11,6 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfigurationSource;
-
 
 @Configuration
 public class SecurityConfig {
@@ -43,7 +41,7 @@ public class SecurityConfig {
                                 "/v3/api-docs/**",
                                 "/swagger-ui.html"
                         ).permitAll()
-
+                        
                         .requestMatchers("/usuario/editar/**").authenticated()
                         .requestMatchers("/usuario/getUsuario/**").authenticated()
                         .requestMatchers("/usuario/deletar/**").authenticated()

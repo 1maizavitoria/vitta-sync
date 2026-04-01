@@ -1,0 +1,54 @@
+package br.com.vittasync.vittasync.DTO;
+
+import jakarta.validation.constraints.*;
+import java.time.LocalDateTime;
+
+public class SinaisVitaisInputDTO {
+
+    @NotNull(message = "Frequência cardíaca é obrigatória")
+    private Integer fcBpm;
+
+    @NotNull(message = "Frequência respiratória é obrigatória")
+    private Integer frRpm;
+
+    @NotNull(message = "Pressão sistólica é obrigatória")
+    private Integer paSistolica;
+
+    @NotNull(message = "Pressão diastólica é obrigatória")
+    private Integer paDiastolica;
+
+    @NotNull(message = "Temperatura é obrigatória")
+    private Double tempCelcius;
+
+    @NotNull(message = "Saturação O2 é obrigatória")
+    private Integer spo2Porcento;
+
+    private LocalDateTime dataRegistro;
+    private LocalDateTime dataModificacao;
+
+    public SinaisVitaisInputDTO() {}
+
+    public Integer getFcBpm() { return fcBpm; }
+    public void setFcBpm(Integer fcBpm) { this.fcBpm = fcBpm; }
+
+    public Integer getFrRpm() { return frRpm; }
+    public void setFrRpm(Integer frRpm) { this.frRpm = frRpm; }
+
+    public Integer getPaSistolica() { return paSistolica; }
+    public void setPaSistolica(Integer paSistolica) { this.paSistolica = paSistolica; }
+
+    public Integer getPaDiastolica() { return paDiastolica; }
+    public void setPaDiastolica(Integer paDiastolica) { this.paDiastolica = paDiastolica; }
+
+    public Double getTempCelcius() { return tempCelcius; }
+    public void setTempCelcius(Double tempCelcius) { this.tempCelcius = tempCelcius; }
+
+    public Integer getSpo2Porcento() { return spo2Porcento; }
+    public void setSpo2Porcento(Integer spo2Porcento) { this.spo2Porcento = spo2Porcento; }
+
+    public LocalDateTime getDataRegistro() { return dataRegistro; }
+    public void setDataRegistro(LocalDateTime dataRegistro) { this.dataRegistro = dataRegistro; }
+
+    public LocalDateTime getDataModificacao() { return dataModificacao; }
+    public void setDataModificacao(LocalDateTime dataModificacao) { this.dataModificacao = dataModificacao; }
+}

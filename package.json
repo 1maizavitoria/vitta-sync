@@ -7,7 +7,10 @@
     "dev": "vite",
     "build": "vite build",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "front": "npm run dev",
+    "back": "cd VittaSyncAPI && mvn spring-boot:run",
+    "start-all": "concurrently \"npm run front\" \"npm run back\""
   },
   "dependencies": {
     "@emotion/react": "^11.14.0",
@@ -27,10 +30,12 @@
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^6.0.1",
+    "concurrently": "^9.2.1",
     "eslint": "^9.39.4",
     "eslint-plugin-react-hooks": "^7.0.1",
     "eslint-plugin-react-refresh": "^0.5.2",
     "globals": "^17.4.0",
+    "npm-run-all": "^4.1.5",
     "vite": "^8.0.1"
   }
 }
