@@ -5,6 +5,7 @@ import {
     DialogActions,
     Button
 } from "@mui/material";
+import ButtonUI from "./Button";
 
 export default function DialogUI({
     open,
@@ -24,14 +25,14 @@ export default function DialogUI({
             </DialogContent>
 
             <DialogActions>
-                <Button onClick={onClose}>
+                <ButtonUI onClick={onClose}>
                     {cancelText}
-                </Button>
+                </ButtonUI>
 
                 {onConfirm && (
-                    <Button onClick={onConfirm} variant="contained">
+                    <ButtonUI onClick={onConfirm} variant="contained">
                         {confirmText}
-                    </Button>
+                    </ButtonUI>
                 )}
             </DialogActions>
         </MuiDialog>

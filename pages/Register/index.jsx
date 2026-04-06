@@ -3,7 +3,6 @@ import ButtonUI from "../../components/ui/Button";
 import InputUI from "../../components/ui/Input";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import AlertUI from "../../components/ui/Alert";
 import { createUser } from "../../services/userService"
 import AutocompleteUI from "../../components/ui/Autocomplete";
 import DatePickerUI from "../../components/ui/DatePicker";
@@ -11,6 +10,8 @@ import CheckboxUI from "../../components/ui/Checkbox";
 import { formatCPF, isValidCpf } from "../../utils/formatters/formatCPF"
 import { useAlert } from "../../hooks/useAlert";
 import { isValidEmail } from "../../utils/formatters/formatEmail";
+import { validatePassword } from "../../utils/validators/passwordValidator";
+import PasswordTooltip from "../../components/ui/Tooltip";
 
 export default function Register() {
     const { showAlert } = useAlert();
@@ -29,30 +30,8 @@ export default function Register() {
 
     const navigate = useNavigate();
 
-    // Regras senha
-    const hasMinLength = (password) => password.length >= 8;
-    const hasUppercase = (password) => /[A-Z]/.test(password);
-    const hasLowercase = (password) => /[a-z]/.test(password);
-    const hasNumber = (password) => /\d/.test(password);
-    const hasSpecialChar = (password) => /[^A-Za-z\d]/.test(password);
-
     const rulesPassword = validatePassword(password);
     const repeatRulesPassword = validatePassword(repeatPassword);
-
-    function validatePassword(password) {
-        const result = {
-            minLength: hasMinLength(password),
-            upperCase: hasUppercase(password),
-            lowerCase: hasLowercase(password),
-            number: hasNumber(password),
-            specialChar: hasSpecialChar(password)
-        }
-
-        return {
-            ...result,
-            isValid: Object.values(result).every(Boolean)
-        };
-    }
 
     const canRegister = () => {
         if (email == "" || CPF == "" || name == "" || userType == null || birthDate == null || password == "" || repeatPassword == "" || (userType.value === "saude" && advice == "")) {
@@ -87,7 +66,7 @@ export default function Register() {
         }
 
         setError(false);
-        showAlert("success", "Sucesso");
+        //showAlert("success", "Sucesso");
         return true;
 
     };
@@ -111,10 +90,6 @@ export default function Register() {
         try {
             const response = await createUser(data);
 
-            // setError(true);
-            // setErrorMessage("Cadastro realizado com sucesso");
-            // setTypeError("success");
-
             console.log("Usuário criado:", response);
 
             showAlert("success", "Cadastro realizado com sucesso");
@@ -127,50 +102,8 @@ export default function Register() {
 
             setError(true);
             showAlert("error", "Erro ao cadastrar usuário");
-            // setErrorMessage("Erro ao cadastrar usuário");
-            // setTypeError("error");
         }
     }
-
-    const titlePasswordTooltip = (
-        <Box>
-            <Box style={{ color: rulesPassword.minLength ? "lightgreen" : "#ff6b6b" }}>
-                • 8 caracteres
-            </Box>
-            <Box style={{ color: rulesPassword.upperCase ? "lightgreen" : "#ff6b6b" }}>
-                • Letra maiúscula
-            </Box>
-            <Box style={{ color: rulesPassword.lowerCase ? "lightgreen" : "#ff6b6b" }}>
-                • Letra minúscula
-            </Box>
-            <Box style={{ color: rulesPassword.number ? "lightgreen" : "#ff6b6b" }}>
-                • Número
-            </Box>
-            <Box style={{ color: rulesPassword.specialChar ? "lightgreen" : "#ff6b6b" }}>
-                • Caractere especial
-            </Box>
-        </Box>
-    )
-
-    const titleRepeatPasswordTooltip = (
-        <Box>
-            <Box style={{ color: repeatRulesPassword.minLength ? "lightgreen" : "#ff6b6b" }}>
-                • 8 caracteres
-            </Box>
-            <Box style={{ color: repeatRulesPassword.upperCase ? "lightgreen" : "#ff6b6b" }}>
-                • Letra maiúscula
-            </Box>
-            <Box style={{ color: repeatRulesPassword.lowerCase ? "lightgreen" : "#ff6b6b" }}>
-                • Letra minúscula
-            </Box>
-            <Box style={{ color: repeatRulesPassword.number ? "lightgreen" : "#ff6b6b" }}>
-                • Número
-            </Box>
-            <Box style={{ color: repeatRulesPassword.specialChar ? "lightgreen" : "#ff6b6b" }}>
-                • Caractere especial
-            </Box>
-        </Box>
-    )
 
     return (
         <Box>
@@ -192,11 +125,33 @@ export default function Register() {
                             display="flex"
                             flexDirection="column"
                             alignItems="center"
-                            gap={3}
+                            gap={1}
                         >
-                            <Typography variant="h4" gutterBottom>
-                                Cadastro
-                            </Typography>
+                            <Box textAlign="center" mb={2}>
+                                <Typography
+                                    sx={{
+                                        fontFamily: 'Inter, sans-serif',
+                                        fontWeight: 600,
+                                        fontSize: '28px',
+                                        color: '#1a1a1a',
+                                        letterSpacing: '0.5px',
+                                    }}
+                                >
+                                    Vitta<span style={{ fontWeight: 400 }}>Sync</span>
+                                </Typography>
+
+                                <Typography
+                                    sx={{
+                                        fontFamily: 'Inter, sans-serif',
+                                        fontWeight: 500,
+                                        fontSize: '20px',
+                                        color: '#4a4a4a',
+                                        mt: 0.5,
+                                    }}
+                                >
+                                    Cadastro
+                                </Typography>
+                            </Box>
 
                             <InputUI
                                 label="Nome"
@@ -273,7 +228,11 @@ export default function Register() {
                                 onChange={setBirthDate}
                             />
 
-                            <Tooltip title={titlePasswordTooltip} placement="right" arrow>
+                            <Tooltip
+                                title={<PasswordTooltip rules={rulesPassword} />}
+                                placement="right"
+                                arrow
+                            >
                                 <InputUI
                                     label="Senha"
                                     placeholder="Digite sua senha"
@@ -285,11 +244,14 @@ export default function Register() {
                                         setPassword(e.target.value),
                                         setError(false)
                                     )}
-                                >
-                                </InputUI>
+                                />
                             </Tooltip>
 
-                            <Tooltip title={titleRepeatPasswordTooltip} placement="right" arrow>
+                            <Tooltip
+                                title={<PasswordTooltip rules={repeatRulesPassword} />}
+                                placement="right"
+                                arrow
+                            >
                                 <InputUI
                                     label="Repetir senha"
                                     placeholder="Repita sua senha"
