@@ -98,7 +98,7 @@ export default function Register() {
 
         } catch (error) {
 
-            console.log(error);
+            console.log("Erro que retorna do backend: ", error);
 
             setError(true);
             showAlert("error", "Erro ao cadastrar usuário");
@@ -117,7 +117,6 @@ export default function Register() {
                 container
                 justifyContent="center"
                 alignItems="center"
-                sx={{ minHeight: "95vh" }}
             >
                 <Grid item>
                     <Paper elevation={5} sx={{ p: 4, width: 360, }}>

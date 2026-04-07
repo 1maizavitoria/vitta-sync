@@ -101,9 +101,12 @@ export default function Login() {
         };
 
         try {
-            await validadeCode(data);
+            const response = await validadeCode(data);
+            const token = response;
+
+            localStorage.setItem("token", token);
             setOpenLoginDialog(false);
-            navigate("/home");
+            navigate("/dashboard");
         } catch (error) {
             console.log(error);
             setErrorCode(true);
@@ -233,14 +236,12 @@ export default function Login() {
 
     }, [seconds]);
 
-
     return (
         <Box>
             <Grid
                 container
                 justifyContent="center"
                 alignItems="center"
-                sx={{ minHeight: "95vh" }}
             >
                 <Grid item>
 
@@ -341,10 +342,11 @@ export default function Login() {
                                     setForgotEmail(""),
                                     setForgotNewPassword("")
                                 )}
+                                disabledConfirm={!forgotEmailConfirm}
                                 onConfirm={() => {
                                     handleChangeCodePassword({
                                         code: forgotCode,
-                                        newPassword: forgotNewPassword
+                                        newPassword: forgotNewPassword,
                                     });
                                 }}
                             >
@@ -398,6 +400,7 @@ export default function Login() {
                             {/* Diálogo para de verificação de 2 fatores no login */}
                             <DialogUI
                                 open={openLoginDialog}
+
                                 onClose={() => (
                                     setOpenLoginDialog(false),
                                     setError(false),

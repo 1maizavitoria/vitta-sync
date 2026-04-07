@@ -1,1 +1,0 @@
-// Guarda estado global (ex: usuário logado)

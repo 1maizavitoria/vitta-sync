@@ -1,14 +1,19 @@
 import { Outlet } from "react-router-dom";
 import AlertUI from "../ui/Alert";
 import { useAlert } from "../../hooks/useAlert";
-// import Navbar from "./Navbar"; // opcional
+import Navbar from "./Navbar";
 
-export default function Layout() {
+import Box from "@mui/material/Box";
+import Toolbar from "@mui/material/Toolbar";
+
+export default function AuthLayout() {
     const { alert } = useAlert();
 
     return (
-        <>
-            {/* <Navbar /> */}
+        <Box>
+            <Navbar />
+
+            <Toolbar />
 
             {alert && (
                 <AlertUI
@@ -17,7 +22,9 @@ export default function Layout() {
                 />
             )}
 
-            <Outlet />
-        </>
+            <Box sx={{ p: 2 }}>
+                <Outlet />
+            </Box>
+        </Box>
     );
 }
