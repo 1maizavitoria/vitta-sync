@@ -1,7 +1,6 @@
 package br.com.vittasync.vittasync.Service;
 
 
-import br.com.vittasync.vittasync.Exception.DadosInvalidosException;
 import br.com.vittasync.vittasync.Model.CodigoVerificacao;
 import br.com.vittasync.vittasync.Model.Usuario;
 import br.com.vittasync.vittasync.Repository.CodigoVerificacaoRepository;
@@ -28,6 +27,7 @@ public class CodigoVerificacaoService {
 
         String codigo = String.valueOf(new Random().nextInt(90000) + 10000);
         CodigoVerificacao cv = new CodigoVerificacao();
+
         cv.setUsuario(usuario);
         cv.setCodigo(codigo);
         cv.setTipo(tipo);
@@ -39,10 +39,11 @@ public class CodigoVerificacaoService {
 
     public CodigoVerificacao validarCodigo(String codigo, String tipo) {
         CodigoVerificacao cv = codigoRepository.findCodigoValido(codigo, tipo)
-                .orElseThrow(() -> new DadosInvalidosException("Código inválido ou expirado"));
+                .orElseThrow(() -> new RuntimeException("Código inválido ou expirado"));
 
         cv.setUtilizado(true);
         codigoRepository.save(cv);
+
         return cv;
     }
 }

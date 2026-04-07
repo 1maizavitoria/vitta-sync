@@ -1,7 +1,6 @@
 package br.com.vittasync.vittasync.Service;
 
 
-import br.com.vittasync.vittasync.Exception.RecursoNaoEncontradoException;
 import br.com.vittasync.vittasync.Model.Habitos;
 import br.com.vittasync.vittasync.Repository.HabitosRepository;
 import org.springframework.stereotype.Service;
@@ -26,7 +25,7 @@ public class HabitosService {
 
     public Habitos update(Integer id, Habitos novosDados) {
         Habitos existente = repository.findById(id)
-                .orElseThrow(() -> new RecursoNaoEncontradoException("Hábito(s) não encontrado(s)"));
+                .orElseThrow(() -> new RuntimeException("Sublista não encontrada"));
         existente.setHorasSono(novosDados.getHorasSono());
         existente.setMinutosExercicio(novosDados.getMinutosExercicio());
         existente.setDataReferencia(novosDados.getDataReferencia());
@@ -35,9 +34,6 @@ public class HabitosService {
     }
 
     public void delete(Integer id) {
-        if (!repository.existsById(id)) {
-            throw new RecursoNaoEncontradoException("Hábito(s) não encontrado(s)");
-        }
         repository.deleteById(id);
     }
 
