@@ -1,7 +1,6 @@
 package br.com.vittasync.vittasync.Service;
 
 
-import br.com.vittasync.vittasync.Exception.DadosInvalidosException;
 import br.com.vittasync.vittasync.Model.CodigoVerificacao;
 import br.com.vittasync.vittasync.Model.Usuario;
 import br.com.vittasync.vittasync.Util.HashUtil;
@@ -35,7 +34,7 @@ public class AuthService {
         String senhaHash = HashUtil.hashSenha(senha);
 
         if (!usuario.getSenha().equals(senhaHash)) {
-            throw new DadosInvalidosException("Dados inseridos inválidos");
+            throw new RuntimeException("Senha inválida");
         }
 
         CodigoVerificacao codigo = codigoService.gerarCodigo(usuario, "LOGIN");
@@ -43,20 +42,25 @@ public class AuthService {
     }
 
     public String validarCodigoLogin(String codigo) {
+
         CodigoVerificacao cv = codigoService.validarCodigo(codigo, "LOGIN");
         Usuario usuario = cv.getUsuario();
         String token = jwtService.gerarToken(usuario.getCpf());
+
         sessaoService.registrarToken(token);
+
         return token;
     }
 
     public void enviarCodigoRedefinirSenha(String email) {
+
         Usuario usuario = usuarioService.searchByEmail(email);
         CodigoVerificacao codigo = codigoService.gerarCodigo(usuario, "REDEFINIR_SENHA");
         emailService.enviarCodigo(usuario.getEmail(), codigo.getCodigo());
     }
 
     public void redefinirSenha(String codigo, String novaSenha) {
+
         CodigoVerificacao cv = codigoService.validarCodigo(codigo, "REDEFINIR_SENHA");
         Usuario usuario = cv.getUsuario();
         usuario.setSenha(HashUtil.hashSenha(novaSenha));

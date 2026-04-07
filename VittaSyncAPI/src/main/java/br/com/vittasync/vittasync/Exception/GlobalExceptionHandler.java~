@@ -1,0 +1,17 @@
+package br.com.vittasync.vittasync.Exception;
+
+public class UsuarioJaCadastradoException extends RuntimeException {
+    public UsuarioJaCadastradoException(String msg) { super(msg); }
+}
+
+public class AcessoNegadoException extends RuntimeException {
+    public AcessoNegadoException(String msg) { super(msg); }
+}
+
+public class DadosInvalidosException extends RuntimeException {
+    public DadosInvalidosException(String msg) { super(msg); }
+}
+
+public class RecursoNaoEncontradoException extends RuntimeException {
+    public RecursoNaoEncontradoException(String msg) { super(msg); }
+}
