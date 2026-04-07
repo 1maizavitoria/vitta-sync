@@ -1,8 +1,6 @@
 package br.com.vittasync.vittasync.Service;
 
 
-import br.com.vittasync.vittasync.Exception.AcessoNegadoException;
-import br.com.vittasync.vittasync.Exception.RecursoNaoEncontradoException;
 import br.com.vittasync.vittasync.Model.SessaoToken;
 import br.com.vittasync.vittasync.Repository.SessaoTokenRepository;
 import org.springframework.stereotype.Service;
@@ -28,11 +26,11 @@ public class SessaoService {
 
     public void logout(String token) {
         if (!jwtService.validarToken(token)) {
-            throw new AcessoNegadoException("Token JWT inválido ou expirado");
+            throw new RuntimeException("Token JWT inválido ou expirado");
         }
 
         SessaoToken st = tokenRepo.findByToken(token)
-                .orElseThrow(() -> new RecursoNaoEncontradoException("Token não encontrado na sessão"));
+                .orElseThrow(() -> new RuntimeException("Token não encontrado na sessão"));
 
         st.setAtivo(false);
         tokenRepo.save(st);
@@ -45,3 +43,4 @@ public class SessaoService {
                         .orElse(false);
     }
 }
+

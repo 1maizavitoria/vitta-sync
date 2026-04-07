@@ -1,8 +1,6 @@
 package br.com.vittasync.vittasync.Service;
 
 
-import br.com.vittasync.vittasync.Exception.UsuarioJaCadastradoException;
-import br.com.vittasync.vittasync.Exception.RecursoNaoEncontradoException;
 import br.com.vittasync.vittasync.Model.Usuario;
 import br.com.vittasync.vittasync.Repository.SessaoTokenRepository;
 import br.com.vittasync.vittasync.Repository.UsuarioRepository;
@@ -26,24 +24,18 @@ public class UsuarioService {
     }
 
     public Usuario create(Usuario usuario) {
-        if (usuarioRepository.existsByCpf(usuario.getCpf())) {
-            throw new UsuarioJaCadastradoException("Usuário já cadastrado");
-        }
-        if (usuarioRepository.existsByEmail(usuario.getEmail())) {
-            throw new UsuarioJaCadastradoException("Usuário já cadastrado");
-        }
         usuario.setDataCadastro(LocalDateTime.now());
         return usuarioRepository.save(usuario);
     }
 
     public Usuario searchByEmail(String email) {
         return usuarioRepository.findByEmail(email)
-                .orElseThrow(() -> new RecursoNaoEncontradoException("Usuário não encontrado"));
+                .orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
     }
 
     public Usuario searchByCpf(String cpf) {
         return usuarioRepository.findByCpf(cpf)
-                .orElseThrow(() -> new RecursoNaoEncontradoException("Usuário não encontrado"));
+                .orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
     }
 
     public Usuario update(Usuario usuario) {
@@ -52,7 +44,7 @@ public class UsuarioService {
 
     public void delete(Integer id) {
         Usuario usuario = usuarioRepository.findById(id)
-                .orElseThrow(() -> new RecursoNaoEncontradoException("Usuário não encontrado"));
+                .orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
 
         tokenRepo.findAll().stream()
                 .filter(t -> {

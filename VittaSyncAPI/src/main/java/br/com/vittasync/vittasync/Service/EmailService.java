@@ -22,7 +22,7 @@ public class EmailService {
                 + "Equipe Vittasync";
 
         SimpleMailMessage message = new SimpleMailMessage();
-        message.setFrom("no.reply.vittasync@gmail.com");
+        message.setFrom("joao.brum.lisboa@gmail.com");
         message.setTo(to);
         message.setSubject("Código de Verificação VittaSync");
         message.setText(mensagem);
