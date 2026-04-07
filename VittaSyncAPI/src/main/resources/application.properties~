@@ -19,8 +19,8 @@ springdoc.swagger-ui.enabled=true
 
 spring.mail.host=smtp.gmail.com
 spring.mail.port=587
-spring.mail.username=no.reply.vittasync@gmail.com
-spring.mail.password=pcpx knac azxg zvnm
+spring.mail.username=joao.brum.lisboa@gmail.com
+spring.mail.password=mbic afgm miod strk
 spring.mail.properties.mail.smtp.auth=true
 spring.mail.properties.mail.smtp.starttls.enable=true
 
