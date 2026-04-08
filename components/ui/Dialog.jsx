@@ -10,9 +10,11 @@ import ButtonUI from "./Button";
 export default function DialogUI({
     open,
     onClose,
+    disabledClose = false,
     title,
     children,
     onConfirm,
+    disabledConfirm = false,
     confirmText = "Confirmar",
     cancelText = "Cancelar"
 }) {
@@ -25,11 +27,11 @@ export default function DialogUI({
             </DialogContent>
 
             <DialogActions>
-                <ButtonUI onClick={onClose}>
+                {!disabledClose && <ButtonUI onClick={onClose}>
                     {cancelText}
-                </ButtonUI>
+                </ButtonUI>}
 
-                {onConfirm && (
+                {onConfirm && !disabledConfirm && (
                     <ButtonUI onClick={onConfirm} variant="contained">
                         {confirmText}
                     </ButtonUI>
