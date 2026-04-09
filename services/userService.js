@@ -5,8 +5,8 @@ export const createUser = async (data) => {
     return response.data;
 };
 
-export const getUsers = async () => {
-    const response = await api.get("/usuarios");
+export const getUserByCpf = async (data) => {
+    const response = await api.get(`/usuario/getUsuario/${data.CPF}`);
     return response.data;
 };
 

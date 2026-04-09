@@ -105,6 +105,7 @@ export default function Login() {
             const token = response;
 
             localStorage.setItem("token", token);
+            localStorage.setItem("CPF", CPF);
             setOpenLoginDialog(false);
             navigate("/dashboard");
         } catch (error) {

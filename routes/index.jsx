@@ -26,17 +26,17 @@ export default function AppRoutes() {
                         <Route
                             path="/dashboard"
                             element={
-                                // <PrivateRoute>
-                                <Dashboard />
-                                // </PrivateRoute>
+                                <PrivateRoute>
+                                    <Dashboard />
+                                </PrivateRoute>
                             }
                         />
                         <Route
                             path="/health-tracker"
                             element={
-                                // <PrivateRoute>
-                                <HealthTracker />
-                                // </PrivateRoute>
+                                <PrivateRoute>
+                                    <HealthTracker />
+                                </PrivateRoute>
                             }
                         />
                     </Route>

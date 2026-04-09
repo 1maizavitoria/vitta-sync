@@ -27,13 +27,14 @@ export default function InputUI({
             value={value}
             onChange={onChange}
             variant="outlined"
-            fullWidth
+            fullWidth={props.fullWidth ?? true}
             margin="normal"
             size="small"
             placeholder={placeholder}
             {...props}
 
             sx={{
+                ...props.sx,
 
                 '& .MuiInputLabel-root': {
                     transform: 'translate(14px, 9px) scale(1)', // posição inicial

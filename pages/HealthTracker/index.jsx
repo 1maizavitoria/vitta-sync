@@ -1,14 +1,18 @@
-import { Typography } from "@mui/material";
+import { HabitTracker } from "../../components/ui/HabitTracker";
+import { VitalTracker } from "../../components/ui/VitalTracker";
 
-export default function HealthTracker() {
+export default function HealthTreacker() {
+
 
     return (
         <>
-            <Typography variant="h4" gutterBottom>
-                Health Tracker
-            </Typography>
+            <VitalTracker />
+
+            <HabitTracker />
+
+
 
 
         </>
-    )
+    );
 }

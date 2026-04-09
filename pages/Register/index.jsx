@@ -98,9 +98,13 @@ export default function Register() {
 
         } catch (error) {
 
-            console.log("Erro que retorna do backend: ", error);
+            console.log("Erro que retorna do backend: ", error.response.data.value);
 
             setError(true);
+            if (error.response.data.value === "duplicateEmail") {
+                showAlert("error", "Email já cadastrado");
+                return;
+            }
             showAlert("error", "Erro ao cadastrar usuário");
         }
     }

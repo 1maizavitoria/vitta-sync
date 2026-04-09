@@ -14,6 +14,8 @@ import DashboardIcon from "@mui/icons-material/Dashboard";
 import DescriptionIcon from "@mui/icons-material/Description";
 import LinkIcon from "@mui/icons-material/Link";
 import ShowChartIcon from "@mui/icons-material/ShowChart";
+import { getUserByCpf } from "../../services/userService";
+import { useEffect, useState } from "react";
 
 const drawerWidth = 240;
 
@@ -27,6 +29,22 @@ const menuItems = [
 export default function Sidebar() {
     const location = useLocation();
     const navigate = useNavigate();
+
+    const [userResponse, setUserResponse] = useState("");
+
+    useEffect(() => {
+        async function fetchUsers() {
+            try {
+                const CPF = localStorage.getItem("CPF");
+                const data = await getUserByCpf({ CPF });
+                setUserResponse(data);
+                console.log("Usuários obtidos:", data);
+            } catch (error) {
+                console.error("Erro ao buscar usuários:", error);
+            }
+        }
+        fetchUsers()
+    }, []);
 
     return (
         <Drawer
@@ -82,10 +100,10 @@ export default function Sidebar() {
 
                     <Box>
                         <Typography variant="body2" fontWeight="bold">
-                            Ana Silva
+                            {userResponse.nome || "Usuário"}
                         </Typography>
                         <Typography variant="caption" color="text.secondary">
-                            Paciente
+                            {userResponse.tipo || "Tipo de usuário"}
                         </Typography>
                     </Box>
                 </Box>

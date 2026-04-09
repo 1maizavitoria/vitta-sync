@@ -11,21 +11,23 @@ export default function MainLayout() {
     const { alert } = useAlert();
 
     return (
-        <Box>
+        <Box sx={{ display: "flex" }}>
             <Navbar />
 
             <Sidebar />
 
-            <Toolbar />
+            <Box component="main" sx={{ flexGrow: 1, p: 3 }}>
+                <Toolbar /> {/* OFFSET DA NAVBAR */}
 
-            {alert && (
-                <AlertUI
-                    type={alert.type}
-                    message={alert.message}
-                />
-            )}
 
-            <Box sx={{ p: 2 }}>
+                {alert && (
+                    <AlertUI
+                        type={alert.type}
+                        message={alert.message}
+                    />
+                )}
+
+
                 <Outlet />
             </Box>
         </Box>
