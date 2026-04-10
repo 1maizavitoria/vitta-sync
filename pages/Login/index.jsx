@@ -77,7 +77,6 @@ export default function Login() {
         try {
             setOpenLoginDialog(true);
             showAlert("success", "Um código foi enviado para seu email");
-            setSeconds(10);
             await login(data);
 
         } catch (error) {

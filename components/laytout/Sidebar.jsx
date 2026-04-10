@@ -32,13 +32,27 @@ export default function Sidebar() {
 
     const [userResponse, setUserResponse] = useState("");
 
+    const filteredMenu = menuItems.filter((item) => {
+        if (item.path === "/health-tracker" && localStorage.getItem("tipo") !== "paciente") {
+            return false;
+        }
+        return true;
+    });
+
     useEffect(() => {
         async function fetchUsers() {
             try {
                 const CPF = localStorage.getItem("CPF");
                 const data = await getUserByCpf({ CPF });
+
                 setUserResponse(data);
                 console.log("Usuários obtidos:", data);
+                localStorage.setItem("nome", data.nome);
+                localStorage.setItem("tipo", data.tipo);
+                localStorage.setItem("conselho", data.conselho);
+                localStorage.setItem("email", data.email);
+                localStorage.setItem("privCompartilharDiario", data.privCompartilharDiario);
+                localStorage.setItem("privCompartilharHabitos", data.privCompartilharHabitos);
             } catch (error) {
                 console.error("Erro ao buscar usuários:", error);
             }
@@ -62,7 +76,7 @@ export default function Sidebar() {
 
             {/* MENU */}
             <List sx={{ p: 1, mt: 10 }}>
-                {menuItems.map((item) => {
+                {filteredMenu.map((item) => {
                     const isActive = location.pathname === item.path;
 
                     return (

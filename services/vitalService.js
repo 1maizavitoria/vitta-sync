@@ -10,6 +10,17 @@ export const getVitalSigns = async () => {
     return response.data;
 };
 
+export const editVitalSigns = async (id, data) => {
+    const response = await api.put(`/sinaisvitais/editar/${id}`, data);
+    return response.data;
+};
+
+export const deleteVitalSigns = async (id, cpf) => {
+    const response = await api.delete(`/sinaisvitais/deletar/${id}/${cpf}`);
+    return response.data;
+};
+
+
 
 
 
