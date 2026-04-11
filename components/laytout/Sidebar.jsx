@@ -51,6 +51,7 @@ export default function Sidebar() {
                 localStorage.setItem("tipo", data.tipo);
                 localStorage.setItem("conselho", data.conselho);
                 localStorage.setItem("email", data.email);
+                localStorage.setItem("dataNascimento", data.dataNascimento);
                 localStorage.setItem("privCompartilharDiario", data.privCompartilharDiario);
                 localStorage.setItem("privCompartilharHabitos", data.privCompartilharHabitos);
             } catch (error) {

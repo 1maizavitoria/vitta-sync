@@ -40,6 +40,12 @@ export default function Register() {
             return false;
         }
 
+        if (name.length < 5) {
+            setError(true);
+            showAlert("error", "O nome deve ter pelo menos 5 caracteres");
+            return false;
+        }
+
         if (!isValidCpf(CPF)) {
             setError(true);
             showAlert("error", "CPF incorreto");

@@ -10,6 +10,16 @@ export const getUserByCpf = async (data) => {
     return response.data;
 };
 
+export const editUser = async (cpf, data) => {
+    const response = await api.put(`/usuario/editar/${cpf}`, data);
+    return response.data;
+};
+
+export const deleteUser = async (cpf) => {
+    const response = await api.delete(`/usuario/deletar/${cpf}`);
+    return response.data;
+};
+
 export const login = async (data) => {
     const response = await api.post("/auth/login", data);
     return response.data;

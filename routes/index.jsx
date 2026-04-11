@@ -8,6 +8,7 @@ import PrivateRoute from "../utils/auth/PrivateRoute";
 import Dashboard from "../pages/Dashboard";
 import AuthLayout from "../components/laytout/AuthLayout";
 import HealthTracker from "../pages/HealthTracker";
+import Reports from "../pages/Reports";
 
 export default function AppRoutes() {
     return (
@@ -36,6 +37,14 @@ export default function AppRoutes() {
                             element={
                                 <PrivateRoute>
                                     <HealthTracker />
+                                </PrivateRoute>
+                            }
+                        />
+                        <Route
+                            path="/reports"
+                            element={
+                                <PrivateRoute>
+                                    <Reports />
                                 </PrivateRoute>
                             }
                         />
