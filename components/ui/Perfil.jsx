@@ -71,9 +71,11 @@ export default function Perfil() {
 
         try {
             await editUser(formData.cpf, data);
+            setEditing(false);
             showAlert("success", "Dados atualizados com sucesso");
 
         } catch (error) {
+            setEditing(true);
             showAlert("error", "Erro ao salvar dados");
             console.error("Erro ao salvar dados:", error);
         }
@@ -136,7 +138,6 @@ export default function Perfil() {
                         <ButtonUI
                             onClick={() => {
                                 handleChangeSave();
-                                setEditing(false);
                             }}
                         >
                             Salvar
@@ -151,7 +152,7 @@ export default function Perfil() {
                         label="Nome"
                         value={formData.nome}
                         onChange={(e) => {
-                            handleChange("nome")(e);
+                            handleChange("nome")(e.target.value);
                             setErrorName(false);
                         }}
                         disabled={!editing}
@@ -182,12 +183,12 @@ export default function Perfil() {
                         label="Email"
                         value={formData.email}
                         onChange={(e) => {
-                            handleChange("email")(e);
+                            handleChange("email")(e.target.value);
                             setErrorEmail(false);
                         }}
                         disabled={!editing}
                         fullWidth
-                        error={error && !formData.email || errorEmail}
+                        error={(error && !formData.email) || errorEmail}
                     />
                 </Grid>
 
@@ -221,7 +222,8 @@ export default function Perfil() {
                         />
                     </Grid>
                 )}
-                <FormGroup>
+
+                {formData.tipo === "paciente" && <FormGroup>
                     <CheckboxUI
                         disabled={!editing}
                         label="Permitir compartilhar dados diarios"
@@ -235,7 +237,7 @@ export default function Perfil() {
                         checked={formData.privCompartilharHabitos}
                         onChange={handleChange("privCompartilharHabitos")}
                     />
-                </FormGroup>
+                </FormGroup>}
             </Grid>
         </Paper>
     );

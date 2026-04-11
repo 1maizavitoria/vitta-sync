@@ -55,7 +55,7 @@ export default function Navbar({
                 <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
 
                     {/* Botão de período */}
-                    <Button
+                    {/* <Button
                         variant="outlined"
                         endIcon={<KeyboardArrowDownIcon />}
                         sx={{
@@ -64,14 +64,14 @@ export default function Navbar({
                         }}
                     >
                         Últimos 7 dias
-                    </Button>
+                    </Button> */}
 
                     {/* Notificação */}
-                    <IconButton>
+                    {/* <IconButton>
                         <Badge badgeContent={1} color="error">
                             <NotificationsIcon />
                         </Badge>
-                    </IconButton>
+                    </IconButton> */}
                 </Box>
             </Toolbar>
         </AppBar>

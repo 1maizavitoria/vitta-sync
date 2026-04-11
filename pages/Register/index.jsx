@@ -1,7 +1,7 @@
 import { Box, FormGroup, Grid, Paper, Tooltip, Typography } from "@mui/material";
 import ButtonUI from "../../components/ui/Button";
 import InputUI from "../../components/ui/Input";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { createUser } from "../../services/userService"
 import AutocompleteUI from "../../components/ui/Autocomplete";
@@ -12,6 +12,7 @@ import { useAlert } from "../../hooks/useAlert";
 import { isValidEmail } from "../../utils/formatters/formatEmail";
 import { validatePassword } from "../../utils/validators/passwordValidator";
 import PasswordTooltip from "../../components/ui/Tooltip";
+import { getDateLimit, isUnder18 } from "../../utils/formatters/formatDate";
 
 export default function Register() {
     const { showAlert } = useAlert();
@@ -27,6 +28,7 @@ export default function Register() {
     const [privateShareHabits, setPrivateShareHabits] = useState(false);
     const [email, setEmail] = useState("");
     const [repeatPassword, setRepeatPassword] = useState("");
+    const [dateLimit, setDateLimit] = useState()
 
     const navigate = useNavigate();
 
@@ -48,7 +50,7 @@ export default function Register() {
 
         if (!isValidCpf(CPF)) {
             setError(true);
-            showAlert("error", "CPF incorreto");
+            showAlert("error", "CPF inválido");
             return false;
 
         }
@@ -71,6 +73,18 @@ export default function Register() {
             return false;
         }
 
+        if (
+            (userType?.value === "responsavel" || userType?.value === "saude") &&
+            isUnder18(birthDate)
+        ) {
+            showAlert(
+                "error",
+                `"${userType?.label}" precisa ser maior de idade`
+            );
+            setError(true);
+            return;
+        }
+
         setError(false);
         //showAlert("success", "Sucesso");
         return true;
@@ -78,7 +92,6 @@ export default function Register() {
     };
 
     async function handleRegister() {
-
         if (!canRegister()) return;
 
         const data = {
@@ -114,6 +127,10 @@ export default function Register() {
             showAlert("error", "Erro ao cadastrar usuário");
         }
     }
+
+    useEffect(() => {
+        setDateLimit(getDateLimit(userType));
+    }, [userType]);
 
     return (
         <Box>
@@ -232,6 +249,7 @@ export default function Register() {
 
                             <DatePickerUI
                                 label="Data de nascimento"
+                                dateLimit={dateLimit}
                                 error={error && birthDate == null}
                                 value={birthDate}
                                 onChange={setBirthDate}
@@ -276,7 +294,7 @@ export default function Register() {
                                 </InputUI>
                             </Tooltip>
 
-                            <FormGroup>
+                            {userType?.value === "paciente" && <FormGroup>
                                 <CheckboxUI
                                     label="Permitir compartilhar dados diarios"
                                     checked={privateShareDaily}
@@ -288,7 +306,7 @@ export default function Register() {
                                     checked={privateShareHabits}
                                     onChange={setPrivateShareHabits}
                                 />
-                            </FormGroup>
+                            </FormGroup>}
 
                             <ButtonUI
                                 onClick={handleRegister}

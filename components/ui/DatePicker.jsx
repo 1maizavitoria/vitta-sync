@@ -9,6 +9,7 @@ export default function DatePickerUI({
     value,
     onChange,
     error,
+    dateLimit,
     format = "DD/MM/YYYY", // yyyy-MM-dd
     ...props
 }) {
@@ -17,7 +18,7 @@ export default function DatePickerUI({
             <DatePicker
                 label={label}
                 value={value && dayjs(value).isValid() ? dayjs(value) : null}
-                maxDate={dayjs()}
+                maxDate={dateLimit || dayjs()}
                 onChange={(newValue) => {
                     onChange(newValue ? newValue.format("YYYY-MM-DD") : null);
                 }}
