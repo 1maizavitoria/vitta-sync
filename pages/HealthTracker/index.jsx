@@ -10,7 +10,7 @@ export default function HealthTreacker() {
 
     return (
         <Box sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
-            <Accordion>
+            <Accordion defaultExpanded>
                 <AccordionSummary
                     expandIcon={<ExpandMoreIcon />}
                     aria-controls="panel1-content"
@@ -25,14 +25,14 @@ export default function HealthTreacker() {
 
             </Accordion>
 
-            <Accordion>
+            <Accordion defaultExpanded>
                 <AccordionSummary
                     expandIcon={<ExpandMoreIcon />}
                     aria-controls="panel1-content"
                     id="panel1-header"
                 >
                     <Typography variant="h5" fontWeight="bold" >
-                        Habitos
+                        Hábitos
                     </Typography>
 
                 </AccordionSummary>

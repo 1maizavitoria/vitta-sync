@@ -1,12 +1,8 @@
 import Grid from "@mui/material/Grid";
-import Typography from "@mui/material/Typography";
-
 import FavoriteIcon from "@mui/icons-material/Favorite";
 import MonitorHeartIcon from "@mui/icons-material/MonitorHeart";
-
 import AirIcon from '@mui/icons-material/Air';
 import DeviceThermostatIcon from '@mui/icons-material/DeviceThermostat';
-
 import { Box, Paper } from "@mui/material";
 import { useEffect, useState } from "react";
 import { useAlert } from "../../hooks/useAlert";
@@ -15,9 +11,11 @@ import VitalCard from "./VitalCard";
 import ButtonUI from "./Button";
 
 export function VitalTracker() {
+    const { showAlert } = useAlert();
+
     const [editing, setEditing] = useState(false);
     const [addVital, setAddVital] = useState(false);
-    const { showAlert } = useAlert();
+
     const [error, setError] = useState(false);
     const [errorFC, setErrorFC] = useState(false);
     const [errorFR, setErrorFR] = useState(false);
@@ -25,7 +23,9 @@ export function VitalTracker() {
     const [errorTemp, setErrorTemp] = useState(false);
     const [errorSistolica, setErrorSistolica] = useState(false);
     const [errorDiastolica, setErrorDiastolica] = useState(false);
+
     const [vitals, setVitals] = useState([]);
+
     const [closeMeditionInput, setCloseMeditionInput] = useState(false);
 
     const [resetKey, setResetKey] = useState(0);

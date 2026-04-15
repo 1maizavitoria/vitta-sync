@@ -2,82 +2,113 @@ import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
 import Typography from "@mui/material/Typography";
 import Box from "@mui/material/Box";
-import Button from "@mui/material/Button";
-import Chip from "@mui/material/Chip";
-import ButtonUI from "./Button";
 import InputUI from "./Input";
+import { Grid } from "@mui/material";
+import DatePickerUI from "./DatePicker";
+// import { useState } from "react";
 
 export default function HabitCard({
     icon,
     title,
-    description,
-    isDone,
+    value,
+    type,
+    error = false,
+    unit,
+    date,
+    dataPicker,
+    inputValue,
+    onInputChange,
+    showInput
 }) {
+
+    // const [showInput, setShowInput] = useState(false);
+
     return (
-        <Card
-            sx={{
-                borderRadius: 4,
-                p: 1,
-                height: "100%",
-                boxShadow: "0 2px 10px rgba(0,0,0,0.05)",
-            }}
-        >
-            <CardContent
+        <Grid item xs={12} md={4} sx={{ display: "flex" }}>
+
+            <Card
                 sx={{
-                    display: "flex",
-                    flexDirection: "column",
-                    mt: 2
+                    borderRadius: 4,
+                    p: 1,
+                    height: "100%",
+                    width: "100%",
+                    boxShadow: "0 2px 10px rgba(0,0,0,0.05)",
+
+                    border: error ? "2px solid #d32f2f" : "none", // vermelho MUI
+                    backgroundColor: error ? "#fdecea" : "#fff", // leve fundo vermelho
+                    transition: "all 0.3s ease"
                 }}
             >
-                {/* Ícone */}
-                <Box
+                <CardContent
                     sx={{
-                        width: 50,
-                        height: 50,
-                        borderRadius: 3,
-                        background: "#e0e0e0",
                         display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        mb: 2,
+                        flexDirection: "column",
+                        mt: 2
                     }}
                 >
-                    {icon}
-                </Box>
-
-                {/* Título */}
-                <Typography variant="h6" fontWeight="bold">
-                    {title}
-                </Typography>
-
-                {/* Descrição */}
-                <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
-                    {description}
-                </Typography>
-
-                {/* STATUS */}
-                {isDone && (
-                    <Chip
-                        label="✓ Registrado hoje"
+                    {/* Ícone */}
+                    <Box
                         sx={{
-                            mt: 2,
-                            backgroundColor: "#e8f5e9",
-                            color: "#2e7d32",
-                            fontWeight: "bold",
+                            width: 50,
+                            height: 50,
+                            borderRadius: 3,
+                            background: "linear-gradient(135deg, #a8e6cf, #dcedc1)",
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            mb: 2,
                         }}
-                    />
-                )}
+                    >
+                        {icon}
+                    </Box>
 
-                {/* Botão */}
-                <ButtonUI
-                    fullWidth
-                    minWidth="6px"
-                    variant={isDone ? "outlined" : "contained"}
-                >
-                    + Registrar
-                </ButtonUI>
+                    {/* Título */}
+                    <Typography variant="h6" fontWeight="bold">
+                        {title}
+                    </Typography>
 
-            </CardContent>
-        </Card >
+                    {/* Valor */}
+                    <Typography variant="h5" fontWeight="bold" sx={{ mt: 1 }}>
+                        {value} {unit}
+                    </Typography>
+
+                    {/* Sub */}
+                    <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+                        Último registro
+                    </Typography>
+
+                    {/* Data */}
+                    <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
+                        {date}
+                    </Typography>
+
+                    {/* Botão */}
+
+                    {showInput && !dataPicker && <InputUI
+                        value={inputValue}
+                        type={type}
+                        onChange={onInputChange}
+                        error={error}
+                    >
+                    </InputUI>}
+
+                    {showInput && dataPicker && <DatePickerUI
+                        value={inputValue}
+                        onChange={onInputChange}
+                        error={error}
+                    >
+                    </DatePickerUI>}
+
+                    {/* <DatePickerUI
+                        label="Data de nascimento"
+                        dateLimit={dateLimit}
+                        error={error && birthDate == null}
+                        value={birthDate}
+                        onChange={setBirthDate}
+                    /> */}
+
+                </CardContent>
+            </Card>
+        </Grid>
     );
 }
