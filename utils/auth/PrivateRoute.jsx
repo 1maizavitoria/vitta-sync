@@ -4,7 +4,7 @@ import { isTokenExpired } from "./auth";
 
 export default function PrivateRoute({ children }) {
     const token = localStorage.getItem("token");
-
+    //logout se o token expirou
     useEffect(() => {
         const interval = setInterval(() => {
             const token = localStorage.getItem("token");

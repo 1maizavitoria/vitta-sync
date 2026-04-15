@@ -12,7 +12,7 @@ import { useAlert } from "../../hooks/useAlert";
 import { isValidEmail } from "../../utils/formatters/formatEmail";
 import { validatePassword } from "../../utils/validators/passwordValidator";
 import PasswordTooltip from "../../components/ui/Tooltip";
-import { getDateLimit, isUnder18 } from "../../utils/formatters/formatDate";
+import { getDateLimit, isUnder18 } from "../../utils/validators/dateValidator";
 
 export default function Register() {
     const { showAlert } = useAlert();
@@ -134,12 +134,6 @@ export default function Register() {
 
     return (
         <Box>
-            {/* {error &&
-                <AlertUI
-                    type={typeError}
-                    message={errorMessage}
-                />
-            } */}
             <Grid
                 container
                 justifyContent="center"

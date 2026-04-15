@@ -7,11 +7,12 @@ import NotificationsIcon from "@mui/icons-material/Notifications";
 import Badge from "@mui/material/Badge";
 import Button from "@mui/material/Button";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
+import MenuIcon from '@mui/icons-material/Menu';
 
 export default function Navbar({
-    variant = "dashboard",
     title = "",
     subtitle = "",
+    setOpen
 }) {
 
     return (
@@ -33,6 +34,16 @@ export default function Navbar({
                 }}
             >
                 {/* ESQUERDA */}
+                {localStorage.getItem("token") && <IconButton
+                    size="large"
+                    edge="start"
+                    color="inherit"
+                    aria-label="menu"
+                    sx={{ mr: 2 }}
+                    onClick={() => setOpen(prev => !prev)}
+                >
+                    <MenuIcon />
+                </IconButton>}
 
                 {/* LOGO */}
                 <Box sx={{ p: 2 }}>

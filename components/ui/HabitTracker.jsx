@@ -1,4 +1,4 @@
-import { Box, Grid, Typography } from "@mui/material";
+import { Box, Grid, Paper, Typography } from "@mui/material";
 import HabitCard from "./HabitCard";
 import BedtimeIcon from "@mui/icons-material/Bedtime";
 import FitnessCenterIcon from "@mui/icons-material/FitnessCenter";
@@ -7,10 +7,10 @@ import RestaurantIcon from "@mui/icons-material/Restaurant";
 export function HabitTracker() {
 
     return (
-        <Box>
-            <Typography variant="h5" fontWeight="bold" sx={{ mb: 3, mt: 5 }}>
+        <Paper elevation={3} sx={{ p: 3 }}>
+            {/* <Typography variant="h5" fontWeight="bold" sx={{ mb: 3, mt: 5 }}>
                 Hábitos de Estilo de Vida
-            </Typography>
+            </Typography> */}
 
             <Grid container spacing={3}>
                 <Grid item xs={12} md={4}>
@@ -40,6 +40,6 @@ export function HabitTracker() {
                     />
                 </Grid>
             </Grid>
-        </Box>
+        </Paper>
     )
 }

@@ -7,7 +7,7 @@ import InputUI from "./Input";
 import ButtonUI from "./Button";
 import { WidthFull } from "@mui/icons-material";
 import { Grid } from "@mui/material";
-import { useState } from "react";
+// import { useState } from "react";
 
 export default function VitalCard({
     icon,
@@ -19,9 +19,10 @@ export default function VitalCard({
     date,
     inputValue,
     onInputChange,
+    showInput
 }) {
 
-    const [showInput, setShowInput] = useState(false);
+    // const [showInput, setShowInput] = useState(false);
 
     return (
         <Grid item xs={12} md={4} sx={{ display: "flex" }}>
@@ -84,9 +85,9 @@ export default function VitalCard({
 
                     {/* Botão */}
 
-                    {!showInput && <ButtonUI onClick={() => setShowInput(true)} >
+                    {/* {!showInput && <ButtonUI onClick={() => setShowInput(true)} >
                         + Adicionar Medição
-                    </ButtonUI>}
+                    </ButtonUI>} */}
 
                     {showInput && <InputUI
                         value={inputValue}

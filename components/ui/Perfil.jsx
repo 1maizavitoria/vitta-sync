@@ -8,6 +8,7 @@ import { useAlert } from "../../hooks/useAlert";
 import { isValidEmail } from "../../utils/formatters/formatEmail";
 import { logout } from "../../services/authService";
 import CheckboxUI from "./Checkbox";
+import { getDateLimit, isUnder18 } from "../../utils/validators/dateValidator";
 
 export default function Perfil() {
     const [editing, setEditing] = useState(false);
@@ -28,10 +29,11 @@ export default function Perfil() {
     });
 
     const handleChange = (campo) => (value) => {
-        setFormData({
-            ...formData,
-            [campo]: value
-        });
+        setFormData(prev => ({
+            ...prev,
+            [campo]: value,
+            ...(campo === "tipo" && { dataNascimento: getDateLimit(value) })
+        }));
     };
 
     function canSave() {
@@ -51,6 +53,18 @@ export default function Perfil() {
             setErrorEmail(true);
             showAlert("error", "Email inválido");
             return false;
+        }
+
+        if (
+            (formData?.tipo === "responsavel" || formData?.tipo === "saude") &&
+            isUnder18(formData.dataNascimento)
+        ) {
+            showAlert(
+                "error",
+                `"${formData.tipo}" precisa ser maior de idade`
+            );
+            setError(true);
+            return;
         }
 
         setError(false);
@@ -88,6 +102,7 @@ export default function Perfil() {
         );
 
         if (!confirmed) return;
+
         try {
             await deleteUser(formData.cpf);
             showAlert("success", "Conta deletada com sucesso");
@@ -105,6 +120,8 @@ export default function Perfil() {
 
     }
 
+
+
     return (
         <Paper elevation={3} sx={{ p: 3, borderRadius: 3 }}>
             <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
@@ -116,12 +133,9 @@ export default function Perfil() {
                 </Box>
 
                 {!editing ? (
-
                     <ButtonUI onClick={() => setEditing(true)}>
                         Editar
                     </ButtonUI>
-
-
                 ) : (
                     <Box display="flex" gap={1}>
 
@@ -135,6 +149,7 @@ export default function Perfil() {
                         <ButtonUI onClick={() => setEditing(false)}>
                             Cancelar
                         </ButtonUI>
+
                         <ButtonUI
                             onClick={() => {
                                 handleChangeSave();
@@ -142,6 +157,7 @@ export default function Perfil() {
                         >
                             Salvar
                         </ButtonUI>
+
                     </Box>
                 )}
             </Box>
@@ -175,7 +191,6 @@ export default function Perfil() {
                         fullWidth
                         error={error && !formData.dataNascimento}
                     />
-
                 </Grid>
 
                 <Grid item xs={12} md={6}>

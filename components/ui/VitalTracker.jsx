@@ -2,16 +2,21 @@ import Grid from "@mui/material/Grid";
 import Typography from "@mui/material/Typography";
 
 import FavoriteIcon from "@mui/icons-material/Favorite";
-import OpacityIcon from "@mui/icons-material/Opacity";
 import MonitorHeartIcon from "@mui/icons-material/MonitorHeart";
-import { Box } from "@mui/material";
+
+import AirIcon from '@mui/icons-material/Air';
+import DeviceThermostatIcon from '@mui/icons-material/DeviceThermostat';
+
+import { Box, Paper } from "@mui/material";
 import { useEffect, useState } from "react";
 import { useAlert } from "../../hooks/useAlert";
-import { getVitalSigns, registerVitalSigns } from "../../services/vitalService";
+import { editVitalSigns, getVitalSigns, registerVitalSigns } from "../../services/vitalService";
 import VitalCard from "./VitalCard";
 import ButtonUI from "./Button";
 
 export function VitalTracker() {
+    const [editing, setEditing] = useState(false);
+    const [addVital, setAddVital] = useState(false);
     const { showAlert } = useAlert();
     const [error, setError] = useState(false);
     const [errorFC, setErrorFC] = useState(false);
@@ -43,7 +48,6 @@ export function VitalTracker() {
     });
 
     function canRegister() {
-
         // Verifica se todos os campos estão preenchidos
         if (!vitalInputs.frequenciaCardiaca || !vitalInputs.frequenciaRespiratoria || !vitalInputs.saturacao || !vitalInputs.temperatura || !vitalInputs.sistolica || !vitalInputs.diastolica) {
             showAlert("error", "Faça todas as medições antes de salvar");
@@ -52,28 +56,37 @@ export function VitalTracker() {
         }
 
         // Frequência cardíaca
-        if (vitalInputs.frequenciaCardiaca < 30 || vitalInputs.frequenciaCardiaca > 220) {
+        if (Number(vitalInputs.frequenciaCardiaca) < 30 || Number(vitalInputs.frequenciaCardiaca) > 220) {
             showAlert("error", "Frequência cardíaca inválida");
             setErrorFC(true);
             return false;
         }
 
         // Frequência respiratória
-        if (vitalInputs.frequenciaRespiratoria < 5 || vitalInputs.frequenciaRespiratoria > 60) {
+        if (
+            Number(vitalInputs.frequenciaRespiratoria) < 5 ||
+            Number(vitalInputs.frequenciaRespiratoria) > 60
+        ) {
             showAlert("error", "Frequência respiratória inválida");
             setErrorFR(true);
             return false;
         }
 
         // Saturação
-        if (vitalInputs.saturacao < 70 || vitalInputs.saturacao > 100) {
+        if (
+            Number(vitalInputs.saturacao) < 70 ||
+            Number(vitalInputs.saturacao) > 100
+        ) {
             showAlert("error", "Saturação deve estar entre 70% e 100%");
             setErrorSPO2(true);
             return false;
         }
 
         // Temperatura
-        if (vitalInputs.temperatura < 30 || vitalInputs.temperatura > 45) {
+        if (
+            Number(vitalInputs.temperatura) < 30 ||
+            Number(vitalInputs.temperatura) > 45
+        ) {
             showAlert("error", "Temperatura inválida");
             setErrorTemp(true);
             return false;
@@ -81,10 +94,10 @@ export function VitalTracker() {
 
         // Pressão arterial
         if (
-            vitalInputs.sistolica < 50 ||
-            vitalInputs.sistolica > 250 ||
-            vitalInputs.diastolica < 30 ||
-            vitalInputs.diastolica > 150
+            Number(vitalInputs.sistolica) < 50 ||
+            Number(vitalInputs.sistolica) > 250 ||
+            Number(vitalInputs.diastolica) < 30 ||
+            Number(vitalInputs.diastolica) > 150
         ) {
             showAlert("error", "Pressão arterial inválida");
             setErrorSistolica(true);
@@ -93,7 +106,7 @@ export function VitalTracker() {
         }
 
         // Regra clínica importante
-        if (vitalInputs.sistolica <= vitalInputs.diastolica) {
+        if (Number(vitalInputs.sistolica) <= Number(vitalInputs.diastolica)) {
             showAlert("error", "Sistólica deve ser maior que a diastólica");
             setErrorSistolica(true);
             setErrorDiastolica(true);
@@ -127,32 +140,74 @@ export function VitalTracker() {
             spo2Porcento: vitalInputs.saturacao,
         }
 
-        try {
-            await registerVitalSigns(CPF, data);
-            const updatedVitals = await getVitalSigns();
-            setVitals(updatedVitals);
-            showAlert("success", "Sinais vitais registrados com sucesso");
+        if (addVital) {
 
-            setVitalInputs({
-                frequenciaCardiaca: "",
-                frequenciaRespiratoria: "",
-                saturacao: "",
-                temperatura: "",
-                sistolica: "",
-                diastolica: "",
-            });
+            try {
+                await registerVitalSigns(CPF, data);
+                const updatedVitals = await getVitalSigns();
+                setVitals(updatedVitals);
+                showAlert("success", "Sinais vitais registrados com sucesso");
 
-            setCloseMeditionInput(true);
+                handleClearInputs();
 
-            //serve parar resetar o estado dos componentes sem o useeffect.
-            setResetKey(prev => prev + 1);
+                setCloseMeditionInput(true);
+
+                //serve parar resetar o estado dos componentes sem o useeffect.
+                setResetKey(prev => prev + 1);
+                setAddVital(false);
 
 
-        } catch (error) {
-            console.error("Erro ao registrar sinais vitais:", error);
-            showAlert("error", "Erro ao registrar sinais vitais");
+            } catch (error) {
+                console.error("Erro ao registrar sinais vitais:", error);
+                showAlert("error", "Erro ao registrar sinais vitais");
+            }
         }
 
+        if (editing) {
+
+            try {
+                await editVitalSigns(lastVital.id, data);
+                const updatedVitals = await getVitalSigns();
+                setVitals(updatedVitals);
+                showAlert("success", "Sinais vitais editados com sucesso");
+
+                handleClearInputs();
+
+                setCloseMeditionInput(true);
+
+                //serve parar resetar o estado dos componentes sem o useeffect.
+                setResetKey(prev => prev + 1);
+                setEditing(false);
+
+
+            } catch (error) {
+                console.error("Erro ao editar sinais vitais:", error);
+                showAlert("error", "Erro ao editar sinais vitais");
+            }
+        }
+
+    }
+
+    function handleDataEditing() {
+        setVitalInputs({
+            frequenciaCardiaca: lastVital.fcBpm,
+            frequenciaRespiratoria: lastVital.frRpm,
+            saturacao: lastVital.spo2Porcento,
+            temperatura: lastVital.tempCelcius,
+            sistolica: lastVital.paSistolica,
+            diastolica: lastVital.paDiastolica,
+        });
+    }
+
+    function handleClearInputs() {
+        setVitalInputs({
+            frequenciaCardiaca: "",
+            frequenciaRespiratoria: "",
+            saturacao: "",
+            temperatura: "",
+            sistolica: "",
+            diastolica: "",
+        });
     }
 
     useEffect(() => {
@@ -193,14 +248,64 @@ export function VitalTracker() {
     }, [hasUnsavedChanges]);
 
     return (
-        <>
-            <Typography variant="h5" fontWeight="bold" sx={{ mb: 3 }}>
+
+        <Paper elevation={3} sx={{ p: 3 }}>
+
+            {/* <Typography variant="h5" fontWeight="bold" sx={{ mb: 3 }}>
                 Sinais Vitais
-            </Typography>
+            </Typography> */}
+
+            <Box display="flex" alignItems="center" mb={2}>
+
+                {(addVital || editing) ? (
+                    <Box display="flex" gap={1}>
+
+                        <ButtonUI onClick={() => {
+                            setEditing(false);
+                            setAddVital(false);
+                            setErrorFC(false);
+                            setErrorFR(false);
+                            setErrorSPO2(false);
+                            setErrorTemp(false);
+                            setErrorSistolica(false);
+                            setErrorDiastolica(false);
+                            setError(false);
+                        }}>
+                            Cancelar
+                        </ButtonUI>
+
+                        <ButtonUI
+                            onClick={() => {
+                                handleRegister();
+                            }}
+                        >
+                            Salvar
+                        </ButtonUI>
+
+                    </Box>
+                ) : (
+                    <Box display="flex" alignItems="center" gap={1}>
+                        <ButtonUI onClick={() => {
+                            setAddVital(true);
+                            handleClearInputs();
+                        }}>
+                            + Adicionar Medições
+                        </ButtonUI>
+
+                        <ButtonUI onClick={() => {
+                            setEditing(true);
+                            handleDataEditing();
+                        }}>
+                            Editar Medições
+                        </ButtonUI>
+                    </Box>
+                )}
+            </Box>
 
             <Grid container spacing={3}>
                 <Grid item xs={12} md={4}>
                     <VitalCard
+                        showInput={editing || addVital}
                         icon={<MonitorHeartIcon />}
                         title="Frequência cardíaca"
                         error={(error && !vitalInputs.frequenciaCardiaca) || errorFC}
@@ -217,6 +322,7 @@ export function VitalTracker() {
 
                 <Grid item xs={12} md={4}>
                     <VitalCard
+                        showInput={editing || addVital}
                         icon={<FavoriteIcon />}
                         title="Frequência respiratória"
                         error={(error && !vitalInputs.frequenciaRespiratoria) || errorFR}
@@ -233,7 +339,8 @@ export function VitalTracker() {
 
                 <Grid item xs={12} md={4}>
                     <VitalCard
-                        icon={<OpacityIcon />}
+                        showInput={editing || addVital}
+                        icon={<AirIcon />}
                         title="Saturação de Oxigênio (SpO2)"
                         error={(error && !vitalInputs.saturacao) || errorSPO2}
                         type="number"
@@ -249,7 +356,8 @@ export function VitalTracker() {
 
                 <Grid item xs={12} md={4}>
                     <VitalCard
-                        icon={<OpacityIcon />}
+                        showInput={editing || addVital}
+                        icon={<DeviceThermostatIcon />}
                         title="Temperatura Corporal"
                         error={(error && !vitalInputs.temperatura) || errorTemp}
                         type="number"
@@ -265,7 +373,8 @@ export function VitalTracker() {
 
                 <Grid item xs={12} md={4}>
                     <VitalCard
-                        icon={<OpacityIcon />}
+                        showInput={editing || addVital}
+                        icon={<MonitorHeartIcon />}
                         title="Pressão sistólica"
                         error={(error && !vitalInputs.sistolica) || errorSistolica}
                         type="number"
@@ -281,7 +390,8 @@ export function VitalTracker() {
 
                 <Grid item xs={12} md={4}>
                     <VitalCard
-                        icon={<OpacityIcon />}
+                        showInput={editing || addVital}
+                        icon={<MonitorHeartIcon />}
                         title="Pressão diastólica"
                         error={(error && !vitalInputs.diastolica) || errorDiastolica}
                         type="number"
@@ -297,12 +407,7 @@ export function VitalTracker() {
 
             </Grid>
 
-            <Box sx={{ mt: 4, display: "flex", justifyContent: "center" }}>
-                <ButtonUI onClick={handleRegister}>
-                    Salvar Sinais Vitais
-                </ButtonUI>
-            </Box>
-        </>
+        </Paper>
 
     )
 

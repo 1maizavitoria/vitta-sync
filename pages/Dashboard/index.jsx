@@ -6,9 +6,9 @@ export default function Dashboard() {
 
     async function handleLogout() {
         try {
+            await logout();
             localStorage.removeItem("token");
             window.location.href = "/";
-            await logout();
         } catch (e) {
             console.error("Erro ao fazer logout:", e);
         }

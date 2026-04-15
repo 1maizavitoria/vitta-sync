@@ -22,11 +22,12 @@ const drawerWidth = 240;
 const menuItems = [
     { label: "Dashboard", icon: <DashboardIcon />, path: "/dashboard" },
     { label: "Registros", icon: <DescriptionIcon />, path: "/health-tracker" },
-    { label: "Vínculos", icon: <LinkIcon />, path: "/links" },
+    // { label: "Vínculos", icon: <LinkIcon />, path: "/links" },
     { label: "Relatórios", icon: <ShowChartIcon />, path: "/reports" },
 ];
 
-export default function Sidebar() {
+export default function Sidebar({ open, setOpen }) {
+
     const location = useLocation();
     const navigate = useNavigate();
 
@@ -38,6 +39,21 @@ export default function Sidebar() {
         }
         return true;
     });
+
+    const getIniciais = (nome) => {
+        if (!nome) return "";
+
+        const partes = nome.trim().split(" ").filter(Boolean);
+
+        if (partes.length === 1) {
+            return partes[0][0].toUpperCase();
+        }
+
+        const primeira = partes[0][0];
+        const ultima = partes[partes.length - 1][0];
+
+        return (primeira + ultima).toUpperCase();
+    };
 
     useEffect(() => {
         async function fetchUsers() {
@@ -63,7 +79,9 @@ export default function Sidebar() {
 
     return (
         <Drawer
-            variant="permanent"
+            variant="temporary"
+            open={open}
+            onClose={() => setOpen(false)}
             sx={{
                 width: drawerWidth,
                 flexShrink: 0,
@@ -110,7 +128,7 @@ export default function Sidebar() {
 
                 <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
                     <Avatar sx={{ bgcolor: "#a8e6cf", color: "#000" }}>
-                        AS
+                        {getIniciais(userResponse.nome)}
                     </Avatar>
 
                     <Box>

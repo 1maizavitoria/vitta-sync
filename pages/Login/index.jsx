@@ -1,11 +1,9 @@
 import { Box, Button, Grid, Paper, Tooltip, Typography } from "@mui/material";
 import ButtonUI from "../../components/ui/Button";
-import Link from "../../components/ui/Link";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import InputUI from "../../components/ui/Input";
 import DialogUI from "../../components/ui/Dialog";
-import AlertUI from "../../components/ui/Alert";
 import LinkUI from "../../components/ui/Link";
 import { login, validadeCode, validadeCodePassword, changePassword } from "../../services/userService"
 import { formatCPF, isValidCpf } from "../../utils/formatters/formatCPF";
@@ -40,7 +38,6 @@ export default function Login() {
     // Estado para controlar o tempo de reenvio do código
     const [seconds, setSeconds] = useState(0);
     const disabled = seconds > 0;
-
 
     // Regras de validação da senha para o tooltip
     const rulesPassword = validatePassword(forgotNewPassword);
