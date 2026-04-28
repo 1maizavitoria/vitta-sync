@@ -17,9 +17,9 @@ export default function AppRoutes() {
                 <Routes>
                     {/* PÚBLICO (sem sidebar) */}
                     <Route element={<AuthLayout />}>
-                        <Route path="/" element={<Login />} />
+                        <Route path="/" element={<Landing />} />
+                        <Route path="/login" element={<Login />} />
                         <Route path="/register" element={<Register />} />
-                        <Route path="/landing" element={<Landing />} />
                     </Route>
 
                     {/* PRIVADO (com sidebar futuramente) */}

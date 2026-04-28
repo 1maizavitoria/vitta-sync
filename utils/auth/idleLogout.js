@@ -2,7 +2,7 @@ import { logout } from "../../services/authService";
 
 let timeout;
 
-const TEMPO_INATIVIDADE = 60 * 60 * 1000; // 5 min
+const TEMPO_INATIVIDADE = 5 * 60 * 1000; // 5 minutos
 //const TEMPO_INATIVIDADE = 1 * 10 * 1000; // 10 sec
 
 function handleLogout() {
@@ -13,7 +13,7 @@ function handleLogout() {
     });
 
     localStorage.removeItem("token");
-    window.location.href = "/";
+    window.location.href = "/login";
 }
 
 function resetTimer() {

@@ -113,7 +113,7 @@ export default function Register() {
 
             showAlert("success", "Cadastro realizado com sucesso");
 
-            navigate("/");
+            navigate("/login");
 
         } catch (error) {
 

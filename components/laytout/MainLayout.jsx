@@ -14,6 +14,7 @@ export default function MainLayout() {
 
     return (
         <Box sx={{ display: "flex" }}>
+
             <Navbar open={open} setOpen={setOpen} />
 
             <Sidebar open={open} setOpen={setOpen} />
@@ -21,14 +22,12 @@ export default function MainLayout() {
             <Box component="main" sx={{ flexGrow: 1, p: 3 }}>
                 <Toolbar /> {/* OFFSET DA NAVBAR */}
 
-
                 {alert && (
                     <AlertUI
                         type={alert.type}
                         message={alert.message}
                     />
                 )}
-
 
                 <Outlet />
             </Box>

@@ -6,11 +6,6 @@ export default function Reports() {
     return (
         <>
             <Perfil />
-
-
-
-
-
         </>
     );
 }

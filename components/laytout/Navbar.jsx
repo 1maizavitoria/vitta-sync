@@ -8,12 +8,16 @@ import Badge from "@mui/material/Badge";
 import Button from "@mui/material/Button";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 import MenuIcon from '@mui/icons-material/Menu';
+import ButtonUI from "../ui/Button";
+import { Navigate, useLocation, useNavigate } from "react-router-dom";
 
 export default function Navbar({
     title = "",
     subtitle = "",
     setOpen
 }) {
+    const navigate = useNavigate();
+    const location = useLocation();
 
     return (
 
@@ -78,11 +82,28 @@ export default function Navbar({
                     </Button> */}
 
                     {/* Notificação */}
-                    {/* <IconButton>
-                        <Badge badgeContent={1} color="error">
-                            <NotificationsIcon />
-                        </Badge>
-                    </IconButton> */}
+                    {(location.pathname !== "/" &&
+                        location.pathname !== "/login" &&
+                        location.pathname !== "/register") &&
+                        <IconButton>
+                            <Badge badgeContent={1} color="error">
+                                <NotificationsIcon />
+                            </Badge>
+                        </IconButton>}
+
+                    {location.pathname === "/" && <ButtonUI
+                        variant="outlined"
+                        sx={{
+                            textTransform: "none",
+                            borderRadius: 3,
+                        }}
+                        onClick={() => navigate("/login")}
+                    >
+                        Entrar / Registrar
+                    </ButtonUI>}
+
+
+
                 </Box>
             </Toolbar>
         </AppBar>

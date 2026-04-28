@@ -11,7 +11,7 @@ export default function PrivateRoute({ children }) {
 
             if (token && isTokenExpired(token)) {
                 localStorage.removeItem("token");
-                window.location.href = "/";
+                window.location.href = "/login";
             }
         }, 5000);
 
@@ -20,7 +20,7 @@ export default function PrivateRoute({ children }) {
 
     if (!token || isTokenExpired(token)) {
         localStorage.removeItem("token");
-        return <Navigate to="/" />;
+        return <Navigate to="/login" />;
     }
 
     return children;
