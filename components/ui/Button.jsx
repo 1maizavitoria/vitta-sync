@@ -1,37 +1,52 @@
 import Button from '@mui/material/Button';
 
-export default function ButtonUI({ children, minWidth, ...props }) {
+export default function ButtonUI({
+    children,
+    minWidth,
+    sx,
+    ...props
+}) {
     return (
         <Button
             variant="contained"
             size="small"
             {...props}
             sx={{
-                minWidth: { minWidth },
+                minWidth,
+
                 borderRadius: '30px',
                 padding: '5px 16px',
+
                 fontWeight: 'bold',
                 textTransform: 'uppercase',
                 fontSize: '12px',
 
-                // 🔵 Degradê (esquerda → direita)
-                background: 'linear-gradient(to right, #00aeff, #00ff5e)',
+                background:
+                    'linear-gradient(90deg, #c6eee6 0%, #b6d98e 100%)',
 
-                // 🩶 Borda cinza
-                border: '3px solid #bdbdbd',
+                border: '2px solid #bdbdbd',
 
-                // 🌫️ Sombra cinza
-                boxShadow: '0px 4px 8px rgba(0,0,0,0.2)',
+                color: '#2b2b2b',
 
-                // Evita que o MUI sobrescreva o background
+                boxShadow:
+                    '0px 4px 8px rgba(0,0,0,0.15)',
+
+                transition: '0.2s ease',
+
                 '&:hover': {
-                    background: 'linear-gradient(to right, #6cc8ec, #75f4a0)',
-                    boxShadow: '0px 6px 12px rgba(0,0,0,0.25)',
+                    background:
+                        'linear-gradient(90deg, #d4f5ee 0%, #c6e7a7 100%)',
+
+                    boxShadow:
+                        '0px 6px 12px rgba(0,0,0,0.2)',
                 },
 
                 '&:active': {
-                    boxShadow: '0px 2px 4px rgba(0,0,0,0.2)',
-                }
+                    boxShadow:
+                        '0px 2px 4px rgba(0,0,0,0.2)',
+                },
+
+                ...sx,
             }}
         >
             {children}

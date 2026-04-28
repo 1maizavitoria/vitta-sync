@@ -14,8 +14,14 @@ import DashboardIcon from "@mui/icons-material/Dashboard";
 import DescriptionIcon from "@mui/icons-material/Description";
 import LinkIcon from "@mui/icons-material/Link";
 import ShowChartIcon from "@mui/icons-material/ShowChart";
+import IconButton from "@mui/material/IconButton";
+import LogoutIcon from "@mui/icons-material/Logout";
+
 import { getUserByCpf } from "../../services/userService";
 import { useEffect, useState } from "react";
+import { logout } from "../../services/authService";
+import { Button } from "@mui/material";
+import ButtonUI from "../ui/Button";
 
 const drawerWidth = 240;
 
@@ -54,6 +60,16 @@ export default function Sidebar({ open, setOpen }) {
 
         return (primeira + ultima).toUpperCase();
     };
+
+    async function handleLogout() {
+        try {
+            await logout();
+            localStorage.removeItem("token");
+            navigate("/login");
+        } catch (e) {
+            console.error("Erro ao fazer logout:", e);
+        }
+    }
 
     useEffect(() => {
         async function fetchUsers() {
@@ -126,7 +142,14 @@ export default function Sidebar({ open, setOpen }) {
             <Box sx={{ mt: "auto", p: 2 }}>
                 <Divider sx={{ mb: 2 }} />
 
-                <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                <Box
+                    sx={{
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "space-between",
+                        width: "100%",
+                    }}
+                >
                     <Avatar sx={{ bgcolor: "#a8e6cf", color: "#000" }}>
                         {getIniciais(userResponse.nome)}
                     </Avatar>
@@ -139,6 +162,19 @@ export default function Sidebar({ open, setOpen }) {
                             {userResponse.tipo || "Tipo de usuário"}
                         </Typography>
                     </Box>
+
+                    <IconButton
+                        onClick={handleLogout}
+                        sx={{
+                            backgroundColor: "#ffe5e5",
+                            "&:hover": {
+                                backgroundColor: "#ffd6d6",
+                            },
+                        }}
+                    >
+                        <LogoutIcon color="error" />
+                    </IconButton>
+
                 </Box>
             </Box>
         </Drawer>

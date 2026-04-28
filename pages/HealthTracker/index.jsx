@@ -4,43 +4,48 @@ import { VitalTracker } from "../../components/ui/VitalTracker";
 
 
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import ReminderCard from "../../components/ui/RemindCard";
 
 export default function HealthTreacker() {
 
-
     return (
-        <Box sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
-            <Accordion defaultExpanded>
-                <AccordionSummary
-                    expandIcon={<ExpandMoreIcon />}
-                    aria-controls="panel1-content"
-                    id="panel1-header"
-                >
-                    <Typography variant="h5" fontWeight="bold" >
-                        Sinais Vitais
-                    </Typography>
-                </AccordionSummary>
+        <Box sx={{ display: "flex", flexDirection: "row", gap: 3 }}>
+            <Box>
+                <Accordion defaultExpanded>
+                    <AccordionSummary
+                        expandIcon={<ExpandMoreIcon />}
+                        aria-controls="panel1-content"
+                        id="panel1-header"
+                    >
+                        <Typography variant="h5" fontWeight="bold" >
+                            Sinais Vitais
+                        </Typography>
+                    </AccordionSummary>
 
-                <VitalTracker />
+                    <VitalTracker />
 
-            </Accordion>
+                </Accordion>
 
-            <Accordion defaultExpanded>
-                <AccordionSummary
-                    expandIcon={<ExpandMoreIcon />}
-                    aria-controls="panel1-content"
-                    id="panel1-header"
-                >
-                    <Typography variant="h5" fontWeight="bold" >
-                        Hábitos
-                    </Typography>
+                <Accordion defaultExpanded>
+                    <AccordionSummary
+                        expandIcon={<ExpandMoreIcon />}
+                        aria-controls="panel1-content"
+                        id="panel1-header"
+                    >
+                        <Typography variant="h5" fontWeight="bold" >
+                            Hábitos
+                        </Typography>
 
-                </AccordionSummary>
+                    </AccordionSummary>
 
-                <HabitTracker />
+                    <HabitTracker />
 
-            </Accordion>
+                </Accordion>
+            </Box>
 
+            <Box>
+                <ReminderCard />
+            </Box>
 
 
         </Box>
