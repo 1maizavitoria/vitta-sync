@@ -2,7 +2,6 @@ import React, { useEffect, useState } from "react";
 import { Box, Button, Card, CardContent, Dialog, DialogTitle, DialogContent, DialogActions, Stack, Typography, ToggleButton, ToggleButtonGroup } from "@mui/material";
 import { LocalizationProvider, TimePicker } from "@mui/x-date-pickers";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
-import dayjs from "dayjs";
 import { activateReminder, deactivateReminder, getReminder, registerReminder } from "../../services/reminderService";
 import ReminderList from "./RemindList";
 import ButtonUI from "./Button";
@@ -19,22 +18,46 @@ const weekDays = [
     { label: "Sáb", value: "Saturday" },
 ];
 
+
+
 export default function ReminderCard() {
     const { showAlert } = useAlert();
 
     const [open, setOpen] = useState(false);
 
-    const [selectedDay, setSelectedDay] = useState(null);
+    const [selectedDay, setSelectedDay] = useState([]);
 
     const [time, setTime] = useState(null);
-    // const [time, setTime] = useState(dayjs().hour(8).minute(0));
 
     const [reminder, setReminder] = useState([]);
 
     const [error, setError] = useState(false);
 
-    const handleDays = (_, newDay) => {
-        setSelectedDay(newDay);
+    function sortWeekDays(days) {
+
+        const daysOrder = [
+            "Monday",
+            "Tuesday",
+            "Wednesday",
+            "Thursday",
+            "Friday",
+            "Saturday",
+            "Sunday",
+        ];
+
+        return [...days].sort(
+            (a, b) =>
+                daysOrder.indexOf(a) -
+                daysOrder.indexOf(b)
+        );
+    }
+
+    const handleDays = (_, newDays) => {
+        setSelectedDay(newDays);
+
+        if (newDays.length > 0) {
+            setError(false);
+        }
     };
 
     function canSave() {
@@ -51,7 +74,8 @@ export default function ReminderCard() {
     async function handleSave() {
         if (!canSave()) return;
         const data = {
-            diasSemana: selectedDay,
+
+            diasSemana: sortWeekDays(selectedDay).join(","),
             horario: time.format("HH:mm"),
             ativo: true
         };
@@ -162,7 +186,8 @@ export default function ReminderCard() {
                         <ToggleButtonGroup
                             value={selectedDay}
                             onChange={handleDays}
-                            exclusive
+
+                            // exclusive
                             fullWidth
                             sx={{
                                 border: error
