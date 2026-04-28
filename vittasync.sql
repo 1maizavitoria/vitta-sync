@@ -67,6 +67,15 @@ CREATE TABLE Habitos (
     CONSTRAINT fk_habitos_paciente FOREIGN KEY (paciente_id) REFERENCES usuario(id) ON DELETE CASCADE
 );
 
+CREATE TABLE LembreteMedicao (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    usuario_id INT NOT NULL,
+    dias_semana VARCHAR(10) NOT NULL,
+    horario TIME NOT NULL,
+    ativo BOOLEAN NOT NULL DEFAULT TRUE,
+    CONSTRAINT fk_usuario_lembrete FOREIGN KEY (usuario_id) REFERENCES Usuario(id)
+);
+
 SHOW TABLES;
 
 DESCRIBE Usuario;
@@ -74,9 +83,11 @@ DESCRIBE CodigoVerificacao;
 DESCRIBE SessaoToken;
 DESCRIBE SinaisVitais;
 DESCRIBE Habitos;
+DESCRIBE LembreteMedicao;
 
 SELECT * FROM Usuario;
 SELECT * FROM CodigoVerificacao;
 SELECT * FROM SessaoToken;
 SELECT * FROM SinaisVitais;
 SELECT * FROM Habitos;
+SELECT * FROM LembreteMedicao;
