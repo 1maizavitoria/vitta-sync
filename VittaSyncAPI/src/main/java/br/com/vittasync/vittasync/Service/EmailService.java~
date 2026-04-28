@@ -29,14 +29,4 @@ public class EmailService {
 
         mailSender.send(message);
     }
-
-    public void enviarLembrete(String to, String mensagem) {
-        SimpleMailMessage message = new SimpleMailMessage();
-        message.setFrom("no.reply.vittasync@gmail.com");
-        message.setTo(to);
-        message.setSubject("Lembrete de Medição - VittaSync");
-        message.setText(mensagem);
-
-        mailSender.send(message);
-    }
 }
