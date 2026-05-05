@@ -70,11 +70,23 @@ CREATE TABLE Habitos (
 CREATE TABLE LembreteMedicao (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
     usuario_id INT NOT NULL,
-    dias_semana VARCHAR(10) NOT NULL,
+    dias_semana VARCHAR(100) NOT NULL,
     horario TIME NOT NULL,
     ativo BOOLEAN NOT NULL DEFAULT TRUE,
     CONSTRAINT fk_usuario_lembrete FOREIGN KEY (usuario_id) REFERENCES Usuario(id)
 );
+
+CREATE TABLE DiarioSintomas (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    paciente_id INT NOT NULL,
+    sintoma VARCHAR(255) NOT NULL,
+    intensidade_dor INT NOT NULL,
+    data_referencia DATE NOT NULL,
+    data_registro TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    data_modificacao TIMESTAMP NULL,
+    FOREIGN KEY (paciente_id) REFERENCES usuario(id)
+);
+
 
 SHOW TABLES;
 
@@ -84,6 +96,7 @@ DESCRIBE SessaoToken;
 DESCRIBE SinaisVitais;
 DESCRIBE Habitos;
 DESCRIBE LembreteMedicao;
+DESCRIBE DiarioSintomas;
 
 SELECT * FROM Usuario;
 SELECT * FROM CodigoVerificacao;
@@ -91,3 +104,4 @@ SELECT * FROM SessaoToken;
 SELECT * FROM SinaisVitais;
 SELECT * FROM Habitos;
 SELECT * FROM LembreteMedicao;
+SELECT * FROM DiarioSintomas;
