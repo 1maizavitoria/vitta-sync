@@ -21,7 +21,6 @@ public class DiarioSintomasInputDTO {
     private LocalDateTime dataRegistro;
     private LocalDateTime dataModificacao;
 
-
     public DiarioSintomasInputDTO() {}
 
     public String getSintoma() { return sintoma; }
