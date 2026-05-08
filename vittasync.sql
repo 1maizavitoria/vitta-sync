@@ -87,6 +87,57 @@ CREATE TABLE DiarioSintomas (
     FOREIGN KEY (paciente_id) REFERENCES usuario(id)
 );
 
+CREATE TABLE SolicitacaoVinculo (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    solicitante_id INT NOT NULL,
+    paciente_id INT,
+    codigo VARCHAR(10) NOT NULL UNIQUE,
+	tipo VARCHAR(20) NOT NULL,
+    status ENUM(
+        'PENDENTE',
+        'ACEITO',
+        'RECUSADO',
+        'EXPIRADO'
+    ) DEFAULT 'PENDENTE',
+    utilizado BOOLEAN DEFAULT FALSE,
+    expira_em TIMESTAMP NOT NULL,
+    criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (solicitante_id)
+        REFERENCES Usuario(id)
+        ON DELETE CASCADE,
+    FOREIGN KEY (paciente_id)
+        REFERENCES Usuario(id)
+        ON DELETE CASCADE
+);
+
+CREATE TABLE PacienteMedico (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    paciente_id INT NOT NULL,
+    medico_id INT NOT NULL,
+    criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE (paciente_id, medico_id),
+    FOREIGN KEY (paciente_id)
+        REFERENCES Usuario(id)
+        ON DELETE CASCADE,
+    FOREIGN KEY (medico_id)
+        REFERENCES Usuario(id)
+        ON DELETE CASCADE
+);
+
+CREATE TABLE PacienteResponsavel (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    paciente_id INT NOT NULL,
+    responsavel_id INT NOT NULL,
+    criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE (paciente_id, responsavel_id),
+    FOREIGN KEY (paciente_id)
+        REFERENCES Usuario(id)
+        ON DELETE CASCADE,
+    FOREIGN KEY (responsavel_id)
+        REFERENCES Usuario(id)
+        ON DELETE CASCADE
+);
+
 
 SHOW TABLES;
 
