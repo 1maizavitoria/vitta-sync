@@ -1,48 +1,53 @@
 package br.com.vittasync.vittasync.Service;
 
-import br.com.vittasync.vittasync.DTO.VinculoInputDTO;
+import br.com.vittasync.vittasync.DTO.ConviteVinculoOutputDTO;
+import br.com.vittasync.vittasync.DTO.EnviarConviteDTO;
+
 import br.com.vittasync.vittasync.DTO.VinculoOutputDTO;
 import br.com.vittasync.vittasync.Exception.RecursoNaoEncontradoException;
-import br.com.vittasync.vittasync.Model.SolicitacaoVinculo;
+
+import br.com.vittasync.vittasync.Model.ConviteVinculo;
 import br.com.vittasync.vittasync.Model.Usuario;
-import br.com.vittasync.vittasync.Repository.SolicitacaoVinculoRepository;
+import br.com.vittasync.vittasync.Model.Vinculo;
+
+import br.com.vittasync.vittasync.Repository.ConviteVinculoRepository;
 import br.com.vittasync.vittasync.Repository.UsuarioRepository;
+import br.com.vittasync.vittasync.Repository.VinculoRepository;
 
-import br.com.vittasync.vittasync.Model.PacienteMedico;
-import br.com.vittasync.vittasync.Model.PacienteResponsavel;
-
-import br.com.vittasync.vittasync.Repository.PacienteMedicoRepository;
-import br.com.vittasync.vittasync.Repository.PacienteResponsavelRepository;
 
 import org.springframework.stereotype.Service;
 
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.UUID;
 
 @Service
 public class VinculoService {
 
-    private final SolicitacaoVinculoRepository repository;
-    private final UsuarioRepository usuarioRepository;
-    private final PacienteMedicoRepository pacienteMedicoRepository;
+    private final ConviteVinculoRepository conviteRepository;
 
-    private final PacienteResponsavelRepository pacienteResponsavelRepository;
+    private final VinculoRepository vinculoRepository;
+
+    private final UsuarioRepository usuarioRepository;
+
+    private final EmailService emailService;
 
     public VinculoService(
-            SolicitacaoVinculoRepository repository,
+            ConviteVinculoRepository conviteRepository,
+            VinculoRepository vinculoRepository,
             UsuarioRepository usuarioRepository,
-            PacienteMedicoRepository pacienteMedicoRepository,
-            PacienteResponsavelRepository pacienteResponsavelRepository
+            EmailService emailService
     ) {
-        this.repository = repository;
+        this.conviteRepository = conviteRepository;
+        this.vinculoRepository = vinculoRepository;
         this.usuarioRepository = usuarioRepository;
-        this.pacienteMedicoRepository = pacienteMedicoRepository;
-        this.pacienteResponsavelRepository = pacienteResponsavelRepository;
+        this.emailService = emailService;
     }
 
-
-    public String gerarCodigo(Integer usuarioId) {
+    public ConviteVinculoOutputDTO gerarCodigo(
+            Integer usuarioId
+    ){
 
         Usuario usuario = usuarioRepository.findById(usuarioId)
                 .orElseThrow(() ->
@@ -51,12 +56,10 @@ public class VinculoService {
                         )
                 );
 
-        if (
-                !usuario.getTipo().equalsIgnoreCase("medico") &&
-                        !usuario.getTipo().equalsIgnoreCase("responsavel")
-        ) {
+        if (!usuario.getTipo().equalsIgnoreCase("paciente")) {
+
             throw new RuntimeException(
-                    "Usuário não pode gerar vínculo"
+                    "Somente pacientes podem gerar vínculo"
             );
         }
 
@@ -70,203 +73,306 @@ public class VinculoService {
                     .substring(0, 6)
                     .toUpperCase();
 
-        } while (repository.existsByCodigo(codigo));
+        } while (
+                conviteRepository.existsByCodigo(codigo)
+        );
 
-        SolicitacaoVinculo solicitacao =
-                new SolicitacaoVinculo();
+        ConviteVinculo convite =
+                new ConviteVinculo();
 
-        solicitacao.setSolicitanteId(usuario.getId());
+        convite.setPacienteId(usuario.getId());
 
-        solicitacao.setCodigo(codigo);
+        convite.setCodigo(codigo);
 
-        solicitacao.setTipo(usuario.getTipo());
+        convite.setAtivo(true);
 
-        solicitacao.setStatus("PENDENTE");
-
-        solicitacao.setUtilizado(false);
-
-        solicitacao.setCriadoEm(
+        convite.setCriadoEm(
                 Timestamp.valueOf(LocalDateTime.now())
         );
 
-        solicitacao.setExpiraEm(
+        convite.setExpiraEm(
                 Timestamp.valueOf(
-                        LocalDateTime.now().plusHours(1)
+                        LocalDateTime.now().plusHours(24)
                 )
         );
 
-        repository.save(solicitacao);
+        conviteRepository.save(convite);
 
-        return codigo;
+        ConviteVinculoOutputDTO output =
+                new ConviteVinculoOutputDTO();
+
+        output.setCodigo(codigo);
+
+        output.setLink(
+                "http://localhost:3000/entrar?codigo="
+                        + codigo
+        );
+
+        output.setExpiraEm(
+                convite.getExpiraEm()
+        );
+
+        return output;
     }
 
-    public VinculoOutputDTO validarCodigo(
-            VinculoInputDTO dto
+    public void entrarComCodigo(
+            String codigo,
+            Integer usuarioId
     ) {
 
-        SolicitacaoVinculo solicitacao =
-                repository.findByCodigo(dto.getCodigo())
-                        .orElseThrow(() ->
-                                new RecursoNaoEncontradoException(
-                                        "Código inválido"
-                                )
-                        );
-
-        if (solicitacao.getUtilizado()) {
-            throw new RuntimeException(
-                    "Código já utilizado"
-            );
-        }
-
-        if (
-                solicitacao.getExpiraEm().before(
-                        Timestamp.valueOf(LocalDateTime.now())
-                )
-        ) {
-            solicitacao.setStatus("EXPIRADO");
-            repository.save(solicitacao);
-            throw new RuntimeException(
-                    "Código expirado"
-            );
-        }
-
-        Usuario solicitante =
-                usuarioRepository.findById(
-                        solicitacao.getSolicitanteId()
-                ).orElseThrow(() ->
+        Usuario usuario = usuarioRepository.findById(usuarioId)
+                .orElseThrow(() ->
                         new RecursoNaoEncontradoException(
                                 "Usuário não encontrado"
                         )
                 );
 
-        VinculoOutputDTO output =
-                new VinculoOutputDTO();
+        if (usuario.getTipo().equalsIgnoreCase("paciente")) {
 
-        output.setNome(solicitante.getNome());
-
-        output.setTipo(solicitante.getTipo());
-
-        output.setCodigo(solicitacao.getCodigo());
-
-        return output;
-    }
-
-    public void confirmarVinculo(
-            String codigo,
-            Integer pacienteId
-    ) {
-
-        Usuario paciente = usuarioRepository.findById(pacienteId)
-                .orElseThrow(() ->
-                        new RecursoNaoEncontradoException(
-                                "Paciente não encontrado"
-                        )
-                );
-
-        if (!paciente.getTipo().equalsIgnoreCase("paciente")) {
             throw new RuntimeException(
-                    "Usuário não é paciente"
+                    "Paciente não pode entrar com código"
             );
         }
 
-        SolicitacaoVinculo solicitacao =
-                repository.findByCodigo(codigo)
+        ConviteVinculo convite =
+                conviteRepository.findByCodigo(codigo)
                         .orElseThrow(() ->
                                 new RecursoNaoEncontradoException(
                                         "Código inválido"
                                 )
                         );
 
-        if (solicitacao.getUtilizado()) {
+        if (!convite.getAtivo()) {
+
             throw new RuntimeException(
-                    "Código já utilizado"
+                    "Código inativo"
             );
         }
 
         if (
-                solicitacao.getExpiraEm().before(
+                convite.getExpiraEm().before(
                         Timestamp.valueOf(LocalDateTime.now())
                 )
         ) {
-            solicitacao.setStatus("EXPIRADO");
-            repository.save(solicitacao);
+
+            convite.setAtivo(false);
+
+            conviteRepository.save(convite);
+
             throw new RuntimeException(
                     "Código expirado"
             );
         }
 
-        Integer solicitanteId =
-                solicitacao.getSolicitanteId();
+        boolean jaExiste =
+                vinculoRepository
+                        .existsByPacienteIdAndUsuarioId(
+                                convite.getPacienteId(),
+                                usuarioId
+                        );
 
-        if (
-                solicitacao.getTipo()
-                        .equalsIgnoreCase("medico")
-        ) {
+        if (jaExiste) {
 
-            boolean jaExiste =
-                    pacienteMedicoRepository
-                            .existsByPacienteIdAndMedicoId(
-                                    pacienteId,
-                                    solicitanteId
-                            );
-
-            if (jaExiste) {
-                throw new RuntimeException(
-                        "Vínculo já existe"
-                );
-            }
-
-            PacienteMedico vinculo =
-                    new PacienteMedico();
-
-            vinculo.setPacienteId(pacienteId);
-
-            vinculo.setMedicoId(solicitanteId);
-
-            vinculo.setCriadoEm(
-                    Timestamp.valueOf(LocalDateTime.now())
+            throw new RuntimeException(
+                    "Vínculo já existe"
             );
-
-            pacienteMedicoRepository.save(vinculo);
-
-        } else if (
-                solicitacao.getTipo()
-                        .equalsIgnoreCase("responsavel")
-        ) {
-
-            boolean jaExiste =
-                    pacienteResponsavelRepository
-                            .existsByPacienteIdAndResponsavelId(
-                                    pacienteId,
-                                    solicitanteId
-                            );
-
-            if (jaExiste) {
-                throw new RuntimeException(
-                        "Vínculo já existe"
-                );
-            }
-
-            PacienteResponsavel vinculo =
-                    new PacienteResponsavel();
-
-            vinculo.setPacienteId(pacienteId);
-
-            vinculo.setResponsavelId(solicitanteId);
-
-            vinculo.setCriadoEm(
-                    Timestamp.valueOf(LocalDateTime.now())
-            );
-
-            pacienteResponsavelRepository.save(vinculo);
         }
 
-        solicitacao.setUtilizado(true);
+        Vinculo vinculo =
+                new Vinculo();
 
-        solicitacao.setStatus("ACEITO");
+        vinculo.setPacienteId(
+                convite.getPacienteId()
+        );
 
-        repository.save(solicitacao);
+        vinculo.setUsuarioId(usuarioId);
+
+        vinculo.setTipo(usuario.getTipo());
+
+        vinculo.setCriadoEm(
+                Timestamp.valueOf(LocalDateTime.now())
+        );
+
+        vinculoRepository.save(vinculo);
+    }
+
+    public void enviarConviteEmail(
+            String email,
+            String codigo
+    ) {
+
+        ConviteVinculo convite =
+                conviteRepository
+                        .findByCodigo(codigo)
+                        .orElseThrow(() ->
+                                new RecursoNaoEncontradoException(
+                                        "Convite não encontrado"
+                                )
+                        );
+
+        if (!convite.getAtivo()) {
+
+            throw new RuntimeException(
+                    "Convite inativo"
+            );
+        }
+
+        if (
+                convite.getExpiraEm().before(
+                        Timestamp.valueOf(LocalDateTime.now())
+                )
+        ) {
+
+            convite.setAtivo(false);
+
+            conviteRepository.save(convite);
+
+            throw new RuntimeException(
+                    "Convite expirado"
+            );
+        }
+
+        Usuario paciente =
+                usuarioRepository.findById(
+                        convite.getPacienteId()
+                ).orElseThrow(() ->
+                        new RecursoNaoEncontradoException(
+                                "Paciente não encontrado"
+                        )
+                );
+
+        Usuario convidado =
+                usuarioRepository.findByEmail(email)
+                        .orElseThrow(() ->
+                                new RecursoNaoEncontradoException(
+                                        "Usuário não encontrado"
+                                )
+                        );
+
+        if (
+                convidado.getTipo()
+                        .equalsIgnoreCase("paciente")
+        ) {
+
+            throw new RuntimeException(
+                    "Paciente não pode ser vinculado"
+            );
+        }
+
+        String link =
+                "http://localhost:3000/entrar?codigo="
+                        + convite.getCodigo();
+
+        emailService.enviarConviteVinculo(
+                email,
+                convidado.getNome(),
+                paciente.getNome(),
+                convite.getCodigo(),
+                link
+        );
+    }
+
+    public void removerVinculo(Long id) {
+
+        Vinculo vinculo =
+                vinculoRepository.findById(id)
+                        .orElseThrow(() ->
+                                new RecursoNaoEncontradoException(
+                                        "Vínculo não encontrado"
+                                )
+                        );
+
+        vinculoRepository.delete(vinculo);
+    }
+
+    public List<VinculoOutputDTO> listar(Integer usuarioId) {
+
+        Usuario usuario =
+                usuarioRepository.findById(usuarioId)
+                        .orElseThrow(() ->
+                                new RecursoNaoEncontradoException(
+                                        "Usuário não encontrado"
+                                )
+                        );
+
+        List<Vinculo> vinculos;
+
+        if (
+                usuario.getTipo()
+                        .equalsIgnoreCase("paciente")
+        ) {
+
+            vinculos =
+                    vinculoRepository
+                            .findByPacienteId(usuarioId);
+
+        } else {
+
+            vinculos =
+                    vinculoRepository
+                            .findByUsuarioId(usuarioId);
+        }
+
+        return vinculos.stream().map(vinculo -> {
+
+            Usuario usuarioVinculado;
+
+            if (
+                    usuario.getTipo()
+                            .equalsIgnoreCase("paciente")
+            ) {
+
+                usuarioVinculado =
+                        usuarioRepository.findById(
+                                vinculo.getUsuarioId()
+                        ).orElseThrow(() ->
+                                new RecursoNaoEncontradoException(
+                                        "Usuário não encontrado"
+                                )
+                        );
+
+            } else {
+
+                usuarioVinculado =
+                        usuarioRepository.findById(
+                                vinculo.getPacienteId()
+                        ).orElseThrow(() ->
+                                new RecursoNaoEncontradoException(
+                                        "Paciente não encontrado"
+                                )
+                        );
+            }
+
+            VinculoOutputDTO dto =
+                    new VinculoOutputDTO();
+
+            dto.setId(vinculo.getId());
+
+            dto.setNome(
+                    usuarioVinculado.getNome()
+            );
+
+            dto.setEmail(
+                    usuarioVinculado.getEmail()
+            );
+
+            dto.setTipo(
+                    vinculo.getTipo()
+            );
+
+            dto.setConselho(
+                    usuarioVinculado.getConselho()
+            );
+
+            dto.setCriadoEm(
+                    vinculo.getCriadoEm()
+            );
+
+            return dto;
+
+        }).toList();
     }
 
 
 }
+

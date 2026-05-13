@@ -39,4 +39,54 @@ public class EmailService {
 
         mailSender.send(message);
     }
+
+    public void enviarConviteVinculo(
+            String to,
+            String nomeConvidado,
+            String nomePaciente,
+            String codigo,
+            String link
+    ) {
+
+        String mensagem = "Olá, "
+                + nomeConvidado + "\n\n"
+
+                + nomePaciente
+                + " convidou você para participar "
+                + "do contexto compartilhado de saúde "
+                + "na plataforma VittaSync.\n\n"
+
+                + "Código de vínculo: "
+                + codigo + "\n\n"
+
+                + "Ou utilize o link abaixo:\n"
+                + link + "\n\n"
+
+                + "Este convite possui tempo limitado.\n\n"
+
+                + "Se você não reconhece este convite, "
+                + "ignore este email.\n\n"
+
+                + "Atenciosamente,\n"
+                + "Equipe VittaSync";
+
+        SimpleMailMessage message =
+                new SimpleMailMessage();
+
+        message.setFrom(
+                "no.reply.vittasync@gmail.com"
+        );
+
+        message.setTo(to);
+
+        message.setSubject(
+                "Convite de vínculo com "
+                        + nomePaciente
+                        + " - VittaSync"
+        );
+
+        message.setText(mensagem);
+
+        mailSender.send(message);
+    }
 }

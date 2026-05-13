@@ -1,6 +1,5 @@
 package br.com.vittasync.vittasync.Service;
 
-
 import br.com.vittasync.vittasync.Exception.RecursoNaoEncontradoException;
 import br.com.vittasync.vittasync.Model.SinaisVitais;
 import br.com.vittasync.vittasync.Repository.SinaisVitaisRepository;

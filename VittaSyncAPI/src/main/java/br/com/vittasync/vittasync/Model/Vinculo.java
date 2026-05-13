@@ -5,8 +5,8 @@ import jakarta.persistence.*;
 import java.sql.Timestamp;
 
 @Entity
-@Table(name = "PacienteMedico")
-public class PacienteMedico {
+@Table(name = "Vinculo")
+public class Vinculo {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -15,13 +15,16 @@ public class PacienteMedico {
     @Column(name = "paciente_id")
     private Integer pacienteId;
 
-    @Column(name = "medico_id")
-    private Integer medicoId;
+    @Column(name = "usuario_id")
+    private Integer usuarioId;
+
+    @Column(name = "tipo")
+    private String tipo;
 
     @Column(name = "criado_em")
     private Timestamp criadoEm;
 
-    public PacienteMedico() {
+    public Vinculo() {
     }
 
     public Long getId() {
@@ -36,12 +39,20 @@ public class PacienteMedico {
         this.pacienteId = pacienteId;
     }
 
-    public Integer getMedicoId() {
-        return medicoId;
+    public Integer getUsuarioId() {
+        return usuarioId;
     }
 
-    public void setMedicoId(Integer medicoId) {
-        this.medicoId = medicoId;
+    public void setUsuarioId(Integer usuarioId) {
+        this.usuarioId = usuarioId;
+    }
+
+    public String getTipo() {
+        return tipo;
+    }
+
+    public void setTipo(String tipo) {
+        this.tipo = tipo;
     }
 
     public Timestamp getCriadoEm() {

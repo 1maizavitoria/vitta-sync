@@ -1,5 +1,7 @@
 package br.com.vittasync.vittasync.Controller;
 
+import br.com.vittasync.vittasync.Service.PermissaoService;
+
 import br.com.vittasync.vittasync.DTO.DiarioSintomasInputDTO;
 import br.com.vittasync.vittasync.DTO.DiarioSintomasOutputDTO;
 import br.com.vittasync.vittasync.Model.DiarioSintomas;
@@ -19,11 +21,18 @@ public class DiarioSintomasController {
     private final DiarioSintomasService service;
     private final JwtService jwtService;
     private final UsuarioService usuarioService;
+    private final PermissaoService permissaoService;
 
-    public DiarioSintomasController(DiarioSintomasService service, JwtService jwtService, UsuarioService usuarioService) {
+    public DiarioSintomasController(
+            DiarioSintomasService service,
+            JwtService jwtService,
+            UsuarioService usuarioService,
+            PermissaoService permissaoService
+    ) {
         this.service = service;
         this.jwtService = jwtService;
         this.usuarioService = usuarioService;
+        this.permissaoService = permissaoService;
     }
 
     @PostMapping("/cadastrar/{cpf}")
@@ -33,11 +42,20 @@ public class DiarioSintomasController {
         String token = authHeader.replace("Bearer ", "");
         String cpfDoToken = jwtService.extrairCpf(token);
 
-        if (!cpfDoToken.equals(cpf)) {
+        Usuario usuarioLogado =
+                usuarioService.searchByCpf(cpfDoToken);
+
+        Usuario paciente =
+                usuarioService.searchByCpf(cpf);
+
+        if (
+                !permissaoService.podeEditarPaciente(
+                        usuarioLogado.getId(),
+                        paciente.getId()
+                )
+        ) {
             return ResponseEntity.status(403).build();
         }
-
-        Usuario paciente = usuarioService.searchByCpf(cpf);
 
         DiarioSintomas entity = new DiarioSintomas();
         entity.setPaciente(paciente);
@@ -57,11 +75,20 @@ public class DiarioSintomasController {
         String token = authHeader.replace("Bearer ", "");
         String cpfDoToken = jwtService.extrairCpf(token);
 
-        if (!cpfDoToken.equals(cpf)) {
+        Usuario usuarioLogado =
+                usuarioService.searchByCpf(cpfDoToken);
+
+        Usuario paciente =
+                usuarioService.searchByCpf(cpf);
+
+        if (
+                !permissaoService.podeEditarPaciente(
+                        usuarioLogado.getId(),
+                        paciente.getId()
+                )
+        ) {
             return ResponseEntity.status(403).build();
         }
-
-        Usuario paciente = usuarioService.searchByCpf(cpf);
 
         DiarioSintomas entity = new DiarioSintomas();
         entity.setPaciente(paciente);
@@ -80,7 +107,18 @@ public class DiarioSintomasController {
         String token = authHeader.replace("Bearer ", "");
         String cpfDoToken = jwtService.extrairCpf(token);
 
-        if (!cpfDoToken.equals(cpf)) {
+        Usuario usuarioLogado =
+                usuarioService.searchByCpf(cpfDoToken);
+
+        Usuario paciente =
+                usuarioService.searchByCpf(cpf);
+
+        if (
+                !permissaoService.podeEditarPaciente(
+                        usuarioLogado.getId(),
+                        paciente.getId()
+                )
+        ) {
             return ResponseEntity.status(403).build();
         }
 
@@ -94,7 +132,18 @@ public class DiarioSintomasController {
         String token = authHeader.replace("Bearer ", "");
         String cpfDoToken = jwtService.extrairCpf(token);
 
-        if (!cpfDoToken.equals(cpf)) {
+        Usuario usuarioLogado =
+                usuarioService.searchByCpf(cpfDoToken);
+
+        Usuario paciente =
+                usuarioService.searchByCpf(cpf);
+
+        if (
+                !permissaoService.podeVisualizarPaciente(
+                        usuarioLogado.getId(),
+                        paciente.getId()
+                )
+        ) {
             return ResponseEntity.status(403).build();
         }
 
