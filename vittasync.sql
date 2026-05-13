@@ -87,57 +87,30 @@ CREATE TABLE DiarioSintomas (
     FOREIGN KEY (paciente_id) REFERENCES usuario(id)
 );
 
-CREATE TABLE SolicitacaoVinculo (
+CREATE TABLE Vinculo (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
-    solicitante_id INT NOT NULL,
-    paciente_id INT,
-    codigo VARCHAR(10) NOT NULL UNIQUE,
-	tipo VARCHAR(20) NOT NULL,
-    status ENUM(
-        'PENDENTE',
-        'ACEITO',
-        'RECUSADO',
-        'EXPIRADO'
-    ) DEFAULT 'PENDENTE',
-    utilizado BOOLEAN DEFAULT FALSE,
+    paciente_id INT NOT NULL,
+    usuario_id INT NOT NULL,
+    tipo VARCHAR(20) NOT NULL,
+    criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE (paciente_id, usuario_id),
+    FOREIGN KEY (paciente_id)
+        REFERENCES Usuario(id),
+    FOREIGN KEY (usuario_id)
+        REFERENCES Usuario(id)
+);
+
+CREATE TABLE ConviteVinculo (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    paciente_id INT NOT NULL,
+    codigo VARCHAR(30) NOT NULL UNIQUE,
     expira_em TIMESTAMP NOT NULL,
+    ativo BOOLEAN DEFAULT TRUE,
     criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (solicitante_id)
-        REFERENCES Usuario(id)
-        ON DELETE CASCADE,
     FOREIGN KEY (paciente_id)
         REFERENCES Usuario(id)
         ON DELETE CASCADE
 );
-
-CREATE TABLE PacienteMedico (
-    id BIGINT AUTO_INCREMENT PRIMARY KEY,
-    paciente_id INT NOT NULL,
-    medico_id INT NOT NULL,
-    criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    UNIQUE (paciente_id, medico_id),
-    FOREIGN KEY (paciente_id)
-        REFERENCES Usuario(id)
-        ON DELETE CASCADE,
-    FOREIGN KEY (medico_id)
-        REFERENCES Usuario(id)
-        ON DELETE CASCADE
-);
-
-CREATE TABLE PacienteResponsavel (
-    id BIGINT AUTO_INCREMENT PRIMARY KEY,
-    paciente_id INT NOT NULL,
-    responsavel_id INT NOT NULL,
-    criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    UNIQUE (paciente_id, responsavel_id),
-    FOREIGN KEY (paciente_id)
-        REFERENCES Usuario(id)
-        ON DELETE CASCADE,
-    FOREIGN KEY (responsavel_id)
-        REFERENCES Usuario(id)
-        ON DELETE CASCADE
-);
-
 
 SHOW TABLES;
 
