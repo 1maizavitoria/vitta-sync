@@ -7,6 +7,9 @@ import java.time.LocalDateTime;
 
 public class SinaisVitaisInputDTO {
 
+    @NotNull(message = "Peso é obrigatório")
+    private Double peso;
+
     @NotNull(message = "Frequência cardíaca é obrigatória")
     private Integer fcBpm;
 
@@ -29,6 +32,9 @@ public class SinaisVitaisInputDTO {
     private LocalDateTime dataModificacao;
 
     public SinaisVitaisInputDTO() {}
+
+    public Double getPeso() { return peso; }
+    public void setPeso(Double peso) {this.peso = peso;}
 
     public Integer getFcBpm() { return fcBpm; }
     public void setFcBpm(Integer fcBpm) { this.fcBpm = fcBpm; }

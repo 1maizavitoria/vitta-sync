@@ -30,7 +30,7 @@ public class LembreteMedicaoScheduler {
         DayOfWeek dia = agora.getDayOfWeek(); // MONDAY, TUESDAY, WEDNESDAY, THURSDAY, FRIDAY, SATURDAY, SUNDAY
         LocalTime horaAtual = agora.toLocalTime().truncatedTo(ChronoUnit.MINUTES);
 
-        List<LembreteMedicao> lembretes = service.buscarTodosAtivos();
+        List<LembreteMedicao> lembretes = service.searchLembreteAtivo();
 
         for (LembreteMedicao lembrete : lembretes) {
             LocalTime horarioLembrete = lembrete.getHorario().truncatedTo(ChronoUnit.MINUTES);

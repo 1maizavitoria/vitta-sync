@@ -176,7 +176,6 @@ public class SinaisVitaisController {
     private SinaisVitaisOutputDTO toOutputDTO(SinaisVitais entity) {
         SinaisVitaisOutputDTO dto = new SinaisVitaisOutputDTO();
         dto.setId(entity.getId());
-        dto.setPeso(entity.getPeso());
         dto.setFcBpm(entity.getFcBpm());
         dto.setFrRpm(entity.getFrRpm());
         dto.setPaSistolica(entity.getPaSistolica());

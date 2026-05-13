@@ -1,59 +1,25 @@
-package br.com.vittasync.vittasync.Model;
+package br.com.vittasync.vittasync.DTO;
 
-
-import jakarta.persistence.*;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 
-@Entity
-@Table(name = "Usuario")
-public class Usuario {
+public class UsuarioOutputDTO {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
-
-    @Column(nullable = false, unique = true, length = 11)
     private String cpf;
-
-    @Column(nullable = false, length = 50)
     private String nome;
-
-    @Column(nullable = false, unique = true, length = 50)
     private String email;
-
-    @Column(nullable = false, length = 15)
     private String telefone;
-
-    @Column(name = "peso_inicial")
-    private Double pesoInicial;
-
-    private Double altura;
-
-    @Column(nullable = false, length = 64)
-    private String senha;
-
-    @Column(nullable = false, length = 15)
+    private Float pesoInicial;
+    private Float altura;
     private String tipo;
-
-    @Column(length = 30)
     private String conselho;
-
-    @Column(name = "priv_compartilhar_diario")
     private Boolean privCompartilharDiario;
-
-    @Column(name = "priv_compartilhar_habitos")
     private Boolean privCompartilharHabitos;
-
-    @Column(name = "data_nascimento", nullable = false)
     private LocalDate dataNascimento;
-
-    @Column(name = "data_cadastro")
     private LocalDateTime dataCadastro;
 
-    public Integer getId() { return id; }
-    public void setId(Integer id) { this.id = id; }
+
 
     public String getCpf() { return cpf; }
     public void setCpf(String cpf) { this.cpf = cpf; }
@@ -67,14 +33,11 @@ public class Usuario {
     public String getTelefone() { return telefone; }
     public void setTelefone(String telefone) { this.telefone = telefone; }
 
-    public Double getPesoInicial() { return pesoInicial; }
-    public void setPesoInicial(Double pesoInicial) { this.pesoInicial = pesoInicial; }
+    public Float getPesoInicial() { return pesoInicial; }
+    public void setPesoInicial(Float pesoInicial) { this.pesoInicial = pesoInicial; }
 
-    public Double getAltura() { return altura; }
-    public void setAltura(Double altura) { this.altura = altura; }
-
-    public String getSenha() { return senha; }
-    public void setSenha(String senha) { this.senha = senha; }
+    public Float getAltura() { return altura; }
+    public void setAltura(Float altura) { this.altura = altura; }
 
     public String getTipo() { return tipo; }
     public void setTipo(String tipo) { this.tipo = tipo; }

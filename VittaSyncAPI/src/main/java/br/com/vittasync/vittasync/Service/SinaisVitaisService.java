@@ -26,6 +26,7 @@ public class SinaisVitaisService {
     public SinaisVitais update(Integer id, SinaisVitais novosDados) {
         SinaisVitais existente = repository.findById(id)
                 .orElseThrow(() -> new RecursoNaoEncontradoException("Sinais vitais não encontrados"));
+        existente.setPeso(novosDados.getPeso());
         existente.setFcBpm(novosDados.getFcBpm());
         existente.setFrRpm(novosDados.getFrRpm());
         existente.setPaSistolica(novosDados.getPaSistolica());

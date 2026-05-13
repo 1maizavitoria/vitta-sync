@@ -7,6 +7,7 @@ import java.time.LocalDateTime;
 public class SinaisVitaisOutputDTO {
 
     private Integer id;
+    private Double peso;
     private Integer fcBpm;
     private Integer frRpm;
     private Integer paSistolica;
@@ -20,6 +21,9 @@ public class SinaisVitaisOutputDTO {
 
     public Integer getId() { return id; }
     public void setId(Integer id) { this.id = id; }
+
+    public Double getPeso() { return peso; }
+    public void setPeso(Double peso) {this.peso = peso;}
 
     public Integer getFcBpm() { return fcBpm; }
     public void setFcBpm(Integer fcBpm) { this.fcBpm = fcBpm; }

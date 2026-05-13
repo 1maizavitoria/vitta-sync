@@ -23,11 +23,11 @@ public class UsuarioInputDTO {
 
     @NotNull(message = "Peso inicial é obrigatório")
     @Positive(message = "Peso inicial deve ser positivo")
-    private Double pesoInicial;
+    private Float pesoInicial;
 
     @NotNull(message = "Altura é obrigatória")
     @Positive(message = "Altura deve ser positiva")
-    private Double altura;
+    private Float altura;
 
     @NotBlank(message = "Senha é obrigatória")
     private String senha;
@@ -58,11 +58,11 @@ public class UsuarioInputDTO {
     public String getTelefone() { return telefone; }
     public void setTelefone(String telefone) { this.telefone = telefone; }
 
-    public Double getPesoInicial() { return pesoInicial; }
-    public void setPesoInicial(Double pesoInicial) { this.pesoInicial = pesoInicial; }
+    public Float getPesoInicial() { return pesoInicial; }
+    public void setPesoInicial(Float pesoInicial) { this.pesoInicial = pesoInicial; }
 
-    public Double getAltura() { return altura; }
-    public void setAltura(Double altura) { this.altura = altura; }
+    public Float getAltura() { return altura; }
+    public void setAltura(Float altura) { this.altura = altura; }
 
     public String getSenha() { return senha; }
     public void setSenha(String senha) { this.senha = senha; }

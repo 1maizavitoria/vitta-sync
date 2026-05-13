@@ -9,12 +9,16 @@ public class UsuarioOutputDTO {
     private String cpf;
     private String nome;
     private String email;
+    private String telefone;
+    private Double pesoInicial;
+    private Double altura;
     private String tipo;
     private String conselho;
     private Boolean privCompartilharDiario;
     private Boolean privCompartilharHabitos;
     private LocalDate dataNascimento;
     private LocalDateTime dataCadastro;
+
 
 
     public String getCpf() { return cpf; }
@@ -25,6 +29,15 @@ public class UsuarioOutputDTO {
 
     public String getEmail() { return email; }
     public void setEmail(String email) { this.email = email; }
+
+    public String getTelefone() { return telefone; }
+    public void setTelefone(String telefone) { this.telefone = telefone; }
+
+    public Double getPesoInicial() { return pesoInicial; }
+    public void setPesoInicial(Double pesoInicial) { this.pesoInicial = pesoInicial; }
+
+    public Double getAltura() { return altura; }
+    public void setAltura(Double altura) { this.altura = altura; }
 
     public String getTipo() { return tipo; }
     public void setTipo(String tipo) { this.tipo = tipo; }
