@@ -60,6 +60,7 @@ public class PermissaoService {
             Vinculo vinculoAlvo
     ) {
 
+        // paciente remove qualquer vínculo dele
         if (
                 usuarioLogadoId.equals(
                         vinculoAlvo.getPacienteId()
@@ -77,6 +78,16 @@ public class PermissaoService {
             return false;
         }
 
+        // médico ou responsável removendo o PRÓPRIO vínculo
+        if (
+                usuarioLogadoId.equals(
+                        vinculoAlvo.getUsuarioId()
+                )
+        ) {
+            return true;
+        }
+
+        // responsável removendo médicos do paciente
         if (
                 usuarioLogado.getTipo()
                         .equalsIgnoreCase("responsavel")
@@ -95,7 +106,5 @@ public class PermissaoService {
 
         return false;
     }
-
-
 
 }

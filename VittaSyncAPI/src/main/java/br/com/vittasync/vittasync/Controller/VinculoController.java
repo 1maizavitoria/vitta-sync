@@ -1,19 +1,21 @@
 package br.com.vittasync.vittasync.Controller;
 
-import br.com.vittasync.vittasync.DTO.VinculoOutputDTO;
+
 import br.com.vittasync.vittasync.Exception.RecursoNaoEncontradoException;
-import br.com.vittasync.vittasync.Model.Vinculo;
-import br.com.vittasync.vittasync.Service.PermissaoService;
 import br.com.vittasync.vittasync.Repository.VinculoRepository;
 
+import br.com.vittasync.vittasync.DTO.VinculoOutputDTO;
 import br.com.vittasync.vittasync.DTO.ConviteVinculoOutputDTO;
 import br.com.vittasync.vittasync.DTO.EnviarConviteDTO;
-
 import br.com.vittasync.vittasync.DTO.VinculoInputDTO;
+
 import br.com.vittasync.vittasync.Model.Usuario;
+import br.com.vittasync.vittasync.Model.Vinculo;
+
 import br.com.vittasync.vittasync.Service.JwtService;
 import br.com.vittasync.vittasync.Service.UsuarioService;
 import br.com.vittasync.vittasync.Service.VinculoService;
+import br.com.vittasync.vittasync.Service.PermissaoService;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
