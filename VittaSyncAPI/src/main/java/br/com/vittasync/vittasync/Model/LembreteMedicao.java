@@ -26,6 +26,12 @@ public class LembreteMedicao {
     @Column(nullable = false)
     private boolean ativo = true;
 
+    @Column(name = "enviar_email")
+    private Boolean enviarEmail;
+
+    @Column(name = "enviar_sms")
+    private Boolean enviarSms;
+
 
     public Long getId() { return id; }
 
@@ -40,4 +46,10 @@ public class LembreteMedicao {
 
     public boolean isAtivo() { return ativo; }
     public void setAtivo(boolean ativo) { this.ativo = ativo; }
+
+    public Boolean getEnviarEmail() {return enviarEmail;}
+    public void setEnviarEmail(Boolean enviarEmail) {this.enviarEmail = enviarEmail;}
+
+    public Boolean getEnviarSms() {return enviarSms;}
+    public void setEnviarSms(Boolean enviarSms) {this.enviarSms = enviarSms;}
 }

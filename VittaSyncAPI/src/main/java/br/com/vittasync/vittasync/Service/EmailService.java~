@@ -30,41 +30,11 @@ public class EmailService {
         mailSender.send(message);
     }
 
-    public void enviarLembrete(
-            String to,
-            String nomePaciente,
-            String mensagemLembrete
-    ) {
-
-        String mensagem =
-                "Olá, "
-                        + nomePaciente
-                        + "\n\n"
-
-                        + mensagemLembrete
-                        + "\n\n"
-
-                        + "Este lembrete foi enviado "
-                        + "pela plataforma VittaSync "
-                        + "para auxiliar no acompanhamento "
-                        + "contínuo da saúde.\n\n"
-
-                        + "Atenciosamente,\n"
-                        + "Equipe VittaSync";
-
-        SimpleMailMessage message =
-                new SimpleMailMessage();
-
-        message.setFrom(
-                "no.reply.vittasync@gmail.com"
-        );
-
+    public void enviarLembrete(String to, String mensagem) {
+        SimpleMailMessage message = new SimpleMailMessage();
+        message.setFrom("no.reply.vittasync@gmail.com");
         message.setTo(to);
-
-        message.setSubject(
-                "Lembrete de medição - VittaSync"
-        );
-
+        message.setSubject("Lembrete de Medição - VittaSync");
         message.setText(mensagem);
 
         mailSender.send(message);

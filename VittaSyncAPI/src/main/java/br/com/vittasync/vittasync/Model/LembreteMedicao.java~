@@ -18,13 +18,19 @@ public class LembreteMedicao {
     private Usuario usuario;
 
     @Column(name = "dias_semana", nullable = false)
-    private String diasSemana; // "SEGUNDA,TERCA,QUARTA,QUINTA,SEXTA,SABADO,DOMINGO"
+    private String diasSemana; // "segunda,terca,quarta,quinta,sexta,sabado,domingo"
 
     @Column(nullable = false)
     private LocalTime horario;
 
     @Column(nullable = false)
     private boolean ativo = true;
+
+    @Column(name = "enviar_email")
+    private Boolean enviarEmail;
+
+    @Column(name = "enviar_sms")
+    private Boolean enviarSms;
 
 
     public Long getId() { return id; }

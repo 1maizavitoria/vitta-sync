@@ -1,0 +1,10 @@
+package br.com.vittasync.vittasync.DTO;
+
+
+public class CanalNotificacaoDTO {
+
+    private String canal;
+
+    public String getCanal() {return canal;}
+    public void setCanal(String canal) {this.canal = canal;}
+}

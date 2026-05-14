@@ -21,8 +21,4 @@ spring.mail.password=pcpx knac azxg zvnm
 spring.mail.properties.mail.smtp.auth=true
 spring.mail.properties.mail.smtp.starttls.enable=true
 
-twilio.account.sid=AC8b463e0cd4093fae556fc077b1690f18
-twilio.auth.token=f6e006c911736d533731ef0541b00e74
-twilio.phone.number=+15075858368
-
 jwt.secret=mysupersecretkeymysupersecretkey1234567890 vittasync2026pucprbsidesenvolvimentoagildeproduto
