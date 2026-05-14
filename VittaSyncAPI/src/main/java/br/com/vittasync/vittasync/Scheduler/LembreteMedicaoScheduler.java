@@ -18,7 +18,7 @@ import java.util.List;
 public class LembreteMedicaoScheduler {
 
     private final LembreteMedicaoService service;
-    private final NotificacaoService notificationService;
+    private final NotificacaoService notificacaoService;
 
     public LembreteMedicaoScheduler(
             LembreteMedicaoService service,
@@ -26,7 +26,7 @@ public class LembreteMedicaoScheduler {
     ) {
 
         this.service = service;
-        this.notificationService = notificationService;
+        this.notificacaoService = notificationService;
     }
 
     @Scheduled(cron = "0 * * * * *")
@@ -76,7 +76,7 @@ public class LembreteMedicaoScheduler {
                         )
                 ) {
 
-                    notificationService.enviarLembrete(
+                    notificacaoService.enviarLembrete(
                             usuario,
                             mensagem,
                             "email"
@@ -89,7 +89,7 @@ public class LembreteMedicaoScheduler {
                         )
                 ) {
 
-                    notificationService.enviarLembrete(
+                    notificacaoService.enviarLembrete(
                             usuario,
                             mensagem,
                             "sms"
