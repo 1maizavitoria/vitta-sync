@@ -1,23 +1,40 @@
 import { Box, FormGroup, Grid, Paper, Tooltip, Typography } from "@mui/material";
-import ButtonUI from "../../components/ui/Button";
-import InputUI from "../../components/ui/Input";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { createUser } from "../../services/userService"
+import { createUser } from "../../services/userService";
+
+import { useAlert } from "../../hooks/useAlert";
+
+import ButtonUI from "../../components/ui/Button";
+import InputUI from "../../components/ui/Input";
 import AutocompleteUI from "../../components/ui/Autocomplete";
 import DatePickerUI from "../../components/ui/DatePicker";
 import CheckboxUI from "../../components/ui/Checkbox";
+import PasswordTooltip from "../../components/ui/Tooltip";
+
 import { formatCPF, isValidCpf } from "../../utils/formatters/formatCPF"
-import { useAlert } from "../../hooks/useAlert";
 import { isValidEmail } from "../../utils/formatters/formatEmail";
 import { validatePassword } from "../../utils/validators/passwordValidator";
-import PasswordTooltip from "../../components/ui/Tooltip";
 import { getDateLimit, isUnder18 } from "../../utils/validators/dateValidator";
+import { formatPhone } from "../../utils/formatters/formatPhone";
 
 export default function Register() {
     const { showAlert } = useAlert();
 
-    const [error, setError] = useState(false);
+    const [errorName, setErrorName] = useState(false);
+    const [errorCPF, setErrorCPF] = useState(false);
+    const [errorEmail, setErrorEmail] = useState(false);
+    const [errorUserType, setErrorUserType] = useState(false);
+    const [errorBirthDate, setErrorBirthDate] = useState(false);
+    const [errorPassword, setErrorPassword] = useState(false);
+    const [errorRepeatPassword, setErrorRepeatPassword] = useState(false);
+    const [errorAdvice, setErrorAdvice] = useState(false);
+    const [errorPhone, setErrorPhone] = useState(false);
+    const [errorWeight, setErrorWeight] = useState(false);
+    const [errorHeight, setErrorHeight] = useState(false);
+
+    const [loading, setLoading] = useState(false);
+
     const [name, setName] = useState("");
     const [password, setPassword] = useState("");
     const [CPF, setCPF] = useState("");
@@ -28,47 +45,99 @@ export default function Register() {
     const [privateShareHabits, setPrivateShareHabits] = useState(false);
     const [email, setEmail] = useState("");
     const [repeatPassword, setRepeatPassword] = useState("");
-    const [dateLimit, setDateLimit] = useState()
+    const [dateLimit, setDateLimit] = useState();
+    const [phone, setPhone] = useState("");
+    const [initialWeight, setInitialWeight] = useState("");
+    const [height, setHeight] = useState("");
 
     const navigate = useNavigate();
 
     const rulesPassword = validatePassword(password);
     const repeatRulesPassword = validatePassword(repeatPassword);
 
+    function isValidPhone(phone) {
+        return /^\d{10,11}$/.test(phone);
+    }
+
+    function isValidPositiveNumber(value) {
+        return !isNaN(value) && Number(value) > 0;
+    }
+
     const canRegister = () => {
-        if (email == "" || CPF == "" || name == "" || userType == null || birthDate == null || password == "" || repeatPassword == "" || (userType.value === "saude" && advice == "")) {
-            setError(true);
+        if (
+            email == "" ||
+            CPF == "" ||
+            name == "" ||
+            phone == "" ||
+            initialWeight == "" ||
+            height == "" ||
+            userType == null ||
+            birthDate == null ||
+            password == "" ||
+            repeatPassword == "" ||
+            (userType.value === "saude" && advice == "")
+        ) {
+            setErrorName(name == "");
+            setErrorCPF(CPF == "");
+            setErrorEmail(email == "");
+            setErrorPhone(phone == "");
+            setErrorWeight(initialWeight == "");
+            setErrorHeight(height == "");
+            setErrorUserType(userType == null);
+            setErrorBirthDate(birthDate == null);
+            setErrorPassword(password == "");
+            setErrorRepeatPassword(repeatPassword == "");
+            setErrorAdvice(userType?.value === "saude" && advice == "");
             showAlert("error", "Preencha todos os campos");
             return false;
         }
 
         if (name.length < 5) {
-            setError(true);
+            setErrorName(true);
             showAlert("error", "O nome deve ter pelo menos 5 caracteres");
             return false;
         }
 
         if (!isValidCpf(CPF)) {
-            setError(true);
+            setErrorCPF(true);
             showAlert("error", "CPF inválido");
             return false;
+        }
 
+        if (!isValidPhone(phone)) {
+            setErrorPhone(true);
+            showAlert("error", "Telefone inválido");
+            return false;
+        }
+
+        if (!isValidPositiveNumber(initialWeight)) {
+            setErrorWeight(true);
+            showAlert("error", "Peso inválido");
+            return false;
+        }
+
+        if (!isValidPositiveNumber(height)) {
+            setErrorHeight(true);
+            showAlert("error", "Altura inválida");
+            return false;
         }
 
         if (!isValidEmail(email)) {
-            setError(true);
+            setErrorEmail(true);
             showAlert("error", "Email inválido");
             return false;
         }
 
         if (!rulesPassword.isValid || !repeatRulesPassword.isValid) {
-            setError(true);
+            setErrorPassword(true);
+            setErrorRepeatPassword(true);
             showAlert("error", "Verifique as regras de senha");
             return false;
         }
 
         if (password !== repeatPassword) {
-            setError(true);
+            setErrorPassword(true);
+            setErrorRepeatPassword(true);
             showAlert("error", "As senhas devem ser iguais");
             return false;
         }
@@ -77,36 +146,57 @@ export default function Register() {
             (userType?.value === "responsavel" || userType?.value === "saude") &&
             isUnder18(birthDate)
         ) {
+            setErrorBirthDate(true);
             showAlert(
                 "error",
                 `"${userType?.label}" precisa ser maior de idade`
             );
-            setError(true);
             return;
         }
 
-        setError(false);
-        //showAlert("success", "Sucesso");
+        setErrorName(false);
+        setErrorCPF(false);
+        setErrorEmail(false);
+        setErrorPhone(false);
+        setErrorWeight(false);
+        setErrorHeight(false);
+        setErrorUserType(false);
+        setErrorBirthDate(false);
+        setErrorPassword(false);
+        setErrorRepeatPassword(false);
+        setErrorAdvice(false);
+
         return true;
 
     };
 
     async function handleRegister() {
-        if (!canRegister()) return;
+
+        if (loading) return;
+        setLoading(true);
+
+        if (!canRegister()) {
+            setLoading(false);
+            return;
+        }
 
         const data = {
             nome: name,
             email: email,
+            telefone: phone,
+            pesoInicial: Number(initialWeight),
+            altura: Number(height),
             senha: password,
             cpf: CPF,
             conselho: advice,
-            tipo: userType.value, // "paciente", "responsavel" ou "saude"
-            dataNascimento: birthDate, // formato "yyyy-MM-dd", ex: "2000-01-25"
+            tipo: userType.value,
+            dataNascimento: birthDate,
             privCompartilharDiario: privateShareDaily,
             privCompartilharHabitos: privateShareHabits,
         };
 
         try {
+
             const response = await createUser(data);
 
             console.log("Usuário criado:", response);
@@ -115,17 +205,23 @@ export default function Register() {
 
             navigate("/login");
 
+            setLoading(false);
+
         } catch (error) {
 
             console.log("Erro que retorna do backend: ", error.response.data.value);
-
-            setError(true);
             if (error.response.data.value === "duplicateEmail") {
                 showAlert("error", "CPF ou Email já cadastrados");
-                setError(true);
+                setErrorEmail(true);
+                setErrorCPF(true);
                 return;
             }
             showAlert("error", "Erro ao cadastrar usuário");
+            setLoading(false);
+        } finally {
+
+            setLoading(false);
+
         }
     }
 
@@ -178,11 +274,11 @@ export default function Register() {
                                 label="Nome"
                                 placeholder="Ex: João Silva"
                                 type="string"
-                                error={error && (name === "")}
+                                error={errorName}
                                 value={name}
                                 onChange={(e) => (
                                     setName(e.target.value),
-                                    setError(false)
+                                    setErrorName(false)
                                 )}
                             >
                             </InputUI>
@@ -191,11 +287,11 @@ export default function Register() {
                                 label="CPF"
                                 placeholder="999.999.999-99"
                                 limit={14}
-                                error={error && (CPF === "" || !isValidCpf(CPF))}
+                                error={errorCPF}
                                 value={formatCPF(CPF)}
                                 onChange={(e) => {
                                     setCPF(e.target.value.replace(/\D/g, ""));
-                                    setError(false);
+                                    setErrorCPF(false);
                                 }
                                 }
                             >
@@ -205,22 +301,66 @@ export default function Register() {
                                 label="Email"
                                 placeholder="exemplo@gmail.com"
                                 type="email"
-                                error={error && (email === "" || !isValidEmail(email))}
+                                error={errorEmail}
                                 value={email}
                                 onChange={(e) => (
                                     setEmail(e.target.value),
-                                    setError(false)
+                                    setErrorEmail(false)
                                 )}
+                            >
+                            </InputUI>
+
+                            <InputUI
+                                label="Telefone"
+                                placeholder="(11) 99999-9999"
+                                limit={15}
+                                error={errorPhone}
+                                value={formatPhone(phone)}
+                                onChange={(e) => {
+                                    setPhone(e.target.value.replace(/\D/g, ""));
+                                    setErrorPhone(false);
+                                }}
+                            >
+                            </InputUI>
+
+                            <InputUI
+                                label="Peso Inicial"
+                                placeholder="Ex: 70.5"
+                                type="number"
+                                error={errorWeight}
+                                value={initialWeight}
+                                onChange={(e) => {
+                                    const value = e.target.value;
+                                    if (value < 0 || value > 500) return;
+                                    setInitialWeight(value);
+                                    setErrorWeight(false);
+                                }}
+                            >
+                            </InputUI>
+
+                            <InputUI
+                                label="Altura"
+                                placeholder="Ex: 1.75"
+                                type="number"
+                                error={errorHeight}
+                                value={height}
+                                onChange={(e) => {
+                                    const value = e.target.value;
+                                    if (value < 0 || value > 3) return;
+                                    setHeight(value);
+                                    setErrorHeight(false);
+                                }}
                             >
                             </InputUI>
 
                             <AutocompleteUI
                                 label="Tipo de usuário"
-                                error={error && userType == null}
+                                error={errorUserType && userType == null}
                                 //helperText="Selecione um tipo válido"
                                 value={userType}
                                 onChange={(newValue) =>
                                     setUserType(newValue)
+                                    // setErrorUserType(false)
                                 }
                                 options={[
                                     { value: "paciente", label: "Paciente" },
@@ -232,11 +372,11 @@ export default function Register() {
                             {userType?.value === "saude" && <InputUI
                                 label="Conselho"
                                 placeholder="CRM, etc"
-                                error={error && (advice === "")}
+                                error={errorAdvice}
                                 value={advice}
                                 onChange={(e) => {
                                     setAdvice(e.target.value);
-                                    setError(false);
+                                    setErrorAdvice(false);
                                 }
                                 }
                             >
@@ -245,7 +385,7 @@ export default function Register() {
                             <DatePickerUI
                                 label="Data de nascimento"
                                 dateLimit={dateLimit}
-                                error={error && birthDate == null}
+                                error={errorBirthDate && birthDate == null}
                                 value={birthDate}
                                 onChange={setBirthDate}
                             />
@@ -260,11 +400,11 @@ export default function Register() {
                                     placeholder="Digite sua senha"
                                     type="password"
                                     showPasswordToggle={true}
-                                    error={error && (password === "" || !rulesPassword.isValid || password !== repeatPassword)}
+                                    error={errorPassword}
                                     value={password}
                                     onChange={(e) => (
                                         setPassword(e.target.value),
-                                        setError(false)
+                                        setErrorPassword(false)
                                     )}
                                 />
                             </Tooltip>
@@ -279,11 +419,11 @@ export default function Register() {
                                     placeholder="Repita sua senha"
                                     type="password"
                                     showPasswordToggle={true}
-                                    error={error && (repeatPassword === "" || !repeatRulesPassword.isValid || password !== repeatPassword)}
+                                    error={errorRepeatPassword}
                                     value={repeatPassword}
                                     onChange={(e) => (
                                         setRepeatPassword(e.target.value),
-                                        setError(false)
+                                        setErrorRepeatPassword(false)
                                     )}
                                 >
                                 </InputUI>
@@ -305,8 +445,9 @@ export default function Register() {
 
                             <ButtonUI
                                 onClick={handleRegister}
+                                disabled={loading}
                             >
-                                Cadastrar
+                                {loading ? "Cadastrando..." : "Cadastrar"}
                             </ButtonUI>
                         </Box>
                     </Paper>
