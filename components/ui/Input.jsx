@@ -108,13 +108,18 @@ export default function InputUI({
                         showPasswordToggle && isPassword ? (
                             <InputAdornment position="end">
                                 <IconButton
-                                    onClick={() => setShowPassword((prev) => !prev)}
+                                    onClick={() =>
+                                        setShowPassword((prev) => !prev)
+                                    }
                                     edge="end"
                                 >
-                                    {showPassword ? <VisibilityOff /> : <Visibility />}
+                                    {showPassword
+                                        ? <VisibilityOff />
+                                        : <Visibility />
+                                    }
                                 </IconButton>
                             </InputAdornment>
-                        ) : null
+                        ) : props.slotProps?.input?.endAdornment || null
 
                 }
             }}

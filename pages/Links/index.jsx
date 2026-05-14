@@ -1,0 +1,951 @@
+import { Box, Typography, IconButton, Button, TextField, Stack, Chip, Skeleton, Tabs, Tab } from "@mui/material";
+
+import { useEffect, useState } from "react";
+
+import { useAlert } from "../../hooks/useAlert";
+import { getLinks, removeLink, generateLinkCode, joinWithCode, sendInviteEmail } from "../../services/linkService";
+
+import ButtonUI from "../../components/ui/Button";
+import DialogUI from "../../components/ui/Dialog";
+import InputUI from "../../components/ui/Input";
+
+import AddIcon from "@mui/icons-material/Add";
+import CloseIcon from "@mui/icons-material/Close";
+import ContentCopyIcon from "@mui/icons-material/ContentCopy";
+import DeleteIcon from "@mui/icons-material/Delete";
+
+import { formatDate } from "../../utils/formatters/formatDate";
+
+export default function Links() {
+
+    const { showAlert } = useAlert();
+    const [links, setLinks] = useState([]);
+    const [openModal, setOpenModal] = useState(false);
+    const [generatedCode, setGeneratedCode] = useState("");
+    const [generatedLink, setGeneratedLink] = useState("");
+    const [openJoinModal, setOpenJoinModal] = useState(false);
+    const [joinCode, setJoinCode] = useState("");
+    const [openRemoveDialog, setOpenRemoveDialog] = useState(false);
+    const [selectedLinkId, setSelectedLinkId] = useState(null);
+    const [loading, setLoading] = useState(false);
+    const [emailInput, setEmailInput] = useState("");
+    const [emails, setEmails] = useState([]);
+    const [selectedTab, setSelectedTab] = useState(0);
+
+    const userType = localStorage.getItem("tipo");
+
+    async function loadLinks() {
+
+        try {
+
+            setLoading(true);
+
+            const data =
+                await getLinks();
+
+            setLinks(data);
+
+        } catch (error) {
+
+            console.error(error);
+
+            showAlert(
+                "error",
+                "Erro ao carregar vínculos"
+            );
+
+        } finally {
+
+            setLoading(false);
+        }
+    }
+
+    async function handleRemoveLink(id) {
+
+        try {
+
+            await removeLink(id);
+
+            showAlert(
+                "success",
+                "Vínculo removido com sucesso"
+            );
+
+            loadLinks();
+
+        } catch (error) {
+
+            console.error(error);
+
+            showAlert(
+                "error",
+                "Erro ao remover vínculo"
+            );
+        }
+    }
+
+    async function confirmRemoveLink() {
+
+        if (!selectedLinkId) {
+            return;
+        }
+
+        await handleRemoveLink(
+            selectedLinkId
+        );
+
+        setOpenRemoveDialog(false);
+
+        setSelectedLinkId(null);
+    }
+
+    async function handleGenerateCode() {
+
+        try {
+
+            const data = await generateLinkCode();
+            setSelectedTab(0);
+            setGeneratedCode(data.codigo);
+            setGeneratedLink(data.link);
+            setOpenModal(true);
+
+        } catch (error) {
+
+            console.error(error);
+
+            showAlert(
+                "error",
+                "Erro ao gerar código"
+            );
+        }
+    }
+
+    async function handleCopy(text) {
+
+        try {
+
+            await navigator.clipboard.writeText(text);
+
+            showAlert(
+                "success",
+                "Copiado com sucesso"
+            );
+
+        } catch (error) {
+
+            console.error(error);
+
+            showAlert(
+                "error",
+                "Erro ao copiar"
+            );
+        }
+    }
+
+    async function handleJoinWithCode() {
+
+        try {
+
+            await joinWithCode(joinCode);
+
+            showAlert(
+                "success",
+                "Vínculo criado com sucesso"
+            );
+
+            setOpenJoinModal(false);
+
+            setJoinCode("");
+
+            loadLinks();
+
+        } catch (error) {
+
+            console.error(error);
+
+            showAlert(
+                "error",
+                "Código inválido"
+            );
+        }
+    }
+
+    function handleAddEmail() {
+
+        const formattedEmail =
+            emailInput.trim().toLowerCase();
+
+        if (!formattedEmail) {
+            return;
+        }
+
+        const emailExists =
+            emails.includes(formattedEmail);
+
+        if (emailExists) {
+
+            showAlert(
+                "warning",
+                "Email já adicionado"
+            );
+
+            return;
+        }
+
+        setEmails((prev) => [
+            ...prev,
+            formattedEmail
+        ]);
+
+        setEmailInput("");
+    }
+
+    function handleRemoveEmail(email) {
+
+        setEmails((prev) =>
+            prev.filter((item) =>
+                item !== email
+            )
+        );
+    }
+
+    async function handleSendEmails() {
+
+        if (emails.length === 0) {
+
+            showAlert(
+                "warning",
+                "Adicione pelo menos um email"
+            );
+
+            return;
+        }
+
+        try {
+
+            await Promise.all(
+
+                emails.map((email) =>
+
+                    sendInviteEmail(
+                        email,
+                        generatedCode
+                    )
+                )
+            );
+
+            showAlert(
+                "success",
+                "Convites enviados com sucesso"
+            );
+
+            setEmails([]);
+
+            setEmailInput("");
+
+        } catch (error) {
+
+            console.error(error);
+
+            showAlert(
+                "error",
+                "Erro ao enviar convites"
+            );
+        }
+    }
+
+    useEffect(() => {
+        loadLinks();
+    }, []);
+
+    function getTypeColor(type) {
+
+        switch (type?.toLowerCase()) {
+
+            case "saude":
+                return {
+                    background: "#e3f2fd",
+                    color: "#1976d2",
+                    label: "Saúde"
+                };
+
+            case "paciente":
+                return {
+                    background: "#e3f2fd",
+                    color: "#c6d219",
+                    label: "Saúde"
+                };
+
+            case "responsavel":
+                return {
+                    background: "#e8f5e9",
+                    color: "#2e7d32",
+                    label: "Responsável"
+                };
+
+
+
+            default:
+                return {
+                    background: "#eeeeee",
+                    color: "#616161",
+                    label: type
+                };
+        }
+    }
+
+    return (
+
+        <Box
+            p={4}
+            sx={{
+                minHeight: "100vh",
+                backgroundColor: "#f8fafc"
+            }}
+        >
+
+            <Box
+                display="flex"
+
+                flexDirection={{
+                    xs: "column",
+                    md: "row"
+                }}
+
+                justifyContent="space-between"
+
+                alignItems={{
+                    xs: "flex-start",
+                    md: "center"
+                }}
+
+                gap={3}
+
+                mb={4}
+            >
+
+                <Box>
+
+                    <Typography
+                        variant="h4"
+                        sx={{
+                            fontWeight: 700
+                        }}
+                    >
+                        Vínculos
+                    </Typography>
+
+                    <Typography
+                        sx={{
+                            color: "#777"
+                        }}
+                    >
+                        Gerencie médicos e responsáveis vinculados
+                    </Typography>
+
+                </Box>
+
+                <Box
+                    display="flex"
+                    flexWrap="wrap"
+                    gap={2}
+                    width={{
+                        xs: "100%",
+                        md: "auto"
+                    }}
+                >
+
+                    {userType?.toLowerCase() ===
+                        "paciente" && (
+                            <Button
+                                width={{
+                                    xs: "100%",
+                                    sm: "auto"
+                                }}
+                                variant="contained"
+                                onClick={handleGenerateCode}
+                                sx={{
+                                    borderRadius: "14px",
+                                    textTransform: "none",
+                                    fontWeight: 600
+                                }}
+                            >
+                                Gerar Código
+                            </Button>)}
+
+                    {userType?.toLowerCase() !== "paciente" &&
+                        (<Button
+                            width={{
+                                xs: "100%",
+                                sm: "auto"
+                            }}
+                            variant="outlined"
+                            onClick={() =>
+                                setOpenJoinModal(true)
+                            }
+                            sx={{
+                                borderRadius: "14px",
+                                textTransform: "none",
+                                fontWeight: 600
+                            }}
+                        >
+                            Entrar com Código
+                        </Button>)}
+
+                </Box>
+
+            </Box>
+
+            <Box
+                display="flex"
+                flexDirection="column"
+                gap={2}
+            >
+                {loading ? (
+                    <Box
+                        display="flex"
+                        flexDirection="column"
+                        gap={2}
+                    >
+
+                        {[1, 2, 3].map((item) => (
+
+                            <Box
+                                key={item}
+                                sx={{
+                                    backgroundColor: "#fff",
+
+                                    borderRadius: "24px",
+
+                                    padding: 3,
+
+                                    boxShadow:
+                                        "0px 4px 15px rgba(0,0,0,0.08)"
+                                }}
+                            >
+
+                                <Box
+                                    display="flex"
+                                    alignItems="center"
+                                    gap={2}
+                                >
+
+                                    <Skeleton
+                                        variant="rounded"
+                                        width={60}
+                                        height={60}
+                                        sx={{
+                                            borderRadius: "18px"
+                                        }}
+                                    />
+
+                                    <Box width="100%">
+
+                                        <Skeleton
+                                            width="40%"
+                                            height={30}
+                                        />
+
+                                        <Skeleton
+                                            width={90}
+                                            height={30}
+                                        />
+
+                                        <Skeleton
+                                            width="60%"
+                                        />
+
+                                    </Box>
+
+                                </Box>
+
+                            </Box>
+
+                        ))}
+
+                    </Box>
+
+                ) : links.length === 0 ? (
+
+                    <Box
+                        sx={{
+                            backgroundColor: "#fff",
+
+                            borderRadius: "24px",
+
+                            padding: 6,
+
+                            textAlign: "center",
+
+                            boxShadow:
+                                "0px 4px 15px rgba(0,0,0,0.08)"
+                        }}
+                    >
+
+                        <Typography
+                            variant="h6"
+                            sx={{
+                                fontWeight: 600,
+                                mb: 1
+                            }}
+                        >
+                            Nenhum vínculo encontrado
+                        </Typography>
+
+                        <Typography
+                            sx={{
+                                color: "#777",
+                                mb: 3
+                            }}
+                        >
+                            Gere um código ou entre com um
+                            código para criar vínculos.
+                        </Typography>
+
+                        {/* <Box
+                            display="flex"
+                            justifyContent="center"
+                            gap={2}
+                        >
+
+                            <Button
+                                variant="contained"
+                                onClick={handleGenerateCode}
+                                sx={{
+                                    borderRadius: "14px",
+                                    textTransform: "none"
+                                }}
+                            >
+                                Gerar Código
+                            </Button>
+
+                            <Button
+                                variant="outlined"
+                                onClick={() =>
+                                    setOpenJoinModal(true)
+                                }
+                                sx={{
+                                    borderRadius: "14px",
+                                    textTransform: "none"
+                                }}
+                            >
+                                Entrar com Código
+                            </Button>
+
+                        </Box> */}
+
+                    </Box>
+
+                ) : (
+
+                    links.map((link) => {
+
+                        const typeStyle =
+                            getTypeColor(link.tipo);
+
+                        return (
+
+                            <Box
+                                key={link.id}
+                                sx={{
+                                    backgroundColor: "#fff",
+                                    borderRadius: "24px",
+                                    padding: 3,
+                                    marginBottom: 2,
+                                    boxShadow: "0px 4px 15px rgba(0,0,0,0.08)",
+                                    border: "1px solid #f0f0f0"
+                                }}
+                            >
+
+                                <Box
+                                    display="flex"
+                                    flexDirection={{
+                                        xs: "column",
+                                        sm: "row"
+                                    }}
+                                    justifyContent="space-between"
+                                    alignItems={{
+                                        xs: "flex-start",
+                                        sm: "center"
+                                    }}
+                                    gap={2}
+                                >
+
+                                    <Box
+                                        display="flex"
+                                        alignItems="center"
+                                        gap={2}
+                                    >
+
+                                        <Box
+                                            sx={{
+                                                width: 60,
+                                                height: 60,
+
+                                                borderRadius: "18px",
+
+                                                background:
+                                                    "linear-gradient(to right, #00b7ff, #00ff55)",
+
+                                                display: "flex",
+                                                alignItems: "center",
+                                                justifyContent: "center",
+
+                                                color: "#fff",
+
+                                                fontWeight: 700,
+
+                                                fontSize: "1.2rem"
+                                            }}
+                                        >
+
+                                            {link.nome
+                                                ?.substring(0, 2)
+                                                .toUpperCase()}
+
+                                        </Box>
+
+                                        <Box>
+
+                                            <Typography
+                                                variant="h6"
+                                                sx={{
+                                                    fontWeight: 600
+                                                }}
+                                            >
+                                                {link.nome}
+                                            </Typography>
+
+                                            <Chip
+                                                label={typeStyle.label}
+                                                size="small"
+                                                sx={{
+                                                    mt: 1,
+
+                                                    width: "fit-content",
+
+                                                    backgroundColor:
+                                                        typeStyle.background,
+
+                                                    color:
+                                                        typeStyle.color,
+
+                                                    fontWeight: 600
+                                                }}
+                                            />
+
+                                            <Typography
+                                                sx={{
+                                                    color: "#888",
+                                                    fontSize: ".9rem"
+                                                }}
+                                            >
+                                                {link.email}
+                                            </Typography>
+
+                                            {link.conselho && (
+
+                                                <Typography
+                                                    sx={{
+                                                        color: "#888",
+                                                        fontSize: ".9rem"
+                                                    }}
+                                                >
+                                                    {link.conselho}
+                                                </Typography>
+
+                                            )}
+
+                                            <Typography
+                                                sx={{
+                                                    color: "#999",
+
+                                                    fontSize: ".85rem",
+
+                                                    mt: 1
+                                                }}
+                                            >
+                                                Vinculado em {formatDate(link.criadoEm)}
+                                            </Typography>
+
+                                        </Box>
+
+                                    </Box>
+
+                                    <IconButton
+                                        color="error"
+                                        onClick={() => {
+
+                                            setSelectedLinkId(link.id);
+
+                                            setOpenRemoveDialog(true);
+                                        }}
+                                    >
+                                        <DeleteIcon />
+                                    </IconButton>
+
+                                </Box>
+
+                            </Box>
+                        );
+                    })
+
+                )}
+            </Box>
+
+            <DialogUI
+                open={openModal}
+                onClose={() => setOpenModal(false)}
+                title="Link e Código Gerados"
+                disabledConfirm
+            >
+                <Tabs
+                    value={selectedTab}
+                    onChange={(event, newValue) =>
+                        setSelectedTab(newValue)
+                    }
+                    sx={{
+                        mb: 3
+                    }}
+                >
+
+                    <Tab label="Código" />
+
+                    <Tab label="Enviar por Email" />
+
+                </Tabs>
+
+                <Stack spacing={3} mt={1}>
+
+                    {selectedTab === 0 && (
+                        <Box>
+                            <Box>
+
+                                <Typography
+                                    variant="body2"
+                                    sx={{
+                                        mb: 1,
+                                        color: "#666"
+                                    }}
+                                >
+                                    Código
+                                </Typography>
+
+                                <Box
+                                    sx={{
+                                        display: "flex",
+                                        alignItems: "center",
+                                        justifyContent: "space-between",
+
+                                        backgroundColor: "#f1f1f1",
+
+                                        borderRadius: "16px",
+
+                                        padding: "12px 16px"
+                                    }}
+                                >
+
+                                    <Typography
+                                        sx={{
+                                            fontWeight: 600,
+                                            letterSpacing: 1
+                                        }}
+                                    >
+                                        {generatedCode}
+                                    </Typography>
+
+                                    <IconButton
+                                        onClick={() =>
+                                            handleCopy(generatedCode)
+                                        }
+                                    >
+                                        <ContentCopyIcon />
+                                    </IconButton>
+
+                                </Box>
+
+                            </Box>
+
+
+                            <Box>
+
+                                <Typography
+                                    variant="body2"
+                                    sx={{
+                                        mb: 1,
+                                        color: "#666"
+                                    }}
+                                >
+                                    Link
+                                </Typography>
+
+                                <Box
+                                    sx={{
+                                        display: "flex",
+                                        alignItems: "center",
+                                        justifyContent: "space-between",
+
+                                        backgroundColor: "#f1f1f1",
+
+                                        borderRadius: "16px",
+
+                                        padding: "12px 16px"
+                                    }}
+                                >
+
+                                    <Typography
+                                        sx={{
+                                            overflow: "hidden",
+                                            textOverflow: "ellipsis",
+                                            whiteSpace: "nowrap",
+                                            maxWidth: "90%"
+                                        }}
+                                    >
+                                        {generatedLink}
+                                    </Typography>
+
+                                    <IconButton
+                                        onClick={() =>
+                                            handleCopy(generatedLink)
+                                        }
+                                    >
+                                        <ContentCopyIcon />
+                                    </IconButton>
+
+                                </Box>
+
+                            </Box>
+                        </Box>
+                    )}
+
+                    {selectedTab === 1 && (
+                        <Box mt={4}>
+
+                            <Typography
+                                variant="h6"
+                                sx={{
+                                    fontWeight: 600,
+                                    mb: 2
+                                }}
+                            >
+                                Enviar convite por email
+                            </Typography>
+
+                            <Box
+                                display="flex"
+                                gap={2}
+                                mb={2}
+                            >
+
+                                <TextField
+                                    label="Email"
+                                    value={emailInput}
+                                    onChange={(e) =>
+                                        setEmailInput(e.target.value)
+                                    }
+                                    fullWidth
+                                    size="small"
+                                />
+
+                                <Button
+                                    variant="contained"
+                                    onClick={handleAddEmail}
+                                    sx={{
+                                        minWidth: "56px",
+                                        borderRadius: "14px"
+                                    }}
+                                >
+                                    <AddIcon />
+                                </Button>
+
+                            </Box>
+
+                            <Stack
+                                direction="row"
+                                flexWrap="wrap"
+                                gap={1}
+                            >
+
+                                {emails.map((email) => (
+                                    <Chip
+                                        key={email}
+                                        label={email}
+                                        onDelete={() =>
+                                            handleRemoveEmail(email)
+                                        }
+                                        deleteIcon={<CloseIcon />}
+                                        sx={{
+                                            borderRadius: "10px"
+                                        }}
+                                    />
+                                ))}
+
+                            </Stack>
+
+                            {emails.length > 0 && (
+
+                                <Button
+                                    variant="contained"
+                                    onClick={handleSendEmails}
+                                    sx={{
+                                        mt: 3,
+                                        borderRadius: "14px",
+                                        textTransform: "none",
+                                        fontWeight: 600
+                                    }}
+                                >
+                                    Enviar Convites
+                                </Button>
+
+                            )}
+
+                        </Box>
+                    )}
+                </Stack>
+
+            </DialogUI>
+
+            <DialogUI
+                open={openJoinModal}
+                onClose={() => setOpenJoinModal(false)}
+                title="Join With Code"
+                onConfirm={handleJoinWithCode}
+                confirmText="Join"
+            >
+
+                <InputUI
+                    label="Code"
+                    value={joinCode}
+                    onChange={(e) =>
+                        setJoinCode(e.target.value)
+                    }
+                />
+
+            </DialogUI>
+
+            <DialogUI
+                open={openRemoveDialog}
+                onClose={() => {
+
+                    setOpenRemoveDialog(false);
+
+                    setSelectedLinkId(null);
+                }}
+                title="Remover vínculo"
+                onConfirm={confirmRemoveLink}
+                confirmText="Remover"
+                cancelText="Cancelar"
+            >
+
+                <Typography>
+
+                    Tem certeza que deseja remover
+                    este vínculo?
+
+                </Typography>
+
+            </DialogUI>
+
+        </Box>
+    );
+}

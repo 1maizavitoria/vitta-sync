@@ -10,8 +10,20 @@ export function daysMap() {
     }
 };
 
-export function formatDate(dateString) {
-    const [year, month, day] = dateString.split('-');
+// export function formatDate(dateString) {
+//     const [year, month, day] = dateString.split('-');
 
-    return `${day}/${month}/${year}`;
+//     return `${day}/${month}/${year}`;
+// }
+
+export function formatDate(dateString) {
+
+    if (!dateString) {
+        return "";
+    }
+
+    const date =
+        new Date(dateString);
+
+    return date.toLocaleDateString("pt-BR");
 }

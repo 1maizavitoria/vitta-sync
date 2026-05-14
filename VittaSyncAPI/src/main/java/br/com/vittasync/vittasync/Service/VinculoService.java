@@ -104,7 +104,7 @@ public class VinculoService {
         output.setCodigo(codigo);
 
         output.setLink(
-                "http://localhost:3000/entrar?codigo="
+                "http://localhost:5173/entrar?codigo="
                         + codigo
         );
 
@@ -260,7 +260,7 @@ public class VinculoService {
         }
 
         String link =
-                "http://localhost:3000/entrar?codigo="
+                "http://localhost:5173/entrar?codigo="
                         + convite.getCodigo();
 
         emailService.enviarConviteVinculo(

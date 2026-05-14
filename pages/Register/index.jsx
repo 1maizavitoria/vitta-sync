@@ -122,6 +122,7 @@ export default function Register() {
             setError(true);
             if (error.response.data.value === "duplicateEmail") {
                 showAlert("error", "CPF ou Email já cadastrados");
+                setError(true);
                 return;
             }
             showAlert("error", "Erro ao cadastrar usuário");
