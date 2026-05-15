@@ -1,14 +1,17 @@
 package br.com.vittasync.vittasync.Controller;
 
+
 import br.com.vittasync.vittasync.DTO.LembreteMedicaoInputDTO;
 import br.com.vittasync.vittasync.DTO.LembreteMedicaoOutputDTO;
 import br.com.vittasync.vittasync.Model.LembreteMedicao;
 import br.com.vittasync.vittasync.Model.Usuario;
-import br.com.vittasync.vittasync.Service.LembreteMedicaoService;
 import br.com.vittasync.vittasync.Service.JwtService;
+import br.com.vittasync.vittasync.Service.LembreteMedicaoService;
+import br.com.vittasync.vittasync.Service.PermissaoService;
 import br.com.vittasync.vittasync.Service.UsuarioService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
 
 @RestController
 @RequestMapping("/lembretes")
@@ -17,73 +20,214 @@ public class LembreteMedicaoController {
     private final LembreteMedicaoService service;
     private final JwtService jwtService;
     private final UsuarioService usuarioService;
+    private final PermissaoService permissaoService;
 
-    public LembreteMedicaoController(LembreteMedicaoService service,
-                                     JwtService jwtService,
-                                     UsuarioService usuarioService) {
+    public LembreteMedicaoController(
+            LembreteMedicaoService service,
+            JwtService jwtService,
+            UsuarioService usuarioService,
+            PermissaoService permissaoService
+    ) {
+
         this.service = service;
         this.jwtService = jwtService;
         this.usuarioService = usuarioService;
+        this.permissaoService = permissaoService;
     }
 
-    private LembreteMedicaoOutputDTO toOutputDTO(LembreteMedicao lembrete) {
+    private LembreteMedicaoOutputDTO toOutputDTO(
+            LembreteMedicao lembrete
+    ) {
+
         return new LembreteMedicaoOutputDTO(
                 lembrete.getId(),
                 lembrete.getDiasSemana(),
                 lembrete.getHorario(),
-                lembrete.isAtivo()
+                lembrete.isAtivo(),
+                lembrete.getEnviarEmail(),
+                lembrete.getEnviarSms()
         );
     }
 
-    @PostMapping("/registrar")
+    @PostMapping("/registrar/{cpf}")
     public ResponseEntity<LembreteMedicaoOutputDTO> create(
+            @PathVariable String cpf,
             @RequestHeader("Authorization") String authHeader,
-            @RequestBody LembreteMedicaoInputDTO request) {
+            @RequestBody LembreteMedicaoInputDTO request
+    ) {
 
-        String token = authHeader.replace("Bearer ", "");
-        String cpfDoToken = jwtService.extrairCpf(token);
-        Usuario usuario = usuarioService.searchByCpf(cpfDoToken);
+        String token =
+                authHeader.replace("Bearer ", "");
 
-        LembreteMedicao lembrete = new LembreteMedicao();
-        lembrete.setUsuario(usuario);
-        lembrete.setDiasSemana(request.getDiasSemana().toUpperCase());
-        lembrete.setHorario(request.getHorario().withSecond(0).withNano(0));
-        lembrete.setAtivo(request.isAtivo());
+        String cpfDoToken =
+                jwtService.extrairCpf(token);
 
-        LembreteMedicao salvo = service.salvarSubstituir(lembrete);
-        return ResponseEntity.ok(toOutputDTO(salvo));
+        Usuario usuarioLogado =
+                usuarioService.searchByCpf(cpfDoToken);
+
+        Usuario paciente =
+                usuarioService.searchByCpf(cpf);
+
+        if (
+                !permissaoService.podeEditarPaciente(
+                        usuarioLogado.getId(),
+                        paciente.getId()
+                )
+        ) {
+
+            return ResponseEntity.status(403).build();
+        }
+
+        LembreteMedicao lembrete =
+                new LembreteMedicao();
+
+        lembrete.setUsuario(paciente);
+
+        lembrete.setDiasSemana(
+                request.getDiasSemana()
+                        .toUpperCase()
+        );
+
+        lembrete.setHorario(
+                request.getHorario()
+                        .withSecond(0)
+                        .withNano(0)
+        );
+
+        lembrete.setAtivo(
+                request.isAtivo()
+        );
+
+        lembrete.setEnviarEmail(
+                request.getEnviarEmail()
+        );
+
+        lembrete.setEnviarSms(
+                request.getEnviarSms()
+        );
+
+        LembreteMedicao salvo =
+                service.salvarSubstituir(lembrete);
+
+        return ResponseEntity.ok(
+                toOutputDTO(salvo)
+        );
     }
 
-    @GetMapping("/getLembrete")
-    public ResponseEntity<LembreteMedicaoOutputDTO> getLembrete(@RequestHeader("Authorization") String authHeader) {
-        String token = authHeader.replace("Bearer ", "");
-        String cpfDoToken = jwtService.extrairCpf(token);
-        Usuario usuario = usuarioService.searchByCpf(cpfDoToken);
+    @GetMapping("/getLembrete/{cpf}")
+    public ResponseEntity<LembreteMedicaoOutputDTO> getLembrete(
+            @PathVariable String cpf,
+            @RequestHeader("Authorization") String authHeader
+    ) {
 
-        return service.searchlembrete(usuario)
-                .map(l -> ResponseEntity.ok(toOutputDTO(l)))
-                .orElse(ResponseEntity.notFound().build());
+        String token =
+                authHeader.replace("Bearer ", "");
+
+        String cpfDoToken =
+                jwtService.extrairCpf(token);
+
+        Usuario usuarioLogado =
+                usuarioService.searchByCpf(cpfDoToken);
+
+        Usuario paciente =
+                usuarioService.searchByCpf(cpf);
+
+        if (
+                !permissaoService.podeVisualizarPaciente(
+                        usuarioLogado.getId(),
+                        paciente.getId()
+                )
+        ) {
+
+            return ResponseEntity.status(403).build();
+        }
+
+        return service.searchlembrete(paciente)
+                .map(l ->
+                        ResponseEntity.ok(
+                                toOutputDTO(l)
+                        )
+                )
+                .orElse(
+                        ResponseEntity.notFound().build()
+                );
     }
 
-    @PutMapping("/ativar")
-    public ResponseEntity<LembreteMedicaoOutputDTO> ativar(@RequestHeader("Authorization") String authHeader) {
-        String token = authHeader.replace("Bearer ", "");
-        String cpfDoToken = jwtService.extrairCpf(token);
-        Usuario usuario = usuarioService.searchByCpf(cpfDoToken);
+    @PutMapping("/ativar/{cpf}")
+    public ResponseEntity<LembreteMedicaoOutputDTO> ativar(
+            @PathVariable String cpf,
+            @RequestHeader("Authorization") String authHeader
+    ) {
 
-        return service.ativar(usuario)
-                .map(l -> ResponseEntity.ok(toOutputDTO(l)))
-                .orElse(ResponseEntity.notFound().build());
+        String token =
+                authHeader.replace("Bearer ", "");
+
+        String cpfDoToken =
+                jwtService.extrairCpf(token);
+
+        Usuario usuarioLogado =
+                usuarioService.searchByCpf(cpfDoToken);
+
+        Usuario paciente =
+                usuarioService.searchByCpf(cpf);
+
+        if (
+                !permissaoService.podeEditarPaciente(
+                        usuarioLogado.getId(),
+                        paciente.getId()
+                )
+        ) {
+
+            return ResponseEntity.status(403).build();
+        }
+
+        return service.ativar(paciente)
+                .map(l ->
+                        ResponseEntity.ok(
+                                toOutputDTO(l)
+                        )
+                )
+                .orElse(
+                        ResponseEntity.notFound().build()
+                );
     }
 
-    @PutMapping("/desativar")
-    public ResponseEntity<LembreteMedicaoOutputDTO> desativar(@RequestHeader("Authorization") String authHeader) {
-        String token = authHeader.replace("Bearer ", "");
-        String cpfDoToken = jwtService.extrairCpf(token);
-        Usuario usuario = usuarioService.searchByCpf(cpfDoToken);
+    @PutMapping("/desativar/{cpf}")
+    public ResponseEntity<LembreteMedicaoOutputDTO> desativar(
+            @PathVariable String cpf,
+            @RequestHeader("Authorization") String authHeader
+    ) {
 
-        return service.desativar(usuario)
-                .map(l -> ResponseEntity.ok(toOutputDTO(l)))
-                .orElse(ResponseEntity.notFound().build());
+        String token =
+                authHeader.replace("Bearer ", "");
+
+        String cpfDoToken =
+                jwtService.extrairCpf(token);
+
+        Usuario usuarioLogado =
+                usuarioService.searchByCpf(cpfDoToken);
+
+        Usuario paciente =
+                usuarioService.searchByCpf(cpf);
+
+        if (
+                !permissaoService.podeEditarPaciente(
+                        usuarioLogado.getId(),
+                        paciente.getId()
+                )
+        ) {
+
+            return ResponseEntity.status(403).build();
+        }
+
+        return service.desativar(paciente)
+                .map(l ->
+                        ResponseEntity.ok(
+                                toOutputDTO(l)
+                        )
+                )
+                .orElse(
+                        ResponseEntity.notFound().build()
+                );
     }
 }

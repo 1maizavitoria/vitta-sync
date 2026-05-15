@@ -1,4 +1,4 @@
-import { Box, Button, Grid, Paper, Tooltip, Typography } from "@mui/material";
+import { Box, Button, Grid, Paper, Tooltip, Typography, Radio, RadioGroup, FormControlLabel, FormLabel } from "@mui/material";
 import ButtonUI from "../../components/ui/Button";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -16,21 +16,30 @@ import PasswordTooltip from "../../components/ui/Tooltip";
 export default function Login() {
     const { showAlert } = useAlert();
 
+    const [channel, setChannel] = useState("email");
+
     const [openForgotDialog, setOpenForgotDialog] = useState(false);
     const [openLoginDialog, setOpenLoginDialog] = useState(false);
 
-    const [error, setError] = useState(false);
-    const [errorCode, setErrorCode] = useState(false);
     const [password, setPassword] = useState("");
     const [CPF, setCPF] = useState("");
     const [code, setCode] = useState("");
+
+    const [errorCode, setErrorCode] = useState(false);
+    const [errorCPF, setErrorCPF] = useState(false);
+    const [errorPassword, setErrorPassword] = useState(false);
+    const [errorLoginCode, setErrorLoginCode] = useState(false);
+
+    const [loadingLogin, setLoadingLogin] = useState(false);
+    const [loadingValidateCode, setLoadingValidateCode] = useState(false);
+    const [loadingForgotPassword, setLoadingForgotPassword] = useState(false);
+    const [loadingChangePassword, setLoadingChangePassword] = useState(false);
 
     // estado exclusivo do dialog de troca de senha
     const [forgotError, setForgotError] = useState(false);
     const [forgotErrorCode, setForgotErrorCode] = useState(false);
     const [forgotEmailError, setForgotEmailError] = useState(false);
     const [forgotEmailConfirm, setForgotEmailConfirm] = useState(false);
-
     const [forgotEmail, setForgotEmail] = useState("");
     const [forgotCode, setForgotCode] = useState("");
     const [forgotNewPassword, setForgotNewPassword] = useState("");
@@ -42,55 +51,88 @@ export default function Login() {
     // Regras de validação da senha para o tooltip
     const rulesPassword = validatePassword(forgotNewPassword);
 
+
     const navigate = useNavigate();
 
+
     const canLogin = () => {
-        if (CPF === "" && password === "") {
-            setError(true);
+        if (CPF === "" || password === "") {
+            setErrorCPF(CPF === "");
+            setErrorPassword(password === "");
             showAlert("error", "Preencha todos os campos");
             return false;
         }
 
         if (!isValidCpf(CPF)) {
-            setError(true);
+            setErrorCPF(true);
             showAlert("error", "CPF incorreto");
             return false;
         }
 
-        setError(false);
+        setErrorCPF(false);
+        setErrorPassword(false);
         // showAlert("success", "Sucesso");
         return true;
 
     };
 
-    async function handleLogin() {
-        if (!canLogin()) return;
+    function getChannelMessage(channel) {
 
-        const data = {
-            cpf: CPF,
-            senha: password
-        };
+        switch (channel) {
 
-        try {
-            setOpenLoginDialog(true);
-            showAlert("success", "Um código foi enviado para seu email");
-            await login(data);
+            case "sms":
+                return "Um código foi enviado por SMS";
 
-        } catch (error) {
-            setOpenLoginDialog(false);
-            setError(true);
-            showAlert("error", "CPF ou senha inválidos");
-            console.error(error);
+            case "ambos":
+                return "Um código foi enviado por email e SMS";
+
+            default:
+                return "Um código foi enviado para seu email";
         }
     }
 
-    async function hadleValidateCode() {
+    async function handleLogin() {
+
+        if (!canLogin()) return;
+
+        if (loadingLogin) return;
+
+        setLoadingLogin(true);
+
+        const data = {
+            cpf: CPF,
+            senha: password,
+            canal: channel
+        };
+
+        try {
+            await login(data);
+            setOpenLoginDialog(true);
+            showAlert("success", getChannelMessage(channel));
+
+        } catch (error) {
+            setOpenLoginDialog(false);
+            setErrorCPF(true);
+            setErrorPassword(true);
+            showAlert("error", "CPF ou senha inválidos");
+            console.error(error);
+
+        } finally {
+            setLoadingLogin(false);
+
+        }
+    }
+
+    async function handleValidateCode() {
+        if (loadingValidateCode) return;
 
         if (code === "") {
-            setError(true);
+            setErrorLoginCode(true);
             showAlert("error", "Coloque o código enviado por email");
             return;
         }
+
+        setLoadingValidateCode(true);
 
         const data = {
             codigo: code,
@@ -104,11 +146,16 @@ export default function Login() {
             localStorage.setItem("CPF", CPF);
             setOpenLoginDialog(false);
             navigate("/dashboard");
+
         } catch (error) {
             console.log(error);
             setErrorCode(true);
-            setError(true);
+            setErrorLoginCode(true);
             showAlert("error", "Código inválido");
+
+        } finally {
+            setLoadingValidateCode(false);
+
         }
     }
 
@@ -118,16 +165,18 @@ export default function Login() {
 
         const data = {
             cpf: CPF,
-            senha: password
+            senha: password,
+            canal: channel
         };
 
         try {
-            showAlert("success", "Um código foi enviado para seu email");
+            showAlert("success", getChannelMessage(channel));
             setSeconds(10);
             await login(data);
 
         } catch (error) {
-            setError(true);
+            setErrorCPF(true);
+            setErrorPassword(true);
             showAlert("error", "CPF ou senha inválidos");
             console.error(error);
         }
@@ -151,20 +200,28 @@ export default function Login() {
     };
 
     async function handleValidateCodePassword(emailParam) {
+
+        if (loadingForgotPassword) return;
+
         if (!sendEmail(emailParam)) return;
 
-        const data = { email: emailParam };
+        setLoadingForgotPassword(true);
+
+        const data = { email: emailParam, canal: "email" };
 
         try {
+            await validadeCodePassword(data);
             showAlert("success", "Um código foi enviado para seu email");
             setForgotEmailError(true);
             setForgotEmailConfirm(true);
-            await validadeCodePassword(data);
+
         } catch (error) {
             console.log(error);
             setForgotEmailError(true);
             showAlert("error", "Erro ao Enviar o código");
             setForgotEmailConfirm(false);
+        } finally {
+            setLoadingForgotPassword(false);
         }
     }
 
@@ -188,8 +245,11 @@ export default function Login() {
     };
 
     async function handleChangeCodePassword({ code, newPassword }) {
+        if (loadingChangePassword) return;
 
         if (!canChangePassword(code, newPassword)) return;
+
+        setLoadingChangePassword(true);
 
         const data = {
             codigo: code,
@@ -219,6 +279,8 @@ export default function Login() {
             console.log(error)
             setForgotError(true);
             showAlert("error", "Erro ao trocar senha");
+        } finally {
+            setLoadingChangePassword(false);
         }
     }
 
@@ -280,11 +342,11 @@ export default function Login() {
                                 label="CPF"
                                 placeholder="999.999.999-99"
                                 limit={14}
-                                error={error && (CPF === "" || !isValidCpf(CPF))}
+                                error={errorCPF}
                                 value={formatCPF(CPF)}
                                 onChange={(e) => (
                                     setCPF(e.target.value.replace(/\D/g, "")),
-                                    setError(false),
+                                    setErrorCPF(false),
                                     setOpenForgotDialog(false)
                                 )}
                             />
@@ -293,24 +355,60 @@ export default function Login() {
                                 label="Senha"
                                 placeholder="Digite sua senha"
                                 type="password"
-                                error={error && password === ""}
+                                error={errorPassword}
                                 showPasswordToggle={true}
                                 value={password}
                                 onChange={(e) => (
                                     setPassword(e.target.value),
-                                    setError(false)
+                                    setErrorPassword(false)
                                 )}
                             />
 
+                            <Box width="100%">
+                                <FormLabel
+                                    sx={{
+                                        fontSize: "14px",
+                                        color: "#4a4a4a",
+                                        fontFamily: "Inter, sans-serif",
+                                    }}
+                                >
+                                    Receber código por
+                                </FormLabel>
+
+                                <RadioGroup
+                                    row
+                                    value={channel}
+                                    onChange={(e) => setChannel(e.target.value)}
+                                >
+                                    <FormControlLabel
+                                        value="email"
+                                        control={<Radio size="small" />}
+                                        label="Email"
+                                    />
+
+                                    <FormControlLabel
+                                        value="sms"
+                                        control={<Radio size="small" />}
+                                        label="SMS"
+                                    />
+
+                                    <FormControlLabel
+                                        value="ambos"
+                                        control={<Radio size="small" />}
+                                        label="Ambos"
+                                    />
+                                </RadioGroup>
+                            </Box>
+
                             <ButtonUI
                                 onClick={handleLogin}
+                                disabled={loadingLogin}
                             >
-                                Entrar
+                                {loadingLogin ? "Entrando..." : "Entrar"}
                             </ButtonUI>
 
                             <LinkUI onClick={() => (
-                                setOpenForgotDialog(true),
-                                setError(false)
+                                setOpenForgotDialog(true)
                             )}
                                 variant="action"
                             >
@@ -327,7 +425,18 @@ export default function Login() {
                             {/* Diálogo pra varificação de 2 fatores na trocar de senha */}
                             <DialogUI
                                 title={"Trocar de senha"}
+                                disabledConfirm={
+                                    loadingChangePassword || !forgotEmailConfirm
+                                }
+                                disabledClose={
+                                    loadingForgotPassword || loadingChangePassword
+                                }
                                 open={openForgotDialog}
+                                confirmText={
+                                    loadingChangePassword
+                                        ? "Alterando..."
+                                        : "Confirmar"
+                                }
                                 onClose={() => (
                                     setOpenForgotDialog(false),
                                     setForgotError(false),
@@ -359,9 +468,14 @@ export default function Login() {
                                     />
 
                                     <ButtonUI
+                                        disabled={loadingForgotPassword}
                                         onClick={() => handleValidateCodePassword(forgotEmail)}
                                     >
-                                        Enviar Código
+                                        {
+                                            loadingForgotPassword
+                                                ? "Enviando..."
+                                                : "Enviar Código"
+                                        }
                                     </ButtonUI>
                                 </Box>}
 
@@ -396,30 +510,44 @@ export default function Login() {
 
                             {/* Diálogo para de verificação de 2 fatores no login */}
                             <DialogUI
+                                disabledClose={loadingValidateCode || loadingLogin}
+                                disabledConfirm={loadingValidateCode}
+                                confirmText={
+                                    loadingValidateCode
+                                        ? "Validando..."
+                                        : "Confirmar"
+                                }
                                 open={openLoginDialog}
-
                                 onClose={() => (
                                     setOpenLoginDialog(false),
-                                    setError(false),
+                                    setErrorLoginCode(false),
+                                    setErrorCode(false),
                                     setCode("")
                                 )}
                                 title={"Digite seu código"}
                                 onConfirm={() => {
+
                                     if (!code) {
-                                        setError(true);
-                                        showAlert("error", "Erro ao trocar senha");
+
+                                        setErrorLoginCode(true);
+                                        showAlert("error", "Digite o código enviado");
                                         return;
                                     }
-                                    hadleValidateCode();
+
+                                    handleValidateCode();
                                 }}
                             >
                                 <Box display="flex" gap={2} alignItems="center">
                                     <InputUI
                                         type="text"
-                                        error={error && (!code || errorCode)}
+                                        error={errorLoginCode || errorCode}
                                         placeholder="Digite o código"
                                         value={code}
-                                        onChange={(e) => setCode(e.target.value)}
+                                        onChange={(e) => {
+                                            setCode(e.target.value);
+                                            setErrorLoginCode(false);
+                                            setErrorCode(false);
+                                        }}
 
                                     />
 

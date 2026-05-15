@@ -1,0 +1,37 @@
+package br.com.vittasync.vittasync.DTO;
+
+
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+
+
+public class DiarioSintomasOutputDTO {
+
+    private Integer id;
+    private String sintoma;
+    private Integer intensidadeDor;
+    private LocalDate dataReferencia;
+    private LocalDateTime dataRegistro;
+    private LocalDateTime dataModificacao;
+
+
+    public DiarioSintomasOutputDTO() {}
+
+    public Integer getId() { return id; }
+    public void setId(Integer id) { this.id = id; }
+
+    public String getSintoma() { return sintoma; }
+    public void setSintoma(String sintoma) { this.sintoma = sintoma; }
+
+    public Integer getIntensidadeDor() { return intensidadeDor; }
+    public void setIntensidadeDor(Integer intensidadeDor) { this.intensidadeDor = intensidadeDor; }
+
+    public LocalDate getDataReferencia() { return dataReferencia; }
+    public void setDataReferencia(LocalDate dataReferencia) { this.dataReferencia = dataReferencia; }
+
+    public LocalDateTime getDataRegistro() { return dataRegistro; }
+    public void setDataRegistro(LocalDateTime dataRegistro) { this.dataRegistro = dataRegistro; }
+
+    public LocalDateTime getDataModificacao() { return dataModificacao; }
+    public void setDataModificacao(LocalDateTime dataModificacao) { this.dataModificacao = dataModificacao; }
+}

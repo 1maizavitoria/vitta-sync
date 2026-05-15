@@ -13,6 +13,9 @@ import br.com.vittasync.vittasync.Service.UsuarioService;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import br.com.vittasync.vittasync.Service.PermissaoService;
+
+
 
 @RestController
 @RequestMapping("/habitos")
@@ -21,11 +24,18 @@ public class HabitosController {
     private final HabitosService service;
     private final JwtService jwtService;
     private final UsuarioService usuarioService;
+    private final PermissaoService permissaoService;
 
-    public HabitosController(HabitosService service, JwtService jwtService, UsuarioService usuarioService) {
+    public HabitosController(
+            HabitosService service,
+            JwtService jwtService,
+            UsuarioService usuarioService,
+            PermissaoService permissaoService
+    ) {
         this.service = service;
         this.jwtService = jwtService;
         this.usuarioService = usuarioService;
+        this.permissaoService = permissaoService;
     }
 
     @PostMapping("/cadastrar/{cpf}")
@@ -35,12 +45,19 @@ public class HabitosController {
 
         String token = authHeader.replace("Bearer ", "");
         String cpfDoToken = jwtService.extrairCpf(token);
+        Usuario paciente = usuarioService.searchByCpf(cpf);
 
-        if (!cpfDoToken.equals(cpf)) {
+        Usuario usuarioLogado = usuarioService.searchByCpf(cpfDoToken);
+
+        if (
+                !permissaoService.podeEditarPaciente(
+                        usuarioLogado.getId(),
+                        paciente.getId()
+                )
+        ) {
             return ResponseEntity.status(403).build();
         }
 
-        Usuario paciente = usuarioService.searchByCpf(cpf);
 
         Habitos entity = new Habitos();
         entity.setPaciente(paciente);
@@ -60,12 +77,19 @@ public class HabitosController {
 
         String token = authHeader.replace("Bearer ", "");
         String cpfDoToken = jwtService.extrairCpf(token);
+        Usuario paciente = usuarioService.searchByCpf(cpf);
 
-        if (!cpfDoToken.equals(cpf)) {
+        Usuario usuarioLogado =
+                usuarioService.searchByCpf(cpfDoToken);
+
+        if (
+                !permissaoService.podeEditarPaciente(
+                        usuarioLogado.getId(),
+                        paciente.getId()
+                )
+        ) {
             return ResponseEntity.status(403).build();
         }
-
-        Usuario paciente = usuarioService.searchByCpf(cpf);
 
         Habitos entity = new Habitos();
 
@@ -84,7 +108,18 @@ public class HabitosController {
         String token = authHeader.replace("Bearer ", "");
         String cpfDoToken = jwtService.extrairCpf(token);
 
-        if (!cpfDoToken.equals(cpf)) {
+        Usuario usuarioLogado =
+                usuarioService.searchByCpf(cpfDoToken);
+
+        Usuario paciente =
+                usuarioService.searchByCpf(cpf);
+
+        if (
+                !permissaoService.podeEditarPaciente(
+                        usuarioLogado.getId(),
+                        paciente.getId()
+                )
+        ) {
             return ResponseEntity.status(403).build();
         }
 
@@ -98,7 +133,18 @@ public class HabitosController {
         String token = authHeader.replace("Bearer ", "");
         String cpfDoToken = jwtService.extrairCpf(token);
 
-        if (!cpfDoToken.equals(cpf)) {
+        Usuario usuarioLogado =
+                usuarioService.searchByCpf(cpfDoToken);
+
+        Usuario paciente =
+                usuarioService.searchByCpf(cpf);
+
+        if (
+                !permissaoService.podeVisualizarPaciente(
+                        usuarioLogado.getId(),
+                        paciente.getId()
+                )
+        ) {
             return ResponseEntity.status(403).build();
         }
 

@@ -1,6 +1,6 @@
 package br.com.vittasync.vittasync.Controller;
 
-
+import br.com.vittasync.vittasync.Service.PermissaoService;
 import br.com.vittasync.vittasync.DTO.SinaisVitaisInputDTO;
 import br.com.vittasync.vittasync.DTO.SinaisVitaisOutputDTO;
 import br.com.vittasync.vittasync.Model.SinaisVitais;
@@ -21,11 +21,18 @@ public class SinaisVitaisController {
     private final SinaisVitaisService service;
     private final JwtService jwtService;
     private final UsuarioService usuarioService;
+    private final PermissaoService permissaoService;
 
-    public SinaisVitaisController(SinaisVitaisService service, JwtService jwtService, UsuarioService usuarioService) {
+    public SinaisVitaisController(
+            SinaisVitaisService service,
+            JwtService jwtService,
+            UsuarioService usuarioService,
+            PermissaoService permissaoService
+    ) {
         this.service = service;
         this.jwtService = jwtService;
         this.usuarioService = usuarioService;
+        this.permissaoService = permissaoService;
     }
 
     @PostMapping("/cadastrar/{cpf}")
@@ -34,15 +41,24 @@ public class SinaisVitaisController {
                                                         @RequestBody SinaisVitaisInputDTO dto) {
         String token = authHeader.replace("Bearer ", "");
         String cpfDoToken = jwtService.extrairCpf(token);
+        Usuario usuarioLogado =
+                usuarioService.searchByCpf(cpfDoToken);
 
-        if (!cpfDoToken.equals(cpf)) {
+        Usuario paciente =
+                usuarioService.searchByCpf(cpf);
+
+        if (
+                !permissaoService.podeEditarPaciente(
+                        usuarioLogado.getId(),
+                        paciente.getId()
+                )
+        ) {
             return ResponseEntity.status(403).build();
         }
 
-        Usuario paciente = usuarioService.searchByCpf(cpf);
-
         SinaisVitais entity = new SinaisVitais();
         entity.setPaciente(paciente);
+        entity.setPeso(dto.getPeso());
         entity.setFcBpm(dto.getFcBpm());
         entity.setFrRpm(dto.getFrRpm());
         entity.setPaSistolica(dto.getPaSistolica());
@@ -54,17 +70,33 @@ public class SinaisVitaisController {
         return ResponseEntity.ok(toOutputDTO(salvo));
     }
 
-    @PutMapping("/editar/{id}")
+    @PutMapping("/editar/{id}/{cpf}")
     public ResponseEntity<SinaisVitaisOutputDTO> update(@PathVariable Integer id,
+                                                        @PathVariable String cpf,
                                                         @RequestHeader("Authorization") String authHeader,
                                                         @RequestBody SinaisVitaisInputDTO dto) {
         String token = authHeader.replace("Bearer ", "");
         String cpfDoToken = jwtService.extrairCpf(token);
 
-        Usuario paciente = usuarioService.searchByCpf(cpfDoToken);
+        Usuario usuarioLogado =
+                usuarioService.searchByCpf(cpfDoToken);
+
+        Usuario paciente =
+                usuarioService.searchByCpf(cpf);
+
+        if (
+                !permissaoService.podeEditarPaciente(
+                        usuarioLogado.getId(),
+                        paciente.getId()
+                )
+        ) {
+            return ResponseEntity.status(403).build();
+        }
+
 
         SinaisVitais entity = new SinaisVitais();
         entity.setPaciente(paciente);
+        entity.setPeso(dto.getPeso());
         entity.setFcBpm(dto.getFcBpm());
         entity.setFrRpm(dto.getFrRpm());
         entity.setPaSistolica(dto.getPaSistolica());
@@ -84,7 +116,18 @@ public class SinaisVitaisController {
         String token = authHeader.replace("Bearer ", "");
         String cpfDoToken = jwtService.extrairCpf(token);
 
-        if (!cpfDoToken.equals(cpf)) {
+        Usuario usuarioLogado =
+                usuarioService.searchByCpf(cpfDoToken);
+
+        Usuario paciente =
+                usuarioService.searchByCpf(cpf);
+
+        if (
+                !permissaoService.podeEditarPaciente(
+                        usuarioLogado.getId(),
+                        paciente.getId()
+                )
+        ) {
             return ResponseEntity.status(403).build();
         }
 
@@ -92,19 +135,48 @@ public class SinaisVitaisController {
         return ResponseEntity.noContent().build();
     }
 
-    @GetMapping("/getSinaisVitais")
-    public ResponseEntity<List<SinaisVitaisOutputDTO>> list(@RequestHeader("Authorization") String authHeader) {
-        String token = authHeader.replace("Bearer ", "");
-        String cpfDoToken = jwtService.extrairCpf(token);
+    @GetMapping("/getSinaisVitais/{cpf}")
+    public ResponseEntity<List<SinaisVitaisOutputDTO>> list(
+            @PathVariable String cpf,
+            @RequestHeader("Authorization") String authHeader
+    ) {
 
-        List<SinaisVitais> lista = service.findByPacienteCpf(cpfDoToken);
-        return ResponseEntity.ok(lista.stream().map(this::toOutputDTO).collect(Collectors.toList()));
+        String token =
+                authHeader.replace("Bearer ", "");
+
+        String cpfDoToken =
+                jwtService.extrairCpf(token);
+
+        Usuario usuarioLogado =
+                usuarioService.searchByCpf(cpfDoToken);
+
+        Usuario paciente =
+                usuarioService.searchByCpf(cpf);
+
+        if (
+                !permissaoService.podeVisualizarPaciente(
+                        usuarioLogado.getId(),
+                        paciente.getId()
+                )
+        ) {
+            return ResponseEntity.status(403).build();
+        }
+
+        List<SinaisVitais> lista =
+                service.findByPacienteCpf(cpf);
+
+        return ResponseEntity.ok(
+                lista.stream()
+                        .map(this::toOutputDTO)
+                        .collect(Collectors.toList())
+        );
     }
 
 
     private SinaisVitaisOutputDTO toOutputDTO(SinaisVitais entity) {
         SinaisVitaisOutputDTO dto = new SinaisVitaisOutputDTO();
         dto.setId(entity.getId());
+        dto.setPeso(entity.getPeso());
         dto.setFcBpm(entity.getFcBpm());
         dto.setFrRpm(entity.getFrRpm());
         dto.setPaSistolica(entity.getPaSistolica());

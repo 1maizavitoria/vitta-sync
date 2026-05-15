@@ -23,6 +23,14 @@ public class Usuario {
     @Column(nullable = false, unique = true, length = 50)
     private String email;
 
+    @Column(nullable = false, length = 15)
+    private String telefone;
+
+    @Column(name = "peso_inicial")
+    private Double pesoInicial;
+
+    private Double altura;
+
     @Column(nullable = false, length = 64)
     private String senha;
 
@@ -55,6 +63,15 @@ public class Usuario {
 
     public String getEmail() { return email; }
     public void setEmail(String email) { this.email = email; }
+
+    public String getTelefone() { return telefone; }
+    public void setTelefone(String telefone) { this.telefone = telefone; }
+
+    public Double getPesoInicial() { return pesoInicial; }
+    public void setPesoInicial(Double pesoInicial) { this.pesoInicial = pesoInicial; }
+
+    public Double getAltura() { return altura; }
+    public void setAltura(Double altura) { this.altura = altura; }
 
     public String getSenha() { return senha; }
     public void setSenha(String senha) { this.senha = senha; }

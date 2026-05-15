@@ -1,48 +1,26 @@
-package br.com.vittasync.vittasync.Model;
+package br.com.vittasync.vittasync.DTO;
 
 
-import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
 
-@Entity
-@Table(name = "SinaisVitais")
-public class SinaisVitais {
+public class SinaisVitaisOutputDTO {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
-
-    @ManyToOne
-    @JoinColumn(name = "paciente_id", nullable = false)
-    private Usuario paciente;
-
-    @Column(name = "fc_bpm")
+    private Double peso;
     private Integer fcBpm;
-
     private Integer frRpm;
-
     private Integer paSistolica;
-
     private Integer paDiastolica;
-
     private Double tempCelcius;
-
     private Integer spo2Porcento;
-
-    @Column(name = "data_registro")
     private LocalDateTime dataRegistro;
-
-    @Column(name = "data_modificacao")
     private LocalDateTime dataModificacao;
 
-    public SinaisVitais() {}
+    public SinaisVitaisOutputDTO() {}
 
     public Integer getId() { return id; }
     public void setId(Integer id) { this.id = id; }
-
-    public Usuario getPaciente() { return paciente; }
-    public void setPaciente(Usuario paciente) { this.paciente = paciente; }
 
     public Integer getFcBpm() { return fcBpm; }
     public void setFcBpm(Integer fcBpm) { this.fcBpm = fcBpm; }

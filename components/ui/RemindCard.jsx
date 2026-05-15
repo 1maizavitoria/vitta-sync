@@ -18,8 +18,6 @@ const weekDays = [
     { label: "Sáb", value: "Saturday" },
 ];
 
-
-
 export default function ReminderCard() {
     const { showAlert } = useAlert();
 
@@ -150,6 +148,7 @@ export default function ReminderCard() {
                 }}>
 
                 <CardContent>
+
                     <Typography variant="h6" fontWeight="bold">
                         Lembretes
                     </Typography>
@@ -165,6 +164,7 @@ export default function ReminderCard() {
                     >
                         + Novo Lembrete
                     </ButtonUI>
+
                 </CardContent>
             </Card>
 

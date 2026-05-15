@@ -9,6 +9,8 @@ import Dashboard from "../pages/Dashboard";
 import AuthLayout from "../components/laytout/AuthLayout";
 import HealthTracker from "../pages/HealthTracker";
 import Reports from "../pages/Reports";
+import Links from "../pages/Links";
+import JoinLink from "../pages/JoinLink";
 
 export default function AppRoutes() {
     return (
@@ -20,6 +22,8 @@ export default function AppRoutes() {
                         <Route path="/" element={<Landing />} />
                         <Route path="/login" element={<Login />} />
                         <Route path="/register" element={<Register />} />
+                        <Route path="/entrar" element={<JoinLink />}
+                        />
                     </Route>
 
                     {/* PRIVADO (com sidebar futuramente) */}
@@ -45,6 +49,14 @@ export default function AppRoutes() {
                             element={
                                 <PrivateRoute>
                                     <Reports />
+                                </PrivateRoute>
+                            }
+                        />
+                        <Route
+                            path="/links"
+                            element={
+                                <PrivateRoute>
+                                    <Links />
                                 </PrivateRoute>
                             }
                         />

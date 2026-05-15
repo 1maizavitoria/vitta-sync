@@ -23,6 +23,14 @@ public class Usuario {
     @Column(nullable = false, unique = true, length = 50)
     private String email;
 
+    @Column(nullable = false, length = 15)
+    private String telefone;
+
+    @Column(name = "peso_inicial")
+    private Float pesoInicial;
+
+    private Float altura;
+
     @Column(nullable = false, length = 64)
     private String senha;
 
@@ -35,6 +43,7 @@ public class Usuario {
     @Column(name = "priv_compartilhar_diario")
     private Boolean privCompartilharDiario;
 
+    @Column(name = "priv_compartilhar_habitos")
     private Boolean privCompartilharHabitos;
 
     @Column(name = "data_nascimento", nullable = false)
@@ -54,6 +63,15 @@ public class Usuario {
 
     public String getEmail() { return email; }
     public void setEmail(String email) { this.email = email; }
+
+    public String getTelefone() { return telefone; }
+    public void setTelefone(String telefone) { this.telefone = telefone; }
+
+    public Float getPesoInicial() { return pesoInicial; }
+    public void setPesoInicial(Float pesoInicial) { this.pesoInicial = pesoInicial; }
+
+    public Float getAltura() { return altura; }
+    public void setAltura(Float altura) { this.altura = altura; }
 
     public String getSenha() { return senha; }
     public void setSenha(String senha) { this.senha = senha; }

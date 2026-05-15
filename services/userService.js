@@ -34,14 +34,18 @@ export const validadeCode = async (data) => {
 
 export const validadeCodePassword = async (data) => {
     const response = await api.post(
-        `/auth/enviar-codigo-redefinir-senha?email=${data.email}`
+        "/auth/enviar-codigo-redefinir-senha",
+        data
     );
     return response.data;
 };
 
 export const changePassword = async (data) => {
+
     const response = await api.post(
-        `/auth/redefinir-senha?codigo=${data.codigo}&novaSenha=${data.novaSenha}`
+        "/auth/redefinir-senha",
+        data
     );
+
     return response.data;
 };

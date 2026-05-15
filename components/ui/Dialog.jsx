@@ -19,7 +19,10 @@ export default function DialogUI({
     cancelText = "Cancelar"
 }) {
     return (
-        <MuiDialog open={open} onClose={onClose}>
+        <MuiDialog
+            open={open}
+            onClose={disabledClose ? undefined : onClose}
+        >
             {title && <DialogTitle>{title}</DialogTitle>}
 
             <DialogContent>

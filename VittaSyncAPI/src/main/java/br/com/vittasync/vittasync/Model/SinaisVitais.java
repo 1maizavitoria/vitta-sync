@@ -17,6 +17,9 @@ public class SinaisVitais {
     @JoinColumn(name = "paciente_id", nullable = false)
     private Usuario paciente;
 
+    @Column(name = "peso")
+    private Double peso;
+
     @Column(name = "fc_bpm")
     private Integer fcBpm;
 
@@ -48,6 +51,9 @@ public class SinaisVitais {
 
     public Usuario getPaciente() { return paciente; }
     public void setPaciente(Usuario paciente) { this.paciente = paciente; }
+
+    public Double getPeso() { return peso; }
+    public void setPeso(Double peso) {this.peso = peso;}
 
     public Integer getFcBpm() { return fcBpm; }
     public void setFcBpm(Integer fcBpm) { this.fcBpm = fcBpm; }

@@ -17,6 +17,14 @@ public class UsuarioUpdateDTO {
     @Email(message = "Email inválido")
     private String email;
 
+    @NotBlank(message = "Telefone é obrigatório")
+    @Pattern(regexp = "\\d{10,11}", message = "Telefone deve ter DDD e número")
+    private String telefone;
+
+    @NotNull(message = "Altura é obrigatória")
+    @Positive(message = "Altura deve ser positiva")
+    private Double altura;
+
     private Boolean privCompartilharDiario;
     private Boolean privCompartilharHabitos;
 
@@ -29,6 +37,12 @@ public class UsuarioUpdateDTO {
 
     public String getEmail() { return email; }
     public void setEmail(String email) { this.email = email; }
+
+    public String getTelefone() { return telefone; }
+    public void setTelefone(String telefone) { this.telefone = telefone; }
+
+    public Double getAltura() { return altura; }
+    public void setAltura(Double altura) { this.altura = altura; }
 
     public Boolean getPrivCompartilharDiario() { return privCompartilharDiario; }
     public void setPrivCompartilharDiario(Boolean privCompartilharDiario) { this.privCompartilharDiario = privCompartilharDiario; }
