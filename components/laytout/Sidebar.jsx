@@ -30,7 +30,7 @@ const drawerWidth = 240;
 
 const menuItems = [
     { label: "Dashboard", icon: <DashboardIcon />, path: "/dashboard" },
-    { label: "Registros", icon: <DescriptionIcon />, path: "/health-tracker" },
+    // { label: "Registros", icon: <DescriptionIcon />, path: "/health-tracker" },
     // { label: "Vínculos", icon: <LinkIcon />, path: "/links" },
     // { label: "Relatórios", icon: <ShowChartIcon />, path: "/reports" },
 ];
