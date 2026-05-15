@@ -1,10 +1,9 @@
 package br.com.vittasync.vittasync.DTO;
 
 
+import jakarta.validation.constraints.*;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-
-import jakarta.validation.constraints.NotNull;
 
 
 public class HabitosInputDTO {
@@ -20,11 +19,6 @@ public class HabitosInputDTO {
 
     private LocalDateTime dataRegistro;
     private LocalDateTime dataModificacao;
-
-    private Integer caloriasConsumidas;
-
-    public Integer caloriasConsumidas() { return caloriasConsumidas; }
-    public void setcaloriasConsumidas(Integer caloriasConsumidas) { this.caloriasConsumidas = caloriasConsumidas; }
 
     public HabitosInputDTO() {}
 

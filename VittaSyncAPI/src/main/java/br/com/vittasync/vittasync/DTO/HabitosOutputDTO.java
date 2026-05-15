@@ -13,10 +13,6 @@ public class HabitosOutputDTO {
     private LocalDate dataReferencia;
     private LocalDateTime dataRegistro;
     private LocalDateTime dataModificacao;
-    private Integer litrosAgua;
-
-    public Integer getLitrosAgua() { return litrosAgua; }
-    public void setLitrosAgua(Integer litrosAgua) { this.litrosAgua = litrosAgua; }
 
     public HabitosOutputDTO() {}
 

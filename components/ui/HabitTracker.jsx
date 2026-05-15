@@ -43,7 +43,6 @@ export function HabitTracker() {
         timeExercise: "",
         timeSleep: "",
         date: null,
-        litrosAgua: "",
     });
 
     function isValidMinutes(value) {
@@ -95,7 +94,6 @@ export function HabitTracker() {
             horasSono: habitInputs.timeSleep,
             minutosExercicio: habitInputs.timeExercise,
             dataReferencia: habitInputs.date,
-            litrosAgua: habitInputs.litrosAgua,
         }
 
         const CPF = localStorage.getItem("CPF");
@@ -154,8 +152,7 @@ export function HabitTracker() {
         setHabitInputs({
             timeExercise: lastHabit.minutosExercicio,
             timeSleep: lastHabit.horasSono,
-            date: lastHabit.dataReferencia,
-            litrosAgua: lastHabit.litrosAgua
+            date: lastHabit.dataReferencia
         });
     }
 
@@ -164,7 +161,6 @@ export function HabitTracker() {
             timeExercise: "",
             timeSleep: "",
             date: "",
-            litrosAgua: "",
         });
     }
 
@@ -252,26 +248,6 @@ export function HabitTracker() {
             </Box>
 
             <Grid container spacing={3}>
-
-                <Grid item xs={12} md={4}>
-                    <HabitCard
-                        showInput={editing || addHabit}
-                        icon={<MonitorHeartIcon />}
-                        title="Calorias Consumidas"
-                        error={error && !habitInputs.caloriasConsumidas}
-                        type="number"
-                        value={lastHabit ? lastHabit.caloriasConsumidas : "N/A"}
-                        unit="Calorias"
-                        date={lastHabit ? new Date(lastHabit.dataRegistro).toLocaleString() : "N/A"}
-                        inputValue={habitInputs.caloriasConsumidas}
-                        closeMeditionInput={closeMeditionInput}
-                        onInputChange={(e) =>
-                            setHabitInputs({ ...habitInputs, caloriasConsumidas: e.target.value })
-                        }
-                        key={resetKey}
-                    />
-                </Grid>
-
                 <Grid item xs={12} md={4}>
                     <HabitCard
                         showInput={editing || addHabit}

@@ -1,21 +1,23 @@
-DROP DATABASE vittasync;
 CREATE DATABASE vittasync;
 USE vittasync;
 
 CREATE TABLE Usuario (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    nome VARCHAR(100) NOT NULL,
-    email VARCHAR(100) NOT NULL UNIQUE,
-    senha VARCHAR(255) NOT NULL,
-    cpf VARCHAR(11) NOT NULL UNIQUE,
-    conselho VARCHAR(50),
-    tipo VARCHAR(20) NOT NULL,
+    id INT AUTO_INCREMENT,
+    cpf VARCHAR(11) NOT NULL,
+    nome VARCHAR(50) NOT NULL,
+    email VARCHAR(50) NOT NULL,
+    senha VARCHAR(64) NOT NULL,
+    tipo VARCHAR(15) NOT NULL,
+    conselho VARCHAR(30),
+    priv_compartilhar_diario BOOLEAN,
+    priv_compartilhar_habitos BOOLEAN,
     data_nascimento DATE NOT NULL,
-    priv_compartilhar_diario BOOLEAN DEFAULT FALSE,
-    priv_compartilhar_habitos BOOLEAN DEFAULT FALSE,
-    data_cadastro TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    data_cadastro TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    
+    PRIMARY KEY (id),
+    UNIQUE (cpf),
+    UNIQUE (email)
 );
-
 
 CREATE TABLE CodigoVerificacao (
     id INT AUTO_INCREMENT,
@@ -62,19 +64,30 @@ CREATE TABLE Habitos (
     data_referencia DATE NOT NULL,
     data_registro DATETIME NOT NULL,
     data_modificacao DATETIME,
-    calorias_consumidas INT,
     CONSTRAINT fk_habitos_paciente FOREIGN KEY (paciente_id) REFERENCES usuario(id) ON DELETE CASCADE
 );
 
 CREATE TABLE LembreteMedicao (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
     usuario_id INT NOT NULL,
-    dias_semana VARCHAR(100) NOT NULL,
+    dias_semana VARCHAR(10) NOT NULL,
     horario TIME NOT NULL,
     ativo BOOLEAN NOT NULL DEFAULT TRUE,
     CONSTRAINT fk_usuario_lembrete FOREIGN KEY (usuario_id) REFERENCES Usuario(id)
 );
 
-SELECT * FROM Usuario;
-SELECT * FROM Habitos;
+SHOW TABLES;
 
+DESCRIBE Usuario;
+DESCRIBE CodigoVerificacao;
+DESCRIBE SessaoToken;
+DESCRIBE SinaisVitais;
+DESCRIBE Habitos;
+DESCRIBE LembreteMedicao;
+
+SELECT * FROM Usuario;
+SELECT * FROM CodigoVerificacao;
+SELECT * FROM SessaoToken;
+SELECT * FROM SinaisVitais;
+SELECT * FROM Habitos;
+SELECT * FROM LembreteMedicao;

@@ -47,7 +47,6 @@ public class HabitosController {
         entity.setHorasSono(dto.getHorasSono());
         entity.setMinutosExercicio(dto.getMinutosExercicio());
         entity.setDataReferencia(dto.getDataReferencia());
-        entity.setLitrosAgua(dto.getLitrosAgua());
 
         Habitos salvo = service.create(entity);
         return ResponseEntity.ok(toOutputDTO(salvo));
@@ -115,7 +114,6 @@ public class HabitosController {
         dto.setDataReferencia(entity.getDataReferencia());
         dto.setDataRegistro(entity.getDataRegistro());
         dto.setDataModificacao(entity.getDataModificacao());
-        dto.setLitrosAgua(entity.getLitrosAgua());
         return dto;
     }
 }
