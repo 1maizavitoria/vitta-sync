@@ -245,7 +245,6 @@ export default function Login() {
     };
 
     async function handleChangeCodePassword({ code, newPassword }) {
-        debugger;
         if (loadingChangePassword) return;
 
         if (!canChangePassword(code, newPassword)) return;
