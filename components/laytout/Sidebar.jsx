@@ -23,16 +23,23 @@ import { logout } from "../../services/authService";
 import { Button } from "@mui/material";
 import ButtonUI from "../ui/Button";
 
+import { usePatient } from "../../context/PatientContext";
+import { getAvailablePatients } from "../../services/linkService";
+
 const drawerWidth = 240;
 
 const menuItems = [
     { label: "Dashboard", icon: <DashboardIcon />, path: "/dashboard" },
     { label: "Registros", icon: <DescriptionIcon />, path: "/health-tracker" },
-    { label: "Vínculos", icon: <LinkIcon />, path: "/links" },
-    { label: "Relatórios", icon: <ShowChartIcon />, path: "/reports" },
+    // { label: "Vínculos", icon: <LinkIcon />, path: "/links" },
+    // { label: "Relatórios", icon: <ShowChartIcon />, path: "/reports" },
 ];
 
 export default function Sidebar({ open, setOpen }) {
+
+    const { selectedPatient, setSelectedPatient } = usePatient();
+
+    const [patients, setPatients] = useState([]);
 
     const location = useLocation();
     const navigate = useNavigate();
@@ -90,7 +97,35 @@ export default function Sidebar({ open, setOpen }) {
                 console.error("Erro ao buscar usuários:", error);
             }
         }
-        fetchUsers()
+
+        async function fetchPatients() {
+
+            try {
+
+                const data =
+                    await getAvailablePatients();
+
+                setPatients(data);
+
+                // seleciona automaticamente
+                // o primeiro paciente
+                if (
+                    data.length > 0 &&
+                    !selectedPatient
+                ) {
+
+                    setSelectedPatient(
+                        data[0]
+                    );
+                }
+
+            } catch (error) {
+
+                console.error(error);
+            }
+        }
+        fetchUsers();
+        fetchPatients();
     }, []);
 
     return (
@@ -108,6 +143,120 @@ export default function Sidebar({ open, setOpen }) {
                 },
             }}
         >
+            <Box
+                sx={{
+                    p: 2,
+                    mt: 8
+                }}
+            >
+
+                <Typography
+                    variant="caption"
+                    sx={{
+                        color: "#777",
+                        fontWeight: 700,
+                        textTransform: "uppercase",
+                        letterSpacing: 1
+                    }}
+                >
+                    Paciente ativo
+                </Typography>
+
+
+
+                <Box
+                    sx={{
+                        mt: 1,
+                        p: 2,
+                        borderRadius: "18px",
+                        background:
+                            "linear-gradient(90deg, #a8e6cf, #dcedc1)"
+                    }}
+                >
+
+                    <Box
+                        display="flex"
+                        alignItems="center"
+                        gap={2}
+                    >
+
+                        <Avatar
+                            sx={{
+                                bgcolor: "#fff",
+                                color: "#000"
+                            }}
+                        >
+                            {getIniciais(
+                                selectedPatient?.nome
+                            )}
+                        </Avatar>
+
+                        <Box>
+
+                            <Typography
+                                fontWeight="bold"
+                            >
+                                {selectedPatient?.nome
+                                    || "Nenhum paciente"}
+                            </Typography>
+
+                            <Typography
+                                variant="caption"
+                            >
+                                Contexto atual
+                            </Typography>
+
+                        </Box>
+
+                    </Box>
+
+                </Box>
+
+            </Box>
+
+            {patients.length > 0 && (
+
+                <Box mt={2}>
+
+                    <Typography
+                        variant="caption"
+                        sx={{
+                            color: "#777",
+                            fontWeight: 700,
+                            textTransform: "uppercase",
+                            letterSpacing: 1
+                        }}
+                    >
+                        Outros pacientes
+                    </Typography>
+
+                    <Box mt={1}>
+
+                        {patients.map((patient) => (
+
+                            <Button
+                                key={patient.id}
+                                onClick={() =>
+                                    setSelectedPatient(patient)
+                                }
+                                fullWidth
+                                sx={{
+                                    justifyContent: "flex-start",
+                                    borderRadius: "14px",
+                                    mb: 1,
+                                    textTransform: "none",
+                                    color: "#333"
+                                }}
+                            >
+                                {patient.nome}
+                            </Button>
+
+                        ))}
+
+                    </Box>
+
+                </Box>
+            )}
 
             {/* MENU */}
             <List sx={{ p: 1, mt: 10 }}>
@@ -151,14 +300,20 @@ export default function Sidebar({ open, setOpen }) {
                     }}
                 >
                     <Avatar sx={{ bgcolor: "#a8e6cf", color: "#000" }}>
-                        {getIniciais(userResponse.nome)}
+                        {getIniciais(
+                            selectedPatient?.nome
+                        )}
                     </Avatar>
 
                     <Box>
                         <Typography variant="body2" fontWeight="bold">
                             {userResponse.nome || "Usuário"}
                         </Typography>
-                        <Typography variant="caption" color="text.secondary">
+
+                        <Typography
+                            variant="caption"
+                            color="text.secondary"
+                        >
                             {userResponse.tipo || "Tipo de usuário"}
                         </Typography>
                     </Box>

@@ -4,7 +4,7 @@ import { VitalTracker } from "../../components/ui/VitalTracker";
 
 
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
-import ReminderCard from "../../components/ui/RemindCard";
+import ReminderCard from "../../components/ui/cards/RemindCard";
 import { SymptomTracker } from "../../components/ui/SymptomTracker";
 
 export default function HealthTreacker() {

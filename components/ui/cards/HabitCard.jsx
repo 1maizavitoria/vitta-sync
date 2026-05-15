@@ -2,9 +2,9 @@ import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
 import Typography from "@mui/material/Typography";
 import Box from "@mui/material/Box";
-import InputUI from "./Input";
+import InputUI from "../Input";
 import { Grid } from "@mui/material";
-import DatePickerUI from "./DatePicker";
+import DatePickerUI from "../DatePicker";
 // import { useState } from "react";
 
 export default function HabitCard({

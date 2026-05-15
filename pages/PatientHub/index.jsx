@@ -3,7 +3,7 @@ import { Box, Typography, IconButton, Button, TextField, Stack, Chip, Skeleton, 
 import { useEffect, useState } from "react";
 
 import { useAlert } from "../../hooks/useAlert";
-import { getLinks, removeLink, generateLinkCode, joinWithCode, sendInviteEmail } from "../../services/linkService";
+import { getLinksByPatientId, removeLink, generateLinkCode, joinWithCode, sendInviteEmail } from "../../services/linkService";
 
 import ButtonUI from "../../components/ui/Button";
 import DialogUI from "../../components/ui/Dialog";
@@ -14,10 +14,15 @@ import CloseIcon from "@mui/icons-material/Close";
 import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 import DeleteIcon from "@mui/icons-material/Delete";
 
-import { formatDate } from "../../utils/formatters/formatDate";
+import { useNavigate } from "react-router-dom";
 
-export default function Links() {
+import MemberCard from "../../components/ui/cards/MemberCard";
 
+import {
+    usePatient
+} from "../../context/PatientContext";
+
+export default function PatientHub() {
     const { showAlert } = useAlert();
     const [links, setLinks] = useState([]);
     const [openModal, setOpenModal] = useState(false);
@@ -31,17 +36,28 @@ export default function Links() {
     const [emailInput, setEmailInput] = useState("");
     const [emails, setEmails] = useState([]);
     const [selectedTab, setSelectedTab] = useState(0);
+    const [isLeavingGroup, setIsLeavingGroup] = useState(false);
 
     const userType = localStorage.getItem("tipo");
+    //const nomePaciente = localStorage.getItem("nome");
+
+    const navigate = useNavigate();
+    const {
+        selectedPatient,
+        setSelectedPatient
+    } = usePatient();
 
     async function loadLinks() {
+        if (!selectedPatient?.id) {
+            return;
+        }
 
         try {
 
             setLoading(true);
 
             const data =
-                await getLinks();
+                await getLinksByPatientId(selectedPatient?.id);
 
             setLinks(data);
 
@@ -61,7 +77,6 @@ export default function Links() {
     }
 
     async function handleRemoveLink(id) {
-
         try {
 
             await removeLink(id);
@@ -254,10 +269,6 @@ export default function Links() {
         }
     }
 
-    useEffect(() => {
-        loadLinks();
-    }, []);
-
     function getTypeColor(type) {
 
         switch (type?.toLowerCase()) {
@@ -294,6 +305,93 @@ export default function Links() {
         }
     }
 
+    const pacientes = links.filter(
+        (link) =>
+            link.tipo?.toLowerCase() === "paciente"
+    );
+
+    const responsaveis = links.filter(
+        (link) =>
+            link.tipo?.toLowerCase() === "responsavel"
+    );
+
+    const medicos = links.filter(
+        (link) =>
+            link.tipo?.toLowerCase() === "saude"
+    );
+
+    const isPaciente =
+        userType?.toLowerCase()
+        === "paciente";
+
+    const myLink =
+        links.find((link) => {
+
+            return (
+                link.tipo?.toLowerCase()
+                === userType?.toLowerCase()
+            );
+        });
+
+    function canRemove(targetType) {
+
+        const currentUser =
+            userType?.toLowerCase();
+
+        const target =
+            targetType?.toLowerCase();
+
+        // paciente remove todos
+        if (currentUser === "paciente") {
+            return target !== "paciente";
+        }
+
+        // responsável remove apenas médicos
+        if (currentUser === "responsavel") {
+            return target === "saude";
+        }
+
+        // médico não remove ninguém
+        return false;
+    }
+
+    useEffect(() => {
+        loadLinks();
+    }, []);
+
+    useEffect(() => {
+
+        if (
+            userType?.toLowerCase()
+            === "paciente"
+        ) {
+
+            const patient = {
+                id: localStorage.getItem("id"),
+                nome: localStorage.getItem("nome"),
+                email: localStorage.getItem("email"),
+                tipo: "paciente"
+            };
+
+            setSelectedPatient(patient);
+        }
+
+    }, [userType]);
+
+    useEffect(() => {
+
+        if (!selectedPatient?.id) {
+            return;
+        }
+
+        loadLinks();
+
+    }, [selectedPatient]);
+
+    console.log(
+        "Paciente ativo:",
+        selectedPatient
+    );
     return (
 
         <Box
@@ -332,7 +430,7 @@ export default function Links() {
                             fontWeight: 700
                         }}
                     >
-                        Vínculos
+                        Grupo de {selectedPatient?.nome || "Paciente"}
                     </Typography>
 
                     <Typography
@@ -340,57 +438,109 @@ export default function Links() {
                             color: "#777"
                         }}
                     >
-                        Gerencie médicos e responsáveis vinculados
+                        Pessoas que acompanham o paciente
                     </Typography>
 
                 </Box>
 
                 <Box
-                    display="flex"
-                    flexWrap="wrap"
-                    gap={2}
-                    width={{
-                        xs: "100%",
-                        md: "auto"
+                    sx={{
+                        backgroundColor: "#fff",
+                        borderRadius: "24px",
+                        padding: 4,
+                        mb: 5,
+                        boxShadow:
+                            "0px 4px 20px rgba(0,0,0,0.06)"
                     }}
                 >
 
-                    {userType?.toLowerCase() ===
-                        "paciente" && (
+                    <Typography
+                        variant="h6"
+                        sx={{
+                            fontWeight: 700,
+                            mb: 1
+                        }}
+                    >
+                        Ações do grupo
+                    </Typography>
+
+                    <Typography
+                        sx={{
+                            color: "#777",
+                            mb: 3
+                        }}
+                    >
+                        Gerencie convites e participação no grupo.
+                    </Typography>
+
+                    <Box
+                        display="flex"
+                        flexWrap="wrap"
+                        gap={2}
+                    >
+
+                        {userType?.toLowerCase() ===
+                            "paciente" && (
+
+                                <Button
+                                    variant="contained"
+                                    onClick={handleGenerateCode}
+                                    sx={{
+                                        borderRadius: "14px",
+                                        textTransform: "none",
+                                        fontWeight: 600
+                                    }}
+                                >
+                                    Convidar participante
+                                </Button>
+                            )}
+
+                        {userType?.toLowerCase() !==
+                            "paciente" && (
+
+                                <Button
+                                    variant="outlined"
+                                    onClick={() =>
+                                        setOpenJoinModal(true)
+                                    }
+                                    sx={{
+                                        borderRadius: "14px",
+                                        textTransform: "none",
+                                        fontWeight: 600
+                                    }}
+                                >
+                                    Entrar com código
+                                </Button>
+                            )}
+                        {!isPaciente && myLink && (
+
                             <Button
-                                width={{
-                                    xs: "100%",
-                                    sm: "auto"
+                                variant="outlined"
+                                color="error"
+                                onClick={() => {
+
+                                    setIsLeavingGroup(true);
+
+                                    setSelectedLinkId(
+                                        myLink.id
+                                    );
+
+                                    setOpenRemoveDialog(
+                                        true
+                                    );
                                 }}
-                                variant="contained"
-                                onClick={handleGenerateCode}
                                 sx={{
                                     borderRadius: "14px",
                                     textTransform: "none",
                                     fontWeight: 600
                                 }}
                             >
-                                Gerar Código
-                            </Button>)}
+                                Sair do grupo
+                            </Button>
+                        )}
 
-                    {userType?.toLowerCase() !== "paciente" &&
-                        (<Button
-                            width={{
-                                xs: "100%",
-                                sm: "auto"
-                            }}
-                            variant="outlined"
-                            onClick={() =>
-                                setOpenJoinModal(true)
-                            }
-                            sx={{
-                                borderRadius: "14px",
-                                textTransform: "none",
-                                fontWeight: 600
-                            }}
-                        >
-                            Entrar com Código
-                        </Button>)}
+
+                    </Box>
 
                 </Box>
 
@@ -502,194 +652,295 @@ export default function Links() {
                             código para criar vínculos.
                         </Typography>
 
-                        {/* <Box
-                            display="flex"
-                            justifyContent="center"
-                            gap={2}
-                        >
-
-                            <Button
-                                variant="contained"
-                                onClick={handleGenerateCode}
-                                sx={{
-                                    borderRadius: "14px",
-                                    textTransform: "none"
-                                }}
-                            >
-                                Gerar Código
-                            </Button>
-
-                            <Button
-                                variant="outlined"
-                                onClick={() =>
-                                    setOpenJoinModal(true)
-                                }
-                                sx={{
-                                    borderRadius: "14px",
-                                    textTransform: "none"
-                                }}
-                            >
-                                Entrar com Código
-                            </Button>
-
-                        </Box> */}
-
                     </Box>
 
                 ) : (
 
-                    links.map((link) => {
+                    <>
+                        <Box
+                            sx={{
+                                backgroundColor: "#ffffff",
+                                borderRadius: "28px",
+                                padding: 4,
+                                boxShadow:
+                                    "0px 4px 20px rgba(0,0,0,0.06)",
+                                mb: 5
+                            }}
+                        >
+                            {pacientes.length > 0 && (
 
-                        const typeStyle =
-                            getTypeColor(link.tipo);
+                                <Box mb={6}>
 
-                        return (
-
-                            <Box
-                                key={link.id}
-                                sx={{
-                                    backgroundColor: "#fff",
-                                    borderRadius: "24px",
-                                    padding: 3,
-                                    marginBottom: 2,
-                                    boxShadow: "0px 4px 15px rgba(0,0,0,0.08)",
-                                    border: "1px solid #f0f0f0"
-                                }}
-                            >
-
-                                <Box
-                                    display="flex"
-                                    flexDirection={{
-                                        xs: "column",
-                                        sm: "row"
-                                    }}
-                                    justifyContent="space-between"
-                                    alignItems={{
-                                        xs: "flex-start",
-                                        sm: "center"
-                                    }}
-                                    gap={2}
-                                >
+                                    <Typography
+                                        variant="h6"
+                                        sx={{
+                                            fontWeight: 700,
+                                            mb: 2,
+                                            color: "#444"
+                                        }}
+                                    >
+                                        Paciente
+                                    </Typography>
 
                                     <Box
                                         display="flex"
-                                        alignItems="center"
+                                        flexDirection="column"
                                         gap={2}
                                     >
 
-                                        <Box
-                                            sx={{
-                                                width: 60,
-                                                height: 60,
+                                        {pacientes.map((link) => {
 
-                                                borderRadius: "18px",
+                                            const typeStyle =
+                                                getTypeColor(link.tipo);
 
-                                                background:
-                                                    "linear-gradient(to right, #00b7ff, #00ff55)",
+                                            return (
 
-                                                display: "flex",
-                                                alignItems: "center",
-                                                justifyContent: "center",
-
-                                                color: "#fff",
-
-                                                fontWeight: 700,
-
-                                                fontSize: "1.2rem"
-                                            }}
-                                        >
-
-                                            {link.nome
-                                                ?.substring(0, 2)
-                                                .toUpperCase()}
-
-                                        </Box>
-
-                                        <Box>
-
-                                            <Typography
-                                                variant="h6"
-                                                sx={{
-                                                    fontWeight: 600
-                                                }}
-                                            >
-                                                {link.nome}
-                                            </Typography>
-
-                                            <Chip
-                                                label={typeStyle.label}
-                                                size="small"
-                                                sx={{
-                                                    mt: 1,
-
-                                                    width: "fit-content",
-
-                                                    backgroundColor:
-                                                        typeStyle.background,
-
-                                                    color:
-                                                        typeStyle.color,
-
-                                                    fontWeight: 600
-                                                }}
-                                            />
-
-                                            <Typography
-                                                sx={{
-                                                    color: "#888",
-                                                    fontSize: ".9rem"
-                                                }}
-                                            >
-                                                {link.email}
-                                            </Typography>
-
-                                            {link.conselho && (
-
-                                                <Typography
-                                                    sx={{
-                                                        color: "#888",
-                                                        fontSize: ".9rem"
-                                                    }}
-                                                >
-                                                    {link.conselho}
-                                                </Typography>
-
-                                            )}
-
-                                            <Typography
-                                                sx={{
-                                                    color: "#999",
-
-                                                    fontSize: ".85rem",
-
-                                                    mt: 1
-                                                }}
-                                            >
-                                                Vinculado em {formatDate(link.criadoEm)}
-                                            </Typography>
-
-                                        </Box>
+                                                <MemberCard
+                                                    link={link}
+                                                    typeStyle={typeStyle}
+                                                    highlight
+                                                    hideRemove
+                                                />
+                                            );
+                                        })}
 
                                     </Box>
 
-                                    <IconButton
-                                        color="error"
-                                        onClick={() => {
+                                </Box>
+                            )}
 
-                                            setSelectedLinkId(link.id);
+                            {responsaveis.length > 0 && (
 
-                                            setOpenRemoveDialog(true);
+                                <Box mb={4}>
+
+                                    <Typography
+                                        variant="h6"
+                                        sx={{
+                                            fontWeight: 700,
+                                            mb: 2,
+                                            color: "#444"
                                         }}
                                     >
-                                        <DeleteIcon />
-                                    </IconButton>
+                                        Responsáveis
+                                    </Typography>
+
+                                    <Box
+                                        display="flex"
+                                        flexDirection="column"
+                                        gap={2}
+                                    >
+
+                                        {responsaveis.map((link) => {
+
+                                            const typeStyle =
+                                                getTypeColor(link.tipo);
+
+                                            return (
+
+                                                <MemberCard
+                                                    link={link}
+                                                    typeStyle={typeStyle}
+                                                    onRemove={
+                                                        canRemove(link.tipo)
+                                                            ? () => {
+
+                                                                setSelectedLinkId(link.id);
+                                                                setIsLeavingGroup(false);
+                                                                setOpenRemoveDialog(true);
+                                                            }
+                                                            : null
+                                                    }
+                                                />
+                                            );
+                                        })}
+
+                                    </Box>
+
+                                </Box>
+                            )}
+
+                            {medicos.length > 0 && (
+
+                                <Box mb={4}>
+
+                                    <Typography
+                                        variant="h6"
+                                        sx={{
+                                            fontWeight: 700,
+                                            mb: 2,
+                                            color: "#444"
+                                        }}
+                                    >
+                                        Médicos
+                                    </Typography>
+
+                                    <Box
+                                        display="flex"
+                                        flexDirection="column"
+                                        gap={2}
+                                    >
+
+                                        {medicos.map((link) => {
+
+                                            const typeStyle =
+                                                getTypeColor(link.tipo);
+
+                                            return (
+
+                                                <MemberCard
+                                                    link={link}
+                                                    typeStyle={typeStyle}
+                                                    onRemove={
+                                                        canRemove(link.tipo)
+                                                            ? () => {
+
+                                                                setSelectedLinkId(link.id);
+                                                                setIsLeavingGroup(false);
+                                                                setOpenRemoveDialog(true);
+                                                            }
+                                                            : null
+                                                    }
+                                                />
+                                            );
+                                        })}
+
+                                    </Box>
+
+                                </Box>
+                            )}
+                        </Box>
+
+                        <Box mt={6}>
+
+                            <Typography
+                                variant="h5"
+                                sx={{
+                                    fontWeight: 700,
+                                    mb: 3
+                                }}
+                            >
+                                Módulos
+                            </Typography>
+
+                            <Box
+                                display="grid"
+                                gridTemplateColumns={{
+                                    xs: "1fr",
+                                    md: "repeat(3, 1fr)"
+                                }}
+                                gap={3}
+                            >
+
+                                <Box
+                                    onClick={() => navigate("/health-tracker")}
+                                    sx={{
+                                        backgroundColor: "#fff",
+                                        borderRadius: "24px",
+                                        padding: 4,
+                                        cursor: "pointer",
+                                        transition: ".2s",
+                                        boxShadow:
+                                            "0px 4px 15px rgba(0,0,0,0.08)",
+
+                                        "&:hover": {
+                                            transform: "translateY(-4px)"
+                                        }
+                                    }}
+                                >
+
+                                    <Typography
+                                        variant="h6"
+                                        sx={{
+                                            fontWeight: 700,
+                                            mb: 1
+                                        }}
+                                    >
+                                        Registros
+                                    </Typography>
+
+                                    <Typography
+                                        sx={{
+                                            color: "#777"
+                                        }}
+                                    >
+                                        Hábitos, sintomas, sinais vitais e lembretes.
+                                    </Typography>
+
+                                </Box>
+
+                                <Box
+                                    onClick={() => navigate("/reports")}
+                                    sx={{
+                                        backgroundColor: "#fff",
+                                        borderRadius: "24px",
+                                        padding: 4,
+                                        cursor: "pointer",
+                                        transition: ".2s",
+                                        boxShadow:
+                                            "0px 4px 15px rgba(0,0,0,0.08)",
+
+                                        "&:hover": {
+                                            transform: "translateY(-4px)"
+                                        }
+                                    }}
+                                >
+
+                                    <Typography
+                                        variant="h6"
+                                        sx={{
+                                            fontWeight: 700,
+                                            mb: 1
+                                        }}
+                                    >
+                                        Informações
+                                    </Typography>
+
+                                    <Typography
+                                        sx={{
+                                            color: "#777"
+                                        }}
+                                    >
+                                        Dados gerais e informações do paciente.
+                                    </Typography>
+
+                                </Box>
+
+                                <Box
+                                    sx={{
+                                        backgroundColor: "#fff",
+                                        borderRadius: "24px",
+                                        padding: 4,
+                                        opacity: .6,
+                                        boxShadow:
+                                            "0px 4px 15px rgba(0,0,0,0.08)"
+                                    }}
+                                >
+
+                                    <Typography
+                                        variant="h6"
+                                        sx={{
+                                            fontWeight: 700,
+                                            mb: 1
+                                        }}
+                                    >
+                                        Dashboard
+                                    </Typography>
+
+                                    <Typography
+                                        sx={{
+                                            color: "#777"
+                                        }}
+                                    >
+                                        Visualizações e métricas futuras.
+                                    </Typography>
 
                                 </Box>
 
                             </Box>
-                        );
-                    })
 
+                        </Box>
+
+                    </>
                 )}
             </Box>
 
@@ -908,13 +1159,13 @@ export default function Links() {
             <DialogUI
                 open={openJoinModal}
                 onClose={() => setOpenJoinModal(false)}
-                title="Join With Code"
+                title="Entrar com código"
                 onConfirm={handleJoinWithCode}
-                confirmText="Join"
+                confirmText="Entrar"
             >
 
                 <InputUI
-                    label="Code"
+                    label="Código de convite"
                     value={joinCode}
                     onChange={(e) =>
                         setJoinCode(e.target.value)
@@ -930,17 +1181,34 @@ export default function Links() {
                     setOpenRemoveDialog(false);
 
                     setSelectedLinkId(null);
+
+                    setIsLeavingGroup(false);
                 }}
-                title="Remover vínculo"
+
+                title={
+                    isLeavingGroup
+                        ? "Sair do grupo"
+                        : "Remover vínculo"
+                }
+
                 onConfirm={confirmRemoveLink}
-                confirmText="Remover"
+
+                confirmText={
+                    isLeavingGroup
+                        ? "Sair do grupo"
+                        : "Remover"
+                }
+
                 cancelText="Cancelar"
             >
 
                 <Typography>
 
-                    Tem certeza que deseja remover
-                    este vínculo?
+                    {
+                        isLeavingGroup
+                            ? "Deseja sair deste grupo?"
+                            : "Deseja remover este participante?"
+                    }
 
                 </Typography>
 

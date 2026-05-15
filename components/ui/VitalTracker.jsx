@@ -7,7 +7,7 @@ import { Box, Paper } from "@mui/material";
 import { useEffect, useState } from "react";
 import { useAlert } from "../../hooks/useAlert";
 import { editVitalSigns, getVitalSigns, registerVitalSigns } from "../../services/vitalService";
-import VitalCard from "./VitalCard";
+import VitalCard from "../ui/cards/VitalCard";
 import ButtonUI from "./Button";
 
 export function VitalTracker() {

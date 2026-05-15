@@ -2,11 +2,11 @@ import React, { useEffect, useState } from "react";
 import { Box, Button, Card, CardContent, Dialog, DialogTitle, DialogContent, DialogActions, Stack, Typography, ToggleButton, ToggleButtonGroup } from "@mui/material";
 import { LocalizationProvider, TimePicker } from "@mui/x-date-pickers";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
-import { activateReminder, deactivateReminder, getReminder, registerReminder } from "../../services/reminderService";
-import ReminderList from "./RemindList";
-import ButtonUI from "./Button";
-import DialogUI from "./Dialog";
-import { useAlert } from "../../hooks/useAlert";
+import { activateReminder, deactivateReminder, getReminder, registerReminder } from "../../../services/reminderService";
+import ReminderList from "../RemindList";
+import ButtonUI from "../Button";
+import DialogUI from "../Dialog";
+import { useAlert } from "../../../hooks/useAlert";
 
 const weekDays = [
     { label: "Dom", value: "Sunday" },

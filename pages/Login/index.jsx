@@ -392,11 +392,11 @@ export default function Login() {
                                         label="SMS"
                                     />
 
-                                    <FormControlLabel
+                                    {/* <FormControlLabel
                                         value="ambos"
                                         control={<Radio size="small" />}
                                         label="Ambos"
-                                    />
+                                    /> */}
                                 </RadioGroup>
                             </Box>
 

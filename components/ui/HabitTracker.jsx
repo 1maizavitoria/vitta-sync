@@ -8,7 +8,7 @@ import { useEffect, useState } from "react";
 import { useAlert } from "../../hooks/useAlert";
 import { editHabits, getHabits, registerHabits } from "../../services/habitService";
 import ButtonUI from "./Button";
-import HabitCard from "./HabitCard"
+import HabitCard from "../ui/cards/HabitCard";
 
 import BedtimeIcon from "@mui/icons-material/Bedtime";
 import FitnessCenterIcon from "@mui/icons-material/FitnessCenter";

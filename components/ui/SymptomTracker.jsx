@@ -8,12 +8,12 @@ import { useEffect, useState } from "react";
 import { useAlert } from "../../hooks/useAlert";
 import { editSymptom, getSymptom, registerSymptom } from "../../services/symptomService";
 import ButtonUI from "./Button";
-import HabitCard from "./HabitCard"
+import HabitCard from "../ui/cards/HabitCard";
 
 import BedtimeIcon from "@mui/icons-material/Bedtime";
 import FitnessCenterIcon from "@mui/icons-material/FitnessCenter";
 import { CalendarIcon } from "@mui/x-date-pickers";
-import SymptomCard from "./SymptomCard";
+import SymptomCard from "../ui/cards/SymptomCard";
 import { formatDate } from "../../utils/formatters/formatDate";
 
 export function SymptomTracker() {

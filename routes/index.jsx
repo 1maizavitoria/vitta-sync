@@ -9,8 +9,9 @@ import Dashboard from "../pages/Dashboard";
 import AuthLayout from "../components/laytout/AuthLayout";
 import HealthTracker from "../pages/HealthTracker";
 import Reports from "../pages/Reports";
-import Links from "../pages/Links";
+import PatientHub from "../pages/PatientHub";
 import JoinLink from "../pages/JoinLink";
+import { PatientProvider } from "../context/PatientContext";
 
 export default function AppRoutes() {
     return (
@@ -25,17 +26,22 @@ export default function AppRoutes() {
                         <Route path="/entrar" element={<JoinLink />}
                         />
                     </Route>
-
-                    {/* PRIVADO (com sidebar futuramente) */}
-                    <Route element={<MainLayout />}>
+                    <Route
+                        element={
+                            <PatientProvider>
+                                <MainLayout />
+                            </PatientProvider>
+                        }
+                    >
                         <Route
                             path="/dashboard"
                             element={
                                 <PrivateRoute>
-                                    <Dashboard />
+                                    <PatientHub />
                                 </PrivateRoute>
                             }
                         />
+
                         <Route
                             path="/health-tracker"
                             element={
@@ -44,6 +50,7 @@ export default function AppRoutes() {
                                 </PrivateRoute>
                             }
                         />
+
                         <Route
                             path="/reports"
                             element={
@@ -52,15 +59,17 @@ export default function AppRoutes() {
                                 </PrivateRoute>
                             }
                         />
+
                         <Route
                             path="/links"
                             element={
                                 <PrivateRoute>
-                                    <Links />
+                                    <PatientHub />
                                 </PrivateRoute>
                             }
                         />
                     </Route>
+
 
                 </Routes>
             </BrowserRouter>
