@@ -89,24 +89,20 @@ export default function Landing() {
     ];
 
     return (
-        <Box
-            sx={{
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "center",
-                justifyContent: "center"
-            }}
-        >
-
+        <Box >
             {/* health monitoring */}
             <Box
                 sx={{
-                    width: "100%",
-                    maxWidth: "1400px",
-                    display: "flex",
-                    // gap: 8,
+                    display: "grid",
+                    gridTemplateColumns: {
+                        xs: "1fr",
+                        lg: "1.2fr 0.8fr"
+                    },
+                    gap: {
+                        xs: 6,
+                        md: 8
+                    },
                     alignItems: "center",
-                    justifyContent: "space-between"
                 }}
             >
 
@@ -494,7 +490,8 @@ export default function Landing() {
                             xs: "1fr",
                             md: "repeat(5, 1fr)"
                         },
-                        gap: 3
+                        gap: 3,
+
                     }}
                 >
                     {cards.map((card) => (
@@ -673,20 +670,43 @@ export default function Landing() {
             {/* FOOTER */}
             <Box
                 component="footer"
-                sx={{
-                    width: "100%",
-                    bgcolor: "#07152d",
-                    color: "white",
-                    px: 3,
-                    py: 8,
-                }}
             >
-
                 <Box
                     sx={{
                         width: "100%",
-                        maxWidth: "1200px",
-                        mx: "auto"
+                        maxWidth: "1250px",
+                        mx: "auto",
+
+                        /* BORDA ARREDONDADA */
+                        borderRadius: {
+                            xs: "24px",
+                            md: "36px"
+                        },
+
+                        /* FUNDO */
+                        bgcolor: "#f3fff7",
+
+                        /* SOMBRA VERDE CLARA */
+                        boxShadow: `
+                0 10px 30px rgba(134, 239, 172, 0.18),
+                0 0 80px rgba(134, 239, 172, 0.12)
+            `,
+
+                        /* BORDA SUAVE */
+                        border: "1px solid rgba(134,239,172,0.25)",
+
+                        /* ESPAÇAMENTO */
+                        p: {
+                            xs: 3,
+                            sm: 4,
+                            md: 6
+                        },
+
+                        /* RESPONSIVO */
+                        overflow: "hidden",
+
+                        /* EFEITO SUAVE */
+                        transition: "0.3s ease"
                     }}
                 >
 
@@ -699,8 +719,11 @@ export default function Landing() {
                                 sm: "repeat(2, 1fr)",
                                 md: "2fr 1fr 1fr 1.3fr"
                             },
-                            gap: 6,
-                            mb: 6
+                            gap: {
+                                xs: 5,
+                                md: 6
+                            },
+                            mb: 5
                         }}
                     >
 
@@ -718,23 +741,33 @@ export default function Landing() {
 
                                 <Box
                                     sx={{
-                                        width: 38,
-                                        height: 38,
-                                        borderRadius: "12px",
+                                        width: 44,
+                                        height: 44,
+                                        borderRadius: "16px",
                                         background:
-                                            "linear-gradient(135deg, #c7ebd8 0%, #b4d89d 100%)",
+                                            "linear-gradient(135deg, #7dd3fc 0%, #86efac 100%)",
                                         display: "flex",
                                         alignItems: "center",
-                                        justifyContent: "center"
+                                        justifyContent: "center",
+                                        boxShadow:
+                                            "0 8px 20px rgba(125,211,252,0.35)"
                                     }}
                                 >
-                                    <MonitorHeartOutlinedIcon />
+                                    <MonitorHeartOutlinedIcon
+                                        sx={{
+                                            color: "#0f172a"
+                                        }}
+                                    />
                                 </Box>
 
                                 <Typography
                                     sx={{
-                                        fontSize: 34,
-                                        fontWeight: 800
+                                        fontSize: {
+                                            xs: 28,
+                                            md: 34
+                                        },
+                                        fontWeight: 800,
+                                        color: "#0f172a"
                                     }}
                                 >
                                     VittaSync
@@ -744,21 +777,23 @@ export default function Landing() {
 
                             <Typography
                                 sx={{
-                                    color: "#a7b3c5",
+                                    color: "#475569",
                                     lineHeight: 1.8,
                                     maxWidth: 320,
-                                    mb: 4
+                                    mb: 4,
+                                    fontSize: 15
                                 }}
                             >
-                                Monitoramento preciso de saúde
-                                que sincroniza com seu estilo de vida.
+                                Monitoramento inteligente de saúde
+                                conectado ao seu estilo de vida.
                             </Typography>
 
                             {/* Social */}
                             <Box
                                 sx={{
                                     display: "flex",
-                                    gap: 1.5
+                                    gap: 1.5,
+                                    flexWrap: "wrap"
                                 }}
                             >
 
@@ -771,18 +806,22 @@ export default function Landing() {
                                     <Box
                                         key={index}
                                         sx={{
-                                            width: 42,
-                                            height: 42,
-                                            borderRadius: "12px",
-                                            bgcolor: "rgba(255,255,255,0.08)",
+                                            width: 46,
+                                            height: 46,
+                                            borderRadius: "16px",
+                                            background: "white",
+                                            border:
+                                                "1px solid rgba(15,23,42,0.06)",
                                             display: "flex",
                                             alignItems: "center",
                                             justifyContent: "center",
                                             cursor: "pointer",
-                                            transition: "0.2s",
+                                            transition: "0.25s",
 
                                             "&:hover": {
-                                                bgcolor: "rgba(255,255,255,0.16)"
+                                                transform: "translateY(-3px)",
+                                                boxShadow:
+                                                    "0 10px 20px rgba(15,23,42,0.08)"
                                             }
                                         }}
                                     >
@@ -801,7 +840,8 @@ export default function Landing() {
                                 sx={{
                                     fontWeight: 700,
                                     mb: 3,
-                                    fontSize: 18
+                                    fontSize: 18,
+                                    color: "#0f172a"
                                 }}
                             >
                                 Links Rápidos
@@ -817,11 +857,14 @@ export default function Landing() {
                                 <Typography
                                     key={item}
                                     sx={{
-                                        color: "#d4d9e2",
+                                        color: "#475569",
                                         mb: 2,
                                         cursor: "pointer",
+                                        transition: "0.2s",
+
                                         "&:hover": {
-                                            color: "white"
+                                            color: "#2563eb",
+                                            pl: 0.5
                                         }
                                     }}
                                 >
@@ -838,7 +881,8 @@ export default function Landing() {
                                 sx={{
                                     fontWeight: 700,
                                     mb: 3,
-                                    fontSize: 18
+                                    fontSize: 18,
+                                    color: "#0f172a"
                                 }}
                             >
                                 Suporte
@@ -854,11 +898,14 @@ export default function Landing() {
                                 <Typography
                                     key={item}
                                     sx={{
-                                        color: "#d4d9e2",
+                                        color: "#475569",
                                         mb: 2,
                                         cursor: "pointer",
+                                        transition: "0.2s",
+
                                         "&:hover": {
-                                            color: "white"
+                                            color: "#2563eb",
+                                            pl: 0.5
                                         }
                                     }}
                                 >
@@ -875,7 +922,8 @@ export default function Landing() {
                                 sx={{
                                     fontWeight: 700,
                                     mb: 3,
-                                    fontSize: 18
+                                    fontSize: 18,
+                                    color: "#0f172a"
                                 }}
                             >
                                 Contato
@@ -902,7 +950,7 @@ export default function Landing() {
                                         alignItems: "center",
                                         gap: 1.5,
                                         mb: 3,
-                                        color: "#d4d9e2"
+                                        color: "#475569"
                                     }}
                                 >
                                     {item.icon}
@@ -921,10 +969,12 @@ export default function Landing() {
                     {/* BOTTOM */}
                     <Box
                         sx={{
-                            borderTop: "1px solid rgba(255,255,255,0.08)",
-                            pt: 4,
+                            borderTop:
+                                "1px solid rgba(15,23,42,0.08)",
+                            pt: 3,
                             display: "flex",
                             justifyContent: "space-between",
+                            alignItems: "center",
                             flexWrap: "wrap",
                             gap: 2
                         }}
@@ -932,7 +982,8 @@ export default function Landing() {
 
                         <Typography
                             sx={{
-                                color: "#a7b3c5"
+                                color: "#64748b",
+                                fontSize: 14
                             }}
                         >
                             © 2026 VittaSync. Todos os direitos reservados.
@@ -954,10 +1005,11 @@ export default function Landing() {
                                 <Typography
                                     key={item}
                                     sx={{
-                                        color: "#d4d9e2",
+                                        color: "#475569",
                                         cursor: "pointer",
+
                                         "&:hover": {
-                                            color: "white"
+                                            color: "#2563eb"
                                         }
                                     }}
                                 >
@@ -973,7 +1025,7 @@ export default function Landing() {
 
             </Box>
 
-        </Box>
 
+        </Box>
     );
 }

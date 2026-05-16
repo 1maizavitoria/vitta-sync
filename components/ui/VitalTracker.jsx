@@ -1,17 +1,27 @@
 import Grid from "@mui/material/Grid";
+import { Box, Paper } from "@mui/material";
+
 import FavoriteIcon from "@mui/icons-material/Favorite";
 import MonitorHeartIcon from "@mui/icons-material/MonitorHeart";
 import AirIcon from '@mui/icons-material/Air';
 import DeviceThermostatIcon from '@mui/icons-material/DeviceThermostat';
-import { Box, Paper } from "@mui/material";
+import ScaleIcon from '@mui/icons-material/Scale';
+
 import { useEffect, useState } from "react";
 import { useAlert } from "../../hooks/useAlert";
+
 import { editVitalSigns, getVitalSigns, registerVitalSigns } from "../../services/vitalService";
 import VitalCard from "../ui/cards/VitalCard";
 import ButtonUI from "./Button";
 
+import {
+    usePatient
+} from "../../context/PatientContext";
+
+
 export function VitalTracker() {
     const { showAlert } = useAlert();
+    const { selectedPatient } = usePatient();
 
     const [editing, setEditing] = useState(false);
     const [addVital, setAddVital] = useState(false);
@@ -30,6 +40,12 @@ export function VitalTracker() {
 
     const [resetKey, setResetKey] = useState(0);
 
+    const userType =
+        localStorage.getItem("tipo");
+
+    const canEdit =
+        userType !== "saude";
+
     const lastVital = vitals.reduce((latest, current) => {
         if (!latest) return current;
 
@@ -39,6 +55,7 @@ export function VitalTracker() {
     }, null);
 
     const [vitalInputs, setVitalInputs] = useState({
+        peso: "",
         frequenciaCardiaca: "",
         frequenciaRespiratoria: "",
         saturacao: "",
@@ -47,9 +64,19 @@ export function VitalTracker() {
         diastolica: "",
     });
 
+    const CPF = selectedPatient?.cpf;
+
     function canRegister() {
         // Verifica se todos os campos estão preenchidos
-        if (!vitalInputs.frequenciaCardiaca || !vitalInputs.frequenciaRespiratoria || !vitalInputs.saturacao || !vitalInputs.temperatura || !vitalInputs.sistolica || !vitalInputs.diastolica) {
+        if (
+            !vitalInputs.peso ||
+            !vitalInputs.frequenciaCardiaca ||
+            !vitalInputs.frequenciaRespiratoria ||
+            !vitalInputs.saturacao ||
+            !vitalInputs.temperatura ||
+            !vitalInputs.sistolica ||
+            !vitalInputs.diastolica
+        ) {
             showAlert("error", "Faça todas as medições antes de salvar");
             setError(true);
             return false;
@@ -113,6 +140,14 @@ export function VitalTracker() {
             return false;
         }
 
+        if (
+            Number(vitalInputs.peso) < 1 ||
+            Number(vitalInputs.peso) > 400
+        ) {
+            showAlert("error", "Peso inválido");
+            return false;
+        }
+
         setErrorFC(false);
         setErrorFR(false);
         setErrorSPO2(false);
@@ -126,12 +161,12 @@ export function VitalTracker() {
     }
 
     async function handleRegister() {
-
         if (!canRegister()) return;
 
-        const CPF = localStorage.getItem("CPF");
+        const CPF = selectedPatient?.cpf;
 
         const data = {
+            peso: vitalInputs.peso,
             fcBpm: vitalInputs.frequenciaCardiaca,
             frRpm: vitalInputs.frequenciaRespiratoria,
             paSistolica: vitalInputs.sistolica,
@@ -144,7 +179,7 @@ export function VitalTracker() {
 
             try {
                 await registerVitalSigns(CPF, data);
-                const updatedVitals = await getVitalSigns();
+                const updatedVitals = await getVitalSigns(CPF);
                 setVitals(updatedVitals);
                 showAlert("success", "Sinais vitais registrados com sucesso");
 
@@ -156,7 +191,6 @@ export function VitalTracker() {
                 setResetKey(prev => prev + 1);
                 setAddVital(false);
 
-
             } catch (error) {
                 console.error("Erro ao registrar sinais vitais:", error);
                 showAlert("error", "Erro ao registrar sinais vitais");
@@ -166,8 +200,8 @@ export function VitalTracker() {
         if (editing) {
 
             try {
-                await editVitalSigns(lastVital.id, data);
-                const updatedVitals = await getVitalSigns();
+                await editVitalSigns(lastVital.id, CPF, data);
+                const updatedVitals = await getVitalSigns(CPF);
                 setVitals(updatedVitals);
                 showAlert("success", "Sinais vitais editados com sucesso");
 
@@ -190,6 +224,7 @@ export function VitalTracker() {
 
     function handleDataEditing() {
         setVitalInputs({
+            peso: lastVital.peso,
             frequenciaCardiaca: lastVital.fcBpm,
             frequenciaRespiratoria: lastVital.frRpm,
             saturacao: lastVital.spo2Porcento,
@@ -201,6 +236,7 @@ export function VitalTracker() {
 
     function handleClearInputs() {
         setVitalInputs({
+            peso: "",
             frequenciaCardiaca: "",
             frequenciaRespiratoria: "",
             saturacao: "",
@@ -211,18 +247,41 @@ export function VitalTracker() {
     }
 
     useEffect(() => {
+
+        if (!selectedPatient) return;
+
         async function fetchVitals() {
+
             try {
-                const data = await getVitalSigns();
+
+                const data =
+                    await getVitalSigns(
+                        selectedPatient.cpf
+                    );
+
                 setVitals(data);
-                console.log("Sinais vitais obtidos:", data);
+
+                console.log(
+                    "Sinais vitais obtidos:",
+                    data
+                );
+
             } catch (error) {
-                console.error("Erro ao buscar sinais vitais:", error);
+
+                console.error(
+                    "Erro ao buscar sinais vitais:",
+                    error
+                );
+
+                setVitals([]);
             }
         }
 
         fetchVitals();
-    }, []);
+
+    }, [selectedPatient]);
+
+
 
     const hasUnsavedChanges =
         vitalInputs.frequenciaCardiaca ||
@@ -285,24 +344,46 @@ export function VitalTracker() {
                     </Box>
                 ) : (
                     <Box display="flex" alignItems="center" gap={1}>
-                        <ButtonUI onClick={() => {
+                        {canEdit && <ButtonUI onClick={() => {
                             setAddVital(true);
                             handleClearInputs();
                         }}>
                             + Adicionar Medições
-                        </ButtonUI>
+                        </ButtonUI>}
 
-                        <ButtonUI onClick={() => {
-                            setEditing(true);
-                            handleDataEditing();
-                        }}>
-                            Editar Medições
-                        </ButtonUI>
+                        {canEdit && (
+                            <ButtonUI onClick={() => {
+                                setEditing(true);
+                                handleDataEditing();
+                            }}>
+                                Editar Medições
+                            </ButtonUI>
+                        )}
                     </Box>
                 )}
             </Box>
 
             <Grid container spacing={3}>
+                <Grid item xs={12} md={4}>
+                    <VitalCard
+                        showInput={editing || addVital}
+                        icon={<ScaleIcon />}
+                        title="Peso"
+                        type="number"
+                        value={lastVital ? lastVital.peso : "N/A"}
+                        unit="kg"
+                        date={lastVital ? new Date(lastVital.dataRegistro).toLocaleString() : "N/A"}
+                        inputValue={vitalInputs.peso}
+                        closeMeditionInput={closeMeditionInput}
+                        onInputChange={(e) =>
+                            setVitalInputs({
+                                ...vitalInputs,
+                                peso: e.target.value
+                            })
+                        }
+                        key={resetKey}
+                    />
+                </Grid>
                 <Grid item xs={12} md={4}>
                     <VitalCard
                         showInput={editing || addVital}
@@ -315,7 +396,14 @@ export function VitalTracker() {
                         date={lastVital ? new Date(lastVital.dataRegistro).toLocaleString() : "N/A"}
                         inputValue={vitalInputs.frequenciaCardiaca}
                         closeMeditionInput={closeMeditionInput}
-                        onInputChange={(e) => setVitalInputs({ ...vitalInputs, frequenciaCardiaca: e.target.value }, setErrorFC(false))}
+                        onInputChange={(e) => {
+                            setVitalInputs({
+                                ...vitalInputs,
+                                frequenciaCardiaca: e.target.value
+                            });
+
+                            setErrorFC(false);
+                        }}
                         key={resetKey}
                     />
                 </Grid>

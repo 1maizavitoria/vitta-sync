@@ -14,8 +14,17 @@ import BedtimeIcon from "@mui/icons-material/Bedtime";
 import FitnessCenterIcon from "@mui/icons-material/FitnessCenter";
 import { CalendarIcon } from "@mui/x-date-pickers";
 
+import { usePatient } from "../../context/PatientContext";
+
 export function HabitTracker() {
+    const { selectedPatient } = usePatient();
     const { showAlert } = useAlert();
+
+    const userType =
+        localStorage.getItem("tipo");
+
+    const canEdit =
+        userType !== "saude";
 
     const [editing, setEditing] = useState(false);
     const [addHabit, setAddHabit] = useState(false);
@@ -96,7 +105,7 @@ export function HabitTracker() {
             dataReferencia: habitInputs.date,
         }
 
-        const CPF = localStorage.getItem("CPF");
+        const CPF = selectedPatient?.cpf;
 
         if (addHabit) {
 
@@ -165,19 +174,39 @@ export function HabitTracker() {
     }
 
     useEffect(() => {
-        async function fetchVitals() {
-            const CPF = localStorage.getItem("CPF")
+
+        if (!selectedPatient) return;
+
+        async function fetchHabits() {
+
             try {
-                const data = await getHabits(CPF);
+
+                const data =
+                    await getHabits(
+                        selectedPatient.cpf
+                    );
+
                 setHabit(data);
-                console.log("habitos obtidos:", data);
+
+                console.log(
+                    "Hábitos obtidos:",
+                    data
+                );
+
             } catch (error) {
-                console.error("Erro ao buscar Hábitos:", error);
+
+                console.error(
+                    "Erro ao buscar hábitos:",
+                    error
+                );
+
+                setHabit([]);
             }
         }
 
-        fetchVitals();
-    }, []);
+        fetchHabits();
+
+    }, [selectedPatient]);
 
     const hasUnsavedChanges =
         habitInputs.timeSleep ||
@@ -230,19 +259,19 @@ export function HabitTracker() {
                     </Box>
                 ) : (
                     <Box display="flex" alignItems="center" gap={1}>
-                        <ButtonUI onClick={() => {
+                        {canEdit && <ButtonUI onClick={() => {
                             setAddHabit(true);
                             handleClearInputs();
                         }}>
                             + Adicionar Hábitos
-                        </ButtonUI>
+                        </ButtonUI>}
 
-                        <ButtonUI onClick={() => {
+                        {canEdit && <ButtonUI onClick={() => {
                             setEditing(true);
                             handleDataEditing();
                         }}>
                             Editar Hábitos
-                        </ButtonUI>
+                        </ButtonUI>}
                     </Box>
                 )}
             </Box>
