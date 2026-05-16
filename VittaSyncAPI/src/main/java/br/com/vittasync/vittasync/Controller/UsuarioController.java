@@ -6,6 +6,7 @@ import br.com.vittasync.vittasync.DTO.UsuarioOutputDTO;
 import br.com.vittasync.vittasync.DTO.UsuarioUpdateDTO;
 import br.com.vittasync.vittasync.Model.Usuario;
 import br.com.vittasync.vittasync.Service.JwtService;
+import br.com.vittasync.vittasync.Service.PermissaoService;
 import br.com.vittasync.vittasync.Service.UsuarioService;
 import br.com.vittasync.vittasync.Util.HashUtil;
 import jakarta.validation.Valid;
@@ -19,10 +20,12 @@ public class UsuarioController {
 
     private final UsuarioService usuarioService;
     private final JwtService jwtService;
+    private final PermissaoService permissaoService;
 
-    public UsuarioController(UsuarioService usuarioService, JwtService jwtService) {
+    public UsuarioController(UsuarioService usuarioService, JwtService jwtService, PermissaoService permissaoService) {
         this.usuarioService = usuarioService;
         this.jwtService = jwtService;
+        this.permissaoService = permissaoService;
     }
 
     @PostMapping("/cadastrar")
@@ -51,13 +54,15 @@ public class UsuarioController {
     }
 
     @PutMapping("/editar/{cpf}")
-    public ResponseEntity<UsuarioOutputDTO> update(@PathVariable String cpf,
-                                                   @Valid @RequestBody UsuarioUpdateDTO dto,
-                                                   @RequestHeader("Authorization") String authHeader) {
+    public ResponseEntity<UsuarioOutputDTO> update(@PathVariable String cpf, @Valid @RequestBody UsuarioUpdateDTO dto, @RequestHeader("Authorization") String authHeader) {
         String token = authHeader.replace("Bearer ", "");
         String cpfToken = jwtService.extrairCpf(token);
+        Usuario usuarioLogado = usuarioService.searchByCpf(cpfToken);
+        Usuario usuarioPaciente = usuarioService.searchByCpf(cpf);
+        boolean podeEditar = cpfToken.equals(cpf) ||
+                permissaoService.podeEditarPaciente(usuarioLogado.getId(), usuarioPaciente.getId());
 
-        if (!cpfToken.equals(cpf)) {
+        if (!podeEditar) {
             return ResponseEntity.status(403).build();
         }
 
@@ -71,25 +76,30 @@ public class UsuarioController {
             usuario.setPrivCompartilharDiario(dto.getPrivCompartilharDiario());
             usuario.setPrivCompartilharHabitos(dto.getPrivCompartilharHabitos());
             usuario.setDataNascimento(dto.getDataNascimento());
+            usuario.setTelefone(dto.getTelefone());
+            usuario.setPesoInicial(dto.getPesoInicial());
 
             Usuario atualizado = usuarioService.update(usuario);
 
             return ResponseEntity.ok(toOutputDTO(atualizado));
-        }
-
-        catch (RuntimeException e) {
+        } catch (RuntimeException e) {
             return ResponseEntity.notFound().build();
         }
     }
 
     @GetMapping("/getUsuario/{cpf}")
-    public ResponseEntity<UsuarioOutputDTO> getByCpf(@PathVariable String cpf,
-                                                     @RequestHeader("Authorization") String authHeader) {
+    public ResponseEntity<UsuarioOutputDTO> getByCpf(@PathVariable String cpf, @RequestHeader("Authorization") String authHeader) {
 
         String token = authHeader.replace("Bearer ", "");
         String cpfToken = jwtService.extrairCpf(token);
 
-        if (!cpfToken.equals(cpf)) {
+        Usuario usuarioLogado = usuarioService.searchByCpf(cpfToken);
+
+        Usuario usuarioPaciente = usuarioService.searchByCpf(cpf);
+
+        boolean podeEditar = cpfToken.equals(cpf) || permissaoService.podeEditarPaciente(usuarioLogado.getId(), usuarioPaciente.getId());
+
+        if (!podeEditar) {
             return ResponseEntity.status(403).build();
         }
 
@@ -98,8 +108,7 @@ public class UsuarioController {
     }
 
     @DeleteMapping("/deletar/{cpf}")
-    public ResponseEntity<Void> delete(@PathVariable String cpf,
-                                       @RequestHeader("Authorization") String authHeader) {
+    public ResponseEntity<Void> delete(@PathVariable String cpf, @RequestHeader("Authorization") String authHeader) {
 
         String token = authHeader.replace("Bearer ", "");
         String cpfToken = jwtService.extrairCpf(token);
