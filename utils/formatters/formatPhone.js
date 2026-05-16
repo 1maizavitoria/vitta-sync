@@ -11,3 +11,7 @@ export function formatPhone(value) {
         .replace(/^(\d{2})(\d)/g, "($1) $2")
         .replace(/(\d{5})(\d)/, "$1-$2");
 }
+
+export function isValidPhone(phone) {
+    return /^\d{10,11}$/.test(phone);
+}

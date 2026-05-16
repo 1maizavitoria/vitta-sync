@@ -68,6 +68,13 @@ export default function Sidebar({ open, setOpen }) {
         return (primeira + ultima).toUpperCase();
     };
 
+    function handleOpenProfile() {
+
+        setSelectedPatient(userResponse);
+
+        navigate("/reports");
+    }
+
     async function handleLogout() {
         try {
             await logout();
@@ -85,7 +92,6 @@ export default function Sidebar({ open, setOpen }) {
                 const data = await getUserByCpf({ CPF });
 
                 setUserResponse(data);
-                console.log("Usuários obtidos:", data);
                 localStorage.setItem("nome", data.nome);
                 localStorage.setItem("tipo", data.tipo);
                 localStorage.setItem("conselho", data.conselho);
@@ -93,6 +99,9 @@ export default function Sidebar({ open, setOpen }) {
                 localStorage.setItem("dataNascimento", data.dataNascimento);
                 localStorage.setItem("privCompartilharDiario", data.privCompartilharDiario);
                 localStorage.setItem("privCompartilharHabitos", data.privCompartilharHabitos);
+                localStorage.setItem("telefone", data.telefone);
+                localStorage.setItem("pesoInicial", data.pesoInicial);
+                localStorage.setItem("altura", data.altura);
             } catch (error) {
                 console.error("Erro ao buscar usuários:", error);
             }
@@ -143,166 +152,123 @@ export default function Sidebar({ open, setOpen }) {
                 },
             }}
         >
+            {/* Pacientes */}
             <Box
                 sx={{
-                    p: 2,
+                    px: 2,
+                    py: 0,
                     mt: 8
                 }}
             >
-
-                <Typography
-                    variant="caption"
-                    sx={{
-                        color: "#777",
-                        fontWeight: 700,
-                        textTransform: "uppercase",
-                        letterSpacing: 1
-                    }}
-                >
-                    Paciente ativo
-                </Typography>
-
-
-
-                <Box
-                    sx={{
-                        mt: 1,
-                        p: 2,
-                        borderRadius: "18px",
-                        background:
-                            "linear-gradient(90deg, #a8e6cf, #dcedc1)"
-                    }}
-                >
-
-                    <Box
-                        display="flex"
-                        alignItems="center"
-                        gap={2}
-                    >
-
-                        <Avatar
+                {patients.length > 0 && (
+                    <Box mt={2}>
+                        <Typography
+                            variant="caption"
                             sx={{
-                                bgcolor: "#fff",
-                                color: "#000"
+                                color: "#777",
+                                fontWeight: 700,
+                                textTransform: "uppercase",
+                                letterSpacing: 1
                             }}
                         >
-                            {getIniciais(
-                                selectedPatient?.nome
-                            )}
-                        </Avatar>
+                            Pacientes
+                        </Typography>
 
-                        <Box>
+                        <Box mt={1}>
+                            {patients.map((patient) => (
+                                <Button
+                                    key={patient.id}
+                                    onClick={() =>
+                                        setSelectedPatient(patient)
+                                    }
+                                    fullWidth
+                                    sx={{
+                                        justifyContent: "flex-start",
+                                        borderRadius: "12px",
+                                        mb: 1,
+                                        textTransform: "none",
+                                        color: "#333",
+                                        px: 2,
+                                        py: 1.2,
+                                        backgroundColor: selectedPatient?.id === patient.id
+                                            ? "#EEF7F1"
+                                            : "transparent",
+                                        border: selectedPatient?.id === patient.id
+                                            ? "1px solid #A8E6CF"
+                                            : "1px solid transparent",
+                                        fontWeight: selectedPatient?.id === patient.id
+                                            ? 600
+                                            : 400,
+                                        "&:hover": {
+                                            backgroundColor: "#F5F5F5",
+                                        },
+                                    }}
+                                >
+                                    {patient.nome}
+                                </Button>
 
-                            <Typography
-                                fontWeight="bold"
-                            >
-                                {selectedPatient?.nome
-                                    || "Nenhum paciente"}
-                            </Typography>
-
-                            <Typography
-                                variant="caption"
-                            >
-                                Contexto atual
-                            </Typography>
+                            ))}
 
                         </Box>
 
                     </Box>
-
-                </Box>
+                )}
 
             </Box>
 
-            {patients.length > 0 && (
 
-                <Box mt={2}>
-
-                    <Typography
-                        variant="caption"
-                        sx={{
-                            color: "#777",
-                            fontWeight: 700,
-                            textTransform: "uppercase",
-                            letterSpacing: 1
-                        }}
-                    >
-                        Outros pacientes
-                    </Typography>
-
-                    <Box mt={1}>
-
-                        {patients.map((patient) => (
-
-                            <Button
-                                key={patient.id}
-                                onClick={() =>
-                                    setSelectedPatient(patient)
-                                }
-                                fullWidth
-                                sx={{
-                                    justifyContent: "flex-start",
-                                    borderRadius: "14px",
-                                    mb: 1,
-                                    textTransform: "none",
-                                    color: "#333"
-                                }}
-                            >
-                                {patient.nome}
-                            </Button>
-
-                        ))}
-
-                    </Box>
-
-                </Box>
-            )}
-
-            {/* MENU */}
-            <List sx={{ p: 1, mt: 10 }}>
-                {filteredMenu.map((item) => {
-                    const isActive = location.pathname === item.path;
-
-                    return (
-                        <ListItemButton
-                            key={item.label}
-                            onClick={() => navigate(item.path)}
-                            sx={{
-                                borderRadius: 3,
-                                mb: 0.5,
-
-                                ...(isActive && {
-                                    background: "linear-gradient(90deg, #a8e6cf, #dcedc1)",
-                                    boxShadow: "0 2px 6px rgba(0,0,0,0.1)",
-                                }),
-                            }}
-                        >
-                            <ListItemIcon sx={{ color: "inherit" }}>
-                                {item.icon}
-                            </ListItemIcon>
-
-                            <ListItemText primary={item.label} />
-                        </ListItemButton>
-                    );
-                })}
-            </List>
 
             {/* FOOTER (user) */}
             <Box sx={{ mt: "auto", p: 2 }}>
+                {/* MENU */}
+                <List sx={{ p: 1, mt: 3 }}>
+                    {filteredMenu.map((item) => {
+                        const isActive = location.pathname === item.path;
+
+                        return (
+                            <ListItemButton
+                                key={item.label}
+                                onClick={() => navigate(item.path)}
+                                sx={{
+                                    borderRadius: 3,
+                                    mb: 0.5,
+
+                                    ...(isActive && {
+                                        background: "linear-gradient(90deg, #a8e6cf, #dcedc1)",
+                                        boxShadow: "0 2px 6px rgba(0,0,0,0.1)",
+                                    }),
+                                }}
+                            >
+                                <ListItemIcon sx={{ color: "inherit" }}>
+                                    {item.icon}
+                                </ListItemIcon>
+
+                                <ListItemText primary={item.label} />
+                            </ListItemButton>
+                        );
+                    })}
+                </List>
                 <Divider sx={{ mb: 2 }} />
 
                 <Box
+                    onClick={handleOpenProfile}
+
                     sx={{
                         display: "flex",
                         alignItems: "center",
                         justifyContent: "space-between",
                         width: "100%",
+                        cursor: "pointer",
+                        borderRadius: "12px",
+                        p: 1,
+                        transition: "0.2s",
+                        "&:hover": {
+                            backgroundColor: "#f5f5f5",
+                        },
                     }}
                 >
                     <Avatar sx={{ bgcolor: "#a8e6cf", color: "#000" }}>
-                        {getIniciais(
-                            selectedPatient?.nome
-                        )}
+                        {getIniciais(userResponse.nome)}
                     </Avatar>
 
                     <Box>
