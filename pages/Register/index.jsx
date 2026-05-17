@@ -16,7 +16,7 @@ import { formatCPF, isValidCpf } from "../../utils/formatters/formatCPF"
 import { isValidEmail } from "../../utils/formatters/formatEmail";
 import { validatePassword } from "../../utils/validators/passwordValidator";
 import { getDateLimit, isUnder18 } from "../../utils/validators/dateValidator";
-import { formatPhone } from "../../utils/formatters/formatPhone";
+import { formatPhone, isValidPhone } from "../../utils/formatters/formatPhone";
 
 export default function Register() {
     const { showAlert } = useAlert();
@@ -55,9 +55,7 @@ export default function Register() {
     const rulesPassword = validatePassword(password);
     const repeatRulesPassword = validatePassword(repeatPassword);
 
-    function isValidPhone(phone) {
-        return /^\d{10,11}$/.test(phone);
-    }
+
 
     function isValidPositiveNumber(value) {
         return !isNaN(value) && Number(value) > 0;

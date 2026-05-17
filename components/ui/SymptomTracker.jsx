@@ -8,15 +8,18 @@ import { useEffect, useState } from "react";
 import { useAlert } from "../../hooks/useAlert";
 import { editSymptom, getSymptom, registerSymptom } from "../../services/symptomService";
 import ButtonUI from "./Button";
-import HabitCard from "./HabitCard"
+import HabitCard from "../ui/cards/HabitCard";
 
 import BedtimeIcon from "@mui/icons-material/Bedtime";
 import FitnessCenterIcon from "@mui/icons-material/FitnessCenter";
 import { CalendarIcon } from "@mui/x-date-pickers";
-import SymptomCard from "./SymptomCard";
+import SymptomCard from "../ui/cards/SymptomCard";
 import { formatDate } from "../../utils/formatters/formatDate";
 
+import { usePatient } from "../../context/PatientContext";
+
 export function SymptomTracker() {
+    const { selectedPatient } = usePatient();
     const { showAlert } = useAlert();
 
     const [editing, setEditing] = useState(false);
@@ -46,6 +49,12 @@ export function SymptomTracker() {
         intencity: "",
         date: null,
     });
+
+    const userType =
+        localStorage.getItem("tipo");
+
+    const canEdit =
+        userType !== "saude";
 
     function isValidIntencity(value) {
         const num = Number(value);
@@ -85,7 +94,7 @@ export function SymptomTracker() {
             dataReferencia: SymptomInputs.date,
         }
 
-        const CPF = localStorage.getItem("CPF");
+        const CPF = selectedPatient?.cpf;
 
         if (addSymptom) {
 
@@ -154,19 +163,39 @@ export function SymptomTracker() {
     }
 
     useEffect(() => {
-        async function fetchVitals() {
-            const CPF = localStorage.getItem("CPF")
+
+        if (!selectedPatient) return;
+
+        async function fetchSymptoms() {
+
             try {
-                const data = await getSymptom(CPF);
+
+                const data =
+                    await getSymptom(
+                        selectedPatient.cpf
+                    );
+
                 setSymptom(data);
-                console.log("habitos obtidos:", data);
+
+                console.log(
+                    "Sintomas obtidos:",
+                    data
+                );
+
             } catch (error) {
-                console.error("Erro ao buscar Hábitos:", error);
+
+                console.error(
+                    "Erro ao buscar sintomas:",
+                    error
+                );
+
+                setSymptom([]);
             }
         }
 
-        fetchVitals();
-    }, []);
+        fetchSymptoms();
+
+    }, [selectedPatient]);
 
     const hasUnsavedChanges =
         SymptomInputs.intencity ||
@@ -219,19 +248,19 @@ export function SymptomTracker() {
                     </Box>
                 ) : (
                     <Box display="flex" alignItems="center" gap={1}>
-                        <ButtonUI onClick={() => {
+                        {canEdit && <ButtonUI onClick={() => {
                             setAddSymptom(true);
                             handleClearInputs();
                         }}>
                             + Adicionar Sintomas
-                        </ButtonUI>
+                        </ButtonUI>}
 
-                        <ButtonUI onClick={() => {
+                        {canEdit && <ButtonUI onClick={() => {
                             setEditing(true);
                             handleDataEditing();
                         }}>
                             Editar Sintomas
-                        </ButtonUI>
+                        </ButtonUI>}
                     </Box>
                 )}
             </Box>

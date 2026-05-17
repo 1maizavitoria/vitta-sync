@@ -41,3 +41,26 @@ export const sendInviteEmail = async (email, code) => {
 
     return response.data;
 };
+
+export async function getAvailablePatients() {
+
+    const response =
+        await api.get(
+            "/vinculos/pacientes"
+        );
+
+    return response.data;
+}
+
+export async function
+    getLinksByPatientId(
+        patientId
+    ) {
+
+    const response =
+        await api.get(
+            `/vinculos/paciente/${patientId}`
+        );
+
+    return response.data;
+}

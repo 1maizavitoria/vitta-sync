@@ -3,6 +3,7 @@ package br.com.vittasync.vittasync.Service;
 import br.com.vittasync.vittasync.DTO.ConviteVinculoOutputDTO;
 import br.com.vittasync.vittasync.DTO.EnviarConviteDTO;
 
+import br.com.vittasync.vittasync.DTO.PacienteResumoDTO;
 import br.com.vittasync.vittasync.DTO.VinculoOutputDTO;
 import br.com.vittasync.vittasync.Exception.RecursoNaoEncontradoException;
 
@@ -368,11 +369,130 @@ public class VinculoService {
                     vinculo.getCriadoEm()
             );
 
+
+
             return dto;
 
         }).toList();
     }
 
+    public List<PacienteResumoDTO>
+    listarPacientesDoUsuario(
+            Integer usuarioId
+    ) {
 
+        Usuario usuario =
+                usuarioRepository.findById(usuarioId)
+                        .orElseThrow(() ->
+                                new RecursoNaoEncontradoException(
+                                        "Usuário não encontrado"
+                                )
+                        );
+
+        // paciente vê apenas ele mesmo
+        if (
+                usuario.getTipo()
+                        .equalsIgnoreCase("paciente")
+        ) {
+
+            PacienteResumoDTO dto =
+                    new PacienteResumoDTO();
+
+            dto.setId(usuario.getId());
+
+            dto.setNome(usuario.getNome());
+
+            dto.setEmail(usuario.getEmail());
+
+            dto.setCpf(
+                    usuario.getCpf()
+            );
+
+            return List.of(dto);
+        }
+
+        // responsável/médico
+        List<Vinculo> vinculos =
+                vinculoRepository
+                        .findByUsuarioId(usuarioId);
+
+        return vinculos.stream().map(vinculo -> {
+
+            Usuario paciente =
+                    usuarioRepository.findById(
+                            vinculo.getPacienteId()
+                    ).orElseThrow(() ->
+                            new RecursoNaoEncontradoException(
+                                    "Paciente não encontrado"
+                            )
+                    );
+
+            PacienteResumoDTO dto =
+                    new PacienteResumoDTO();
+
+            dto.setId(paciente.getId());
+
+            dto.setNome(paciente.getNome());
+
+            dto.setEmail(paciente.getEmail());
+
+            dto.setCpf(paciente.getCpf());
+
+            return dto;
+
+        }).toList();
+    }
+
+    public List<VinculoOutputDTO>
+    listarPorPaciente(
+            Integer pacienteId
+    ) {
+
+        List<Vinculo> vinculos =
+                vinculoRepository
+                        .findByPacienteId(
+                                pacienteId
+                        );
+
+        return vinculos.stream().map(vinculo -> {
+
+            Usuario usuarioVinculado =
+                    usuarioRepository.findById(
+                            vinculo.getUsuarioId()
+                    ).orElseThrow(() ->
+                            new RecursoNaoEncontradoException(
+                                    "Usuário não encontrado"
+                            )
+                    );
+
+            VinculoOutputDTO dto =
+                    new VinculoOutputDTO();
+
+            dto.setId(vinculo.getId());
+
+            dto.setNome(
+                    usuarioVinculado.getNome()
+            );
+
+            dto.setEmail(
+                    usuarioVinculado.getEmail()
+            );
+
+            dto.setTipo(
+                    vinculo.getTipo()
+            );
+
+            dto.setConselho(
+                    usuarioVinculado.getConselho()
+            );
+
+            dto.setCriadoEm(
+                    vinculo.getCriadoEm()
+            );
+
+            return dto;
+
+        }).toList();
+    }
 }
 

@@ -25,98 +25,102 @@ export default function ReminderList({
     handleToggleReminder,
 }) {
 
+    if (
+        !reminder?.diasSemana ||
+        !reminder?.horario
+    ) {
+        return null;
+    }
+
+    const item = reminder;
+
+    const translatedDays =
+        item.diasSemana
+            .split(",")
+            .map(day => daysMap[day])
+            .join(", ");
+
     return (
-        <>
-            {reminder.map((item) => {
+        <Card
+            key={item.id}
+            sx={{
+                mt: 1.5,
+                width: "100%",
+                borderRadius: "20px",
+                backgroundColor: "#F3F5F4",
 
-                const translatedDays = item.diasSemana
-                    .split(",")
-                    .map(day => daysMap[day])
-                    .join(", ");
+                border: item.ativo
+                    ? "1.5px solid #7BE0A7"
+                    : "1px solid #D9D9D9",
 
-                return (
-                    <Card
-                        key={item.id}
+                boxShadow: "none",
+                p: 0.5,
+            }}
+        >
+            <CardContent
+                sx={{
+                    p: 1.5,
+
+                    "&:last-child": {
+                        pb: 1.5,
+                    },
+                }}
+            >
+                <Box
+                    sx={{
+                        display: "flex",
+                        justifyContent: "space-between",
+                        alignItems: "center",
+                    }}
+                >
+                    <NotificationsNoneIcon
                         sx={{
-                            mt: 1.5,
-                            width: "100%",
-                            borderRadius: "20px",
-                            backgroundColor: "#F3F5F4",
-
-                            border: item.ativo
-                                ? "1.5px solid #7BE0A7"
-                                : "1px solid #D9D9D9",
-
-                            boxShadow: "none",
-                            p: 0.5,
+                            color: item.ativo
+                                ? "#00B26F"
+                                : "#9CA3AF"
                         }}
-                    >
-                        <CardContent
-                            sx={{
-                                p: 1.5,
+                    />
 
-                                "&:last-child": {
-                                    pb: 1.5,
-                                },
-                            }}
-                        >
-                            <Box
-                                sx={{
-                                    display: "flex",
-                                    justifyContent: "space-between",
-                                    alignItems: "center",
-                                }}
-                            >
-                                <NotificationsNoneIcon
-                                    sx={{
-                                        color: item.ativo
-                                            ? "#00B26F"
-                                            : "#9CA3AF"
-                                    }}
-                                />
+                    <Typography fontWeight="bold">
+                        Fazer medição
+                    </Typography>
 
-                                <Typography fontWeight="bold">
-                                    Fazer medição
-                                </Typography>
+                    <Switch
+                        checked={item.ativo}
+                        onChange={() =>
+                            handleToggleReminder()
+                        }
+                        color="success"
+                    />
+                </Box>
 
-                                <Switch
-                                    checked={item.ativo}
-                                    onChange={() =>
-                                        handleToggleReminder(item.id)
-                                    }
-                                    color="success"
-                                />
-                            </Box>
+                <Stack
+                    direction="row"
+                    spacing={1}
+                    alignItems="center"
+                    mt={1}
+                >
+                    <AccessTimeIcon
+                        sx={{
+                            fontSize: 18,
+                            color: "#6B7280",
+                        }}
+                    />
 
-                            <Stack
-                                direction="row"
-                                spacing={1}
-                                alignItems="center"
-                                mt={1}
-                            >
-                                <AccessTimeIcon
-                                    sx={{
-                                        fontSize: 18,
-                                        color: "#6B7280",
-                                    }}
-                                />
+                    <Typography color="text.secondary">
+                        {item.horario.slice(0, 5)}
+                    </Typography>
 
-                                <Typography color="text.secondary">
-                                    {item.horario.slice(0, 5)}
-                                </Typography>
+                    <Typography color="text.secondary">
+                        •
+                    </Typography>
 
-                                <Typography color="text.secondary">
-                                    •
-                                </Typography>
-
-                                <Typography color="text.secondary">
-                                    {translatedDays}
-                                </Typography>
-                            </Stack>
-                        </CardContent>
-                    </Card>
-                );
-            })}
-        </>
+                    <Typography color="text.secondary">
+                        {translatedDays}
+                    </Typography>
+                </Stack>
+            </CardContent>
+        </Card>
     );
+
 }

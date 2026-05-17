@@ -1,13 +1,9 @@
 package br.com.vittasync.vittasync.Controller;
 
 
+import br.com.vittasync.vittasync.DTO.*;
 import br.com.vittasync.vittasync.Exception.RecursoNaoEncontradoException;
 import br.com.vittasync.vittasync.Repository.VinculoRepository;
-
-import br.com.vittasync.vittasync.DTO.VinculoOutputDTO;
-import br.com.vittasync.vittasync.DTO.ConviteVinculoOutputDTO;
-import br.com.vittasync.vittasync.DTO.EnviarConviteDTO;
-import br.com.vittasync.vittasync.DTO.VinculoInputDTO;
 
 import br.com.vittasync.vittasync.Model.Usuario;
 import br.com.vittasync.vittasync.Model.Vinculo;
@@ -143,7 +139,7 @@ public class VinculoController {
         return ResponseEntity.noContent().build();
     }
 
-    @GetMapping
+    @GetMapping()
     public ResponseEntity<List<VinculoOutputDTO>> listar(
             @RequestHeader("Authorization") String authHeader
     ) {
@@ -159,6 +155,36 @@ public class VinculoController {
 
         return ResponseEntity.ok(
                 service.listar(usuario.getId())
+        );
+    }
+
+    @GetMapping("/pacientes")
+    public ResponseEntity<
+            List<PacienteResumoDTO>
+            > listarPacientes(
+            @RequestHeader("Authorization")
+            String authHeader
+    ) {
+
+        String token = authHeader.replace("Bearer ","" );
+        String cpf = jwtService.extrairCpf(token);
+        Usuario usuario = usuarioService.searchByCpf(cpf);
+        return ResponseEntity.ok(
+                service.listarPacientesDoUsuario(
+                        usuario.getId()
+                )
+        );
+    }
+
+    @GetMapping("/paciente/{id}")
+    public ResponseEntity<
+            List<VinculoOutputDTO>
+            > listarPorPaciente(
+            @PathVariable Integer id
+    ) {
+
+        return ResponseEntity.ok(
+                service.listarPorPaciente(id)
         );
     }
 

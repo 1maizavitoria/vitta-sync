@@ -2,11 +2,16 @@ import React, { useEffect, useState } from "react";
 import { Box, Button, Card, CardContent, Dialog, DialogTitle, DialogContent, DialogActions, Stack, Typography, ToggleButton, ToggleButtonGroup } from "@mui/material";
 import { LocalizationProvider, TimePicker } from "@mui/x-date-pickers";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
-import { activateReminder, deactivateReminder, getReminder, registerReminder } from "../../services/reminderService";
-import ReminderList from "./RemindList";
-import ButtonUI from "./Button";
-import DialogUI from "./Dialog";
-import { useAlert } from "../../hooks/useAlert";
+import { activateReminder, deactivateReminder, getReminder, registerReminder } from "../../../services/reminderService";
+import ReminderList from "../RemindList";
+import ButtonUI from "../Button";
+import DialogUI from "../Dialog";
+import { useAlert } from "../../../hooks/useAlert";
+import { usePatient } from "../../../context/PatientContext";
+import {
+    Checkbox,
+    FormControlLabel
+} from "@mui/material";
 
 const weekDays = [
     { label: "Dom", value: "Sunday" },
@@ -19,6 +24,8 @@ const weekDays = [
 ];
 
 export default function ReminderCard() {
+    const { selectedPatient } = usePatient();
+
     const { showAlert } = useAlert();
 
     const [open, setOpen] = useState(false);
@@ -27,9 +34,19 @@ export default function ReminderCard() {
 
     const [time, setTime] = useState(null);
 
-    const [reminder, setReminder] = useState([]);
+    const [notificationType,
+        setNotificationType] =
+        useState("EMAIL");
+
+    const [reminder, setReminder] = useState(null);
 
     const [error, setError] = useState(false);
+
+    const userType =
+        localStorage.getItem("tipo");
+
+    const canEdit =
+        userType !== "saude";
 
     function sortWeekDays(days) {
 
@@ -60,9 +77,27 @@ export default function ReminderCard() {
 
     function canSave() {
 
-        if (!selectedDay || !time) {
+        if (
+            selectedDay.length === 0 ||
+            !time
+        ) {
             showAlert("error", "Escolha um dia e horário para o lembrete.");
             setError(true);
+            return false;
+        }
+
+        if (
+            selectedDay.length === 0 ||
+            !time
+        ) {
+
+            showAlert(
+                "error",
+                "Escolha um dia e horário para o lembrete."
+            );
+
+            setError(true);
+
             return false;
         }
 
@@ -71,17 +106,19 @@ export default function ReminderCard() {
 
     async function handleSave() {
         if (!canSave()) return;
-        const data = {
 
+        const data = {
             diasSemana: sortWeekDays(selectedDay).join(","),
             horario: time.format("HH:mm"),
-            ativo: true
+            ativo: true,
+            enviarEmail: notificationType === "EMAIL" || notificationType === "AMBOS",
+            enviarSms: notificationType === "SMS" || notificationType === "AMBOS",
         };
 
         try {
-            const response = await registerReminder(data);
-            const dataReminder = await getReminder();
-            setReminder([dataReminder]);
+            const response = await registerReminder(selectedPatient.cpf, data);
+            const dataReminder = await getReminder(selectedPatient.cpf);
+            setReminder(dataReminder);
             console.log(response);
         } catch (error) {
             console.log(error);
@@ -92,45 +129,73 @@ export default function ReminderCard() {
 
     useEffect(() => {
 
+        if (!selectedPatient) return;
+
         async function fetchReminder() {
+
             try {
-                const data = await getReminder();
-                setReminder([data]);
-                console.log("Lembretes obtidos:", data);
+
+                const data =
+                    await getReminder(
+                        selectedPatient.cpf
+                    );
+
+                setReminder(data);
+
+                console.log(
+                    "Lembrete obtido:",
+                    data
+                );
+
             } catch (error) {
-                console.error("Erro ao buscar lembretes:", error);
+
+                if (
+                    error.response?.status === 404
+                ) {
+
+                    setReminder(null);
+
+                    return;
+                }
+
+                console.error(
+                    "Erro ao buscar lembrete:",
+                    error
+                );
             }
         }
 
         fetchReminder();
-    }, []);
 
-    async function handleToggleReminder(id) {
+    }, [selectedPatient]);
+
+
+
+    async function handleToggleReminder() {
+
+        if (!reminder) return;
 
         try {
-            const reminderItem = reminder.find(
-                (item) => item.id === id
-            );
 
-            if (!reminderItem) return;
-
-            const newStatus = !reminderItem.ativo;
+            const newStatus =
+                !reminder.ativo;
 
             if (newStatus) {
-                await activateReminder();
+
+                await activateReminder(selectedPatient.cpf);
+
             } else {
-                await deactivateReminder();
+
+                await deactivateReminder(selectedPatient.cpf);
             }
 
-            setReminder((prev) =>
-                prev.map((item) =>
-                    item.id === id
-                        ? { ...item, ativo: newStatus }
-                        : item
-                )
-            );
+            setReminder(prev => ({
+                ...prev,
+                ativo: newStatus
+            }));
 
         } catch (error) {
+
             console.error(
                 "Erro ao alternar lembrete:",
                 error
@@ -155,7 +220,7 @@ export default function ReminderCard() {
 
                     <ReminderList reminder={reminder} handleToggleReminder={handleToggleReminder} />
 
-                    <ButtonUI
+                    {canEdit && <ButtonUI
                         fullWidth
                         onClick={() => setOpen(true)}
                         sx={{
@@ -163,7 +228,7 @@ export default function ReminderCard() {
                         }}
                     >
                         + Novo Lembrete
-                    </ButtonUI>
+                    </ButtonUI>}
 
                 </CardContent>
             </Card>
@@ -231,7 +296,10 @@ export default function ReminderCard() {
                         <TimePicker
                             label="Escolha o horário"
                             value={time}
-                            onChange={(newValue) => (setTime(newValue), setError(false))}
+                            onChange={(newValue) => {
+                                setTime(newValue);
+                                setError(false);
+                            }}
                             ampm={false}
                             format="HH:mm"
                             slotProps={{
@@ -241,6 +309,47 @@ export default function ReminderCard() {
                                 },
                             }}
                         />
+
+
+                    </Box>
+                    <Box>
+
+                        <Typography
+                            mb={2}
+                            fontWeight="bold"
+                        >
+                            Canal de envio
+                        </Typography>
+
+                        <ToggleButtonGroup
+                            value={notificationType}
+                            exclusive
+                            onChange={(_, newValue) => {
+
+                                if (newValue) {
+
+                                    setNotificationType(
+                                        newValue
+                                    );
+                                }
+                            }}
+                            fullWidth
+                        >
+
+                            <ToggleButton value="EMAIL">
+                                Email
+                            </ToggleButton>
+
+                            <ToggleButton value="SMS">
+                                SMS
+                            </ToggleButton>
+
+                            <ToggleButton value="AMBOS">
+                                Ambos
+                            </ToggleButton>
+
+                        </ToggleButtonGroup>
+
                     </Box>
 
                 </Stack>
