@@ -37,6 +37,9 @@ export default function PatientHub() {
     const [emails, setEmails] = useState([]);
     const [selectedTab, setSelectedTab] = useState(0);
     const [isLeavingGroup, setIsLeavingGroup] = useState(false);
+    const [sendingEmails,
+        setSendingEmails] =
+        useState(false);
 
     const userType = localStorage.getItem("tipo");
     //const nomePaciente = localStorage.getItem("nome");
@@ -44,7 +47,8 @@ export default function PatientHub() {
     const navigate = useNavigate();
     const {
         selectedPatient,
-        setSelectedPatient
+        setSelectedPatient,
+        refreshPatients
     } = usePatient();
 
     async function loadLinks() {
@@ -85,7 +89,7 @@ export default function PatientHub() {
                 "success",
                 "Vínculo removido com sucesso"
             );
-
+            await refreshPatients();
             loadLinks();
 
         } catch (error) {
@@ -172,7 +176,7 @@ export default function PatientHub() {
 
             setJoinCode("");
 
-            loadLinks();
+            await refreshPatients();
 
         } catch (error) {
 
@@ -238,6 +242,8 @@ export default function PatientHub() {
 
         try {
 
+            setSendingEmails(true);
+
             await Promise.all(
 
                 emails.map((email) =>
@@ -266,6 +272,10 @@ export default function PatientHub() {
                 "error",
                 "Erro ao enviar convites"
             );
+
+        } finally {
+
+            setSendingEmails(false);
         }
     }
 
@@ -356,8 +366,14 @@ export default function PatientHub() {
     }
 
     useEffect(() => {
+
+        if (!selectedPatient?.id) {
+            return;
+        }
+
         loadLinks();
-    }, []);
+
+    }, [selectedPatient]);
 
     useEffect(() => {
 
@@ -388,10 +404,6 @@ export default function PatientHub() {
 
     }, [selectedPatient]);
 
-    console.log(
-        "Paciente ativo:",
-        selectedPatient
-    );
     return (
 
         <Box
@@ -422,26 +434,27 @@ export default function PatientHub() {
                 mb={4}
             >
 
-                <Box>
+                {selectedPatient &&
+                    <Box>
 
-                    <Typography
-                        variant="h4"
-                        sx={{
-                            fontWeight: 700
-                        }}
-                    >
-                        Grupo de {selectedPatient?.nome || "Paciente"}
-                    </Typography>
+                        <Typography
+                            variant="h4"
+                            sx={{
+                                fontWeight: 700
+                            }}
+                        >
+                            Grupo de {selectedPatient?.nome || "Paciente"}
+                        </Typography>
 
-                    <Typography
-                        sx={{
-                            color: "#777"
-                        }}
-                    >
-                        Pessoas que acompanham o paciente
-                    </Typography>
+                        <Typography
+                            sx={{
+                                color: "#777"
+                            }}
+                        >
+                            Pessoas que acompanham o paciente
+                        </Typography>
 
-                </Box>
+                    </Box>}
 
                 <Box
                     sx={{
@@ -1135,9 +1148,10 @@ export default function PatientHub() {
 
                             {emails.length > 0 && (
 
-                                <Button
+                                <ButtonUI
                                     variant="contained"
                                     onClick={handleSendEmails}
+                                    disabled={sendingEmails}
                                     sx={{
                                         mt: 3,
                                         borderRadius: "14px",
@@ -1145,8 +1159,14 @@ export default function PatientHub() {
                                         fontWeight: 600
                                     }}
                                 >
-                                    Enviar Convites
-                                </Button>
+
+                                    {
+                                        sendingEmails
+                                            ? "Enviando convites..."
+                                            : "Enviar Convites"
+                                    }
+
+                                </ButtonUI>
 
                             )}
 

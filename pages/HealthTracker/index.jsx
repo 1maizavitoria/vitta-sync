@@ -10,7 +10,10 @@ import { usePatient } from "../../context/PatientContext";
 
 export default function HealthTreacker() {
     const { selectedPatient } = usePatient();
-
+    const userType =
+        localStorage
+            .getItem("tipo")
+            ?.toLowerCase();
     return (
 
         <Box
@@ -42,17 +45,18 @@ export default function HealthTreacker() {
                     Acompanhamento de Saúde
                 </Typography>
 
-                <Typography
-                    variant="body1"
-                    color="text.secondary"
-                    mt={1}
-                >
-                    Paciente selecionado:
-                    {" "}
-                    <strong>
-                        {selectedPatient?.nome || "Nenhum paciente"}
-                    </strong>
-                </Typography>
+                {userType !== "paciente" &&
+                    <Typography
+                        variant="body1"
+                        color="text.secondary"
+                        mt={1}
+                    >
+                        Paciente selecionado:
+                        {" "}
+                        <strong>
+                            {selectedPatient?.nome || "Nenhum paciente"}
+                        </strong>
+                    </Typography>}
 
             </Box>
 

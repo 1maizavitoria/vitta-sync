@@ -29,7 +29,7 @@ import { getAvailablePatients } from "../../services/linkService";
 const drawerWidth = 240;
 
 const menuItems = [
-    { label: "Dashboard", icon: <DashboardIcon />, path: "/dashboard" },
+    { label: "Grupo", icon: <DashboardIcon />, path: "/dashboard" },
     // { label: "Registros", icon: <DescriptionIcon />, path: "/health-tracker" },
     // { label: "Vínculos", icon: <LinkIcon />, path: "/links" },
     // { label: "Relatórios", icon: <ShowChartIcon />, path: "/reports" },
@@ -37,7 +37,12 @@ const menuItems = [
 
 export default function Sidebar({ open, setOpen }) {
 
-    const { selectedPatient, setSelectedPatient } = usePatient();
+
+    const {
+        // patients,
+        selectedPatient,
+        setSelectedPatient
+    } = usePatient();
 
     const [patients, setPatients] = useState([]);
 
@@ -133,6 +138,7 @@ export default function Sidebar({ open, setOpen }) {
                 console.error(error);
             }
         }
+
         fetchUsers();
         fetchPatients();
     }, []);
@@ -160,7 +166,7 @@ export default function Sidebar({ open, setOpen }) {
                     mt: 8
                 }}
             >
-                {patients.length > 0 && (
+                {patients.length > 0 && userResponse.tipo !== "paciente" && (
                     <Box mt={2}>
                         <Typography
                             variant="caption"

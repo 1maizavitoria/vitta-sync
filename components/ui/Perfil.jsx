@@ -147,16 +147,17 @@ export default function Perfil() {
 
     const userType = localStorage.getItem("tipo")?.toLowerCase();
     const canEdit = userType !== "saude";
-    const targetCpf = userType === "responsavel"
-        ? selectedPatient?.cpf
-        : localStorage.getItem("CPF");
+    const loggedCpf = localStorage.getItem("CPF");
+
+    const targetCpf =
+        userType === "paciente"
+            ? localStorage.getItem("CPF")
+            : selectedPatient?.cpf;
 
     useEffect(() => {
-
         if (!targetCpf) return;
 
         async function fetchUser() {
-
             try {
                 const data =
                     await getUserByCpf({
@@ -221,7 +222,7 @@ export default function Perfil() {
                     </Typography>
                 </Box>
 
-                {!editing && canEdit && (
+                {!editing && (canEdit || loggedCpf === targetCpf) && (
 
                     <ButtonUI
                         onClick={() =>
@@ -289,6 +290,15 @@ export default function Perfil() {
                 </Grid>
 
                 <Grid item xs={12} md={6}>
+                    <InputUI
+                        label="Tipo"
+                        value={formData.tipo}
+                        disabled
+                        fullWidth
+                    />
+                </Grid>
+
+                <Grid item xs={12} md={6}>
 
                     <InputUI
                         label="Telefone"
@@ -308,36 +318,6 @@ export default function Perfil() {
                         fullWidth
                     />
 
-                </Grid>
-
-                <Grid item xs={12} md={6}>
-                    <InputUI
-                        label="Peso Inicial (kg)"
-                        type="number"
-                        value={formData.pesoInicial}
-                        onChange={(e) =>
-                            handleChange(
-                                "pesoInicial"
-                            )(e.target.value)
-                        }
-                        disabled={!editing}
-                        fullWidth
-                    />
-                </Grid>
-
-                <Grid item xs={12} md={6}>
-                    <InputUI
-                        label="Altura (m)"
-                        type="number"
-                        value={formData.altura}
-                        onChange={(e) =>
-                            handleChange(
-                                "altura"
-                            )(e.target.value)
-                        }
-                        disabled={!editing}
-                        fullWidth
-                    />
                 </Grid>
 
                 <Grid item xs={12} md={6}>
@@ -379,14 +359,7 @@ export default function Perfil() {
                     />
                 </Grid>
 
-                <Grid item xs={12} md={6}>
-                    <InputUI
-                        label="Tipo"
-                        value={formData.tipo}
-                        disabled
-                        fullWidth
-                    />
-                </Grid>
+
 
                 {formData.tipo === "saude" && (
                     <Grid item xs={12}>
@@ -400,6 +373,36 @@ export default function Perfil() {
                         />
                     </Grid>
                 )}
+
+                {formData.tipo === "paciente" && <Grid item xs={12} md={6}>
+                    <InputUI
+                        label="Peso Inicial (kg)"
+                        type="number"
+                        value={formData.pesoInicial}
+                        onChange={(e) =>
+                            handleChange(
+                                "pesoInicial"
+                            )(e.target.value)
+                        }
+                        disabled={!editing}
+                        fullWidth
+                    />
+                </Grid>}
+
+                {formData.tipo === "paciente" && <Grid item xs={12} md={6}>
+                    <InputUI
+                        label="Altura (m)"
+                        type="number"
+                        value={formData.altura}
+                        onChange={(e) =>
+                            handleChange(
+                                "altura"
+                            )(e.target.value)
+                        }
+                        disabled={!editing}
+                        fullWidth
+                    />
+                </Grid>}
 
                 {formData.tipo === "paciente" && <FormGroup>
                     <CheckboxUI
