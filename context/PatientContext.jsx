@@ -19,34 +19,41 @@ export function usePatient() {
     );
 }
 
-
-
 export function PatientProvider({
     children
 }) {
 
-    const [selectedPatient,
-        setSelectedPatient] =
-        useState(null);
-
-    const [patients,
-        setPatients] =
-        useState([]);
+    const [selectedPatient, setSelectedPatient] = useState(null);
+    const [patients, setPatients] = useState([]);
 
     async function refreshPatients() {
 
         try {
 
-            const data =
-                await getAvailablePatients();
+            const data = await getAvailablePatients();
 
             setPatients(data);
 
             setSelectedPatient((prev) => {
 
-                if (prev) {
-                    return prev;
-                }
+                setSelectedPatient((prev) => {
+
+                    if (!data.length) {
+                        return null;
+                    }
+
+                    const stillExists =
+                        data.some(
+                            patient =>
+                                patient.id === prev?.id
+                        );
+
+                    if (stillExists) {
+                        return prev;
+                    }
+
+                    return data[0];
+                });
 
                 return data[0] || null;
             }); {

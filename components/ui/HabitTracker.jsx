@@ -14,6 +14,8 @@ import BedtimeIcon from "@mui/icons-material/Bedtime";
 import FitnessCenterIcon from "@mui/icons-material/FitnessCenter";
 import { CalendarIcon } from "@mui/x-date-pickers";
 
+import { formatDate } from "../../utils/formatters/formatDate";
+
 import { usePatient } from "../../context/PatientContext";
 
 export function HabitTracker() {
@@ -318,7 +320,7 @@ export function HabitTracker() {
                         title="Data"
                         error={(error && !habitInputs.date) || errorDate}
                         // type="number"
-                        value={lastHabit ? lastHabit.dataReferencia : "N/A"}
+                        value={lastHabit ? formatDate(lastHabit.dataReferencia) : "N/A"}
                         // unit="yyyy-MM-dd"
                         date={lastHabit ? new Date(lastHabit.dataRegistro).toLocaleString() : "N/A"}
                         inputValue={habitInputs.date}

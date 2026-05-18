@@ -42,7 +42,6 @@ export default function PatientHub() {
         useState(false);
 
     const userType = localStorage.getItem("tipo");
-    //const nomePaciente = localStorage.getItem("nome");
 
     const navigate = useNavigate();
     const {
@@ -89,8 +88,8 @@ export default function PatientHub() {
                 "success",
                 "Vínculo removido com sucesso"
             );
-            await refreshPatients();
             loadLinks();
+            await refreshPatients();
 
         } catch (error) {
 
@@ -374,6 +373,7 @@ export default function PatientHub() {
         loadLinks();
 
     }, [selectedPatient]);
+
 
     useEffect(() => {
 
