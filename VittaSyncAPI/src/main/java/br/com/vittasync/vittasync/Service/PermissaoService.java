@@ -14,94 +14,52 @@ public class PermissaoService {
 
     private final VinculoRepository vinculoRepository;
 
-    public PermissaoService(
-            UsuarioRepository usuarioRepository,
-            VinculoRepository vinculoRepository
-    ) {
+    public PermissaoService(UsuarioRepository usuarioRepository, VinculoRepository vinculoRepository) {
         this.usuarioRepository = usuarioRepository;
         this.vinculoRepository = vinculoRepository;
     }
 
-    public boolean podeVisualizarPaciente(
-            Integer usuarioId,
-            Integer pacienteId
-    ) {
+    public boolean podeVisualizarPaciente(Integer usuarioId, Integer pacienteId) {
 
         if (usuarioId.equals(pacienteId)) {
             return true;
         }
 
-        return vinculoRepository
-                .existsByPacienteIdAndUsuarioId(
-                        pacienteId,
-                        usuarioId
-                );
+        return vinculoRepository.existsByPacienteIdAndUsuarioId(pacienteId, usuarioId);
     }
 
-    public boolean podeEditarPaciente(
-            Integer usuarioId,
-            Integer pacienteId
-    ) {
+    public boolean podeEditarPaciente(Integer usuarioId, Integer pacienteId) {
 
         if (usuarioId.equals(pacienteId)) {
             return true;
         }
 
-        return vinculoRepository
-                .existsByPacienteIdAndUsuarioIdAndTipo(
-                        pacienteId,
-                        usuarioId,
-                        "responsavel"
-                );
+        return vinculoRepository.existsByPacienteIdAndUsuarioIdAndTipo(pacienteId, usuarioId, "responsavel");
     }
 
-    public boolean podeRemoverVinculo(
-            Integer usuarioLogadoId,
-            Vinculo vinculoAlvo
-    ) {
+    public boolean podeRemoverVinculo(Integer usuarioLogadoId, Vinculo vinculoAlvo) {
 
         // paciente remove qualquer vínculo dele
-        if (
-                usuarioLogadoId.equals(
-                        vinculoAlvo.getPacienteId()
-                )
-        ) {
+        if (usuarioLogadoId.equals(vinculoAlvo.getPacienteId())) {
             return true;
         }
 
-        Usuario usuarioLogado =
-                usuarioRepository.findById(
-                        usuarioLogadoId
-                ).orElse(null);
+        Usuario usuarioLogado = usuarioRepository.findById(usuarioLogadoId).orElse(null);
 
         if (usuarioLogado == null) {
             return false;
         }
 
         // médico ou responsável removendo o PRÓPRIO vínculo
-        if (
-                usuarioLogadoId.equals(
-                        vinculoAlvo.getUsuarioId()
-                )
-        ) {
+        if (usuarioLogadoId.equals(vinculoAlvo.getUsuarioId())) {
             return true;
         }
 
         // responsável removendo médicos do paciente
-        if (
-                usuarioLogado.getTipo()
-                        .equalsIgnoreCase("responsavel")
-                        &&
-                        vinculoAlvo.getTipo()
-                                .equalsIgnoreCase("medico")
-        ) {
+        if (usuarioLogado.getTipo().equalsIgnoreCase("responsavel")
+                && vinculoAlvo.getTipo().equalsIgnoreCase("saude")) {
 
-            return vinculoRepository
-                    .existsByPacienteIdAndUsuarioIdAndTipo(
-                            vinculoAlvo.getPacienteId(),
-                            usuarioLogadoId,
-                            "responsavel"
-                    );
+            return vinculoRepository.existsByPacienteIdAndUsuarioIdAndTipo(vinculoAlvo.getPacienteId(), usuarioLogadoId, "responsavel");
         }
 
         return false;

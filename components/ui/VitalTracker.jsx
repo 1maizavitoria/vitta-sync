@@ -42,7 +42,6 @@ export function VitalTracker() {
 
     const userType =
         localStorage.getItem("tipo");
-
     const canEdit =
         userType !== "saude";
 

@@ -24,12 +24,12 @@ import { Button } from "@mui/material";
 import ButtonUI from "../ui/Button";
 
 import { usePatient } from "../../context/PatientContext";
-import { getAvailablePatients } from "../../services/linkService";
+import { Refresh } from "@mui/icons-material";
 
 const drawerWidth = 240;
 
 const menuItems = [
-    { label: "Dashboard", icon: <DashboardIcon />, path: "/dashboard" },
+    { label: "Grupo", icon: <DashboardIcon />, path: "/dashboard" },
     // { label: "Registros", icon: <DescriptionIcon />, path: "/health-tracker" },
     // { label: "Vínculos", icon: <LinkIcon />, path: "/links" },
     // { label: "Relatórios", icon: <ShowChartIcon />, path: "/reports" },
@@ -37,9 +37,12 @@ const menuItems = [
 
 export default function Sidebar({ open, setOpen }) {
 
-    const { selectedPatient, setSelectedPatient } = usePatient();
 
-    const [patients, setPatients] = useState([]);
+    const {
+        patients,
+        selectedPatient,
+        setSelectedPatient
+    } = usePatient();
 
     const location = useLocation();
     const navigate = useNavigate();
@@ -67,6 +70,24 @@ export default function Sidebar({ open, setOpen }) {
 
         return (primeira + ultima).toUpperCase();
     };
+
+    const isPersonalContext =
+        selectedPatient?.cpf
+        === userResponse.cpf;
+
+    function handleNavigate(path) {
+        if (userResponse !== "paciente" && isPersonalContext) {
+
+            setSelectedPatient(
+                patients[0]
+            );
+
+            navigate("/dashboard");
+
+            return;
+        }
+        navigate(path);
+    }
 
     function handleOpenProfile() {
 
@@ -107,34 +128,8 @@ export default function Sidebar({ open, setOpen }) {
             }
         }
 
-        async function fetchPatients() {
-
-            try {
-
-                const data =
-                    await getAvailablePatients();
-
-                setPatients(data);
-
-                // seleciona automaticamente
-                // o primeiro paciente
-                if (
-                    data.length > 0 &&
-                    !selectedPatient
-                ) {
-
-                    setSelectedPatient(
-                        data[0]
-                    );
-                }
-
-            } catch (error) {
-
-                console.error(error);
-            }
-        }
         fetchUsers();
-        fetchPatients();
+
     }, []);
 
     return (
@@ -160,7 +155,7 @@ export default function Sidebar({ open, setOpen }) {
                     mt: 8
                 }}
             >
-                {patients.length > 0 && (
+                {patients.length > 0 && userResponse.tipo !== "paciente" && (
                     <Box mt={2}>
                         <Typography
                             variant="caption"
@@ -220,6 +215,7 @@ export default function Sidebar({ open, setOpen }) {
 
             {/* FOOTER (user) */}
             <Box sx={{ mt: "auto", p: 2 }}>
+
                 {/* MENU */}
                 <List sx={{ p: 1, mt: 3 }}>
                     {filteredMenu.map((item) => {
@@ -228,7 +224,7 @@ export default function Sidebar({ open, setOpen }) {
                         return (
                             <ListItemButton
                                 key={item.label}
-                                onClick={() => navigate(item.path)}
+                                onClick={() => handleNavigate(item.path)}
                                 sx={{
                                     borderRadius: 3,
                                     mb: 0.5,
@@ -248,6 +244,7 @@ export default function Sidebar({ open, setOpen }) {
                         );
                     })}
                 </List>
+
                 <Divider sx={{ mb: 2 }} />
 
                 <Box
@@ -298,6 +295,6 @@ export default function Sidebar({ open, setOpen }) {
 
                 </Box>
             </Box>
-        </Drawer>
+        </Drawer >
     );
 }

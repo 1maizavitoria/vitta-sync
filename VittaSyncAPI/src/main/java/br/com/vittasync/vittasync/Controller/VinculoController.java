@@ -32,13 +32,7 @@ public class VinculoController {
 
     private final VinculoRepository vinculoRepository;
 
-    public VinculoController(
-            VinculoService service,
-            JwtService jwtService,
-            UsuarioService usuarioService,
-            PermissaoService permissaoService,
-            VinculoRepository vinculoRepository
-    ) {
+    public VinculoController(VinculoService service, JwtService jwtService, UsuarioService usuarioService, PermissaoService permissaoService, VinculoRepository vinculoRepository) {
         this.service = service;
         this.jwtService = jwtService;
         this.usuarioService = usuarioService;
@@ -47,90 +41,53 @@ public class VinculoController {
     }
 
     @PostMapping("/gerar")
-    public ResponseEntity<ConviteVinculoOutputDTO> gerarCodigo(
-            @RequestHeader("Authorization") String authHeader
-    ) {
+    public ResponseEntity<ConviteVinculoOutputDTO> gerarCodigo(@RequestHeader("Authorization") String authHeader) {
 
-        String token =
-                authHeader.replace("Bearer ", "");
+        String token = authHeader.replace("Bearer ", "");
 
-        String cpf =
-                jwtService.extrairCpf(token);
+        String cpf = jwtService.extrairCpf(token);
 
-        Usuario usuario =
-                usuarioService.searchByCpf(cpf);
+        Usuario usuario = usuarioService.searchByCpf(cpf);
 
-        ConviteVinculoOutputDTO output =
-                service.gerarCodigo(usuario.getId());
+        ConviteVinculoOutputDTO output = service.gerarCodigo(usuario.getId());
 
         return ResponseEntity.ok(output);
     }
 
     @PostMapping("/entrar")
-    public ResponseEntity<Void> entrarComCodigo(
-            @RequestHeader("Authorization") String authHeader,
-            @RequestBody VinculoInputDTO dto
-    ) {
+    public ResponseEntity<Void> entrarComCodigo(@RequestHeader("Authorization") String authHeader, @RequestBody VinculoInputDTO dto) {
 
-        String token =
-                authHeader.replace("Bearer ", "");
+        String token = authHeader.replace("Bearer ", "");
 
-        String cpf =
-                jwtService.extrairCpf(token);
+        String cpf = jwtService.extrairCpf(token);
 
-        Usuario usuario =
-                usuarioService.searchByCpf(cpf);
+        Usuario usuario = usuarioService.searchByCpf(cpf);
 
-        service.entrarComCodigo(
-                dto.getCodigo(),
-                usuario.getId()
-        );
+        service.entrarComCodigo(dto.getCodigo(), usuario.getId());
 
         return ResponseEntity.ok().build();
     }
 
     @PostMapping("/enviar-email")
-    public ResponseEntity<Void> enviarEmail(
-            @RequestBody EnviarConviteDTO dto
-    ) {
+    public ResponseEntity<Void> enviarEmail(@RequestBody EnviarConviteDTO dto) {
 
-        service.enviarConviteEmail(
-                dto.getEmail(),
-                dto.getCodigo()
-        );
+        service.enviarConviteEmail(dto.getEmail(), dto.getCodigo());
 
         return ResponseEntity.ok().build();
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> removerVinculo(
-            @PathVariable Long id,
-            @RequestHeader("Authorization") String authHeader
-    ) {
+    public ResponseEntity<Void> removerVinculo(@PathVariable Long id, @RequestHeader("Authorization") String authHeader) {
 
-        String token =
-                authHeader.replace("Bearer ", "");
+        String token = authHeader.replace("Bearer ", "");
 
-        String cpfDoToken =
-                jwtService.extrairCpf(token);
+        String cpfDoToken = jwtService.extrairCpf(token);
 
-        Usuario usuarioLogado =
-                usuarioService.searchByCpf(cpfDoToken);
+        Usuario usuarioLogado = usuarioService.searchByCpf(cpfDoToken);
 
-        Vinculo vinculo =
-                vinculoRepository.findById(id)
-                        .orElseThrow(() ->
-                                new RecursoNaoEncontradoException(
-                                        "Vínculo não encontrado"
-                                )
-                        );
+        Vinculo vinculo = vinculoRepository.findById(id).orElseThrow(() -> new RecursoNaoEncontradoException("Vínculo não encontrado"));
 
-        if (
-                !permissaoService.podeRemoverVinculo(
-                        usuarioLogado.getId(),
-                        vinculo
-                )
-        ) {
+        if (!permissaoService.podeRemoverVinculo(usuarioLogado.getId(), vinculo)) {
             return ResponseEntity.status(403).build();
         }
 
@@ -140,52 +97,30 @@ public class VinculoController {
     }
 
     @GetMapping()
-    public ResponseEntity<List<VinculoOutputDTO>> listar(
-            @RequestHeader("Authorization") String authHeader
-    ) {
+    public ResponseEntity<List<VinculoOutputDTO>> listar(@RequestHeader("Authorization") String authHeader) {
 
-        String token =
-                authHeader.replace("Bearer ", "");
+        String token = authHeader.replace("Bearer ", "");
 
-        String cpf =
-                jwtService.extrairCpf(token);
+        String cpf = jwtService.extrairCpf(token);
 
-        Usuario usuario =
-                usuarioService.searchByCpf(cpf);
+        Usuario usuario = usuarioService.searchByCpf(cpf);
 
-        return ResponseEntity.ok(
-                service.listar(usuario.getId())
-        );
+        return ResponseEntity.ok(service.listar(usuario.getId()));
     }
 
     @GetMapping("/pacientes")
-    public ResponseEntity<
-            List<PacienteResumoDTO>
-            > listarPacientes(
-            @RequestHeader("Authorization")
-            String authHeader
-    ) {
+    public ResponseEntity<List<PacienteResumoDTO>> listarPacientes(@RequestHeader("Authorization") String authHeader) {
 
-        String token = authHeader.replace("Bearer ","" );
+        String token = authHeader.replace("Bearer ", "");
         String cpf = jwtService.extrairCpf(token);
         Usuario usuario = usuarioService.searchByCpf(cpf);
-        return ResponseEntity.ok(
-                service.listarPacientesDoUsuario(
-                        usuario.getId()
-                )
-        );
+        return ResponseEntity.ok(service.listarPacientesDoUsuario(usuario.getId()));
     }
 
     @GetMapping("/paciente/{id}")
-    public ResponseEntity<
-            List<VinculoOutputDTO>
-            > listarPorPaciente(
-            @PathVariable Integer id
-    ) {
+    public ResponseEntity<List<VinculoOutputDTO>> listarPorPaciente(@PathVariable Integer id) {
 
-        return ResponseEntity.ok(
-                service.listarPorPaciente(id)
-        );
+        return ResponseEntity.ok(service.listarPorPaciente(id));
     }
 
 

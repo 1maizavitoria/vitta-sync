@@ -1,8 +1,13 @@
 import {
     createContext,
     useContext,
+    useEffect,
     useState
 } from "react";
+
+import {
+    getAvailablePatients
+} from "../services/linkService";
 
 const PatientContext =
     createContext();
@@ -18,16 +23,69 @@ export function PatientProvider({
     children
 }) {
 
-    const [selectedPatient,
-        setSelectedPatient] =
-        useState(null);
+    const [selectedPatient, setSelectedPatient] = useState(null);
+    const [patients, setPatients] = useState([]);
+
+    async function refreshPatients() {
+
+        try {
+
+            const data = await getAvailablePatients();
+
+            setPatients(data);
+
+            setSelectedPatient((prev) => {
+
+                setSelectedPatient((prev) => {
+
+                    if (!data.length) {
+                        return null;
+                    }
+
+                    const stillExists =
+                        data.some(
+                            patient =>
+                                patient.id === prev?.id
+                        );
+
+                    if (stillExists) {
+                        return prev;
+                    }
+
+                    return data[0];
+                });
+
+                return data[0] || null;
+            }); {
+
+                setSelectedPatient(
+                    data[0]
+                );
+            }
+
+        } catch (error) {
+
+            console.error(error);
+        }
+    }
+
+    useEffect(() => {
+
+        refreshPatients();
+
+    }, []);
 
     return (
 
         <PatientContext.Provider
             value={{
                 selectedPatient,
-                setSelectedPatient
+                setSelectedPatient,
+
+                patients,
+                setPatients,
+
+                refreshPatients
             }}
         >
 
