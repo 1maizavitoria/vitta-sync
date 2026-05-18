@@ -97,10 +97,16 @@ public class UsuarioController {
 
         Usuario usuarioPaciente = usuarioService.searchByCpf(cpf);
 
-        boolean podeEditar = cpfToken.equals(cpf) || permissaoService.podeEditarPaciente(usuarioLogado.getId(), usuarioPaciente.getId());
-
-        if (!podeEditar) {
-            return ResponseEntity.status(403).build();
+        boolean podeVisualizar =
+                cpfToken.equals(cpf) ||
+                        permissaoService.podeVisualizarPaciente(
+                                usuarioLogado.getId(),
+                                usuarioPaciente.getId()
+                        );
+        if (!podeVisualizar) {
+            return ResponseEntity
+                    .status(403)
+                    .build();
         }
 
         Usuario usuario = usuarioService.searchByCpf(cpf);
