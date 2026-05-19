@@ -29,6 +29,8 @@ public class UsuarioInputDTO {
     @Positive(message = "Altura deve ser positiva")
     private Double altura;
 
+    private String funcaoResponsavel;
+
     @NotBlank(message = "Senha é obrigatória")
     private String senha;
 
@@ -63,6 +65,9 @@ public class UsuarioInputDTO {
 
     public Double getAltura() { return altura; }
     public void setAltura(Double altura) { this.altura = altura; }
+
+    public String getFuncaoResponsavel() { return funcaoResponsavel; }
+    public void setFuncaoResponsavel(String funcaoResponsavel) { this.funcaoResponsavel = funcaoResponsavel; }
 
     public String getSenha() { return senha; }
     public void setSenha(String senha) { this.senha = senha; }

@@ -50,6 +50,7 @@ public class SecurityConfig {
                         .requestMatchers("/sessao/logout").authenticated()
                         .requestMatchers("/sinaisvitais/**").authenticated()
                         .requestMatchers("/habitos/**").authenticated()
+                        .requestMatchers("/contatoemergencia/**").authenticated()
 
                         .anyRequest().authenticated()
                 )

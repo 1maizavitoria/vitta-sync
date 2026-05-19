@@ -14,6 +14,7 @@ public class UsuarioOutputDTO {
     private Double altura;
     private String tipo;
     private String conselho;
+    private String funcaoResponsavel;
     private Boolean privCompartilharDiario;
     private Boolean privCompartilharHabitos;
     private LocalDate dataNascimento;
@@ -38,6 +39,9 @@ public class UsuarioOutputDTO {
 
     public Double getAltura() { return altura; }
     public void setAltura(Double altura) { this.altura = altura; }
+
+    public String getFuncaoResponsavel() { return funcaoResponsavel; }
+    public void setFuncaoResponsavel(String funcaoResponsavel) { this.funcaoResponsavel = funcaoResponsavel; }
 
     public String getTipo() { return tipo; }
     public void setTipo(String tipo) { this.tipo = tipo; }

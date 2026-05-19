@@ -25,9 +25,11 @@ public class UsuarioUpdateDTO {
     @Positive(message = "Altura deve ser positiva")
     private Double altura;
 
-    @NotNull(message = "Peso é obrigatória")
+    @NotNull(message = "Peso é obrigatório")
     @Positive(message = "Peso deve ser positiva")
     private Double pesoInicial;
+
+    private String funcaoResponsavel;
 
     private Boolean privCompartilharDiario;
     private Boolean privCompartilharHabitos;
@@ -50,6 +52,9 @@ public class UsuarioUpdateDTO {
 
     public Double getPesoInicial() { return pesoInicial; }
     public void setPesoInicial(Double pesoInicial) { this.pesoInicial = pesoInicial; }
+
+    public String getFuncaoResponsavel() { return funcaoResponsavel; }
+    public void setFuncaoResponsavel(String funcaoResponsavel) { this.funcaoResponsavel = funcaoResponsavel; }
 
     public Boolean getPrivCompartilharDiario() { return privCompartilharDiario; }
     public void setPrivCompartilharDiario(Boolean privCompartilharDiario) { this.privCompartilharDiario = privCompartilharDiario; }

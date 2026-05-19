@@ -1,0 +1,76 @@
+package br.com.vittasync.vittasync.Service;
+
+
+import br.com.vittasync.vittasync.Exception.AcessoNegadoException;
+import br.com.vittasync.vittasync.Exception.DadosInvalidosException;
+import br.com.vittasync.vittasync.Exception.RecursoNaoEncontradoException;
+import br.com.vittasync.vittasync.Model.ContatoEmergencia;
+import br.com.vittasync.vittasync.Model.Usuario;
+import br.com.vittasync.vittasync.Repository.ContatoEmergenciaRepository;
+import org.springframework.stereotype.Service;
+import java.time.LocalDateTime;
+import java.util.List;
+
+
+@Service
+public class ContatoEmergenciaService {
+
+    private final ContatoEmergenciaRepository repository;
+    private final PermissaoService permissaoService;
+
+    public ContatoEmergenciaService(ContatoEmergenciaRepository repository,
+                                    PermissaoService permissaoService) {
+        this.repository = repository;
+        this.permissaoService = permissaoService;
+    }
+
+    public ContatoEmergencia create(Integer usuarioLogadoId, Usuario paciente, ContatoEmergencia contato) {
+        if (!permissaoService.podeEditarPaciente(usuarioLogadoId, paciente.getId())) {
+            throw new AcessoNegadoException("Você não tem permissão para adicionar contatos de emergência deste paciente.");
+        }
+        
+        int qtd = repository.countByPaciente(paciente);
+        if (qtd >= 3) {
+            throw new DadosInvalidosException("Limite de 3 contatos de emergência atingido.");
+        }
+
+        contato.setPaciente(paciente);
+        contato.setDataRegistro(LocalDateTime.now());
+        contato.setDataModificacao(null);
+
+        return repository.save(contato);
+    }
+
+    public List<ContatoEmergencia> listar(Integer usuarioLogadoId, Usuario paciente) {
+        if (!permissaoService.podeVisualizarPaciente(usuarioLogadoId, paciente.getId())) {
+            throw new AcessoNegadoException("Você não tem permissão para visualizar contatos de emergência deste paciente.");
+        }
+        return repository.findByPaciente(paciente);
+    }
+
+    public ContatoEmergencia update(Integer usuarioLogadoId, ContatoEmergencia contato) {
+        if (!permissaoService.podeEditarPaciente(usuarioLogadoId, contato.getPaciente().getId())) {
+            throw new AcessoNegadoException("Você não tem permissão para editar contatos de emergência deste paciente.");
+        }
+
+        ContatoEmergencia existente = repository.findById(contato.getId())
+                .orElseThrow(() -> new RecursoNaoEncontradoException("Contato de emergência não encontrado"));
+
+        existente.setNome(contato.getNome());
+        existente.setTelefone(contato.getTelefone());
+        existente.setDataModificacao(LocalDateTime.now());
+
+        return repository.save(existente);
+    }
+
+    public void delete(Integer usuarioLogadoId, Integer id) {
+        ContatoEmergencia contato = repository.findById(id)
+                .orElseThrow(() -> new RecursoNaoEncontradoException("Contato de emergência não encontrado"));
+
+        if (!permissaoService.podeEditarPaciente(usuarioLogadoId, contato.getPaciente().getId())) {
+            throw new AcessoNegadoException("Você não tem permissão para remover contatos de emergência deste paciente.");
+        }
+
+        repository.delete(contato);
+    }
+}

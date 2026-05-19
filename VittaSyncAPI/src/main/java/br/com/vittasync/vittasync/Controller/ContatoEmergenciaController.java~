@@ -1,0 +1,126 @@
+package br.com.vittasync.vittasync.Controller;
+
+
+import br.com.vittasync.vittasync.DTO.ContatoEmergenciaInputDTO;
+import br.com.vittasync.vittasync.DTO.ContatoEmergenciaOutputDTO;
+import br.com.vittasync.vittasync.Model.ContatoEmergencia;
+import br.com.vittasync.vittasync.Model.Usuario;
+import br.com.vittasync.vittasync.Service.ContatoEmergenciaService;
+import br.com.vittasync.vittasync.Service.UsuarioService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+import java.util.List;
+
+
+@RestController
+@RequestMapping("/contatoemergencia")
+@SecurityRequirement(name = "bearerAuth")
+public class ContatoEmergenciaController {
+
+    private final ContatoEmergenciaService service;
+    private final UsuarioService usuarioService;
+
+    public ContatoEmergenciaController(ContatoEmergenciaService service,
+                                       UsuarioService usuarioService) {
+        this.service = service;
+        this.usuarioService = usuarioService;
+    }
+
+    @Operation(summary = "Cadastrar contato de emergência",
+            description = "Apenas paciente ou responsável vinculado pode cadastrar.")
+    @PostMapping("/cadastrar/{cpf}")
+    public ResponseEntity<ContatoEmergenciaOutputDTO> cadastrar(
+            @Parameter(description = "CPF do paciente") @PathVariable String cpf,
+            @RequestBody ContatoEmergenciaInputDTO dto,
+            @Parameter(description = "CPF do usuário logado extraído do token")
+            @RequestAttribute("cpf") String cpfLogado
+    ) {
+        Usuario paciente = usuarioService.searchByCpf(cpf);
+        Usuario usuarioLogado = usuarioService.searchByCpf(cpfLogado);
+
+        ContatoEmergencia contato = new ContatoEmergencia();
+        contato.setNome(dto.getNome());
+        contato.setTelefone(dto.getTelefone());
+
+        ContatoEmergencia salvo = service.create(usuarioLogado.getId(), paciente, contato);
+
+        ContatoEmergenciaOutputDTO output = new ContatoEmergenciaOutputDTO();
+        output.setId(salvo.getId());
+        output.setNome(salvo.getNome());
+        output.setTelefone(salvo.getTelefone());
+        output.setDataRegistro(salvo.getDataRegistro());
+        output.setDataModificacao(salvo.getDataModificacao());
+
+        return ResponseEntity.ok(output);
+    }
+
+    @Operation(summary = "Listar contatos de emergência",
+            description = "Apenas paciente ou responsável vinculado pode visualizar.")
+    @GetMapping("/listar/{cpf}")
+    public ResponseEntity<List<ContatoEmergenciaOutputDTO>> listar(
+            @Parameter(description = "CPF do paciente") @PathVariable String cpf,
+            @Parameter(description = "CPF do usuário logado extraído do token")
+            @RequestAttribute("cpf") String cpfLogado
+    ) {
+        Usuario paciente = usuarioService.searchByCpf(cpf);
+        Usuario usuarioLogado = usuarioService.searchByCpf(cpfLogado);
+
+        List<ContatoEmergencia> contatos = service.listar(usuarioLogado.getId(), paciente);
+
+        List<ContatoEmergenciaOutputDTO> output = contatos.stream().map(c -> {
+            ContatoEmergenciaOutputDTO dto = new ContatoEmergenciaOutputDTO();
+            dto.setId(c.getId());
+            dto.setNome(c.getNome());
+            dto.setTelefone(c.getTelefone());
+            dto.setDataRegistro(c.getDataRegistro());
+            dto.setDataModificacao(c.getDataModificacao());
+            return dto;
+        }).toList();
+
+        return ResponseEntity.ok(output);
+    }
+
+    @Operation(summary = "Editar contato de emergência",
+            description = "Apenas paciente ou responsável vinculado pode editar.")
+    @PutMapping("/editar/{id}")
+    public ResponseEntity<ContatoEmergenciaOutputDTO> editar(
+            @Parameter(description = "ID do contato") @PathVariable Integer id,
+            @RequestBody ContatoEmergenciaInputDTO dto,
+            @Parameter(description = "CPF do usuário logado extraído do token")
+            @RequestAttribute("cpf") String cpfLogado
+    ) {
+        Usuario usuarioLogado = usuarioService.searchByCpf(cpfLogado);
+
+        ContatoEmergencia contato = new ContatoEmergencia();
+        contato.setId(id);
+        contato.setNome(dto.getNome());
+        contato.setTelefone(dto.getTelefone());
+
+        ContatoEmergencia atualizado = service.update(usuarioLogado.getId(), contato);
+
+        ContatoEmergenciaOutputDTO output = new ContatoEmergenciaOutputDTO();
+        output.setId(atualizado.getId());
+        output.setNome(atualizado.getNome());
+        output.setTelefone(atualizado.getTelefone());
+        output.setDataRegistro(atualizado.getDataRegistro());
+        output.setDataModificacao(atualizado.getDataModificacao());
+
+        return ResponseEntity.ok(output);
+    }
+
+    @Operation(summary = "Deletar contato de emergência",
+            description = "Apenas paciente ou responsável vinculado pode deletar.")
+    @DeleteMapping("/deletar/{id}")
+    public ResponseEntity<Void> deletar(
+            @Parameter(description = "ID do contato") @PathVariable Integer id,
+            @Parameter(description = "CPF do usuário logado extraído do token")
+            @RequestAttribute("cpf") String cpfLogado
+    ) {
+        Usuario usuarioLogado = usuarioService.searchByCpf(cpfLogado);
+        service.delete(usuarioLogado.getId(), id);
+        return ResponseEntity.noContent().build();
+    }
+}

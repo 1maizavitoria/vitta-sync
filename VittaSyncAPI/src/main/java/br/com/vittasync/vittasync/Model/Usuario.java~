@@ -27,9 +27,13 @@ public class Usuario {
     private String telefone;
 
     @Column(name = "peso_inicial")
-    private Float pesoInicial;
+    private Double pesoInicial;
 
-    private Float altura;
+    @Column(name = "altura")
+    private Double altura;
+
+    @Column(name = "peso_inicial")
+    private Double pesoInicial;
 
     @Column(nullable = false, length = 64)
     private String senha;
@@ -67,11 +71,11 @@ public class Usuario {
     public String getTelefone() { return telefone; }
     public void setTelefone(String telefone) { this.telefone = telefone; }
 
-    public Float getPesoInicial() { return pesoInicial; }
-    public void setPesoInicial(Float pesoInicial) { this.pesoInicial = pesoInicial; }
+    public Double getPesoInicial() { return pesoInicial; }
+    public void setPesoInicial(Double pesoInicial) { this.pesoInicial = pesoInicial; }
 
-    public Float getAltura() { return altura; }
-    public void setAltura(Float altura) { this.altura = altura; }
+    public Double getAltura() { return altura; }
+    public void setAltura(Double altura) { this.altura = altura; }
 
     public String getSenha() { return senha; }
     public void setSenha(String senha) { this.senha = senha; }

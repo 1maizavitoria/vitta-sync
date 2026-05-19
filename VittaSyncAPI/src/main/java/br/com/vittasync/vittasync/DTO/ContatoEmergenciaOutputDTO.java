@@ -1,0 +1,29 @@
+package br.com.vittasync.vittasync.DTO;
+
+
+import java.time.LocalDateTime;
+
+
+public class ContatoEmergenciaOutputDTO {
+
+    private Integer id;
+    private String nome;
+    private String telefone;
+    private LocalDateTime dataRegistro;
+    private LocalDateTime dataModificacao;
+
+    public Integer getId() { return id; }
+    public void setId(Integer id) { this.id = id; }
+
+    public String getNome() { return nome; }
+    public void setNome(String nome) { this.nome = nome; }
+
+    public String getTelefone() { return telefone; }
+    public void setTelefone(String telefone) { this.telefone = telefone; }
+
+    public LocalDateTime getDataRegistro() { return dataRegistro; }
+    public void setDataRegistro(LocalDateTime dataRegistro) { this.dataRegistro = dataRegistro; }
+
+    public LocalDateTime getDataModificacao() { return dataModificacao; }
+    public void setDataModificacao(LocalDateTime dataModificacao) { this.dataModificacao = dataModificacao; }
+}
