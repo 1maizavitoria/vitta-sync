@@ -26,8 +26,6 @@ import ButtonUI from "../ui/Button";
 import { usePatient } from "../../context/PatientContext";
 import { Refresh } from "@mui/icons-material";
 
-const drawerWidth = 240;
-
 const menuItems = [
     { label: "Grupo", icon: <DashboardIcon />, path: "/dashboard" },
     // { label: "Registros", icon: <DescriptionIcon />, path: "/health-tracker" },
@@ -36,7 +34,6 @@ const menuItems = [
 ];
 
 export default function Sidebar({ open, setOpen }) {
-
 
     const {
         patients,
@@ -74,6 +71,20 @@ export default function Sidebar({ open, setOpen }) {
     const isPersonalContext =
         selectedPatient?.cpf
         === userResponse.cpf;
+
+    const userType =
+        localStorage
+            .getItem("tipo")
+            ?.toLowerCase();
+
+    const sidebarColor = {
+        paciente: "#4F8FCF",
+        responsavel: "#2C7A4B",
+        saude: "#7A5DC7"
+    }[userType] || "#4F8FCF";
+
+    const drawerWidth =
+        open ? 280 : 84;
 
     function handleNavigate(path) {
         if (userResponse !== "paciente" && isPersonalContext) {
@@ -134,16 +145,22 @@ export default function Sidebar({ open, setOpen }) {
 
     return (
         <Drawer
-            variant="temporary"
+            variant="permanent"
             open={open}
             onClose={() => setOpen(false)}
             sx={{
                 width: drawerWidth,
+                transition: "0.2s",
+                overflowX: "hidden",
                 flexShrink: 0,
                 "& .MuiDrawer-paper": {
                     width: drawerWidth,
+                    transition: "0.2s",
+                    overflowX: "hidden",
                     boxSizing: "border-box",
                     borderRight: "1px solid #eee",
+                    backgroundColor: sidebarColor,
+                    // color: "#fff",
                 },
             }}
         >
@@ -157,49 +174,110 @@ export default function Sidebar({ open, setOpen }) {
             >
                 {patients.length > 0 && userResponse.tipo !== "paciente" && (
                     <Box mt={2}>
-                        <Typography
-                            variant="caption"
+
+                        {open && <Typography
+
                             sx={{
-                                color: "#777",
-                                fontWeight: 700,
-                                textTransform: "uppercase",
-                                letterSpacing: 1
+                                opacity: open ? 1 : 2,
+                                width: open ? "auto" : 0,
+                                transition: "0.2s",
+                                overflow: "hidden",
+                                whiteSpace: "nowrap"
                             }}
                         >
                             Pacientes
-                        </Typography>
+                        </Typography>}
+
 
                         <Box mt={1}>
+
                             {patients.map((patient) => (
                                 <Button
+
                                     key={patient.id}
                                     onClick={() =>
                                         setSelectedPatient(patient)
                                     }
                                     fullWidth
                                     sx={{
-                                        justifyContent: "flex-start",
-                                        borderRadius: "12px",
+                                        display: "flex",
+                                        justifyContent: open ? "flex-start" : "center",
+                                        alignItems: "center",
+                                        overflow: "hidden",
+                                        borderRadius: "16px",
                                         mb: 1,
                                         textTransform: "none",
-                                        color: "#333",
-                                        px: 2,
-                                        py: 1.2,
-                                        backgroundColor: selectedPatient?.id === patient.id
-                                            ? "#EEF7F1"
-                                            : "transparent",
-                                        border: selectedPatient?.id === patient.id
-                                            ? "1px solid #A8E6CF"
-                                            : "1px solid transparent",
-                                        fontWeight: selectedPatient?.id === patient.id
-                                            ? 600
-                                            : 400,
+                                        minHeight: 52,
+                                        px: open ? 2 : 0,
+                                        width: open ? "100%" : "52px",
+                                        minWidth: open ? "100%" : "52px",
+                                        height: "52px",
+                                        color:
+                                            selectedPatient?.id === patient.id
+                                                ? "#1B1B1B"
+                                                : "rgba(255,255,255,0.82)",
+
+                                        background:
+                                            selectedPatient?.id === patient.id
+                                                ? "linear-gradient(90deg, #69f08a, #F3FFE8)"
+                                                : "transparent",
+
+                                        border:
+                                            selectedPatient?.id === patient.id
+                                                ? "1px solid rgba(255,255,255,0.7)"
+                                                : "1px solid rgba(255,255,255,0.7)",
+
+                                        boxShadow:
+                                            selectedPatient?.id === patient.id
+                                                ? "0 4px 10px rgba(0,0,0,0.12)"
+                                                : "none",
+
+                                        fontWeight:
+                                            selectedPatient?.id === patient.id
+                                                ? 700
+                                                : 500,
+
+                                        transition: "all .2s ease",
+
                                         "&:hover": {
-                                            backgroundColor: "#F5F5F5",
+                                            background:
+                                                selectedPatient?.id === patient.id
+                                                    ? "linear-gradient(90deg, #69f08a, #F3FFE8)"
+                                                    : "rgba(255,255,255,0.10)",
+
+                                            transform: "translateX(2px)",
                                         },
                                     }}
                                 >
-                                    {patient.nome}
+                                    <>
+                                        {!open && (
+                                            <Typography
+                                                sx={{
+                                                    fontWeight: 700,
+                                                    fontSize: "1rem",
+                                                    color:
+                                                        selectedPatient?.id === patient.id
+                                                            ? "#1B1B1B"
+                                                            : "#FFFFFF",
+                                                }}
+                                            >
+                                                {getIniciais(patient.nome)}
+                                            </Typography>
+                                        )}
+
+                                        <Typography
+                                            sx={{
+                                                opacity: open ? 1 : 0,
+                                                maxWidth: open ? "180px" : 0,
+                                                transition: "all .2s ease",
+                                                overflow: "hidden",
+                                                whiteSpace: "nowrap",
+                                                textOverflow: "ellipsis"
+                                            }}
+                                        >
+                                            {patient.nome}
+                                        </Typography>
+                                    </>
                                 </Button>
 
                             ))}
@@ -217,7 +295,7 @@ export default function Sidebar({ open, setOpen }) {
             <Box sx={{ mt: "auto", p: 2 }}>
 
                 {/* MENU */}
-                <List sx={{ p: 1, mt: 3 }}>
+                <List sx={{}}>
                     {filteredMenu.map((item) => {
                         const isActive = location.pathname === item.path;
 
@@ -226,62 +304,127 @@ export default function Sidebar({ open, setOpen }) {
                                 key={item.label}
                                 onClick={() => handleNavigate(item.path)}
                                 sx={{
-                                    borderRadius: 3,
-                                    mb: 0.5,
-
-                                    ...(isActive && {
-                                        background: "linear-gradient(90deg, #a8e6cf, #dcedc1)",
-                                        boxShadow: "0 2px 6px rgba(0,0,0,0.1)",
-                                    }),
+                                    borderRadius: "16px",
+                                    mb: 1,
+                                    minHeight: 52,
+                                    justifyContent: open ? "initial" : "center",
+                                    px: open ? 2 : 1.5,
+                                    color: isActive
+                                        ? "#1B1B1B"
+                                        : "rgba(255,255,255,0.82)",
+                                    background: isActive
+                                        ? "linear-gradient(90deg, #69f08a, #F3FFE8)"
+                                        : "transparent",
+                                    border: isActive
+                                        ? "1px solid rgba(255,255,255,0.7)"
+                                        : "1px solid rgba(255,255,255,0.7)",
+                                    boxShadow: isActive
+                                        ? "0 4px 10px rgba(0,0,0,0.12)"
+                                        : "none",
+                                    transition: "all .2s ease",
+                                    "&:hover": {
+                                        background: isActive
+                                            ? "linear-gradient(90deg, #69f08a, #F3FFE8)"
+                                            : "rgba(255,255,255,0.10)",
+                                        transform: "translateX(2px)",
+                                    },
                                 }}
                             >
-                                <ListItemIcon sx={{ color: "inherit" }}>
+                                <ListItemIcon
+                                    sx={{
+                                        color: "inherit",
+                                        minWidth: 0,
+                                        mr: open ? 2 : 0,
+                                        justifyContent: "center",
+                                    }}
+                                >
                                     {item.icon}
                                 </ListItemIcon>
 
-                                <ListItemText primary={item.label} />
+                                <ListItemText
+                                    primary={item.label}
+                                    sx={{
+                                        opacity: open ? 1 : 0,
+                                        transition: "0.2s",
+                                        whiteSpace: "nowrap",
+                                    }}
+                                />
                             </ListItemButton>
                         );
                     })}
                 </List>
 
-                <Divider sx={{ mb: 2 }} />
 
                 <Box
-                    onClick={handleOpenProfile}
-
                     sx={{
                         display: "flex",
                         alignItems: "center",
-                        justifyContent: "space-between",
-                        width: "100%",
+                        justifyContent: open ? "space-between" : "center",
                         cursor: "pointer",
                         borderRadius: "12px",
                         p: 1,
                         transition: "0.2s",
-                        "&:hover": {
-                            backgroundColor: "#f5f5f5",
-                        },
                     }}
                 >
-                    <Avatar sx={{ bgcolor: "#a8e6cf", color: "#000" }}>
+                    <Avatar
+                        onClick={handleOpenProfile}
+                        sx={{
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            bgcolor: "rgba(255,255,255,0.14)",
+                            color: "#FFFFFF",
+                            width: open ? 52 : 42,
+                            height: open ? 52 : 42,
+                            fontWeight: 700,
+                            fontSize: open ? "1rem" : "0.9rem",
+                            border: "1px solid rgba(255,255,255,0.18)",
+                            boxShadow: "0 4px 10px rgba(0,0,0,0.12)",
+                            backdropFilter: "blur(6px)",
+                            transition: "all .2s ease",
+                            "&:hover": {
+                                transform: "scale(1.04)",
+                                bgcolor: "rgba(255,255,255,0.20)",
+                            },
+                        }}
+                    >
                         {getIniciais(userResponse.nome)}
                     </Avatar>
 
-                    <Box>
-                        <Typography variant="body2" fontWeight="bold">
-                            {userResponse.nome || "Usuário"}
-                        </Typography>
+                    {open && <Box
+                        sx={{
+                            flex: 1,
+                            ml: 1.5,
+                            overflow: "hidden",
+                        }}
+                    >
 
-                        <Typography
-                            variant="caption"
-                            color="text.secondary"
+                        {open && <Typography
+                            sx={{
+                                opacity: open ? 1 : 0,
+                                width: open ? "auto" : 0,
+                                transition: "0.2s",
+                                overflow: "hidden",
+                                whiteSpace: "nowrap"
+                            }}
+                        >
+                            {userResponse.nome || "Usuário"}
+                        </Typography>}
+
+                        {open && <Typography
+                            sx={{
+                                opacity: open ? 1 : 0,
+                                width: open ? "auto" : 0,
+                                transition: "0.2s",
+                                overflow: "hidden",
+                                whiteSpace: "nowrap"
+                            }}
                         >
                             {userResponse.tipo || "Tipo de usuário"}
-                        </Typography>
-                    </Box>
+                        </Typography>}
+                    </Box>}
 
-                    <IconButton
+                    {open && <IconButton
                         onClick={handleLogout}
                         sx={{
                             backgroundColor: "#ffe5e5",
@@ -291,7 +434,7 @@ export default function Sidebar({ open, setOpen }) {
                         }}
                     >
                         <LogoutIcon color="error" />
-                    </IconButton>
+                    </IconButton>}
 
                 </Box>
             </Box>

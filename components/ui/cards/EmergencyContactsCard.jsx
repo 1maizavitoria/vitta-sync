@@ -347,6 +347,8 @@ export default function EmergencyContacts() {
 
                                             <InputUI
                                                 label="Telefone"
+                                                placeholder="(11) 99999-9999"
+                                                limit={15}
                                                 value={formatPhone(
                                                     editData.telefone
                                                 )}
@@ -602,6 +604,7 @@ export default function EmergencyContacts() {
                                     error={!!errors.telefone}
                                     helperText={errors.telefone}
                                     fullWidth
+                                    placeholder="(11) 99999-9999"
                                     limit={15}
                                     value={formatPhone(
                                         formData.telefone
