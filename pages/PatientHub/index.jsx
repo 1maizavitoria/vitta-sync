@@ -18,9 +18,7 @@ import { useNavigate } from "react-router-dom";
 
 import MemberCard from "../../components/ui/cards/MemberCard";
 
-import {
-    usePatient
-} from "../../context/PatientContext";
+import { usePatient } from "../../context/PatientContext";
 
 export default function PatientHub() {
     const { showAlert } = useAlert();
@@ -333,14 +331,12 @@ export default function PatientHub() {
         userType?.toLowerCase()
         === "paciente";
 
-    const myLink =
-        links.find((link) => {
-
-            return (
-                link.tipo?.toLowerCase()
-                === userType?.toLowerCase()
-            );
-        });
+    const myLink = links.find((link) => {
+        return (
+            link.tipo?.toLowerCase()
+            === userType?.toLowerCase()
+        );
+    });
 
     function canRemove(targetType) {
 
@@ -377,10 +373,7 @@ export default function PatientHub() {
 
     useEffect(() => {
 
-        if (
-            userType?.toLowerCase()
-            === "paciente"
-        ) {
+        if (userType?.toLowerCase() === "paciente") {
 
             const patient = {
                 id: localStorage.getItem("id"),
@@ -823,138 +816,138 @@ export default function PatientHub() {
                             )}
                         </Box>
 
-                        <Box mt={6}>
+                    </>
+                )}
+
+                <Box mt={6}>
+
+                    <Typography
+                        variant="h5"
+                        sx={{
+                            fontWeight: 700,
+                            mb: 3
+                        }}
+                    >
+                        Módulos
+                    </Typography>
+
+                    <Box
+                        display="grid"
+                        gridTemplateColumns={{
+                            xs: "1fr",
+                            md: "repeat(3, 1fr)"
+                        }}
+                        gap={3}
+                    >
+
+                        <Box
+                            onClick={() => navigate("/health-tracker")}
+                            sx={{
+                                backgroundColor: "#fff",
+                                borderRadius: "24px",
+                                padding: 4,
+                                cursor: "pointer",
+                                transition: ".2s",
+                                boxShadow:
+                                    "0px 4px 15px rgba(0,0,0,0.08)",
+
+                                "&:hover": {
+                                    transform: "translateY(-4px)"
+                                }
+                            }}
+                        >
 
                             <Typography
-                                variant="h5"
+                                variant="h6"
                                 sx={{
                                     fontWeight: 700,
-                                    mb: 3
+                                    mb: 1
                                 }}
                             >
-                                Módulos
+                                Registros
                             </Typography>
 
-                            <Box
-                                display="grid"
-                                gridTemplateColumns={{
-                                    xs: "1fr",
-                                    md: "repeat(3, 1fr)"
+                            <Typography
+                                sx={{
+                                    color: "#777"
                                 }}
-                                gap={3}
                             >
-
-                                <Box
-                                    onClick={() => navigate("/health-tracker")}
-                                    sx={{
-                                        backgroundColor: "#fff",
-                                        borderRadius: "24px",
-                                        padding: 4,
-                                        cursor: "pointer",
-                                        transition: ".2s",
-                                        boxShadow:
-                                            "0px 4px 15px rgba(0,0,0,0.08)",
-
-                                        "&:hover": {
-                                            transform: "translateY(-4px)"
-                                        }
-                                    }}
-                                >
-
-                                    <Typography
-                                        variant="h6"
-                                        sx={{
-                                            fontWeight: 700,
-                                            mb: 1
-                                        }}
-                                    >
-                                        Registros
-                                    </Typography>
-
-                                    <Typography
-                                        sx={{
-                                            color: "#777"
-                                        }}
-                                    >
-                                        Hábitos, sintomas, sinais vitais e lembretes.
-                                    </Typography>
-
-                                </Box>
-
-                                <Box
-                                    onClick={() => navigate("/reports")}
-                                    sx={{
-                                        backgroundColor: "#fff",
-                                        borderRadius: "24px",
-                                        padding: 4,
-                                        cursor: "pointer",
-                                        transition: ".2s",
-                                        boxShadow:
-                                            "0px 4px 15px rgba(0,0,0,0.08)",
-
-                                        "&:hover": {
-                                            transform: "translateY(-4px)"
-                                        }
-                                    }}
-                                >
-
-                                    <Typography
-                                        variant="h6"
-                                        sx={{
-                                            fontWeight: 700,
-                                            mb: 1
-                                        }}
-                                    >
-                                        Informações
-                                    </Typography>
-
-                                    <Typography
-                                        sx={{
-                                            color: "#777"
-                                        }}
-                                    >
-                                        Dados gerais e informações do paciente.
-                                    </Typography>
-
-                                </Box>
-
-                                <Box
-                                    sx={{
-                                        backgroundColor: "#fff",
-                                        borderRadius: "24px",
-                                        padding: 4,
-                                        opacity: .6,
-                                        boxShadow:
-                                            "0px 4px 15px rgba(0,0,0,0.08)"
-                                    }}
-                                >
-
-                                    <Typography
-                                        variant="h6"
-                                        sx={{
-                                            fontWeight: 700,
-                                            mb: 1
-                                        }}
-                                    >
-                                        Dashboard
-                                    </Typography>
-
-                                    <Typography
-                                        sx={{
-                                            color: "#777"
-                                        }}
-                                    >
-                                        Visualizações e métricas futuras.
-                                    </Typography>
-
-                                </Box>
-
-                            </Box>
+                                Hábitos, sintomas, sinais vitais e lembretes.
+                            </Typography>
 
                         </Box>
 
-                    </>
-                )}
+                        <Box
+                            onClick={() => navigate("/reports")}
+                            sx={{
+                                backgroundColor: "#fff",
+                                borderRadius: "24px",
+                                padding: 4,
+                                cursor: "pointer",
+                                transition: ".2s",
+                                boxShadow:
+                                    "0px 4px 15px rgba(0,0,0,0.08)",
+
+                                "&:hover": {
+                                    transform: "translateY(-4px)"
+                                }
+                            }}
+                        >
+
+                            <Typography
+                                variant="h6"
+                                sx={{
+                                    fontWeight: 700,
+                                    mb: 1
+                                }}
+                            >
+                                Informações
+                            </Typography>
+
+                            <Typography
+                                sx={{
+                                    color: "#777"
+                                }}
+                            >
+                                Dados gerais e informações do paciente.
+                            </Typography>
+
+                        </Box>
+
+                        <Box
+                            sx={{
+                                backgroundColor: "#fff",
+                                borderRadius: "24px",
+                                padding: 4,
+                                opacity: .6,
+                                boxShadow:
+                                    "0px 4px 15px rgba(0,0,0,0.08)"
+                            }}
+                        >
+
+                            <Typography
+                                variant="h6"
+                                sx={{
+                                    fontWeight: 700,
+                                    mb: 1
+                                }}
+                            >
+                                Dashboard
+                            </Typography>
+
+                            <Typography
+                                sx={{
+                                    color: "#777"
+                                }}
+                            >
+                                Visualizações e métricas futuras.
+                            </Typography>
+
+                        </Box>
+
+                    </Box>
+
+                </Box>
             </Box>
 
             <DialogUI

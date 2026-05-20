@@ -234,7 +234,7 @@ export default function Perfil() {
 
                 )}
 
-                {editing && canEdit && (
+                {editing && (canEdit || loggedCpf === targetCpf) && (
 
                     <Box
                         display="flex"

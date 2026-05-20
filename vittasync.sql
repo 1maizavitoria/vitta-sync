@@ -12,6 +12,7 @@ CREATE TABLE Usuario (
     conselho VARCHAR(30),
     peso_inicial DOUBLE,
     altura DOUBLE,
+    funcao_responsavel VARCHAR(50),
     priv_compartilhar_diario BOOLEAN,
     priv_compartilhar_habitos BOOLEAN,
     data_nascimento DATE NOT NULL,
@@ -80,10 +81,13 @@ CREATE TABLE LembreteMedicao (
     usuario_id INT NOT NULL,
     dias_semana VARCHAR(100) NOT NULL,
     horario TIME NOT NULL,
+    enviar_email BOOLEAN DEFAULT TRUE,
+    enviar_sms BOOLEAN DEFAULT FALSE,
     ativo BOOLEAN NOT NULL DEFAULT TRUE,
     CONSTRAINT fk_usuario_lembrete
         FOREIGN KEY (usuario_id)
         REFERENCES Usuario(id)
+        ON DELETE CASCADE
 );
 
 CREATE TABLE DiarioSintomas (
@@ -119,6 +123,18 @@ CREATE TABLE ConviteVinculo (
     ativo BOOLEAN DEFAULT TRUE,
     criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (paciente_id)
+        REFERENCES Usuario(id)
+        ON DELETE CASCADE
+);
+
+CREATE TABLE ContatoEmergencia (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    paciente_id INT NOT NULL,
+    nome VARCHAR(100) NOT NULL,
+    telefone VARCHAR(15) NOT NULL,
+    data_registro DATETIME DEFAULT CURRENT_TIMESTAMP,
+    data_modificacao DATETIME NULL,
+    CONSTRAINT fk_contato_paciente FOREIGN KEY (paciente_id)
         REFERENCES Usuario(id)
         ON DELETE CASCADE
 );
