@@ -1,0 +1,24 @@
+package br.com.vittasync.vittasync.DTO;
+
+
+import java.time.LocalDateTime;
+
+
+public class ArquivoMedicoOutputDTO {
+    private Integer id;
+    private String nomeArquivo;
+    private LocalDateTime dataUpload;
+    private String pacienteCpf;
+
+    public Integer getId() { return id; }
+    public void setId(Integer id) { this.id = id; }
+
+    public String getNomeArquivo() { return nomeArquivo; }
+    public void setNomeArquivo(String nomeArquivo) { this.nomeArquivo = nomeArquivo; }
+
+    public LocalDateTime getDataUpload() { return dataUpload; }
+    public void setDataUpload(LocalDateTime dataUpload) { this.dataUpload = dataUpload; }
+
+    public String getPacienteCpf() { return pacienteCpf; }
+    public void setPacienteCpf(String pacienteCpf) { this.pacienteCpf = pacienteCpf; }
+}

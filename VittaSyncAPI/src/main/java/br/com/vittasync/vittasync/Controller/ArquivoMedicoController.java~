@@ -1,0 +1,172 @@
+package br.com.vittasync.vittasync.Controller;
+
+import br.com.vittasync.vittasync.DTO.ArquivoMedicoOutputDTO;
+import br.com.vittasync.vittasync.Model.ArquivoMedico;
+import br.com.vittasync.vittasync.Model.Usuario;
+import br.com.vittasync.vittasync.Service.ArquivoMedicoService;
+import br.com.vittasync.vittasync.Service.JwtService;
+import br.com.vittasync.vittasync.Service.UsuarioService;
+import br.com.vittasync.vittasync.Service.PermissaoService;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.IOException;
+import java.util.List;
+
+@RestController
+@RequestMapping("/documentos")
+public class ArquivoMedicoController {
+
+    private final ArquivoMedicoService service;
+    private final JwtService jwtService;
+    private final UsuarioService usuarioService;
+    private final PermissaoService permissaoService;
+
+    public ArquivoMedicoController(ArquivoMedicoService service,
+                                   JwtService jwtService,
+                                   UsuarioService usuarioService,
+                                   PermissaoService permissaoService) {
+        this.service = service;
+        this.jwtService = jwtService;
+        this.usuarioService = usuarioService;
+        this.permissaoService = permissaoService;
+    }
+
+    // 🔹 Upload (somente médico vinculado ao paciente)
+    @PostMapping(value = "/upload/{cpfPaciente}", consumes = "multipart/form-data")
+    public ResponseEntity<ArquivoMedicoOutputDTO> upload(@PathVariable String cpfPaciente,
+                                                         @RequestHeader("Authorization") String authHeader,
+                                                         @RequestParam("nomeArquivo") String nomeArquivo,
+                                                         @RequestParam("arquivo") MultipartFile arquivo) throws IOException {
+        String token = authHeader.replace("Bearer ", "");
+        String cpfMedico = jwtService.extrairCpf(token);
+        Usuario medico = usuarioService.searchByCpf(cpfMedico);
+        Usuario paciente = usuarioService.searchByCpf(cpfPaciente);
+
+        if (!permissaoService.medicoVinculadoAoPaciente(medico.getId(), paciente.getId())) {
+            return ResponseEntity.status(403).build();
+        }
+
+        ArquivoMedico salvo = service.upload(medico, paciente, nomeArquivo, arquivo.getBytes());
+
+        ArquivoMedicoOutputDTO dto = new ArquivoMedicoOutputDTO();
+        dto.setId(salvo.getId());
+        dto.setNomeArquivo(salvo.getNomeArquivo());
+        dto.setDataUpload(salvo.getDataUpload());
+        dto.setPacienteCpf(paciente.getCpf());
+
+        return ResponseEntity.ok(dto);
+    }
+
+    // 🔹 Listar documentos do paciente (paciente logado ou responsável vinculado)
+    @GetMapping("/getDocumentosPaciente/{cpf}")
+    public ResponseEntity<List<ArquivoMedicoOutputDTO>> listarPorPaciente(@PathVariable String cpf,
+                                                                          @RequestHeader("Authorization") String authHeader) {
+        String token = authHeader.replace("Bearer ", "");
+        String cpfUsuario = jwtService.extrairCpf(token);
+        Usuario usuarioLogado = usuarioService.searchByCpf(cpfUsuario);
+        Usuario paciente = usuarioService.searchByCpf(cpf);
+
+        if (!permissaoService.podeVisualizarPaciente(usuarioLogado.getId(), paciente.getId())) {
+            return ResponseEntity.status(403).build();
+        }
+
+        List<ArquivoMedico> docs = service.listarPorPaciente(paciente);
+
+        List<ArquivoMedicoOutputDTO> output = docs.stream().map(d -> {
+            ArquivoMedicoOutputDTO dto = new ArquivoMedicoOutputDTO();
+            dto.setId(d.getId());
+            dto.setNomeArquivo(d.getNomeArquivo());
+            dto.setDataUpload(d.getDataUpload());
+            dto.setPacienteCpf(d.getPaciente().getCpf());
+            return dto;
+        }).toList();
+
+        return ResponseEntity.ok(output);
+    }
+
+    // 🔹 Listar documentos do médico (somente médico logado)
+    @GetMapping("/getDocumentosMedico")
+    public ResponseEntity<List<ArquivoMedicoOutputDTO>> listarPorMedico(@RequestHeader("Authorization") String authHeader) {
+        String token = authHeader.replace("Bearer ", "");
+        String cpfMedico = jwtService.extrairCpf(token);
+        Usuario medico = usuarioService.searchByCpf(cpfMedico);
+
+        if (!permissaoService.isMedico(medico)) {
+            return ResponseEntity.status(403).build();
+        }
+
+        List<ArquivoMedico> docs = service.listarPorMedico(medico);
+
+        List<ArquivoMedicoOutputDTO> output = docs.stream().map(d -> {
+            ArquivoMedicoOutputDTO dto = new ArquivoMedicoOutputDTO();
+            dto.setId(d.getId());
+            dto.setNomeArquivo(d.getNomeArquivo());
+            dto.setDataUpload(d.getDataUpload());
+            dto.setPacienteCpf(d.getPaciente().getCpf());
+            return dto;
+        }).toList();
+
+        return ResponseEntity.ok(output);
+    }
+
+    // 🔹 Visualizar PDF inline (paciente, responsável ou médico vinculado)
+    @GetMapping("/{id}/visualizarDocumento")
+    public ResponseEntity<byte[]> visualizar(@PathVariable Integer id,
+                                             @RequestHeader("Authorization") String authHeader) {
+        String token = authHeader.replace("Bearer ", "");
+        String cpfUsuario = jwtService.extrairCpf(token);
+        Usuario usuarioLogado = usuarioService.searchByCpf(cpfUsuario);
+
+        ArquivoMedico doc = service.visualizar(id);
+
+        if (!permissaoService.podeVisualizarPaciente(usuarioLogado.getId(), doc.getPaciente().getId())) {
+            return ResponseEntity.status(403).build();
+        }
+
+        return ResponseEntity.ok()
+                .header("Content-Type", "application/pdf")
+                .body(doc.getArquivo());
+    }
+
+    // 🔹 Download PDF (paciente, responsável ou médico vinculado)
+    public ResponseEntity<byte[]> download(@PathVariable Integer id,
+                                           @RequestHeader("Authorization") String authHeader) {
+        String token = authHeader.replace("Bearer ", "");
+        String cpfUsuario = jwtService.extrairCpf(token);
+        Usuario usuarioLogado = usuarioService.searchByCpf(cpfUsuario);
+
+        ArquivoMedico doc = service.visualizar(id);
+
+        if (!permissaoService.podeVisualizarPaciente(usuarioLogado.getId(), doc.getPaciente().getId())) {
+            return ResponseEntity.status(403).build();
+        }
+
+        String fileName = doc.getNomeArquivo();
+        if (!fileName.toLowerCase().endsWith(".pdf")) {
+            fileName += ".pdf";
+        }
+
+        return ResponseEntity.ok()
+                .header("Content-Type", "application/pdf")
+                .header("Content-Disposition", "attachment; filename=\"" + fileName + "\"")
+                .body(doc.getArquivo());
+    }
+
+    // 🔹 Deletar documento (somente médico que upou)
+    @DeleteMapping("/deletarDocumento/{id}")
+    public ResponseEntity<Void> deletar(@PathVariable Integer id,
+                                        @RequestHeader("Authorization") String authHeader) {
+        String token = authHeader.replace("Bearer ", "");
+        String cpfMedico = jwtService.extrairCpf(token);
+        Usuario medico = usuarioService.searchByCpf(cpfMedico);
+
+        if (!permissaoService.isMedico(medico)) {
+            return ResponseEntity.status(403).build();
+        }
+
+        service.deletar(medico, id);
+        return ResponseEntity.noContent().build();
+    }
+}

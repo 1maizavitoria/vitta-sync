@@ -69,13 +69,5 @@ public class PermissaoService {
         return usuario.getTipo().equalsIgnoreCase("saude");
     }
 
-    public boolean medicoVinculadoAoPaciente(Integer medicoId, Integer pacienteId) {
-        return vinculoRepository.existsByPacienteIdAndUsuarioIdAndTipo(pacienteId, medicoId, "saude");
-    }
-
-    public boolean responsavelVinculadoAoPaciente(Integer responsavelId, Integer pacienteId) {
-        return vinculoRepository.existsByPacienteIdAndUsuarioIdAndTipo(pacienteId, responsavelId, "responsavel");
-    }
-
 
 }

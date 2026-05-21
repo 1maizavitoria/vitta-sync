@@ -1,3 +1,4 @@
+DROP DATABASE vittasync;
 CREATE DATABASE vittasync;
 USE vittasync;
 
@@ -12,7 +13,7 @@ CREATE TABLE Usuario (
     conselho VARCHAR(30),
     peso_inicial DOUBLE,
     altura DOUBLE,
-    funcao_responsavel VARCHAR(50),
+    funcao_respoNsavel VARCHAR(50),
     priv_compartilhar_diario BOOLEAN,
     priv_compartilhar_habitos BOOLEAN,
     data_nascimento DATE NOT NULL,
@@ -139,6 +140,18 @@ CREATE TABLE ContatoEmergencia (
         ON DELETE CASCADE
 );
 
+CREATE TABLE ArquivoMedico (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    medico_id INT NOT NULL,
+    paciente_id INT NOT NULL,
+    nome_arquivo VARCHAR(255) NOT NULL,
+    arquivo LONGBLOB NOT NULL,
+    data_upload DATETIME DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT fk_medico FOREIGN KEY (medico_id) REFERENCES Usuario(id),
+    CONSTRAINT fk_paciente FOREIGN KEY (paciente_id) REFERENCES Usuario(id)
+);
+
+
 SHOW TABLES;
 
 DESCRIBE Usuario;
@@ -150,6 +163,8 @@ DESCRIBE LembreteMedicao;
 DESCRIBE DiarioSintomas;
 DESCRIBE Vinculo;
 DESCRIBE ConviteVinculo;
+DESCRIBE ContatoEmergencia;
+DESCRIBE ArquivoMedico;
 
 SELECT * FROM Usuario;
 SELECT * FROM CodigoVerificacao;
@@ -160,3 +175,5 @@ SELECT * FROM LembreteMedicao;
 SELECT * FROM DiarioSintomas;
 SELECT * FROM Vinculo;
 SELECT * FROM ConviteVinculo;
+SELECT * FROM ContatoEmergencia;
+SELECT * FROM ArquivoMedico;
