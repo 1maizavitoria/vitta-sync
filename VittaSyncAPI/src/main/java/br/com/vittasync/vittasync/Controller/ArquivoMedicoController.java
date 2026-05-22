@@ -125,8 +125,23 @@ public class ArquivoMedicoController {
             return ResponseEntity.status(403).build();
         }
 
+        // Detecta o Content-Type pelo nome do arquivo
+        String nomeArquivo = doc.getNomeArquivo();
+        String contentType = "application/octet-stream";
+
+        if (nomeArquivo != null) {
+            String ext = nomeArquivo.toLowerCase();
+            if (ext.endsWith(".pdf")) {
+                contentType = "application/pdf";
+            } else if (ext.endsWith(".png")) {
+                contentType = "image/png";
+            } else if (ext.endsWith(".jpg") || ext.endsWith(".jpeg")) {
+                contentType = "image/jpeg";
+            }
+        }
+
         return ResponseEntity.ok()
-                .header("Content-Type", "application/pdf")
+                .header("Content-Type", contentType)
                 .body(doc.getArquivo());
     }
 
