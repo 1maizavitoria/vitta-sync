@@ -14,6 +14,21 @@ export default function AutocompleteUI({
 }) {
     return (
         <Autocomplete
+            size="small"
+            sx={{
+                width: "100%",
+
+                '& .MuiOutlinedInput-root': {
+                    height: '40px',
+                    width: '225px',
+                    borderRadius: '30px',
+                    backgroundColor: '#e0e0e0',
+
+                    '& input': {
+                        padding: '10px 14px !important',
+                    }
+                }
+            }}
             options={options}
             value={value}
             onChange={(event, newValue) => onChange(newValue)}

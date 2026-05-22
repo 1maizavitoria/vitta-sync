@@ -297,20 +297,6 @@ export default function Login() {
 
     }, [seconds]);
 
-    // const {
-    //     selectedPatient
-    // } = usePatient();
-
-    // useEffect(() => {
-
-    //     if (!selectedPatient?.id) {
-    //         return;
-    //     }
-
-    //     loadLinks();
-
-    // }, [selectedPatient]);
-
     return (
         <Box>
             <Grid

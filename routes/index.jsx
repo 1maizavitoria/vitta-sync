@@ -12,6 +12,7 @@ import Reports from "../pages/Reports";
 import PatientHub from "../pages/PatientHub";
 import JoinLink from "../pages/JoinLink";
 import { PatientProvider } from "../context/PatientContext";
+import Documents from "../pages/Documents";
 
 export default function AppRoutes() {
     return (
@@ -65,6 +66,14 @@ export default function AppRoutes() {
                             element={
                                 <PrivateRoute>
                                     <PatientHub />
+                                </PrivateRoute>
+                            }
+                        />
+                        <Route
+                            path="/documents"
+                            element={
+                                <PrivateRoute>
+                                    <Documents />
                                 </PrivateRoute>
                             }
                         />
