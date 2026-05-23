@@ -18,11 +18,13 @@ public class ArquivoMedicoService {
         this.repository = repository;
     }
 
-    public ArquivoMedico upload(Usuario medico, Usuario paciente, String nomeArquivo, byte[] arquivo) {
+    public ArquivoMedico upload(Usuario medico, Usuario paciente, String nomeArquivo, String extensao, String nomeOriginal, byte[] arquivo) {
         ArquivoMedico doc = new ArquivoMedico();
         doc.setMedico(medico);
         doc.setPaciente(paciente);
         doc.setNomeArquivo(nomeArquivo);
+        doc.setExtensao(extensao);
+        doc.setNomeOriginal(nomeOriginal); // 👈
         doc.setArquivo(arquivo);
         doc.setDataUpload(LocalDateTime.now());
         return repository.save(doc);

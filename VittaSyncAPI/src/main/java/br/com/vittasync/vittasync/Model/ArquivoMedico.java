@@ -31,6 +31,11 @@ public class ArquivoMedico {
     @Column(name = "data_upload")
     private LocalDateTime dataUpload;
 
+    @Column(name = "extensao", nullable = false)
+    private String extensao;
+
+    @Column(name = "nome_original", nullable = false)
+    private String nomeOriginal;
 
     public Integer getId() { return id; }
     public void setId(Integer id) { this.id = id; }
@@ -49,4 +54,10 @@ public class ArquivoMedico {
 
     public LocalDateTime getDataUpload() { return dataUpload; }
     public void setDataUpload(LocalDateTime dataUpload) { this.dataUpload = dataUpload; }
+
+    public String getExtensao() { return extensao; }
+    public void setExtensao(String extensao) { this.extensao = extensao; }
+
+    public String getNomeOriginal() { return nomeOriginal; }
+    public void setNomeOriginal(String nomeOriginal) { this.nomeOriginal = nomeOriginal; }
 }

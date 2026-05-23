@@ -48,14 +48,28 @@ public class ArquivoMedicoController {
             return ResponseEntity.status(403).build();
         }
 
-        ArquivoMedico salvo = service.upload(medico, paciente, nomeArquivo, arquivo.getBytes());
+        String originalName = arquivo.getOriginalFilename();
+        String extensao = originalName != null
+                ? originalName.substring(originalName.lastIndexOf(".")).toLowerCase()
+                : ".pdf";
+
+        ArquivoMedico salvo = service.upload(
+                medico,
+                paciente,
+                nomeArquivo,
+                extensao,
+                originalName,
+                arquivo.getBytes()
+        );
 
         ArquivoMedicoOutputDTO dto = new ArquivoMedicoOutputDTO();
         dto.setId(salvo.getId());
         dto.setNomeArquivo(salvo.getNomeArquivo());
+        dto.setExtensao(salvo.getExtensao());
         dto.setDataUpload(salvo.getDataUpload());
         dto.setPacienteCpf(paciente.getCpf());
-
+        dto.setNomeOriginal(salvo.getNomeOriginal());
+        dto.setMedicoNome(salvo.getMedico().getNome());
         return ResponseEntity.ok(dto);
     }
 
@@ -80,6 +94,9 @@ public class ArquivoMedicoController {
             dto.setNomeArquivo(d.getNomeArquivo());
             dto.setDataUpload(d.getDataUpload());
             dto.setPacienteCpf(d.getPaciente().getCpf());
+            dto.setExtensao(d.getExtensao());
+            dto.setNomeOriginal(d.getNomeOriginal());
+            dto.setMedicoNome(d.getMedico().getNome());
             return dto;
         }).toList();
 
@@ -105,6 +122,9 @@ public class ArquivoMedicoController {
             dto.setNomeArquivo(d.getNomeArquivo());
             dto.setDataUpload(d.getDataUpload());
             dto.setPacienteCpf(d.getPaciente().getCpf());
+            dto.setExtensao(d.getExtensao());
+            dto.setNomeOriginal(d.getNomeOriginal());
+            dto.setMedicoNome(d.getMedico().getNome());
             return dto;
         }).toList();
 
@@ -126,22 +146,22 @@ public class ArquivoMedicoController {
         }
 
         // Detecta o Content-Type pelo nome do arquivo
-        String nomeArquivo = doc.getNomeArquivo();
+        String ext = doc.getExtensao() != null ? doc.getExtensao().toLowerCase() : "";
         String contentType = "application/octet-stream";
 
-        if (nomeArquivo != null) {
-            String ext = nomeArquivo.toLowerCase();
-            if (ext.endsWith(".pdf")) {
-                contentType = "application/pdf";
-            } else if (ext.endsWith(".png")) {
-                contentType = "image/png";
-            } else if (ext.endsWith(".jpg") || ext.endsWith(".jpeg")) {
-                contentType = "image/jpeg";
-            }
+        if (ext.equals(".pdf")) {
+            contentType = "application/pdf";
+        } else if (ext.equals(".png")) {
+            contentType = "image/png";
+        } else if (ext.equals(".jpg") || ext.equals(".jpeg")) {
+            contentType = "image/jpeg";
         }
+
+        String fileName = doc.getNomeOriginal();
 
         return ResponseEntity.ok()
                 .header("Content-Type", contentType)
+                .header("Content-Disposition", "attachment; filename=\"" + fileName + "\"")
                 .body(doc.getArquivo());
     }
 
@@ -158,14 +178,19 @@ public class ArquivoMedicoController {
             return ResponseEntity.status(403).build();
         }
 
-        String fileName = doc.getNomeArquivo();
-        if (!fileName.toLowerCase().endsWith(".pdf")) {
-            fileName += ".pdf";
-        }
+        String ext = doc.getExtensao() != null ? doc.getExtensao() : ".pdf";
+        String contentType = "application/octet-stream";
+
+        if (ext.equals(".pdf")) contentType = "application/pdf";
+        else if (ext.equals(".png")) contentType = "image/png";
+        else if (ext.equals(".jpg") || ext.equals(".jpeg")) contentType = "image/jpeg";
+
+        // Nome exibido no download: "Exame de Sangue.pdf"
+        String fileName = doc.getNomeOriginal() + ext;
 
         return ResponseEntity.ok()
-                .header("Content-Type", "application/pdf")
-                .header("Content-Disposition", "attachment; filename=\"" + fileName + "\"")
+                .header("Content-Type", contentType)
+                .header("Content-Disposition", "inline; filename=\"" + fileName + "\"") // 👈 inline
                 .body(doc.getArquivo());
     }
 

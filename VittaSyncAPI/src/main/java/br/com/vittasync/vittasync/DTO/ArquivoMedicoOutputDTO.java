@@ -9,6 +9,25 @@ public class ArquivoMedicoOutputDTO {
     private String nomeArquivo;
     private LocalDateTime dataUpload;
     private String pacienteCpf;
+    private String extensao;
+    private String nomeOriginal;
+    private String medicoNome;
+
+    public String getMedicoNome() {
+        return medicoNome;
+    }
+
+    public void setMedicoNome(String medicoNome) {
+        this.medicoNome = medicoNome;
+    }
+
+    public String getNomeOriginal() {
+        return nomeOriginal;
+    }
+
+    public void setNomeOriginal(String nomeOriginal) {
+        this.nomeOriginal = nomeOriginal;
+    }
 
     public Integer getId() { return id; }
     public void setId(Integer id) { this.id = id; }
@@ -21,4 +40,7 @@ public class ArquivoMedicoOutputDTO {
 
     public String getPacienteCpf() { return pacienteCpf; }
     public void setPacienteCpf(String pacienteCpf) { this.pacienteCpf = pacienteCpf; }
+
+    public String getExtensao() { return extensao; }
+    public void setExtensao(String extensao) { this.extensao = extensao; }
 }
