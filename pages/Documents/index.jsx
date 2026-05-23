@@ -2,12 +2,23 @@ import { useState } from "react";
 import { Box, Tabs, Tab, Paper } from "@mui/material";
 import SharedDocuments from "../SharedDocuments";
 import HealthHub from "../HealthHub";
+import { usePatient } from "../../context/PatientContext";
 
 export default function Documents() {
+    const { selectedPatient } = usePatient();
 
     const userType = localStorage.getItem("tipo");
+    const cpfUsuario = localStorage.getItem("cpf");
 
-    const [tab, setTab] = useState(0);
+    const hasPatientSelected =
+        selectedPatient &&
+        selectedPatient.cpf !== cpfUsuario;
+
+    const [tab, setTab] = useState(
+        userType === "saude"
+            ? "upload"
+            : "documents"
+    );
 
     return (
 
@@ -29,29 +40,37 @@ export default function Documents() {
                 }}
             >
 
-                <Tab
-                    label="Documento do paciente"
-                />
 
-                {userType === "saude" &&
-                    (<Tab
-                        label="Enviar documento"
+
+                {hasPatientSelected && (
+                    <Tab
+                        label="Documento do paciente"
+                        value="documents"
                     />
-                    )}
+                )}
+
+                {userType === "saude" && (
+                    <Tab
+                        label="Enviar documento"
+                        value="upload"
+                    />
+                )}
+
+
 
             </Tabs>
-
             <Box>
 
-                {tab === 0 && (
+                {tab === "documents" && hasPatientSelected && (
                     <SharedDocuments />
                 )}
 
-                {tab === 1 && userType === "saude" && (
+                {tab === "upload" && userType === "saude" && (
                     <HealthHub />
                 )}
 
             </Box>
+
 
         </Paper>
     );

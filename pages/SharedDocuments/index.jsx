@@ -31,16 +31,9 @@ export default function SharedDocuments() {
 
     const { selectedPatient } = usePatient();
 
-    function getFileType(name) {
-
-        if (!name) {
-            return "unknown";
-        }
-
-        return name
-            .split(".")
-            .pop()
-            .toLowerCase();
+    function getFileType(extensao) {
+        if (!extensao) return "unknown";
+        return extensao.replace(".", "").toLowerCase();
     }
 
     function renderFileIcon(name) {
@@ -66,7 +59,7 @@ export default function SharedDocuments() {
     async function handleOpen(doc) {
 
         try {
-            const url = await viewDocument(doc.id, doc.nomeArquivo);
+            const url = await viewDocument(doc.id, doc.extensao);
 
             setViewerUrl(url);
             setSelectedDoc(doc);
@@ -150,7 +143,12 @@ export default function SharedDocuments() {
                                         color: "#2e7d32"
                                     }}
                                 >
-                                    {doc.nomeArquivo?.[0]}
+                                    {doc.medicoNome
+                                        ?.split(" ")
+                                        .map((n) => n[0])
+                                        .slice(0, 2)
+                                        .join("")
+                                    }
                                 </Avatar>
 
                                 <Box flex={1}>
@@ -160,12 +158,12 @@ export default function SharedDocuments() {
                                     </Typography>
 
                                     <Typography color="text.secondary" mb={2}>
-                                        {doc.pacienteCpf}
+                                        {doc.medicoNome}
                                     </Typography>
 
                                     <Box display="flex" alignItems="center" gap={1} mt={2}>
 
-                                        {renderFileIcon(doc.nomeArquivo)}
+                                        {renderFileIcon(doc.extensao)}
 
                                         <Typography
                                             sx={{
@@ -179,12 +177,12 @@ export default function SharedDocuments() {
                                                 handleOpen(doc)
                                             }
                                         >
-                                            {doc.nomeArquivo}
+                                            {doc.nomeOriginal || "Arquivo antigo"}
                                         </Typography>
 
                                         <Box flex={1} />
 
-                                        <IconButton onClick={() => downloadDocument(doc.id, doc.nomeArquivo)}>
+                                        <IconButton onClick={() => downloadDocument(doc.id, doc.nomeOriginal)}>
                                             <DownloadIcon color="error" />
                                         </IconButton>
 
@@ -250,9 +248,7 @@ export default function SharedDocuments() {
 
                     {selectedDoc && (
 
-                        getFileType(
-                            selectedDoc.nomeArquivo
-                        ) === "pdf" ? (
+                        getFileType(selectedDoc.extensao) === "pdf" ? (
 
                             <object
                                 data={viewerUrl}

@@ -16,8 +16,13 @@ export default function HealthHub() {
     const [selectedFile, setSelectedFile] = useState(null);
     const [nomeArquivo, setNomeArquivo] = useState("");
     const [loading, setLoading] = useState(false);
+    const cpfUsuario = localStorage.getItem("cpf");
 
     const { selectedPatient } = usePatient();
+
+    const hasPatientSelected =
+        selectedPatient &&
+        selectedPatient.cpf !== cpfUsuario;
 
     async function handleUpload() {
         if (!selectedPatient || !selectedFile || !nomeArquivo.trim()) {
@@ -27,13 +32,9 @@ export default function HealthHub() {
         try {
             setLoading(true);
 
-            // Pega a extensão do arquivo real
-            const ext = selectedFile.name.split(".").pop().toLowerCase();
-            const nomeComExtensao = `${nomeArquivo.trim()}.${ext}`;
-
             const formData = new FormData();
             formData.append("arquivo", selectedFile);
-            formData.append("nomeArquivo", nomeComExtensao); // 👈 com extensão
+            formData.append("nomeArquivo", nomeArquivo.trim());
 
             const created = await uploadDocument(selectedPatient.cpf, formData);
 
@@ -109,9 +110,13 @@ export default function HealthHub() {
                     startIcon={<UploadFileIcon />}
                     sx={{ borderRadius: 3 }}
                     onClick={handleUpload}
-                    disabled={loading}
+                    disabled={loading || !hasPatientSelected}
                 >
-                    {loading ? "Enviando..." : "Enviar documento"}
+                    {loading
+                        ? "Enviando..."
+                        : !hasPatientSelected
+                            ? "Selecione um paciente"
+                            : "Enviar documento"}
                 </ButtonUI>
             </Box>
 
@@ -220,13 +225,14 @@ export default function HealthHub() {
 
                                 <PictureAsPdfIcon color="error" />
 
+                                {/* Nome real do arquivo = título + extensão */}
                                 <Typography>
-                                    {doc.nomeArquivo}
+                                    {doc.nomeOriginal || "Arquivo antigo"}
                                 </Typography>
 
                                 <Box flex={1} />
 
-                                <IconButton onClick={() => downloadDocument(doc.id, doc.nomeArquivo)}>
+                                <IconButton onClick={() => downloadDocument(doc.id, doc.nomeOriginal)}>
                                     <DownloadIcon color="error" />
                                 </IconButton>
 
