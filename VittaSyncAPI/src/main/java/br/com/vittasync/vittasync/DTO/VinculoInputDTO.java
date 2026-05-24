@@ -7,6 +7,9 @@ public class VinculoInputDTO {
     @NotBlank(message = "Código é obrigatório")
     private String codigo;
 
+    @NotBlank(message = "Função é obrigatória")
+    private String funcao;
+
     public VinculoInputDTO() {
     }
 
@@ -16,5 +19,13 @@ public class VinculoInputDTO {
 
     public void setCodigo(String codigo) {
         this.codigo = codigo;
+    }
+
+    public String getFuncao() {
+        return funcao;
+    }
+
+    public void setFuncao(String funcao) {
+        this.funcao = funcao;
     }
 }

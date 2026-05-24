@@ -16,6 +16,7 @@ import br.com.vittasync.vittasync.Repository.UsuarioRepository;
 import br.com.vittasync.vittasync.Repository.VinculoRepository;
 
 
+import br.com.vittasync.vittasync.Util.FuncoesResponsavel;
 import org.springframework.stereotype.Service;
 
 import java.sql.Timestamp;
@@ -34,52 +35,31 @@ public class VinculoService {
 
     private final EmailService emailService;
 
-    public VinculoService(
-            ConviteVinculoRepository conviteRepository,
-            VinculoRepository vinculoRepository,
-            UsuarioRepository usuarioRepository,
-            EmailService emailService
-    ) {
+    public VinculoService(ConviteVinculoRepository conviteRepository, VinculoRepository vinculoRepository, UsuarioRepository usuarioRepository, EmailService emailService) {
         this.conviteRepository = conviteRepository;
         this.vinculoRepository = vinculoRepository;
         this.usuarioRepository = usuarioRepository;
         this.emailService = emailService;
     }
 
-    public ConviteVinculoOutputDTO gerarCodigo(
-            Integer usuarioId
-    ){
+    public ConviteVinculoOutputDTO gerarCodigo(Integer usuarioId) {
 
-        Usuario usuario = usuarioRepository.findById(usuarioId)
-                .orElseThrow(() ->
-                        new RecursoNaoEncontradoException(
-                                "Usuário não encontrado"
-                        )
-                );
+        Usuario usuario = usuarioRepository.findById(usuarioId).orElseThrow(() -> new RecursoNaoEncontradoException("Usuário não encontrado"));
 
         if (!usuario.getTipo().equalsIgnoreCase("paciente")) {
 
-            throw new RuntimeException(
-                    "Somente pacientes podem gerar vínculo"
-            );
+            throw new RuntimeException("Somente pacientes podem gerar vínculo");
         }
 
         String codigo;
 
         do {
 
-            codigo = UUID.randomUUID()
-                    .toString()
-                    .replace("-", "")
-                    .substring(0, 6)
-                    .toUpperCase();
+            codigo = UUID.randomUUID().toString().replace("-", "").substring(0, 6).toUpperCase();
 
-        } while (
-                conviteRepository.existsByCodigo(codigo)
-        );
+        } while (conviteRepository.existsByCodigo(codigo));
 
-        ConviteVinculo convite =
-                new ConviteVinculo();
+        ConviteVinculo convite = new ConviteVinculo();
 
         convite.setPacienteId(usuario.getId());
 
@@ -87,288 +67,162 @@ public class VinculoService {
 
         convite.setAtivo(true);
 
-        convite.setCriadoEm(
-                Timestamp.valueOf(LocalDateTime.now())
-        );
+        convite.setCriadoEm(Timestamp.valueOf(LocalDateTime.now()));
 
-        convite.setExpiraEm(
-                Timestamp.valueOf(
-                        LocalDateTime.now().plusHours(24)
-                )
-        );
+        convite.setExpiraEm(Timestamp.valueOf(LocalDateTime.now().plusHours(24)));
 
         conviteRepository.save(convite);
 
-        ConviteVinculoOutputDTO output =
-                new ConviteVinculoOutputDTO();
+        ConviteVinculoOutputDTO output = new ConviteVinculoOutputDTO();
 
         output.setCodigo(codigo);
 
-        output.setLink(
-                "http://localhost:5173/entrar?codigo="
-                        + codigo
-        );
+        output.setLink("http://localhost:5173/entrar?codigo=" + codigo);
 
-        output.setExpiraEm(
-                convite.getExpiraEm()
-        );
+        output.setExpiraEm(convite.getExpiraEm());
 
         return output;
     }
 
-    public void entrarComCodigo(
-            String codigo,
-            Integer usuarioId
-    ) {
+    public void entrarComCodigo(String codigo, String funcao, Integer usuarioId) {
 
-        Usuario usuario = usuarioRepository.findById(usuarioId)
-                .orElseThrow(() ->
-                        new RecursoNaoEncontradoException(
-                                "Usuário não encontrado"
-                        )
-                );
+        Usuario usuario = usuarioRepository.findById(usuarioId).orElseThrow(() -> new RecursoNaoEncontradoException("Usuário não encontrado"));
 
         if (usuario.getTipo().equalsIgnoreCase("paciente")) {
 
-            throw new RuntimeException(
-                    "Paciente não pode entrar com código"
-            );
+            throw new RuntimeException("Paciente não pode entrar com código");
         }
 
-        ConviteVinculo convite =
-                conviteRepository.findByCodigo(codigo)
-                        .orElseThrow(() ->
-                                new RecursoNaoEncontradoException(
-                                        "Código inválido"
-                                )
-                        );
+        if (usuario.getTipo().equalsIgnoreCase("responsavel") && (funcao == null || funcao.isBlank())) {
+
+            throw new RuntimeException("Função é obrigatória");
+        }
+
+        if (usuario.getTipo().equalsIgnoreCase("responsavel") && !FuncoesResponsavel.VALIDAS.contains(funcao)) {
+
+            throw new RuntimeException("Função inválida");
+        }
+
+        ConviteVinculo convite = conviteRepository.findByCodigo(codigo).orElseThrow(() -> new RecursoNaoEncontradoException("Código inválido"));
 
         if (!convite.getAtivo()) {
 
-            throw new RuntimeException(
-                    "Código inativo"
-            );
+            throw new RuntimeException("Código inativo");
         }
 
-        if (
-                convite.getExpiraEm().before(
-                        Timestamp.valueOf(LocalDateTime.now())
-                )
-        ) {
+        if (convite.getExpiraEm().before(Timestamp.valueOf(LocalDateTime.now()))) {
 
             convite.setAtivo(false);
 
             conviteRepository.save(convite);
 
-            throw new RuntimeException(
-                    "Código expirado"
-            );
+            throw new RuntimeException("Código expirado");
         }
 
-        boolean jaExiste =
-                vinculoRepository
-                        .existsByPacienteIdAndUsuarioId(
-                                convite.getPacienteId(),
-                                usuarioId
-                        );
+        boolean jaExiste = vinculoRepository.existsByPacienteIdAndUsuarioId(convite.getPacienteId(), usuarioId);
 
         if (jaExiste) {
 
-            throw new RuntimeException(
-                    "Vínculo já existe"
-            );
+            throw new RuntimeException("Vínculo já existe");
         }
 
-        Vinculo vinculo =
-                new Vinculo();
+        Vinculo vinculo = new Vinculo();
 
-        vinculo.setPacienteId(
-                convite.getPacienteId()
-        );
+        vinculo.setPacienteId(convite.getPacienteId());
 
         vinculo.setUsuarioId(usuarioId);
 
         vinculo.setTipo(usuario.getTipo());
 
-        vinculo.setCriadoEm(
-                Timestamp.valueOf(LocalDateTime.now())
-        );
+        vinculo.setFuncao(funcao);
+
+        vinculo.setCriadoEm(Timestamp.valueOf(LocalDateTime.now()));
 
         vinculoRepository.save(vinculo);
     }
 
-    public void enviarConviteEmail(
-            String email,
-            String codigo
-    ) {
+    public void enviarConviteEmail(String email, String codigo) {
 
-        ConviteVinculo convite =
-                conviteRepository
-                        .findByCodigo(codigo)
-                        .orElseThrow(() ->
-                                new RecursoNaoEncontradoException(
-                                        "Convite não encontrado"
-                                )
-                        );
+        ConviteVinculo convite = conviteRepository.findByCodigo(codigo).orElseThrow(() -> new RecursoNaoEncontradoException("Convite não encontrado"));
 
         if (!convite.getAtivo()) {
 
-            throw new RuntimeException(
-                    "Convite inativo"
-            );
+            throw new RuntimeException("Convite inativo");
         }
 
-        if (
-                convite.getExpiraEm().before(
-                        Timestamp.valueOf(LocalDateTime.now())
-                )
-        ) {
+        if (convite.getExpiraEm().before(Timestamp.valueOf(LocalDateTime.now()))) {
 
             convite.setAtivo(false);
 
             conviteRepository.save(convite);
 
-            throw new RuntimeException(
-                    "Convite expirado"
-            );
+            throw new RuntimeException("Convite expirado");
         }
 
-        Usuario paciente =
-                usuarioRepository.findById(
-                        convite.getPacienteId()
-                ).orElseThrow(() ->
-                        new RecursoNaoEncontradoException(
-                                "Paciente não encontrado"
-                        )
-                );
+        Usuario paciente = usuarioRepository.findById(convite.getPacienteId()).orElseThrow(() -> new RecursoNaoEncontradoException("Paciente não encontrado"));
 
-        Usuario convidado =
-                usuarioRepository.findByEmail(email)
-                        .orElseThrow(() ->
-                                new RecursoNaoEncontradoException(
-                                        "Usuário não encontrado"
-                                )
-                        );
+        Usuario convidado = usuarioRepository.findByEmail(email).orElseThrow(() -> new RecursoNaoEncontradoException("Usuário não encontrado"));
 
-        if (
-                convidado.getTipo()
-                        .equalsIgnoreCase("paciente")
-        ) {
+        if (convidado.getTipo().equalsIgnoreCase("paciente")) {
 
-            throw new RuntimeException(
-                    "Paciente não pode ser vinculado"
-            );
+            throw new RuntimeException("Paciente não pode ser vinculado");
         }
 
-        String link =
-                "http://localhost:5173/entrar?codigo="
-                        + convite.getCodigo();
+        String link = "http://localhost:5173/entrar?codigo=" + convite.getCodigo();
 
-        emailService.enviarConviteVinculo(
-                email,
-                convidado.getNome(),
-                paciente.getNome(),
-                convite.getCodigo(),
-                link
-        );
+        emailService.enviarConviteVinculo(email, convidado.getNome(), paciente.getNome(), convite.getCodigo(), link);
     }
 
     public void removerVinculo(Long id) {
 
-        Vinculo vinculo =
-                vinculoRepository.findById(id)
-                        .orElseThrow(() ->
-                                new RecursoNaoEncontradoException(
-                                        "Vínculo não encontrado"
-                                )
-                        );
+        Vinculo vinculo = vinculoRepository.findById(id).orElseThrow(() -> new RecursoNaoEncontradoException("Vínculo não encontrado"));
 
         vinculoRepository.delete(vinculo);
     }
 
     public List<VinculoOutputDTO> listar(Integer usuarioId) {
 
-        Usuario usuario =
-                usuarioRepository.findById(usuarioId)
-                        .orElseThrow(() ->
-                                new RecursoNaoEncontradoException(
-                                        "Usuário não encontrado"
-                                )
-                        );
+        Usuario usuario = usuarioRepository.findById(usuarioId).orElseThrow(() -> new RecursoNaoEncontradoException("Usuário não encontrado"));
 
         List<Vinculo> vinculos;
 
-        if (
-                usuario.getTipo()
-                        .equalsIgnoreCase("paciente")
-        ) {
+        if (usuario.getTipo().equalsIgnoreCase("paciente")) {
 
-            vinculos =
-                    vinculoRepository
-                            .findByPacienteId(usuarioId);
+            vinculos = vinculoRepository.findByPacienteId(usuarioId);
 
         } else {
 
-            vinculos =
-                    vinculoRepository
-                            .findByUsuarioId(usuarioId);
+            vinculos = vinculoRepository.findByUsuarioId(usuarioId);
         }
 
         return vinculos.stream().map(vinculo -> {
 
             Usuario usuarioVinculado;
 
-            if (
-                    usuario.getTipo()
-                            .equalsIgnoreCase("paciente")
-            ) {
+            if (usuario.getTipo().equalsIgnoreCase("paciente")) {
 
-                usuarioVinculado =
-                        usuarioRepository.findById(
-                                vinculo.getUsuarioId()
-                        ).orElseThrow(() ->
-                                new RecursoNaoEncontradoException(
-                                        "Usuário não encontrado"
-                                )
-                        );
+                usuarioVinculado = usuarioRepository.findById(vinculo.getUsuarioId()).orElseThrow(() -> new RecursoNaoEncontradoException("Usuário não encontrado"));
 
             } else {
 
-                usuarioVinculado =
-                        usuarioRepository.findById(
-                                vinculo.getPacienteId()
-                        ).orElseThrow(() ->
-                                new RecursoNaoEncontradoException(
-                                        "Paciente não encontrado"
-                                )
-                        );
+                usuarioVinculado = usuarioRepository.findById(vinculo.getPacienteId()).orElseThrow(() -> new RecursoNaoEncontradoException("Paciente não encontrado"));
             }
 
-            VinculoOutputDTO dto =
-                    new VinculoOutputDTO();
+            VinculoOutputDTO dto = new VinculoOutputDTO();
 
             dto.setId(vinculo.getId());
 
-            dto.setNome(
-                    usuarioVinculado.getNome()
-            );
+            dto.setNome(usuarioVinculado.getNome());
 
-            dto.setEmail(
-                    usuarioVinculado.getEmail()
-            );
+            dto.setEmail(usuarioVinculado.getEmail());
 
-            dto.setTipo(
-                    vinculo.getTipo()
-            );
+            dto.setTipo(vinculo.getTipo());
 
-            dto.setConselho(
-                    usuarioVinculado.getConselho()
-            );
+            dto.setFuncao(vinculo.getFuncao());
 
-            dto.setCriadoEm(
-                    vinculo.getCriadoEm()
-            );
+            dto.setConselho(usuarioVinculado.getConselho());
 
+            dto.setCriadoEm(vinculo.getCriadoEm());
 
 
             return dto;
@@ -376,27 +230,14 @@ public class VinculoService {
         }).toList();
     }
 
-    public List<PacienteResumoDTO>
-    listarPacientesDoUsuario(
-            Integer usuarioId
-    ) {
+    public List<PacienteResumoDTO> listarPacientesDoUsuario(Integer usuarioId) {
 
-        Usuario usuario =
-                usuarioRepository.findById(usuarioId)
-                        .orElseThrow(() ->
-                                new RecursoNaoEncontradoException(
-                                        "Usuário não encontrado"
-                                )
-                        );
+        Usuario usuario = usuarioRepository.findById(usuarioId).orElseThrow(() -> new RecursoNaoEncontradoException("Usuário não encontrado"));
 
         // paciente vê apenas ele mesmo
-        if (
-                usuario.getTipo()
-                        .equalsIgnoreCase("paciente")
-        ) {
+        if (usuario.getTipo().equalsIgnoreCase("paciente")) {
 
-            PacienteResumoDTO dto =
-                    new PacienteResumoDTO();
+            PacienteResumoDTO dto = new PacienteResumoDTO();
 
             dto.setId(usuario.getId());
 
@@ -404,31 +245,19 @@ public class VinculoService {
 
             dto.setEmail(usuario.getEmail());
 
-            dto.setCpf(
-                    usuario.getCpf()
-            );
+            dto.setCpf(usuario.getCpf());
 
             return List.of(dto);
         }
 
         // responsável/médico
-        List<Vinculo> vinculos =
-                vinculoRepository
-                        .findByUsuarioId(usuarioId);
+        List<Vinculo> vinculos = vinculoRepository.findByUsuarioId(usuarioId);
 
         return vinculos.stream().map(vinculo -> {
 
-            Usuario paciente =
-                    usuarioRepository.findById(
-                            vinculo.getPacienteId()
-                    ).orElseThrow(() ->
-                            new RecursoNaoEncontradoException(
-                                    "Paciente não encontrado"
-                            )
-                    );
+            Usuario paciente = usuarioRepository.findById(vinculo.getPacienteId()).orElseThrow(() -> new RecursoNaoEncontradoException("Paciente não encontrado"));
 
-            PacienteResumoDTO dto =
-                    new PacienteResumoDTO();
+            PacienteResumoDTO dto = new PacienteResumoDTO();
 
             dto.setId(paciente.getId());
 
@@ -443,52 +272,29 @@ public class VinculoService {
         }).toList();
     }
 
-    public List<VinculoOutputDTO>
-    listarPorPaciente(
-            Integer pacienteId
-    ) {
+    public List<VinculoOutputDTO> listarPorPaciente(Integer pacienteId) {
 
-        List<Vinculo> vinculos =
-                vinculoRepository
-                        .findByPacienteId(
-                                pacienteId
-                        );
+        List<Vinculo> vinculos = vinculoRepository.findByPacienteId(pacienteId);
 
         return vinculos.stream().map(vinculo -> {
 
-            Usuario usuarioVinculado =
-                    usuarioRepository.findById(
-                            vinculo.getUsuarioId()
-                    ).orElseThrow(() ->
-                            new RecursoNaoEncontradoException(
-                                    "Usuário não encontrado"
-                            )
-                    );
+            Usuario usuarioVinculado = usuarioRepository.findById(vinculo.getUsuarioId()).orElseThrow(() -> new RecursoNaoEncontradoException("Usuário não encontrado"));
 
-            VinculoOutputDTO dto =
-                    new VinculoOutputDTO();
+            VinculoOutputDTO dto = new VinculoOutputDTO();
 
             dto.setId(vinculo.getId());
 
-            dto.setNome(
-                    usuarioVinculado.getNome()
-            );
+            dto.setNome(usuarioVinculado.getNome());
 
-            dto.setEmail(
-                    usuarioVinculado.getEmail()
-            );
+            dto.setEmail(usuarioVinculado.getEmail());
 
-            dto.setTipo(
-                    vinculo.getTipo()
-            );
+            dto.setTipo(vinculo.getTipo());
 
-            dto.setConselho(
-                    usuarioVinculado.getConselho()
-            );
+            dto.setFuncao(vinculo.getFuncao());
 
-            dto.setCriadoEm(
-                    vinculo.getCriadoEm()
-            );
+            dto.setConselho(usuarioVinculado.getConselho());
+
+            dto.setCriadoEm(vinculo.getCriadoEm());
 
             return dto;
 

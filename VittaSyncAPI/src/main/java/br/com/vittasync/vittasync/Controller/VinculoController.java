@@ -63,7 +63,11 @@ public class VinculoController {
 
         Usuario usuario = usuarioService.searchByCpf(cpf);
 
-        service.entrarComCodigo(dto.getCodigo(), usuario.getId());
+        service.entrarComCodigo(
+                dto.getCodigo(),
+                dto.getFuncao(),
+                usuario.getId()
+        );
 
         return ResponseEntity.ok().build();
     }

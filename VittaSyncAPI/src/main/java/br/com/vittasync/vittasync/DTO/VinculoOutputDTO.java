@@ -14,6 +14,8 @@ public class VinculoOutputDTO {
 
     private String conselho;
 
+    private String funcao;
+
     private Timestamp criadoEm;
 
 
@@ -63,5 +65,13 @@ public class VinculoOutputDTO {
 
     public void setCriadoEm(Timestamp criadoEm) {
         this.criadoEm = criadoEm;
+    }
+
+    public String getFuncao() {
+        return funcao;
+    }
+
+    public void setFuncao(String funcao) {
+        this.funcao = funcao;
     }
 }

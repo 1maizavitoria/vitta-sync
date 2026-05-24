@@ -21,6 +21,9 @@ public class Vinculo {
     @Column(name = "tipo")
     private String tipo;
 
+    @Column(name = "funcao")
+    private String funcao;
+
     @Column(name = "criado_em")
     private Timestamp criadoEm;
 
@@ -61,5 +64,13 @@ public class Vinculo {
 
     public void setCriadoEm(Timestamp criadoEm) {
         this.criadoEm = criadoEm;
+    }
+
+    public String getFuncao() {
+        return funcao;
+    }
+
+    public void setFuncao(String funcao) {
+        this.funcao = funcao;
     }
 }
