@@ -24,12 +24,16 @@ export const generateLinkCode = async () => {
     return response.data;
 };
 
-export const joinWithCode = async (code) => {
+export const joinWithCode = async (code, funcao) => {
 
     const response =
-        await api.post("/vinculos/entrar", {
-            codigo: code
-        });
+        await api.post(
+            "/vinculos/entrar",
+            {
+                codigo: code,
+                funcao
+            }
+        );
 
     return response.data;
 };

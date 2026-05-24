@@ -13,7 +13,6 @@ import { formatPhone, isValidPhone } from "../../utils/formatters/formatPhone";
 import { usePatient } from "../../context/PatientContext";
 import { getUserByCpf } from "../../services/userService";
 import Tooltip from "@mui/material/Tooltip";
-import AutocompleteUI from "./Autocomplete";
 
 export default function Perfil() {
     const { selectedPatient } = usePatient();
@@ -154,34 +153,6 @@ export default function Perfil() {
         userType === "paciente"
             ? localStorage.getItem("CPF")
             : selectedPatient?.cpf;
-
-    const funcoesResponsavel = [
-        {
-            label: "Cuidador",
-            value: "cuidador",
-            descricao: "Pessoa que acompanha cuidados diários do paciente."
-        },
-        {
-            label: "Responsável Legal",
-            value: "responsavel_legal",
-            descricao: "Pai, mãe, tutor ou curador legal do paciente."
-        },
-        {
-            label: "Acompanhante",
-            value: "acompanhante",
-            descricao: "Pessoa que acompanha consultas e exames."
-        },
-        {
-            label: "Contato de Emergência",
-            value: "contato_emergencia",
-            descricao: "Pessoa acionada em situações de urgência."
-        },
-        {
-            label: "Tutor",
-            value: "tutor",
-            descricao: "Responsável por menores ou incapazes."
-        }
-    ];
 
     useEffect(() => {
         if (!targetCpf) return;
@@ -372,39 +343,6 @@ export default function Perfil() {
                         fullWidth
                     />
                 </Grid>
-
-                {formData.tipo === "responsavel" && (
-                    <Grid item xs={12} md={6}>
-                        <AutocompleteUI
-                            label="Função do Responsável"
-                            options={funcoesResponsavel}
-                            value={
-                                funcoesResponsavel.find(
-                                    (option) =>
-                                        option.value === formData.funcaoResponsavel
-                                ) || null
-                            }
-                            onChange={(newValue) =>
-                                handleChange(
-                                    "funcaoResponsavel"
-                                )(newValue?.value || "")
-                            }
-                            disabled={!editing}
-                            error={false}
-                            renderOption={(props, option) => (
-                                <Tooltip
-                                    title={option.descricao || ""}
-                                    placement="right"
-                                    arrow
-                                >
-                                    <li {...props}>
-                                        {option.label}
-                                    </li>
-                                </Tooltip>
-                            )}
-                        />
-                    </Grid>
-                )}
 
                 {formData.tipo === "saude" && (
                     <Grid item xs={12}>

@@ -20,33 +20,110 @@ import MemberCard from "../../components/ui/cards/MemberCard";
 
 import { usePatient } from "../../context/PatientContext";
 
+import AutocompleteUI from "../../components/ui/Autocomplete";
+
 export default function PatientHub() {
     const { showAlert } = useAlert();
+
+    const { selectedPatient, setSelectedPatient, refreshPatients } = usePatient();
+
     const [links, setLinks] = useState([]);
     const [openModal, setOpenModal] = useState(false);
     const [generatedCode, setGeneratedCode] = useState("");
     const [generatedLink, setGeneratedLink] = useState("");
     const [openJoinModal, setOpenJoinModal] = useState(false);
+
     const [joinCode, setJoinCode] = useState("");
     const [openRemoveDialog, setOpenRemoveDialog] = useState(false);
     const [selectedLinkId, setSelectedLinkId] = useState(null);
     const [loading, setLoading] = useState(false);
+
     const [emailInput, setEmailInput] = useState("");
     const [emails, setEmails] = useState([]);
     const [selectedTab, setSelectedTab] = useState(0);
     const [isLeavingGroup, setIsLeavingGroup] = useState(false);
-    const [sendingEmails,
-        setSendingEmails] =
-        useState(false);
-
+    const [sendingEmails, setSendingEmails] = useState(false);
     const userType = localStorage.getItem("tipo");
-
     const navigate = useNavigate();
-    const {
-        selectedPatient,
-        setSelectedPatient,
-        refreshPatients
-    } = usePatient();
+    const [funcao, setFuncao] = useState("");
+
+    const [errorFuncao, setErrorFuncao] = useState(false);
+
+    const funcoesGrupo = [
+        {
+            label: "Cuidador",
+            value: "cuidador",
+            descricao: "Pessoa que acompanha cuidados diários do paciente."
+        },
+        {
+            label: "Responsável Legal",
+            value: "responsavel_legal",
+            descricao: "Pai, mãe, tutor ou curador legal do paciente."
+        },
+        {
+            label: "Acompanhante",
+            value: "acompanhante",
+            descricao: "Pessoa que acompanha consultas e exames."
+        },
+        {
+            label: "Contato de Emergência",
+            value: "contato_emergencia",
+            descricao: "Pessoa acionada em situações de urgência."
+        },
+        {
+            label: "Tutor",
+            value: "tutor",
+            descricao: "Responsável por menores ou incapazes."
+        }
+    ];
+
+    function getResponsavelStyle(funcao) {
+
+        switch (funcao?.toLowerCase()) {
+
+            case "cuidador":
+                return {
+                    background: "#fff3e0",
+                    color: "#e65100",
+                    label: "Cuidador"
+                };
+
+            case "responsavel_legal":
+                return {
+                    background: "#fce4ec",
+                    color: "#c2185b",
+                    label: "Responsável Legal"
+                };
+
+            case "acompanhante":
+                return {
+                    background: "#ede7f6",
+                    color: "#5e35b1",
+                    label: "Acompanhante"
+                };
+
+            case "contato_emergencia":
+                return {
+                    background: "#ffebee",
+                    color: "#c62828",
+                    label: "Contato de Emergência"
+                };
+
+            case "tutor":
+                return {
+                    background: "#e0f7fa",
+                    color: "#00838f",
+                    label: "Tutor"
+                };
+
+            default:
+                return {
+                    background: "#eeeeee",
+                    color: "#616161",
+                    label: "Responsável"
+                };
+        }
+    }
 
     async function loadLinks() {
         if (!selectedPatient?.id) {
@@ -160,9 +237,20 @@ export default function PatientHub() {
 
     async function handleJoinWithCode() {
 
+        if (userType?.toLowerCase() === "responsavel" && !funcao) {
+            setErrorFuncao(true);
+
+            showAlert(
+                "warning",
+                "Selecione uma função no grupo"
+            );
+
+            return;
+        }
+
         try {
 
-            await joinWithCode(joinCode);
+            await joinWithCode(joinCode, funcao);
 
             showAlert(
                 "success",
@@ -172,6 +260,7 @@ export default function PatientHub() {
             setOpenJoinModal(false);
 
             setJoinCode("");
+            setFuncao("");
 
             await refreshPatients();
 
@@ -276,7 +365,7 @@ export default function PatientHub() {
         }
     }
 
-    function getTypeColor(type) {
+    function getTypeColor(type, funcao) {
 
         switch (type?.toLowerCase()) {
 
@@ -295,11 +384,8 @@ export default function PatientHub() {
                 };
 
             case "responsavel":
-                return {
-                    background: "#e8f5e9",
-                    color: "#2e7d32",
-                    label: "Responsável"
-                };
+
+                return getResponsavelStyle(funcao);
 
 
 
@@ -327,9 +413,7 @@ export default function PatientHub() {
             link.tipo?.toLowerCase() === "saude"
     );
 
-    const isPaciente =
-        userType?.toLowerCase()
-        === "paciente";
+    const isPaciente = userType?.toLowerCase() === "paciente";
 
     const myLink = links.find((link) => {
         return (
@@ -739,7 +823,7 @@ export default function PatientHub() {
                                         {responsaveis.map((link) => {
 
                                             const typeStyle =
-                                                getTypeColor(link.tipo);
+                                                getTypeColor(link.tipo, link.funcao);
 
                                             return (
 
@@ -1213,6 +1297,45 @@ export default function PatientHub() {
                 onConfirm={handleJoinWithCode}
                 confirmText="Entrar"
             >
+
+                {userType?.toLowerCase() === "responsavel" && (<AutocompleteUI
+                    label="Função no grupo"
+                    options={funcoesGrupo}
+                    error={errorFuncao}
+                    value={
+                        funcoesGrupo.find(
+                            (option) =>
+                                option.value === funcao
+                        ) || null
+                    }
+                    onChange={(newValue) => {
+                        setFuncao(newValue?.value || "");
+                        setErrorFuncao(false);
+
+                    }}
+                    renderOption={(props, option) => (
+                        <li {...props}>
+                            <Box>
+                                <Typography
+                                    sx={{
+                                        fontWeight: 600
+                                    }}
+                                >
+                                    {option.label}
+                                </Typography>
+
+                                <Typography
+                                    variant="body2"
+                                    sx={{
+                                        color: "#777"
+                                    }}
+                                >
+                                    {option.descricao}
+                                </Typography>
+                            </Box>
+                        </li>
+                    )}
+                />)}
 
                 <InputUI
                     label="Código de convite"
