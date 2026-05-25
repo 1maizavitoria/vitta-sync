@@ -12,6 +12,15 @@ public class ArquivoMedicoOutputDTO {
     private String extensao;
     private String nomeOriginal;
     private String medicoNome;
+    private String pacienteNome;
+
+    public String getPacienteNome() {
+        return pacienteNome;
+    }
+
+    public void setPacienteNome(String pacienteNome) {
+        this.pacienteNome = pacienteNome;
+    }
 
     public String getMedicoNome() {
         return medicoNome;
@@ -29,18 +38,43 @@ public class ArquivoMedicoOutputDTO {
         this.nomeOriginal = nomeOriginal;
     }
 
-    public Integer getId() { return id; }
-    public void setId(Integer id) { this.id = id; }
+    public Integer getId() {
+        return id;
+    }
 
-    public String getNomeArquivo() { return nomeArquivo; }
-    public void setNomeArquivo(String nomeArquivo) { this.nomeArquivo = nomeArquivo; }
+    public void setId(Integer id) {
+        this.id = id;
+    }
 
-    public LocalDateTime getDataUpload() { return dataUpload; }
-    public void setDataUpload(LocalDateTime dataUpload) { this.dataUpload = dataUpload; }
+    public String getNomeArquivo() {
+        return nomeArquivo;
+    }
 
-    public String getPacienteCpf() { return pacienteCpf; }
-    public void setPacienteCpf(String pacienteCpf) { this.pacienteCpf = pacienteCpf; }
+    public void setNomeArquivo(String nomeArquivo) {
+        this.nomeArquivo = nomeArquivo;
+    }
 
-    public String getExtensao() { return extensao; }
-    public void setExtensao(String extensao) { this.extensao = extensao; }
+    public LocalDateTime getDataUpload() {
+        return dataUpload;
+    }
+
+    public void setDataUpload(LocalDateTime dataUpload) {
+        this.dataUpload = dataUpload;
+    }
+
+    public String getPacienteCpf() {
+        return pacienteCpf;
+    }
+
+    public void setPacienteCpf(String pacienteCpf) {
+        this.pacienteCpf = pacienteCpf;
+    }
+
+    public String getExtensao() {
+        return extensao;
+    }
+
+    public void setExtensao(String extensao) {
+        this.extensao = extensao;
+    }
 }

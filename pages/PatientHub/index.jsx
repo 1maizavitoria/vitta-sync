@@ -365,6 +365,15 @@ export default function PatientHub() {
         }
     }
 
+    async function handleOpenPerfil() {
+        try {
+            await refreshPatients();
+            navigate("/reports")
+        } catch (error) {
+            console.error(error);
+        }
+    }
+
     function getTypeColor(type, funcao) {
 
         switch (type?.toLowerCase()) {
@@ -962,7 +971,7 @@ export default function PatientHub() {
                         </Box>
 
                         <Box
-                            onClick={() => navigate("/reports")}
+                            onClick={() => handleOpenPerfil()}
                             sx={{
                                 backgroundColor: "#fff",
                                 borderRadius: "24px",

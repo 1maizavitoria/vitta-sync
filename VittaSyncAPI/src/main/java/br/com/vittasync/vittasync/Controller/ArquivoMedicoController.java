@@ -118,14 +118,22 @@ public class ArquivoMedicoController {
 
         List<ArquivoMedicoOutputDTO> output = docs.stream().map(d -> {
             ArquivoMedicoOutputDTO dto = new ArquivoMedicoOutputDTO();
+
             dto.setId(d.getId());
             dto.setNomeArquivo(d.getNomeArquivo());
             dto.setDataUpload(d.getDataUpload());
             dto.setPacienteCpf(d.getPaciente().getCpf());
+
+            dto.setPacienteNome(
+                    d.getPaciente().getNome()
+            );
+
             dto.setExtensao(d.getExtensao());
             dto.setNomeOriginal(d.getNomeOriginal());
             dto.setMedicoNome(d.getMedico().getNome());
+
             return dto;
+
         }).toList();
 
         return ResponseEntity.ok(output);

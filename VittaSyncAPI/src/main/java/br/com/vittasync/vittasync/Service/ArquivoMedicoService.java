@@ -24,7 +24,7 @@ public class ArquivoMedicoService {
         doc.setPaciente(paciente);
         doc.setNomeArquivo(nomeArquivo);
         doc.setExtensao(extensao);
-        doc.setNomeOriginal(nomeOriginal); // 👈
+        doc.setNomeOriginal(nomeOriginal);
         doc.setArquivo(arquivo);
         doc.setDataUpload(LocalDateTime.now());
         return repository.save(doc);

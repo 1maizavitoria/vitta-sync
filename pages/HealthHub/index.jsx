@@ -1,4 +1,4 @@
-import { Box, Button, Grid, IconButton, Paper, Typography } from "@mui/material";
+import { Box, Button, Grid, IconButton, Paper, Typography, Avatar } from "@mui/material";
 import UploadFileIcon from "@mui/icons-material/UploadFile";
 import PictureAsPdfIcon from "@mui/icons-material/PictureAsPdf";
 import DownloadIcon from "@mui/icons-material/Download";
@@ -190,63 +190,116 @@ export default function HealthHub() {
 
             <Grid container spacing={3}>
 
-                {documents.map((doc) => (
+                <Grid container spacing={3}>
 
-                    <Grid item xs={12} md={6} key={doc.id}>
+                    {documents.map((doc) => (
 
-                        <Paper
-                            elevation={0}
-                            sx={{
-                                p: 3,
-                                borderRadius: 4,
-                                border: "1px solid #eee"
-                            }}
-                        >
+                        <Grid item xs={12} md={6} key={doc.id}>
 
-                            <Box display="flex" justifyContent="space-between">
+                            <Paper
+                                elevation={0}
+                                sx={{
+                                    p: 3,
+                                    borderRadius: 4,
+                                    border: "1px solid #eee"
+                                }}
+                            >
 
-                                <Box>
-                                    <Typography fontWeight={700}>
-                                        {doc.nomeArquivo}
-                                    </Typography>
+                                <Box display="flex" gap={2}>
 
-                                    <Typography color="text.secondary" mb={2}>
-                                        {doc.pacienteCpf}
-                                    </Typography>
+                                    <Avatar
+                                        sx={{
+                                            bgcolor: "#e3f2fd",
+                                            color: "#1565c0"
+                                        }}
+                                    >
+                                        {doc.pacienteNome
+                                            ?.split(" ")
+                                            .map((n) => n[0])
+                                            .slice(0, 2)
+                                            .join("")
+                                        }
+                                    </Avatar>
+
+                                    <Box flex={1}>
+
+                                        <Box
+                                            display="flex"
+                                            justifyContent="space-between"
+                                            alignItems="flex-start"
+                                        >
+
+                                            <Box>
+
+                                                <Typography fontWeight={700}>
+                                                    {doc.nomeArquivo}
+                                                </Typography>
+
+                                                <Typography
+                                                    color="text.secondary"
+                                                >
+                                                    {doc.pacienteNome || "undefined"}
+                                                </Typography>
+
+                                            </Box>
+
+                                            <IconButton
+                                                onClick={() =>
+                                                    handleDelete(doc.id)
+                                                }
+                                            >
+                                                <CloseIcon color="error" />
+                                            </IconButton>
+
+                                        </Box>
+
+                                        <Box
+                                            display="flex"
+                                            alignItems="center"
+                                            gap={1}
+                                            mt={2}
+                                        >
+
+                                            <PictureAsPdfIcon color="error" />
+
+                                            <Typography>
+                                                {doc.nomeOriginal || "Arquivo antigo"}
+                                            </Typography>
+
+                                            <Box flex={1} />
+
+                                            <IconButton
+                                                onClick={() =>
+                                                    downloadDocument(
+                                                        doc.id,
+                                                        doc.nomeOriginal
+                                                    )
+                                                }
+                                            >
+                                                <DownloadIcon color="error" />
+                                            </IconButton>
+
+                                        </Box>
+
+                                        <Typography
+                                            variant="caption"
+                                            color="text.secondary"
+                                        >
+                                            {new Date(doc.dataUpload)
+                                                .toLocaleString("pt-BR")}
+                                        </Typography>
+
+                                    </Box>
+
                                 </Box>
 
-                                <IconButton onClick={() => handleDelete(doc.id)}>
-                                    <CloseIcon color="error" />
-                                </IconButton>
+                            </Paper>
 
-                            </Box>
+                        </Grid>
 
-                            <Box display="flex" alignItems="center" gap={1}>
+                    ))}
 
-                                <PictureAsPdfIcon color="error" />
-
-                                {/* Nome real do arquivo = título + extensão */}
-                                <Typography>
-                                    {doc.nomeOriginal || "Arquivo antigo"}
-                                </Typography>
-
-                                <Box flex={1} />
-
-                                <IconButton onClick={() => downloadDocument(doc.id, doc.nomeOriginal)}>
-                                    <DownloadIcon color="error" />
-                                </IconButton>
-
-                            </Box>
-
-                            <Typography variant="caption" color="text.secondary">
-                                {new Date(doc.dataUpload).toLocaleString("pt-BR")}
-                            </Typography>
-
-                        </Paper>
-
-                    </Grid>
-
-                ))}
+                </Grid>
 
             </Grid>
 
