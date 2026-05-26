@@ -33,8 +33,10 @@ public class DiarioSintomas {
     @Column(name = "data_modificacao")
     private LocalDateTime dataModificacao;
 
-    public DiarioSintomas() {}
+    @Column(name = "registrado_por_usuario_id")
+    private Integer registradoPorUsuarioId;
 
+    public DiarioSintomas() {}
 
     public Integer getId() { return id; }
     public void setId(Integer id) { this.id = id; }
@@ -56,4 +58,7 @@ public class DiarioSintomas {
 
     public LocalDateTime getDataModificacao() { return dataModificacao; }
     public void setDataModificacao(LocalDateTime dataModificacao) { this.dataModificacao = dataModificacao; }
+
+    public Integer getRegistradoPorUsuarioId() { return registradoPorUsuarioId; }
+    public void setRegistradoPorUsuarioId(Integer registradoPorUsuarioId) { this.registradoPorUsuarioId = registradoPorUsuarioId; }
 }

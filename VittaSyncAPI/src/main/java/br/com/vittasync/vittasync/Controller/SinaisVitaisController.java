@@ -1,15 +1,13 @@
 package br.com.vittasync.vittasync.Controller;
 
-import br.com.vittasync.vittasync.Service.PermissaoService;
+import br.com.vittasync.vittasync.Service.*;
 import br.com.vittasync.vittasync.DTO.SinaisVitaisInputDTO;
 import br.com.vittasync.vittasync.DTO.SinaisVitaisOutputDTO;
 import br.com.vittasync.vittasync.Model.SinaisVitais;
 import br.com.vittasync.vittasync.Model.Usuario;
-import br.com.vittasync.vittasync.Service.SinaisVitaisService;
-import br.com.vittasync.vittasync.Service.JwtService;
-import br.com.vittasync.vittasync.Service.UsuarioService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -22,17 +20,20 @@ public class SinaisVitaisController {
     private final JwtService jwtService;
     private final UsuarioService usuarioService;
     private final PermissaoService permissaoService;
+    private final EventoPacienteService eventoPacienteService;
 
     public SinaisVitaisController(
             SinaisVitaisService service,
             JwtService jwtService,
             UsuarioService usuarioService,
-            PermissaoService permissaoService
+            PermissaoService permissaoService,
+            EventoPacienteService eventoPacienteService
     ) {
         this.service = service;
         this.jwtService = jwtService;
         this.usuarioService = usuarioService;
         this.permissaoService = permissaoService;
+        this.eventoPacienteService = eventoPacienteService;
     }
 
     @PostMapping("/cadastrar/{cpf}")
@@ -41,11 +42,8 @@ public class SinaisVitaisController {
                                                         @RequestBody SinaisVitaisInputDTO dto) {
         String token = authHeader.replace("Bearer ", "");
         String cpfDoToken = jwtService.extrairCpf(token);
-        Usuario usuarioLogado =
-                usuarioService.searchByCpf(cpfDoToken);
-
-        Usuario paciente =
-                usuarioService.searchByCpf(cpf);
+        Usuario usuarioLogado = usuarioService.searchByCpf(cpfDoToken);
+        Usuario paciente = usuarioService.searchByCpf(cpf);
 
         if (
                 !permissaoService.podeEditarPaciente(
@@ -66,7 +64,7 @@ public class SinaisVitaisController {
         entity.setTempCelcius(dto.getTempCelcius());
         entity.setSpo2Porcento(dto.getSpo2Porcento());
 
-        SinaisVitais salvo = service.create(entity);
+        SinaisVitais salvo = service.create(entity, usuarioLogado.getId());
         return ResponseEntity.ok(toOutputDTO(salvo));
     }
 
@@ -104,7 +102,7 @@ public class SinaisVitaisController {
         entity.setTempCelcius(dto.getTempCelcius());
         entity.setSpo2Porcento(dto.getSpo2Porcento());
 
-        SinaisVitais atualizado = service.update(id, entity);
+        SinaisVitais atualizado = service.update(id, entity, usuarioLogado.getId());
         return ResponseEntity.ok(toOutputDTO(atualizado));
     }
 
@@ -131,7 +129,7 @@ public class SinaisVitaisController {
             return ResponseEntity.status(403).build();
         }
 
-        service.delete(id);
+        service.delete(id, usuarioLogado.getId());
         return ResponseEntity.noContent().build();
     }
 

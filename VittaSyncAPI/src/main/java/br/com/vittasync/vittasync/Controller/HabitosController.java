@@ -5,16 +5,12 @@ import br.com.vittasync.vittasync.DTO.HabitosInputDTO;
 import br.com.vittasync.vittasync.DTO.HabitosOutputDTO;
 import br.com.vittasync.vittasync.Model.Habitos;
 import br.com.vittasync.vittasync.Model.Usuario;
-import br.com.vittasync.vittasync.Service.HabitosService;
-import br.com.vittasync.vittasync.Service.JwtService;
+import br.com.vittasync.vittasync.Service.*;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import br.com.vittasync.vittasync.Service.UsuarioService;
+
 import java.util.List;
 import java.util.stream.Collectors;
-
-import br.com.vittasync.vittasync.Service.PermissaoService;
-
 
 
 @RestController
@@ -25,17 +21,20 @@ public class HabitosController {
     private final JwtService jwtService;
     private final UsuarioService usuarioService;
     private final PermissaoService permissaoService;
+    private final EventoPacienteService eventoPacienteService;
 
     public HabitosController(
             HabitosService service,
             JwtService jwtService,
             UsuarioService usuarioService,
-            PermissaoService permissaoService
+            PermissaoService permissaoService,
+            EventoPacienteService eventoPacienteService
     ) {
         this.service = service;
         this.jwtService = jwtService;
         this.usuarioService = usuarioService;
         this.permissaoService = permissaoService;
+        this.eventoPacienteService = eventoPacienteService;
     }
 
     @PostMapping("/cadastrar/{cpf}")
@@ -65,7 +64,7 @@ public class HabitosController {
         entity.setMinutosExercicio(dto.getMinutosExercicio());
         entity.setDataReferencia(dto.getDataReferencia());
 
-        Habitos salvo = service.create(entity);
+        Habitos salvo = service.create(entity, usuarioLogado.getId());
         return ResponseEntity.ok(toOutputDTO(salvo));
     }
 
@@ -97,7 +96,7 @@ public class HabitosController {
         entity.setMinutosExercicio(dto.getMinutosExercicio());
         entity.setDataReferencia(dto.getDataReferencia());
 
-        Habitos atualizado = service.update(id, entity);
+        Habitos atualizado = service.update(id, entity, usuarioLogado.getId());
         return ResponseEntity.ok(toOutputDTO(atualizado));
     }
 
@@ -123,7 +122,7 @@ public class HabitosController {
             return ResponseEntity.status(403).build();
         }
 
-        service.delete(id);
+        service.delete(id, usuarioLogado.getId());
         return ResponseEntity.noContent().build();
     }
 

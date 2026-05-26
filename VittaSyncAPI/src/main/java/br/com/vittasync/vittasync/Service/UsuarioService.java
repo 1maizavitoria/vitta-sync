@@ -46,6 +46,15 @@ public class UsuarioService {
                 .orElseThrow(() -> new RecursoNaoEncontradoException("Usuário não encontrado"));
     }
 
+    public Usuario searchById(Integer id) {
+        return usuarioRepository.findById(id)
+                .orElseThrow(() ->
+                        new RecursoNaoEncontradoException(
+                                "Usuário não encontrado"
+                        )
+                );
+    }
+
     public Usuario update(Usuario usuario) {
         return usuarioRepository.save(usuario);
     }

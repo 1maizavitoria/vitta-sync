@@ -8,10 +8,7 @@ import br.com.vittasync.vittasync.Repository.VinculoRepository;
 import br.com.vittasync.vittasync.Model.Usuario;
 import br.com.vittasync.vittasync.Model.Vinculo;
 
-import br.com.vittasync.vittasync.Service.JwtService;
-import br.com.vittasync.vittasync.Service.UsuarioService;
-import br.com.vittasync.vittasync.Service.VinculoService;
-import br.com.vittasync.vittasync.Service.PermissaoService;
+import br.com.vittasync.vittasync.Service.*;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -23,16 +20,18 @@ import java.util.List;
 public class VinculoController {
 
     private final VinculoService service;
-
     private final JwtService jwtService;
-
     private final UsuarioService usuarioService;
-
     private final PermissaoService permissaoService;
-
     private final VinculoRepository vinculoRepository;
 
-    public VinculoController(VinculoService service, JwtService jwtService, UsuarioService usuarioService, PermissaoService permissaoService, VinculoRepository vinculoRepository) {
+    public VinculoController(
+            VinculoService service,
+            JwtService jwtService,
+            UsuarioService usuarioService,
+            PermissaoService permissaoService,
+            VinculoRepository vinculoRepository
+    ) {
         this.service = service;
         this.jwtService = jwtService;
         this.usuarioService = usuarioService;
@@ -95,7 +94,7 @@ public class VinculoController {
             return ResponseEntity.status(403).build();
         }
 
-        service.removerVinculo(id);
+        service.removerVinculo(id, usuarioLogado.getId());
 
         return ResponseEntity.noContent().build();
     }

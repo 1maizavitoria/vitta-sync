@@ -23,6 +23,7 @@ import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
+import br.com.vittasync.vittasync.Util.EventoPrioridades;
 
 @Service
 public class VinculoService {
@@ -35,11 +36,19 @@ public class VinculoService {
 
     private final EmailService emailService;
 
-    public VinculoService(ConviteVinculoRepository conviteRepository, VinculoRepository vinculoRepository, UsuarioRepository usuarioRepository, EmailService emailService) {
+    private final EventoPacienteService eventoPacienteService;
+
+    public VinculoService(ConviteVinculoRepository conviteRepository,
+                          VinculoRepository vinculoRepository,
+                          UsuarioRepository usuarioRepository,
+                          EmailService emailService,
+                          EventoPacienteService eventoPacienteService) {
         this.conviteRepository = conviteRepository;
         this.vinculoRepository = vinculoRepository;
         this.usuarioRepository = usuarioRepository;
         this.emailService = emailService;
+        this.eventoPacienteService = eventoPacienteService;
+
     }
 
     public ConviteVinculoOutputDTO gerarCodigo(Integer usuarioId) {
@@ -139,6 +148,31 @@ public class VinculoService {
         vinculo.setCriadoEm(Timestamp.valueOf(LocalDateTime.now()));
 
         vinculoRepository.save(vinculo);
+
+        String descricao =
+                usuario.getNome()
+                        + " entrou no grupo";
+
+        if (
+                usuario.getTipo()
+                        .equalsIgnoreCase("responsavel")
+                        && funcao != null
+                        && !funcao.isBlank()
+        ) {
+
+            descricao +=
+                    " como "
+                            + funcao.replace("_", " ");
+        }
+
+        eventoPacienteService.criarEvento(
+                convite.getPacienteId(),
+                usuario.getId(),
+                "vinculo_criado",
+                "Novo participante no grupo",
+                descricao,
+                EventoPrioridades.NORMAL
+        );
     }
 
     public void enviarConviteEmail(String email, String codigo) {
@@ -173,10 +207,38 @@ public class VinculoService {
         emailService.enviarConviteVinculo(email, convidado.getNome(), paciente.getNome(), convite.getCodigo(), link);
     }
 
-    public void removerVinculo(Long id) {
+    public void removerVinculo(Long id, Integer usuarioLogadoId) {
 
         Vinculo vinculo = vinculoRepository.findById(id).orElseThrow(() -> new RecursoNaoEncontradoException("Vínculo não encontrado"));
-
+        Usuario usuarioLogado =
+                usuarioRepository.findById(
+                        usuarioLogadoId
+                ).orElseThrow(() ->
+                        new RecursoNaoEncontradoException(
+                                "Usuário não encontrado"
+                        )
+                );
+        Usuario usuarioRemovido =
+                usuarioRepository.findById(
+                        vinculo.getUsuarioId()
+                ).orElseThrow(() ->
+                        new RecursoNaoEncontradoException(
+                                "Usuário removido não encontrado"
+                        )
+                );
+        String descricao =
+                usuarioLogado.getNome()
+                        + " removeu "
+                        + usuarioRemovido.getNome()
+                        + " do grupo";
+        eventoPacienteService.criarEvento(
+                vinculo.getPacienteId(),
+                usuarioLogadoId,
+                "vinculo_removido",
+                "Participante removido",
+                descricao,
+                EventoPrioridades.NORMAL
+        );
         vinculoRepository.delete(vinculo);
     }
 

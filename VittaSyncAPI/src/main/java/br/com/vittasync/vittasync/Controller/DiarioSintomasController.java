@@ -11,6 +11,7 @@ import br.com.vittasync.vittasync.Service.JwtService;
 import br.com.vittasync.vittasync.Service.UsuarioService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -37,8 +38,8 @@ public class DiarioSintomasController {
 
     @PostMapping("/cadastrar/{cpf}")
     public ResponseEntity<DiarioSintomasOutputDTO> create(@PathVariable String cpf,
-                                                    @RequestHeader("Authorization") String authHeader,
-                                                    @RequestBody DiarioSintomasInputDTO dto) {
+                                                          @RequestHeader("Authorization") String authHeader,
+                                                          @RequestBody DiarioSintomasInputDTO dto) {
         String token = authHeader.replace("Bearer ", "");
         String cpfDoToken = jwtService.extrairCpf(token);
 
@@ -63,7 +64,7 @@ public class DiarioSintomasController {
         entity.setIntensidadeDor(dto.getIntensidadeDor());
         entity.setDataReferencia(dto.getDataReferencia());
 
-        DiarioSintomas salvo = service.create(entity);
+        DiarioSintomas salvo = service.create(entity, usuarioLogado.getId());
         return ResponseEntity.ok(toOutputDTO(salvo));
     }
 
@@ -96,7 +97,7 @@ public class DiarioSintomasController {
         entity.setIntensidadeDor(dto.getIntensidadeDor());
         entity.setDataReferencia(dto.getDataReferencia());
 
-        DiarioSintomas atualizado = service.update(id, entity);
+        DiarioSintomas atualizado = service.update(id, entity, usuarioLogado.getId());
         return ResponseEntity.ok(toOutputDTO(atualizado));
     }
 
@@ -122,13 +123,13 @@ public class DiarioSintomasController {
             return ResponseEntity.status(403).build();
         }
 
-        service.delete(id);
+        service.delete(id,usuarioLogado.getId());
         return ResponseEntity.noContent().build();
     }
 
     @GetMapping("/getSintomas/{cpf}")
     public ResponseEntity<List<DiarioSintomasOutputDTO>> list(@PathVariable String cpf,
-                                                        @RequestHeader("Authorization") String authHeader) {
+                                                              @RequestHeader("Authorization") String authHeader) {
         String token = authHeader.replace("Bearer ", "");
         String cpfDoToken = jwtService.extrairCpf(token);
 
