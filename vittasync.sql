@@ -13,7 +13,6 @@ CREATE TABLE Usuario (
     conselho VARCHAR(30),
     peso_inicial DOUBLE,
     altura DOUBLE,
-    funcao_respoNsavel VARCHAR(50),
     priv_compartilhar_diario BOOLEAN,
     priv_compartilhar_habitos BOOLEAN,
     data_nascimento DATE NOT NULL,
@@ -48,6 +47,7 @@ CREATE TABLE SessaoToken (
 CREATE TABLE SinaisVitais (
     id INT AUTO_INCREMENT PRIMARY KEY,
     paciente_id INT NOT NULL,
+    registrado_por_usuario_id INT,
     fc_bpm INT,
     fr_rpm INT,
     pa_sistolica INT,
@@ -57,24 +57,37 @@ CREATE TABLE SinaisVitais (
     peso DOUBLE,
     data_registro DATETIME NOT NULL,
     data_modificacao DATETIME,
+
     CONSTRAINT fk_sinais_paciente
         FOREIGN KEY (paciente_id)
         REFERENCES Usuario(id)
-        ON DELETE CASCADE
+        ON DELETE CASCADE,
+
+    CONSTRAINT fk_sinais_registrado_por
+        FOREIGN KEY (registrado_por_usuario_id)
+        REFERENCES Usuario(id)
+        ON DELETE SET NULL
 );
 
 CREATE TABLE Habitos (
     id INT AUTO_INCREMENT PRIMARY KEY,
     paciente_id INT NOT NULL,
+    registrado_por_usuario_id INT,
     horas_sono INT,
     minutos_exercicio INT,
     data_referencia DATE NOT NULL,
     data_registro DATETIME NOT NULL,
     data_modificacao DATETIME,
+
     CONSTRAINT fk_habitos_paciente
         FOREIGN KEY (paciente_id)
         REFERENCES Usuario(id)
-        ON DELETE CASCADE
+        ON DELETE CASCADE,
+
+    CONSTRAINT fk_habitos_registrado_por
+        FOREIGN KEY (registrado_por_usuario_id)
+        REFERENCES Usuario(id)
+        ON DELETE SET NULL
 );
 
 CREATE TABLE LembreteMedicao (
@@ -85,6 +98,7 @@ CREATE TABLE LembreteMedicao (
     enviar_email BOOLEAN DEFAULT TRUE,
     enviar_sms BOOLEAN DEFAULT FALSE,
     ativo BOOLEAN NOT NULL DEFAULT TRUE,
+
     CONSTRAINT fk_usuario_lembrete
         FOREIGN KEY (usuario_id)
         REFERENCES Usuario(id)
@@ -99,6 +113,7 @@ CREATE TABLE DiarioSintomas (
     data_referencia DATE NOT NULL,
     data_registro TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     data_modificacao TIMESTAMP NULL,
+
     FOREIGN KEY (paciente_id)
         REFERENCES Usuario(id)
 );
@@ -108,10 +123,14 @@ CREATE TABLE Vinculo (
     paciente_id INT NOT NULL,
     usuario_id INT NOT NULL,
     tipo VARCHAR(20) NOT NULL,
+    funcao VARCHAR(50),
     criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
     UNIQUE (paciente_id, usuario_id),
+
     FOREIGN KEY (paciente_id)
         REFERENCES Usuario(id),
+
     FOREIGN KEY (usuario_id)
         REFERENCES Usuario(id)
 );
@@ -123,6 +142,7 @@ CREATE TABLE ConviteVinculo (
     expira_em TIMESTAMP NOT NULL,
     ativo BOOLEAN DEFAULT TRUE,
     criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
     FOREIGN KEY (paciente_id)
         REFERENCES Usuario(id)
         ON DELETE CASCADE
@@ -135,7 +155,9 @@ CREATE TABLE ContatoEmergencia (
     telefone VARCHAR(15) NOT NULL,
     data_registro DATETIME DEFAULT CURRENT_TIMESTAMP,
     data_modificacao DATETIME NULL,
-    CONSTRAINT fk_contato_paciente FOREIGN KEY (paciente_id)
+
+    CONSTRAINT fk_contato_paciente
+        FOREIGN KEY (paciente_id)
         REFERENCES Usuario(id)
         ON DELETE CASCADE
 );
@@ -145,10 +167,40 @@ CREATE TABLE ArquivoMedico (
     medico_id INT NOT NULL,
     paciente_id INT NOT NULL,
     nome_arquivo VARCHAR(255) NOT NULL,
+    nome_original VARCHAR(255) NOT NULL,
+    extensao VARCHAR(20) NOT NULL,
     arquivo LONGBLOB NOT NULL,
     data_upload DATETIME DEFAULT CURRENT_TIMESTAMP,
-    CONSTRAINT fk_medico FOREIGN KEY (medico_id) REFERENCES Usuario(id),
-    CONSTRAINT fk_paciente FOREIGN KEY (paciente_id) REFERENCES Usuario(id)
+
+    CONSTRAINT fk_medico
+        FOREIGN KEY (medico_id)
+        REFERENCES Usuario(id),
+
+    CONSTRAINT fk_paciente
+        FOREIGN KEY (paciente_id)
+        REFERENCES Usuario(id)
+);
+
+CREATE TABLE EventoPaciente (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    paciente_id INT NOT NULL,
+    usuario_id INT,
+    tipo_evento VARCHAR(50) NOT NULL,
+    titulo VARCHAR(150) NOT NULL,
+    descricao TEXT,
+    prioridade VARCHAR(20) DEFAULT 'normal',
+    visualizado BOOLEAN DEFAULT FALSE,
+    criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT fk_evento_paciente
+        FOREIGN KEY (paciente_id)
+        REFERENCES Usuario(id)
+        ON DELETE CASCADE,
+
+    CONSTRAINT fk_evento_usuario
+        FOREIGN KEY (usuario_id)
+        REFERENCES Usuario(id)
+        ON DELETE SET NULL
 );
 
 

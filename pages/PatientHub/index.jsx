@@ -1075,8 +1075,44 @@ export default function PatientHub() {
 
                         </Box>
 
-                    </Box>
+                        <Box
+                            onClick={() => navigate("/activity")}
+                            sx={{
+                                backgroundColor: "#fff",
+                                borderRadius: "24px",
+                                padding: 4,
+                                cursor: "pointer",
+                                transition: ".2s",
+                                boxShadow:
+                                    "0px 4px 15px rgba(0,0,0,0.08)",
 
+                                "&:hover": {
+                                    transform: "translateY(-4px)"
+                                }
+                            }}
+                        >
+
+                            <Typography
+                                variant="h6"
+                                sx={{
+                                    fontWeight: 700,
+                                    mb: 1
+                                }}
+                            >
+                                Atividade
+                            </Typography>
+
+                            <Typography
+                                sx={{
+                                    color: "#777"
+                                }}
+                            >
+                                Histórico de atividades e notificações do grupo.
+                            </Typography>
+
+                        </Box>
+
+                    </Box>
                 </Box>
             </Box>
 
