@@ -23,6 +23,10 @@ public class EventoTipos {
     public static final String SONO_CRITICO = "sono_critico";
     public static final String SEDENTARISMO_DETECTADO = "sedentarismo_detectado";
 
+    public static final String DOCUMENTO_ENVIADO = "documento_enviado";
+
+    public static final String DOCUMENTO_REMOVIDO = "documento_removido";
+
     private EventoTipos() {
     }
 }

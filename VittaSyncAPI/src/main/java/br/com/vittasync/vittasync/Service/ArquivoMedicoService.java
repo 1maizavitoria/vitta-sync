@@ -4,7 +4,10 @@ package br.com.vittasync.vittasync.Service;
 import br.com.vittasync.vittasync.Model.ArquivoMedico;
 import br.com.vittasync.vittasync.Model.Usuario;
 import br.com.vittasync.vittasync.Repository.ArquivoMedicoRepository;
+import br.com.vittasync.vittasync.Util.EventoPrioridades;
+import br.com.vittasync.vittasync.Util.EventoTipos;
 import org.springframework.stereotype.Service;
+
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -13,9 +16,14 @@ import java.util.List;
 public class ArquivoMedicoService {
 
     private final ArquivoMedicoRepository repository;
+    private final EventoPacienteService eventoPacienteService;
 
-    public ArquivoMedicoService(ArquivoMedicoRepository repository) {
+    public ArquivoMedicoService(
+            ArquivoMedicoRepository repository,
+            EventoPacienteService eventoPacienteService
+    ) {
         this.repository = repository;
+        this.eventoPacienteService = eventoPacienteService;
     }
 
     public ArquivoMedico upload(Usuario medico, Usuario paciente, String nomeArquivo, String extensao, String nomeOriginal, byte[] arquivo) {
@@ -27,7 +35,20 @@ public class ArquivoMedicoService {
         doc.setNomeOriginal(nomeOriginal);
         doc.setArquivo(arquivo);
         doc.setDataUpload(LocalDateTime.now());
-        return repository.save(doc);
+        ArquivoMedico salvo = repository.save(doc);
+
+        eventoPacienteService.criarEvento(
+                paciente.getId(),
+                medico.getId(),
+                EventoTipos.DOCUMENTO_ENVIADO,
+                "Novo documento enviado",
+                medico.getNome()
+                        + " enviou o documento "
+                        + nomeArquivo,
+                EventoPrioridades.NORMAL
+        );
+
+        return salvo;
     }
 
     public List<ArquivoMedico> listarPorPaciente(Usuario paciente) {
@@ -47,6 +68,16 @@ public class ArquivoMedicoService {
         if (!doc.getMedico().getId().equals(medico.getId())) {
             throw new RuntimeException("Você não tem permissão para deletar este documento");
         }
+        eventoPacienteService.criarEvento(
+                doc.getPaciente().getId(),
+                medico.getId(),
+                EventoTipos.DOCUMENTO_REMOVIDO,
+                "Documento removido",
+                medico.getNome()
+                        + " removeu o documento "
+                        + doc.getNomeArquivo(),
+                EventoPrioridades.NORMAL
+        );
         repository.delete(doc);
     }
 }
