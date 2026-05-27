@@ -30,8 +30,6 @@ export default function Perfil() {
         email: "",
         tipo: "",
         conselho: "",
-        privCompartilharDiario: "",
-        privCompartilharHabitos: "",
         telefone: "",
         pesoInicial: "",
         altura: "",
@@ -101,8 +99,6 @@ export default function Perfil() {
             nome: formData.nome,
             email: formData.email,
             dataNascimento: formData.dataNascimento,
-            privCompartilharDiario: formData.privCompartilharDiario,
-            privCompartilharHabitos: formData.privCompartilharHabitos,
             telefone: formData.telefone,
             pesoInicial: Number(formData.pesoInicial),
             altura: Number(formData.altura),
@@ -174,8 +170,6 @@ export default function Perfil() {
                     email: data.email,
                     tipo: data.tipo,
                     conselho: data.conselho,
-                    privCompartilharDiario: data.privCompartilharDiario,
-                    privCompartilharHabitos: data.privCompartilharHabitos,
                     funcaoResponsavel: data.funcaoResponsavel,
                 });
 
@@ -271,15 +265,6 @@ export default function Perfil() {
                         disabled={!editing}
                         fullWidth
                         error={(error && !formData.nome) || errorName}
-                    />
-                </Grid>
-
-                <Grid item xs={12} md={6}>
-                    <InputUI
-                        label="Tipo"
-                        value={formData.tipo}
-                        disabled
-                        fullWidth
                     />
                 </Grid>
 
@@ -386,22 +371,6 @@ export default function Perfil() {
                         fullWidth
                     />
                 </Grid>}
-
-                {formData.tipo === "paciente" && <FormGroup>
-                    <CheckboxUI
-                        disabled={!editing}
-                        label="Permitir compartilhar dados diarios"
-                        checked={formData.privCompartilharDiario}
-                        onChange={handleChange("privCompartilharDiario")}
-                    />
-
-                    <CheckboxUI
-                        disabled={!editing}
-                        label="Permitir compartilhar dados dos hábitos"
-                        checked={formData.privCompartilharHabitos}
-                        onChange={handleChange("privCompartilharHabitos")}
-                    />
-                </FormGroup>}
             </Grid>
         </Paper>
     );

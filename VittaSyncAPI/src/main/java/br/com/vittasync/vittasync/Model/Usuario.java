@@ -44,12 +44,6 @@ public class Usuario {
     @Column(length = 30)
     private String conselho;
 
-    @Column(name = "priv_compartilhar_diario")
-    private Boolean privCompartilharDiario;
-
-    @Column(name = "priv_compartilhar_habitos")
-    private Boolean privCompartilharHabitos;
-
     @Column(name = "data_nascimento", nullable = false)
     private LocalDate dataNascimento;
 
@@ -88,12 +82,6 @@ public class Usuario {
 
     public String getConselho() { return conselho; }
     public void setConselho(String conselho) { this.conselho = conselho; }
-
-    public Boolean getPrivCompartilharDiario() { return privCompartilharDiario; }
-    public void setPrivCompartilharDiario(Boolean privCompartilharDiario) { this.privCompartilharDiario = privCompartilharDiario; }
-
-    public Boolean getPrivCompartilharHabitos() { return privCompartilharHabitos; }
-    public void setPrivCompartilharHabitos(Boolean privCompartilharHabitos) { this.privCompartilharHabitos = privCompartilharHabitos; }
 
     public LocalDate getDataNascimento() { return dataNascimento; }
     public void setDataNascimento(LocalDate dataNascimento) { this.dataNascimento = dataNascimento; }

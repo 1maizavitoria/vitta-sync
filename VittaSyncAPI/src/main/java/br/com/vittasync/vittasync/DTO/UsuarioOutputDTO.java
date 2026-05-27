@@ -15,8 +15,6 @@ public class UsuarioOutputDTO {
     private String tipo;
     private String conselho;
     private String funcaoResponsavel;
-    private Boolean privCompartilharDiario;
-    private Boolean privCompartilharHabitos;
     private LocalDate dataNascimento;
     private LocalDateTime dataCadastro;
 
@@ -48,12 +46,6 @@ public class UsuarioOutputDTO {
 
     public String getConselho() { return conselho; }
     public void setConselho(String conselho) { this.conselho = conselho; }
-
-    public Boolean getPrivCompartilharDiario() { return privCompartilharDiario; }
-    public void setPrivCompartilharDiario(Boolean privCompartilharDiario) { this.privCompartilharDiario = privCompartilharDiario; }
-
-    public Boolean getPrivCompartilharHabitos() { return privCompartilharHabitos; }
-    public void setPrivCompartilharHabitos(Boolean privCompartilharHabitos) { this.privCompartilharHabitos = privCompartilharHabitos; }
 
     public LocalDate getDataNascimento() { return dataNascimento; }
     public void setDataNascimento(LocalDate dataNascimento) { this.dataNascimento = dataNascimento; }

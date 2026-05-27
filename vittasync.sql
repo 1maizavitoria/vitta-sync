@@ -13,8 +13,6 @@ CREATE TABLE Usuario (
     conselho VARCHAR(30),
     peso_inicial DOUBLE,
     altura DOUBLE,
-    priv_compartilhar_diario BOOLEAN,
-    priv_compartilhar_habitos BOOLEAN,
     data_nascimento DATE NOT NULL,
     data_cadastro TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY (id),

@@ -46,8 +46,6 @@ public class UsuarioController {
         usuario.setSenha(HashUtil.hashSenha(dto.getSenha()));
         usuario.setTipo(dto.getTipo());
         usuario.setConselho(dto.getConselho());
-        usuario.setPrivCompartilharDiario(dto.getPrivCompartilharDiario());
-        usuario.setPrivCompartilharHabitos(dto.getPrivCompartilharHabitos());
         usuario.setDataNascimento(dto.getDataNascimento());
 
         Usuario criado = usuarioService.create(usuario);
@@ -75,8 +73,6 @@ public class UsuarioController {
             usuario.setTelefone(dto.getTelefone());
             usuario.setAltura(dto.getAltura());
             usuario.setFuncaoResponsavel(dto.getFuncaoResponsavel());
-            usuario.setPrivCompartilharDiario(dto.getPrivCompartilharDiario());
-            usuario.setPrivCompartilharHabitos(dto.getPrivCompartilharHabitos());
             usuario.setDataNascimento(dto.getDataNascimento());
             usuario.setTelefone(dto.getTelefone());
             usuario.setPesoInicial(dto.getPesoInicial());
@@ -141,8 +137,6 @@ public class UsuarioController {
         out.setFuncaoResponsavel(usuario.getFuncaoResponsavel());
         out.setTipo(usuario.getTipo());
         out.setConselho(usuario.getConselho());
-        out.setPrivCompartilharDiario(usuario.getPrivCompartilharDiario());
-        out.setPrivCompartilharHabitos(usuario.getPrivCompartilharHabitos());
         out.setDataNascimento(usuario.getDataNascimento());
         out.setDataCadastro(usuario.getDataCadastro());
         return out;

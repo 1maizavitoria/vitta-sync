@@ -93,37 +93,30 @@ export default function Login() {
         }
     }
 
-    async function handleLogin() {
-
+    function handleLogin() {
         if (!canLogin()) return;
-
         if (loadingLogin) return;
-
         setLoadingLogin(true);
 
-        const data = {
-            cpf: CPF,
-            senha: password,
-            canal: channel
-        };
+        const data = { cpf: CPF, senha: password, canal: channel };
+        setOpenLoginDialog(true);
+        showAlert("success", getChannelMessage(channel));
 
-        try {
-            await login(data);
-            setOpenLoginDialog(true);
-            showAlert("success", getChannelMessage(channel));
-
-        } catch (error) {
-            setOpenLoginDialog(false);
-            setErrorCPF(true);
-            setErrorPassword(true);
-            showAlert("error", "CPF ou senha inválidos");
-            console.error(error);
-
-        } finally {
-            setLoadingLogin(false);
-
-        }
+        login(data)
+            .then(() => {
+            })
+            .catch((error) => {
+                showAlert("error", "Erro ao enviar código");
+                console.error(error);
+            })
+            .finally(() => {
+                setLoadingLogin(false);
+            });
     }
+
+
+
+
 
     async function handleValidateCode() {
         if (loadingValidateCode) return;
@@ -512,7 +505,7 @@ export default function Login() {
 
                             {/* Diálogo para de verificação de 2 fatores no login */}
                             <DialogUI
-                                disabledClose={loadingValidateCode || loadingLogin}
+                                disabledClose={loadingValidateCode}
                                 disabledConfirm={loadingValidateCode}
                                 confirmText={
                                     loadingValidateCode

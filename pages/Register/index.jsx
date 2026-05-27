@@ -41,8 +41,6 @@ export default function Register() {
     const [advice, setAdvice] = useState("");
     const [userType, setUserType] = useState(null);
     const [birthDate, setBirthDate] = useState(null);
-    const [privateShareDaily, setPrivateShareDaily] = useState(false);
-    const [privateShareHabits, setPrivateShareHabits] = useState(false);
     const [email, setEmail] = useState("");
     const [repeatPassword, setRepeatPassword] = useState("");
     const [dateLimit, setDateLimit] = useState();
@@ -67,20 +65,19 @@ export default function Register() {
             CPF == "" ||
             name == "" ||
             phone == "" ||
-            initialWeight == "" ||
-            height == "" ||
             userType == null ||
             birthDate == null ||
             password == "" ||
             repeatPassword == "" ||
+            (userType.value === "paciente" && (initialWeight == "" || height == "")) ||
             (userType.value === "saude" && advice == "")
         ) {
             setErrorName(name == "");
             setErrorCPF(CPF == "");
             setErrorEmail(email == "");
             setErrorPhone(phone == "");
-            setErrorWeight(initialWeight == "");
-            setErrorHeight(height == "");
+            setErrorWeight(userType?.value === "paciente" && initialWeight == "");
+            setErrorHeight(userType?.value === "paciente" && height == "");
             setErrorUserType(userType == null);
             setErrorBirthDate(birthDate == null);
             setErrorPassword(password == "");
@@ -108,13 +105,13 @@ export default function Register() {
             return false;
         }
 
-        if (!isValidPositiveNumber(initialWeight)) {
+        if (userType?.value === "paciente" && !isValidPositiveNumber(initialWeight)) {
             setErrorWeight(true);
             showAlert("error", "Peso inválido");
             return false;
         }
 
-        if (!isValidPositiveNumber(height)) {
+        if (userType?.value === "paciente" && !isValidPositiveNumber(height)) {
             setErrorHeight(true);
             showAlert("error", "Altura inválida");
             return false;
@@ -149,9 +146,10 @@ export default function Register() {
                 "error",
                 `"${userType?.label}" precisa ser maior de idade`
             );
-            return;
+            return false;
         }
 
+        // resetando erros
         setErrorName(false);
         setErrorCPF(false);
         setErrorEmail(false);
@@ -165,8 +163,8 @@ export default function Register() {
         setErrorAdvice(false);
 
         return true;
-
     };
+
 
     async function handleRegister() {
 
@@ -182,15 +180,17 @@ export default function Register() {
             nome: name,
             email: email,
             telefone: phone,
-            pesoInicial: Number(initialWeight),
-            altura: Number(height),
             senha: password,
             cpf: CPF,
-            conselho: advice,
             tipo: userType.value,
             dataNascimento: birthDate,
-            privCompartilharDiario: privateShareDaily,
-            privCompartilharHabitos: privateShareHabits,
+            ...(userType.value === "paciente" && {
+                pesoInicial: Number(initialWeight),
+                altura: Number(height),
+            }),
+            ...(userType.value === "saude" && {
+                conselho: advice,
+            }),
         };
 
         try {
@@ -321,64 +321,75 @@ export default function Register() {
                             >
                             </InputUI>
 
-                            <InputUI
-                                label="Peso Inicial"
-                                placeholder="Ex: 70.5"
-                                type="number"
-                                error={errorWeight}
-                                value={initialWeight}
-                                onChange={(e) => {
-                                    const value = e.target.value;
-                                    if (value < 0 || value > 500) return;
-                                    setInitialWeight(value);
-                                    setErrorWeight(false);
-                                }}
-                            >
-                            </InputUI>
-
-                            <InputUI
-                                label="Altura"
-                                placeholder="Ex: 1.75"
-                                type="number"
-                                error={errorHeight}
-                                value={height}
-                                onChange={(e) => {
-                                    const value = e.target.value;
-                                    if (value < 0 || value > 3) return;
-                                    setHeight(value);
-                                    setErrorHeight(false);
-                                }}
-                            >
-                            </InputUI>
-
                             <AutocompleteUI
                                 label="Tipo de usuário"
                                 error={errorUserType && userType == null}
-                                //helperText="Selecione um tipo válido"
                                 value={userType}
-                                onChange={(newValue) =>
-                                    setUserType(newValue)
-                                    // setErrorUserType(false)
-                                }
+                                onChange={(newValue) => setUserType(newValue)}
                                 options={[
                                     { value: "paciente", label: "Paciente" },
                                     { value: "responsavel", label: "Responsável" },
                                     { value: "saude", label: "Profissional da Saúde" }
                                 ]}
+                                fullWidth
+                                sx={{ width: "100%" }}
                             />
 
-                            {userType?.value === "saude" && <InputUI
-                                label="Conselho"
-                                placeholder="CRM, etc"
-                                error={errorAdvice}
-                                value={advice}
-                                onChange={(e) => {
-                                    setAdvice(e.target.value);
-                                    setErrorAdvice(false);
-                                }
-                                }
-                            >
-                            </InputUI>}
+
+                            {userType?.value === "paciente" && (
+                                <>
+                                    <InputUI
+                                        label="Peso Inicial"
+                                        placeholder="Ex: 70.5"
+                                        error={errorWeight}
+                                        value={initialWeight}
+                                        onChange={(e) => {
+                                            let value = e.target.value.replace(",", ".");
+                                            if (value.length > 4) return;
+
+                                            setInitialWeight(value);
+                                            setErrorWeight(false);
+                                        }}
+                                    />
+
+
+
+
+
+                                    <InputUI
+                                        label="Altura"
+                                        placeholder="Ex: 1.75"
+                                        error={errorHeight}
+                                        value={height}
+                                        onChange={(e) => {
+                                            let raw = e.target.value.replace(/\D/g, "");
+                                            if (raw.length === 3) {
+                                                const num = parseFloat(raw[0] + "." + raw.slice(1));
+                                                if (num >= 0.5 && num <= 2.7) {
+                                                    setHeight(num.toFixed(2));
+                                                    setErrorHeight(false);
+                                                }
+                                            } else {
+                                                setHeight(raw);
+                                            }
+                                        }}
+                                    />
+
+                                </>
+                            )}
+
+                            {userType?.value === "saude" && (
+                                <InputUI
+                                    label="Conselho"
+                                    placeholder="CRM, etc"
+                                    error={errorAdvice}
+                                    value={advice}
+                                    onChange={(e) => {
+                                        setAdvice(e.target.value);
+                                        setErrorAdvice(false);
+                                    }}
+                                />
+                            )}
 
                             <DatePickerUI
                                 label="Data de nascimento"
@@ -387,6 +398,7 @@ export default function Register() {
                                 value={birthDate}
                                 onChange={setBirthDate}
                             />
+    
 
                             <Tooltip
                                 title={<PasswordTooltip rules={rulesPassword} />}
@@ -426,20 +438,6 @@ export default function Register() {
                                 >
                                 </InputUI>
                             </Tooltip>
-
-                            {userType?.value === "paciente" && <FormGroup>
-                                <CheckboxUI
-                                    label="Permitir compartilhar dados diarios"
-                                    checked={privateShareDaily}
-                                    onChange={setPrivateShareDaily}
-                                />
-
-                                <CheckboxUI
-                                    label="Permitir compartilhar dados dos hábitos"
-                                    checked={privateShareHabits}
-                                    onChange={setPrivateShareHabits}
-                                />
-                            </FormGroup>}
 
                             <ButtonUI
                                 onClick={handleRegister}

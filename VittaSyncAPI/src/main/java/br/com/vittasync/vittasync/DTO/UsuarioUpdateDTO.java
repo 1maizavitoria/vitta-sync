@@ -21,18 +21,13 @@ public class UsuarioUpdateDTO {
     @Pattern(regexp = "\\d{10,11}", message = "Telefone deve ter DDD e número")
     private String telefone;
 
-    @NotNull(message = "Altura é obrigatória")
     @Positive(message = "Altura deve ser positiva")
     private Double altura;
 
-    @NotNull(message = "Peso é obrigatório")
     @Positive(message = "Peso deve ser positiva")
     private Double pesoInicial;
 
     private String funcaoResponsavel;
-
-    private Boolean privCompartilharDiario;
-    private Boolean privCompartilharHabitos;
 
     @NotNull(message = "Data de nascimento é obrigatória")
     @JsonFormat(pattern = "yyyy-MM-dd")
@@ -55,12 +50,6 @@ public class UsuarioUpdateDTO {
 
     public String getFuncaoResponsavel() { return funcaoResponsavel; }
     public void setFuncaoResponsavel(String funcaoResponsavel) { this.funcaoResponsavel = funcaoResponsavel; }
-
-    public Boolean getPrivCompartilharDiario() { return privCompartilharDiario; }
-    public void setPrivCompartilharDiario(Boolean privCompartilharDiario) { this.privCompartilharDiario = privCompartilharDiario; }
-
-    public Boolean getPrivCompartilharHabitos() { return privCompartilharHabitos; }
-    public void setPrivCompartilharHabitos(Boolean privCompartilharHabitos) { this.privCompartilharHabitos = privCompartilharHabitos; }
 
     public LocalDate getDataNascimento() { return dataNascimento; }
     public void setDataNascimento(LocalDate dataNascimento) { this.dataNascimento = dataNascimento; }

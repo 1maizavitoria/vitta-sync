@@ -21,11 +21,10 @@ public class UsuarioInputDTO {
     @Pattern(regexp = "\\d{10,11}", message = "Telefone deve ter DDD e número")
     private String telefone;
 
-    @NotNull(message = "Peso inicial é obrigatório")
     @Positive(message = "Peso inicial deve ser positivo")
     private Double pesoInicial;
 
-    @NotNull(message = "Altura é obrigatória")
+
     @Positive(message = "Altura deve ser positiva")
     private Double altura;
 
@@ -43,9 +42,6 @@ public class UsuarioInputDTO {
     @NotBlank(message = "CPF é obrigatório")
     @Pattern(regexp = "\\d{11}", message = "CPF deve ter exatamente 11 números")
     private String cpf;
-
-    private Boolean privCompartilharDiario;
-    private Boolean privCompartilharHabitos;
 
     @NotNull(message = "Data de nascimento é obrigatória")
     @JsonFormat(pattern = "yyyy-MM-dd")
@@ -77,12 +73,6 @@ public class UsuarioInputDTO {
 
     public String getConselho() { return conselho; }
     public void setConselho(String conselho) { this.conselho = conselho; }
-
-    public Boolean getPrivCompartilharDiario() { return privCompartilharDiario; }
-    public void setPrivCompartilharDiario(Boolean privCompartilharDiario) { this.privCompartilharDiario = privCompartilharDiario; }
-
-    public Boolean getPrivCompartilharHabitos() { return privCompartilharHabitos; }
-    public void setPrivCompartilharHabitos(Boolean privCompartilharHabitos) { this.privCompartilharHabitos = privCompartilharHabitos; }
 
     public LocalDate getDataNascimento() { return dataNascimento; }
     public void setDataNascimento(LocalDate dataNascimento) { this.dataNascimento = dataNascimento; }
