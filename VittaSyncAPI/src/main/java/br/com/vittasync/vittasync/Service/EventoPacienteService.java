@@ -69,6 +69,13 @@ public class EventoPacienteService {
 
         for (Vinculo vinculo : vinculos) {
 
+            if (
+                    vinculo.getUsuarioId()
+                            .equals(usuarioId)
+            ) {
+                continue;
+            }
+
             Usuario usuario =
                     usuarioRepository.findById(
                             vinculo.getUsuarioId()
