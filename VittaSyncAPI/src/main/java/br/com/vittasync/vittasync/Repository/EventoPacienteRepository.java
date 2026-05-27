@@ -8,4 +8,8 @@ import java.util.List;
 public interface EventoPacienteRepository extends JpaRepository<EventoPaciente, Long> {
 
     List<EventoPaciente> findByPacienteIdOrderByCriadoEmDesc(Integer pacienteId);
+
+    Long countByPacienteIdAndVisualizadoFalse(Integer pacienteId);
+
+    List<EventoPaciente> findByPacienteIdAndVisualizadoFalse(Integer pacienteId);
 }

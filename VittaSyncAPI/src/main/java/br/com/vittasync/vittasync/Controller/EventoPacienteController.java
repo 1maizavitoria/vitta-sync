@@ -69,6 +69,62 @@ public class EventoPacienteController {
         return ResponseEntity.ok(output);
     }
 
+    @GetMapping("/paciente/{id}/nao-visualizados")
+    public ResponseEntity<Long> contarNaoVisualizados(
+            @PathVariable Integer id,
+            @RequestHeader("Authorization") String authHeader
+    ) {
+
+        String token =
+                authHeader.replace("Bearer ", "");
+
+        String cpfDoToken =
+                jwtService.extrairCpf(token);
+
+        Usuario usuarioLogado =
+                usuarioService.searchByCpf(cpfDoToken);
+
+        if (
+                !permissaoService.podeVisualizarPaciente(
+                        usuarioLogado.getId(),
+                        id
+                )
+        ) {
+            return ResponseEntity.status(403).build();
+        }
+
+        Long total = service.contarNaoVisualizados(id, usuarioLogado.getId());
+
+        return ResponseEntity.ok(total);
+    }
+
+    @PutMapping("/paciente/{id}/visualizar")
+    public ResponseEntity<Void> visualizarEventos(
+            @PathVariable Integer id,
+            @RequestHeader("Authorization") String authHeader
+    ) {
+
+        String token = authHeader.replace("Bearer ", "");
+        String cpfDoToken = jwtService.extrairCpf(token);
+        Usuario usuarioLogado = usuarioService.searchByCpf(cpfDoToken);
+
+        if (
+                !permissaoService.podeVisualizarPaciente(
+                        usuarioLogado.getId(),
+                        id
+                )
+        ) {
+            return ResponseEntity.status(403).build();
+        }
+
+        service.marcarComoVisualizados(
+                id,
+                usuarioLogado.getId()
+        );
+
+        return ResponseEntity.ok().build();
+    }
+
     private EventoPacienteOutputDTO toOutputDTO(
             EventoPaciente entity
     ) {
