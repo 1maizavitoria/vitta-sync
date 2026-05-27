@@ -28,7 +28,9 @@ export default function Activity() {
             await markEventsAsRead(
                 selectedPatient.id
             );
-
+            window.dispatchEvent(
+                new Event("notificationsUpdated")
+            );
             setEvents(data);
 
         } catch (error) {

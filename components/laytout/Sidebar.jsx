@@ -214,7 +214,27 @@ export default function Sidebar({ open, setOpen }) {
 
     }, []);
 
+    useEffect(() => {
 
+        function handleNotificationsUpdated() {
+
+            loadNotificationCounts();
+        }
+
+        window.addEventListener(
+            "notificationsUpdated",
+            handleNotificationsUpdated
+        );
+
+        return () => {
+
+            window.removeEventListener(
+                "notificationsUpdated",
+                handleNotificationsUpdated
+            );
+        };
+
+    }, [patients.length]);
 
     return (
         <Drawer
