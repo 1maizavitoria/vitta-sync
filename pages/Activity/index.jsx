@@ -4,7 +4,7 @@ import { Box, Typography } from "@mui/material";
 
 import { usePatient } from "../../context/PatientContext";
 
-import { getPatientEvents } from "../../services/eventService";
+import { getPatientEvents, markEventsAsRead } from "../../services/eventService";
 
 import EventCard from "../../components/ui/cards/EventCard";
 
@@ -25,6 +25,9 @@ export default function Activity() {
                 await getPatientEvents(
                     selectedPatient.id
                 );
+            await markEventsAsRead(
+                selectedPatient.id
+            );
 
             setEvents(data);
 
@@ -37,6 +40,7 @@ export default function Activity() {
     useEffect(() => {
 
         loadEvents();
+
 
     }, [selectedPatient]);
 

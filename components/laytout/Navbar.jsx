@@ -15,8 +15,7 @@ import { Navigate, useLocation, useNavigate } from "react-router-dom";
 
 export default function Navbar({
     title = "",
-    subtitle = "",
-    setOpen
+    subtitle = ""
 }) {
     const navigate = useNavigate();
     const location = useLocation();
@@ -40,18 +39,6 @@ export default function Navbar({
                 }}
             >
                 <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
-
-                    {/* ESQUERDA */}
-                    {localStorage.getItem("token") && <IconButton
-                        size="large"
-                        edge="start"
-                        color="inherit"
-                        aria-label="menu"
-                        sx={{ mr: 2 }}
-                        onClick={() => setOpen(prev => !prev)}
-                    >
-                        <MenuIcon />
-                    </IconButton>}
 
                     <Typography
                         sx={{
@@ -77,28 +64,6 @@ export default function Navbar({
 
                 {/* DIREITA */}
                 <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
-
-                    {/* Botão de período */}
-                    {/* <Button
-                        variant="outlined"
-                        endIcon={<KeyboardArrowDownIcon />}
-                        sx={{
-                            textTransform: "none",
-                            borderRadius: 3,
-                        }}
-                    >
-                        Últimos 7 dias
-                    </Button> */}
-
-                    {/* Notificação */}
-                    {/* {(location.pathname !== "/" &&
-                        location.pathname !== "/login" &&
-                        location.pathname !== "/register") &&
-                        <IconButton>
-                            <Badge badgeContent={1} color="error">
-                                <NotificationsIcon />
-                            </Badge>
-                        </IconButton>} */}
 
                     {location.pathname === "/" && <ButtonUI
                         variant="outlined"

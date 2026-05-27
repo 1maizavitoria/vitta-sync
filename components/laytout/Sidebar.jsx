@@ -9,6 +9,8 @@ import ListItemIcon from "@mui/material/ListItemIcon";
 import ListItemText from "@mui/material/ListItemText";
 import Divider from "@mui/material/Divider";
 import Avatar from "@mui/material/Avatar";
+import ChevronRightIcon from "@mui/icons-material/ChevronRight";
+import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
 
 import DashboardIcon from "@mui/icons-material/Dashboard";
 import DescriptionIcon from "@mui/icons-material/Description";
@@ -26,6 +28,11 @@ import ButtonUI from "../ui/Button";
 import { usePatient } from "../../context/PatientContext";
 import { Refresh } from "@mui/icons-material";
 
+import { getUnreadEventsCount } from "../../services/eventService";
+
+import { useRef } from "react";
+
+
 const menuItems = [
     { label: "Grupo", icon: <DashboardIcon />, path: "/dashboard" },
     // { label: "Registros", icon: <DescriptionIcon />, path: "/health-tracker" },
@@ -34,6 +41,9 @@ const menuItems = [
 ];
 
 export default function Sidebar({ open, setOpen }) {
+    const sidebarRef = useRef(null);
+
+    const [notificationCounts, setNotificationCounts] = useState({});
 
     const {
         patients,
@@ -117,6 +127,40 @@ export default function Sidebar({ open, setOpen }) {
         }
     }
 
+    async function loadNotificationCounts() {
+
+        try {
+
+            const counts = {};
+
+            for (const patient of patients) {
+
+                const total =
+                    await getUnreadEventsCount(
+                        patient.id
+                    );
+
+                counts[patient.id] = total;
+            }
+
+            setNotificationCounts(counts);
+
+        } catch (error) {
+
+            console.error(error);
+        }
+    }
+
+    useEffect(() => {
+
+        if (patients.length === 0) {
+            return;
+        }
+
+        loadNotificationCounts();
+
+    }, [patients.length]);
+
     useEffect(() => {
         async function fetchUsers() {
             try {
@@ -143,19 +187,54 @@ export default function Sidebar({ open, setOpen }) {
 
     }, []);
 
+    useEffect(() => {
+
+        function handleClickOutside(event) {
+
+            if (
+                sidebarRef.current &&
+                !sidebarRef.current.contains(event.target)
+            ) {
+                setOpen(false);
+            }
+        }
+
+        document.addEventListener(
+            "mousedown",
+            handleClickOutside
+        );
+
+        return () => {
+
+            document.removeEventListener(
+                "mousedown",
+                handleClickOutside
+            );
+        };
+
+    }, []);
+
+
+
     return (
         <Drawer
+            ref={sidebarRef}
             variant="permanent"
             open={open}
+            onClick={() => {
+                if (!open) {
+                    setOpen(true);
+                }
+            }}
             onClose={() => setOpen(false)}
             sx={{
                 width: drawerWidth,
-                transition: "0.2s",
+                transition: "width .28s cubic-bezier(0.4, 0, 0.2, 1)",
                 overflowX: "hidden",
                 flexShrink: 0,
                 "& .MuiDrawer-paper": {
                     width: drawerWidth,
-                    transition: "0.2s",
+                    transition: "width .28s cubic-bezier(0.4, 0, 0.2, 1)",
                     overflowX: "hidden",
                     boxSizing: "border-box",
                     borderRight: "1px solid #eee",
@@ -180,7 +259,11 @@ export default function Sidebar({ open, setOpen }) {
                             sx={{
                                 opacity: open ? 1 : 2,
                                 width: open ? "auto" : 0,
-                                transition: "0.2s",
+                                transition: "opacity .18s ease, transform .28s ease",
+                                transform:
+                                    open
+                                        ? "translateX(0)"
+                                        : "translateX(-8px)",
                                 overflow: "hidden",
                                 whiteSpace: "nowrap"
                             }}
@@ -276,9 +359,50 @@ export default function Sidebar({ open, setOpen }) {
                                             }}
                                         >
                                             {patient.nome}
+
                                         </Typography>
+
+
+
+
                                     </>
+                                    {notificationCounts[patient.id] > 0 && (
+
+                                        <Box
+                                            onClick={(event) => {
+                                                event.stopPropagation();
+                                                setSelectedPatient(patient);
+                                                setNotificationCounts((prev) => ({
+                                                    ...prev,
+                                                    [patient.id]: 0
+                                                }));
+                                                navigate("/activity");
+                                            }}
+                                            sx={{
+                                                minWidth: open ? 22 : 20,
+                                                height: open ? 22 : 20,
+                                                borderRadius: "999px",
+                                                backgroundColor: "#ff3b30",
+                                                color: "#fff",
+                                                fontSize: "0.75rem",
+                                                fontWeight: 700,
+                                                display: "flex",
+                                                alignItems: "center",
+                                                justifyContent: "center",
+                                                px: open ? 0.8 : 0,
+                                                ml: open ? "auto" : 0,
+                                                boxShadow: "0 2px 8px rgba(0,0,0,0.25)",
+                                                transition: "all .22s ease"
+                                            }}
+                                        >
+                                            {
+                                                notificationCounts[patient.id]
+                                            }
+                                        </Box>
+                                    )}
+
                                 </Button>
+
 
                             ))}
 
@@ -345,7 +469,11 @@ export default function Sidebar({ open, setOpen }) {
                                     primary={item.label}
                                     sx={{
                                         opacity: open ? 1 : 0,
-                                        transition: "0.2s",
+                                        transition: "opacity .18s ease, transform .28s ease",
+                                        transform:
+                                            open
+                                                ? "translateX(0)"
+                                                : "translateX(-8px)",
                                         whiteSpace: "nowrap",
                                     }}
                                 />
@@ -363,7 +491,7 @@ export default function Sidebar({ open, setOpen }) {
                         cursor: "pointer",
                         borderRadius: "12px",
                         p: 1,
-                        transition: "0.2s",
+                        transition: "opacity .18s ease, transform .28s ease",
                     }}
                 >
                     <Avatar
@@ -403,7 +531,11 @@ export default function Sidebar({ open, setOpen }) {
                             sx={{
                                 opacity: open ? 1 : 0,
                                 width: open ? "auto" : 0,
-                                transition: "0.2s",
+                                transition: "opacity .18s ease, transform .28s ease",
+                                transform:
+                                    open
+                                        ? "translateX(0)"
+                                        : "translateX(-8px)",
                                 overflow: "hidden",
                                 whiteSpace: "nowrap"
                             }}
@@ -415,28 +547,66 @@ export default function Sidebar({ open, setOpen }) {
                             sx={{
                                 opacity: open ? 1 : 0,
                                 width: open ? "auto" : 0,
-                                transition: "0.2s",
+                                transition: "opacity .18s ease, transform .28s ease",
+                                transform:
+                                    open
+                                        ? "translateX(0)"
+                                        : "translateX(-8px)",
                                 overflow: "hidden",
                                 whiteSpace: "nowrap"
                             }}
                         >
                             {userResponse.tipo || "Tipo de usuário"}
                         </Typography>}
-                    </Box>}
+                    </Box>
+                    }
 
-                    {open && <IconButton
-                        onClick={handleLogout}
-                        sx={{
-                            backgroundColor: "#ffe5e5",
-                            "&:hover": {
-                                backgroundColor: "#ffd6d6",
-                            },
-                        }}
-                    >
-                        <LogoutIcon color="error" />
-                    </IconButton>}
+                    {
+                        open && <IconButton
+                            onClick={handleLogout}
+                            sx={{
+                                backgroundColor: "#ffe5e5",
+                                "&:hover": {
+                                    backgroundColor: "#ffd6d6",
+                                },
+                            }}
+                        >
+                            <LogoutIcon color="error" />
+                        </IconButton>
+                    }
 
-                </Box>
+                </Box >
+            </Box >
+            <Box
+                onClick={() => setOpen(prev => !prev)}
+                sx={{
+                    position: "absolute",
+                    top: "50%",
+                    right: 0,
+                    transform: "translateY(-50%)",
+                    width: 28,
+                    height: 64,
+                    borderRadius: "14px",
+                    backgroundColor: sidebarColor,
+                    border: "1px solid rgba(255,255,255,0.18)",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    cursor: "pointer",
+                    boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
+                    transition: "all .2s ease",
+                    zIndex: 2000,
+
+                    "&:hover": {
+                        transform: "translateY(-50%) scale(1.05)",
+                    }
+                }}
+            >
+                {
+                    open
+                        ? <ChevronLeftIcon sx={{ color: "#fff" }} />
+                        : <ChevronRightIcon sx={{ color: "#fff" }} />
+                }
             </Box>
         </Drawer >
     );
