@@ -241,12 +241,19 @@ export default function Sidebar({ open, setOpen }) {
             ref={sidebarRef}
             variant="permanent"
             open={open}
-            onClick={() => {
-                if (!open) {
-                    setOpen(true);
+            onClick={(event) => {
+                if (
+                    event.target.closest("button") ||
+                    event.target.closest("li") ||
+                    event.target.closest(".MuiAvatar-root") ||
+                    event.target.closest(".MuiListItemButton-root") ||
+                    event.target.closest("svg")
+                ) {
+                    return;
                 }
+                setOpen(prev => !prev);
             }}
-            onClose={() => setOpen(false)}
+
             sx={{
                 width: drawerWidth,
                 transition: "width .28s cubic-bezier(0.4, 0, 0.2, 1)",
@@ -259,7 +266,6 @@ export default function Sidebar({ open, setOpen }) {
                     boxSizing: "border-box",
                     borderRight: "1px solid #eee",
                     backgroundColor: sidebarColor,
-                    // color: "#fff",
                 },
             }}
         >
@@ -597,37 +603,6 @@ export default function Sidebar({ open, setOpen }) {
 
                 </Box >
             </Box >
-            <Box
-                onClick={() => setOpen(prev => !prev)}
-                sx={{
-                    position: "absolute",
-                    top: "50%",
-                    right: 0,
-                    transform: "translateY(-50%)",
-                    width: 28,
-                    height: 64,
-                    borderRadius: "14px",
-                    backgroundColor: sidebarColor,
-                    border: "1px solid rgba(255,255,255,0.18)",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    cursor: "pointer",
-                    boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
-                    transition: "all .2s ease",
-                    zIndex: 2000,
-
-                    "&:hover": {
-                        transform: "translateY(-50%) scale(1.05)",
-                    }
-                }}
-            >
-                {
-                    open
-                        ? <ChevronLeftIcon sx={{ color: "#fff" }} />
-                        : <ChevronRightIcon sx={{ color: "#fff" }} />
-                }
-            </Box>
         </Drawer >
     );
 }

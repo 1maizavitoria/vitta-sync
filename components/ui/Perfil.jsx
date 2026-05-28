@@ -68,15 +68,17 @@ export default function Perfil() {
             return false;
         }
 
-        if (Number(formData.pesoInicial) <= 0) {
-            showAlert("error", "Peso inválido");
-            return false;
+        if (formData.tipo === "paciente") {
+            if (Number(formData.pesoInicial) <= 0) {
+                showAlert("error", "Peso inválido");
+                return false;
+            }
+            if (Number(formData.altura) <= 0) {
+                showAlert("error", "Altura inválida");
+                return false;
+            }
         }
 
-        if (Number(formData.altura) <= 0) {
-            showAlert("error", "Altura inválida");
-            return false;
-        }
 
         if (
             (formData?.tipo === "responsavel" || formData?.tipo === "saude") &&
@@ -100,10 +102,18 @@ export default function Perfil() {
             email: formData.email,
             dataNascimento: formData.dataNascimento,
             telefone: formData.telefone,
-            pesoInicial: Number(formData.pesoInicial),
-            altura: Number(formData.altura),
-            funcaoResponsavel: formData.funcaoResponsavel
-        }
+            ...(formData.tipo === "paciente" && {
+                pesoInicial: Number(formData.pesoInicial),
+                altura: Number(formData.altura),
+            }),
+            ...(formData.tipo === "responsavel" && {
+                funcaoResponsavel: formData.funcaoResponsavel,
+            }),
+            ...(formData.tipo === "saude" && {
+                conselho: formData.conselho,
+            }),
+        };
+
         try {
             await editUser(formData.cpf, data);
             setEditing(false);

@@ -274,12 +274,14 @@ export default function Register() {
                                 type="string"
                                 error={errorName}
                                 value={name}
-                                onChange={(e) => (
-                                    setName(e.target.value),
-                                    setErrorName(false)
-                                )}
+                                onChange={(e) => {
+                                    const onlyLetters = e.target.value.replace(/[^a-zA-ZÀ-ÿ\s]/g, "");
+                                    setName(onlyLetters);
+                                    setErrorName(false);
+                                }}
                             >
                             </InputUI>
+
 
                             <InputUI
                                 label="CPF"

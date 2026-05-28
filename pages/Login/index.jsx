@@ -96,23 +96,27 @@ export default function Login() {
     function handleLogin() {
         if (!canLogin()) return;
         if (loadingLogin) return;
+
         setLoadingLogin(true);
 
         const data = { cpf: CPF, senha: password, canal: channel };
-        setOpenLoginDialog(true);
-        showAlert("success", getChannelMessage(channel));
 
         login(data)
             .then(() => {
+                // sucesso → abre popup e mostra aviso
+                setOpenLoginDialog(true);
+                showAlert("success", getChannelMessage(channel));
             })
             .catch((error) => {
-                showAlert("error", "Erro ao enviar código");
+                // erro → não abre popup, mostra alerta
+                showAlert("error", "CPF ou senha inválidos");
                 console.error(error);
             })
             .finally(() => {
                 setLoadingLogin(false);
             });
     }
+
 
 
 
