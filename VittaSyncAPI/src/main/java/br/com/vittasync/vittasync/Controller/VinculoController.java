@@ -54,7 +54,7 @@ public class VinculoController {
     }
 
     @PostMapping("/entrar")
-    public ResponseEntity<Void> entrarComCodigo(@RequestHeader("Authorization") String authHeader, @RequestBody VinculoInputDTO dto) {
+    public ResponseEntity<PacienteResumoDTO> entrarComCodigo(@RequestHeader("Authorization") String authHeader, @RequestBody VinculoInputDTO dto) {
 
         String token = authHeader.replace("Bearer ", "");
 
@@ -62,13 +62,14 @@ public class VinculoController {
 
         Usuario usuario = usuarioService.searchByCpf(cpf);
 
-        service.entrarComCodigo(
-                dto.getCodigo(),
-                dto.getFuncao(),
-                usuario.getId()
-        );
+        PacienteResumoDTO paciente =
+                service.entrarComCodigo(
+                        dto.getCodigo(),
+                        dto.getFuncao(),
+                        usuario.getId()
+                );
 
-        return ResponseEntity.ok().build();
+        return ResponseEntity.ok(paciente);
     }
 
     @PostMapping("/enviar-email")

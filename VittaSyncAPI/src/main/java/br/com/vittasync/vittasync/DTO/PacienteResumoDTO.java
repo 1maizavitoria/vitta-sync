@@ -1,14 +1,28 @@
 package br.com.vittasync.vittasync.DTO;
 
+import java.sql.Timestamp;
+
 public class PacienteResumoDTO {
 
     private Integer id;
-
     private String nome;
-
     private String email;
-
     private String cpf;
+
+    public PacienteResumoDTO() {
+    }
+
+    public PacienteResumoDTO(
+            Integer id,
+            String nome,
+            String email,
+            String cpf
+    ) {
+        this.id = id;
+        this.nome = nome;
+        this.email = email;
+        this.cpf = cpf;
+    }
 
     public String getCpf() {
         return cpf;

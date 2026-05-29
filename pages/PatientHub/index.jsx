@@ -25,7 +25,12 @@ import AutocompleteUI from "../../components/ui/Autocomplete";
 export default function PatientHub() {
     const { showAlert } = useAlert();
 
-    const { selectedPatient, setSelectedPatient, refreshPatients } = usePatient();
+    const {
+        selectedPatient,
+        setSelectedPatient,
+        addPatient,
+        removePatient
+    } = usePatient();
 
     const [links, setLinks] = useState([]);
     const [openModal, setOpenModal] = useState(false);
@@ -159,12 +164,23 @@ export default function PatientHub() {
 
             await removeLink(id);
 
+            setLinks(prev =>
+                prev.filter(
+                    link => link.id !== id
+                )
+            );
+
+            if (isLeavingGroup) {
+
+                removePatient(selectedPatient.id);
+
+                setSelectedPatient(null);
+            }
+
             showAlert(
                 "success",
                 "Vínculo removido com sucesso"
             );
-            loadLinks();
-            await refreshPatients();
 
         } catch (error) {
 
@@ -237,7 +253,13 @@ export default function PatientHub() {
 
     async function handleJoinWithCode() {
 
-        if (userType?.toLowerCase() === "responsavel" && !funcao) {
+        if (
+            userType?.toLowerCase() ===
+            "responsavel"
+            &&
+            !funcao
+        ) {
+
             setErrorFuncao(true);
 
             showAlert(
@@ -250,7 +272,15 @@ export default function PatientHub() {
 
         try {
 
-            await joinWithCode(joinCode, funcao);
+            const patient =
+                await joinWithCode(
+                    joinCode,
+                    funcao
+                );
+
+            addPatient(patient);
+
+            setSelectedPatient(patient);
 
             showAlert(
                 "success",
@@ -260,9 +290,8 @@ export default function PatientHub() {
             setOpenJoinModal(false);
 
             setJoinCode("");
-            setFuncao("");
 
-            await refreshPatients();
+            setFuncao("");
 
         } catch (error) {
 
@@ -456,6 +485,9 @@ export default function PatientHub() {
     useEffect(() => {
 
         if (!selectedPatient?.id) {
+
+            setLinks([]);
+
             return;
         }
 
@@ -464,21 +496,7 @@ export default function PatientHub() {
     }, [selectedPatient]);
 
 
-    useEffect(() => {
 
-        if (userType?.toLowerCase() === "paciente") {
-
-            const patient = {
-                id: localStorage.getItem("id"),
-                nome: localStorage.getItem("nome"),
-                email: localStorage.getItem("email"),
-                tipo: "paciente"
-            };
-
-            setSelectedPatient(patient);
-        }
-
-    }, [userType]);
 
     useEffect(() => {
 

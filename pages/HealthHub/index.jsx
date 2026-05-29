@@ -23,6 +23,26 @@ export default function HealthHub() {
     // ref para resetar o input
     const fileInputRef = useRef(null);
 
+    async function loadDocuments() {
+
+        try {
+
+            setLoading(true);
+
+            const data = await getDoctorDocuments();
+
+            setDocuments(data);
+
+        } catch (error) {
+
+            console.error(error);
+
+        } finally {
+
+            setLoading(false);
+        }
+    }
+
     async function handleUpload() {
         if (!selectedPatient || !selectedFile || !nomeArquivo.trim()) {
             return;
@@ -37,7 +57,7 @@ export default function HealthHub() {
 
             const created = await uploadDocument(selectedPatient.cpf, formData);
 
-            setDocuments((prev) => [created, ...prev]);
+            await loadDocuments();
 
             // limpa input e estado
             setSelectedFile(null);
@@ -69,18 +89,7 @@ export default function HealthHub() {
     }
 
     useEffect(() => {
-        async function load() {
-            try {
-                setLoading(true);
-                const data = await getDoctorDocuments();
-                setDocuments(data);
-            } catch (error) {
-                console.error(error);
-            } finally {
-                setLoading(false);
-            }
-        }
-        load();
+        loadDocuments();
     }, []);
 
     return (

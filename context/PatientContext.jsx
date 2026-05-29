@@ -23,45 +23,54 @@ export function PatientProvider({
     children
 }) {
 
-    const [selectedPatient, setSelectedPatient] = useState(null);
-    const [patients, setPatients] = useState([]);
+    const [
+        selectedPatient,
+        setSelectedPatient
+    ] = useState(null);
 
-    async function refreshPatients() {
+    const [
+        patients,
+        setPatients
+    ] = useState([]);
+
+    async function loadPatients() {
 
         try {
 
-            const data = await getAvailablePatients();
+            const data =
+                await getAvailablePatients();
 
             setPatients(data);
 
-            setSelectedPatient((prev) => {
+            const userType =
+                localStorage.getItem("tipo");
 
-                setSelectedPatient((prev) => {
+            if (
+                userType?.toLowerCase() ===
+                "paciente"
+            ) {
 
-                    if (!data.length) {
-                        return null;
-                    }
+                setSelectedPatient(data[0]);
 
-                    const stillExists =
-                        data.some(
-                            patient =>
-                                patient.id === prev?.id
-                        );
-
-                    if (stillExists) {
-                        return prev;
-                    }
-
-                    return data[0];
-                });
-
-                return data[0] || null;
-            }); {
-
-                setSelectedPatient(
-                    data[0]
-                );
+                return;
             }
+
+            setSelectedPatient(prev => {
+
+                if (!data.length) {
+                    return null;
+                }
+
+                const stillExists =
+                    data.some(
+                        patient =>
+                            patient.id === prev?.id
+                    );
+
+                return stillExists
+                    ? prev
+                    : data[0];
+            });
 
         } catch (error) {
 
@@ -69,9 +78,67 @@ export function PatientProvider({
         }
     }
 
+    function addPatient(patient) {
+
+        setPatients(prev => {
+
+            const alreadyExists =
+                prev.some(
+                    item =>
+                        item.id === patient.id
+                );
+
+            if (alreadyExists) {
+                return prev;
+            }
+
+            return [
+                ...prev,
+                patient
+            ];
+        });
+    }
+
+    function updatePatient(updatedPatient) {
+
+        setPatients(prev =>
+            prev.map(patient =>
+                patient.id === updatedPatient.id
+                    ? updatedPatient
+                    : patient
+            )
+        );
+
+        setSelectedPatient(prev =>
+            prev?.id === updatedPatient.id
+                ? updatedPatient
+                : prev
+        );
+    }
+
+    function removePatient(id) {
+
+        setPatients(prev => {
+
+            const updated =
+                prev.filter(
+                    patient =>
+                        patient.id !== id
+                );
+
+            return updated;
+        });
+
+        setSelectedPatient(prev =>
+            prev?.id === id
+                ? null
+                : prev
+        );
+    }
+
     useEffect(() => {
 
-        refreshPatients();
+        loadPatients();
 
     }, []);
 
@@ -79,13 +146,17 @@ export function PatientProvider({
 
         <PatientContext.Provider
             value={{
+
                 selectedPatient,
                 setSelectedPatient,
 
                 patients,
-                setPatients,
 
-                refreshPatients
+                addPatient,
+                updatePatient,
+                removePatient,
+
+                loadPatients
             }}
         >
 
@@ -94,4 +165,3 @@ export function PatientProvider({
         </PatientContext.Provider>
     );
 }
-

@@ -93,7 +93,11 @@ public class VinculoService {
         return output;
     }
 
-    public void entrarComCodigo(String codigo, String funcao, Integer usuarioId) {
+    public PacienteResumoDTO entrarComCodigo(
+            String codigo,
+            String funcao,
+            Integer usuarioId
+    ) {
 
         Usuario usuario = usuarioRepository.findById(usuarioId).orElseThrow(() -> new RecursoNaoEncontradoException("Usuário não encontrado"));
 
@@ -173,6 +177,22 @@ public class VinculoService {
                 descricao,
                 EventoPrioridades.NORMAL
         );
+        Usuario paciente =
+                usuarioRepository
+                        .findById(convite.getPacienteId())
+                        .orElseThrow(() ->
+                                new RecursoNaoEncontradoException(
+                                        "Paciente não encontrado"
+                                )
+                        );
+        return new PacienteResumoDTO(
+                paciente.getId(),
+                paciente.getNome(),
+                paciente.getEmail(),
+                paciente.getCpf()
+        );
+
+
     }
 
     public void enviarConviteEmail(String email, String codigo) {
