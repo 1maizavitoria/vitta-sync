@@ -22,6 +22,8 @@ import { usePatient } from "../../context/PatientContext";
 
 import AutocompleteUI from "../../components/ui/Autocomplete";
 
+import { funcoesGrupo, funcoesMedico } from "../../utils/validators/userFunction";
+
 export default function PatientHub() {
     const { showAlert } = useAlert();
 
@@ -54,33 +56,16 @@ export default function PatientHub() {
 
     const [errorFuncao, setErrorFuncao] = useState(false);
 
-    const funcoesGrupo = [
-        {
-            label: "Cuidador",
-            value: "cuidador",
-            descricao: "Pessoa que acompanha cuidados diários do paciente."
-        },
-        {
-            label: "Responsável Legal",
-            value: "responsavel_legal",
-            descricao: "Pai, mãe, tutor ou curador legal do paciente."
-        },
-        {
-            label: "Acompanhante",
-            value: "acompanhante",
-            descricao: "Pessoa que acompanha consultas e exames."
-        },
-        {
-            label: "Contato de Emergência",
-            value: "contato_emergencia",
-            descricao: "Pessoa acionada em situações de urgência."
-        },
-        {
-            label: "Tutor",
-            value: "tutor",
-            descricao: "Responsável por menores ou incapazes."
-        }
-    ];
+    const precisaEscolherFuncao =
+        ["responsavel", "saude"]
+            .includes(
+                userType?.toLowerCase()
+            );
+
+    const opcoesFuncao =
+        userType?.toLowerCase() === "saude"
+            ? funcoesMedico
+            : funcoesGrupo;
 
     function getResponsavelStyle(funcao) {
 
@@ -126,6 +111,54 @@ export default function PatientHub() {
                     background: "#eeeeee",
                     color: "#616161",
                     label: "Responsável"
+                };
+        }
+    }
+
+    function getMedicoStyle(funcao) {
+
+        switch (funcao?.toLowerCase()) {
+
+            case "medico_principal":
+                return {
+                    background: "#e3f2fd",
+                    color: "#1565c0",
+                    label: "Médico Principal"
+                };
+
+            case "especialista":
+                return {
+                    background: "#e8f5e9",
+                    color: "#2e7d32",
+                    label: "Especialista"
+                };
+
+            case "consultor":
+                return {
+                    background: "#fff8e1",
+                    color: "#f9a825",
+                    label: "Consultor"
+                };
+
+            case "acompanhamento_clinico":
+                return {
+                    background: "#e0f2f1",
+                    color: "#00695c",
+                    label: "Acompanhamento Clínico"
+                };
+
+            case "equipe_assistencial":
+                return {
+                    background: "#ede7f6",
+                    color: "#4527a0",
+                    label: "Equipe Assistencial"
+                };
+
+            default:
+                return {
+                    background: "#eeeeee",
+                    color: "#616161",
+                    label: "Profissional de Saúde"
                 };
         }
     }
@@ -254,8 +287,7 @@ export default function PatientHub() {
     async function handleJoinWithCode() {
 
         if (
-            userType?.toLowerCase() ===
-            "responsavel"
+            precisaEscolherFuncao
             &&
             !funcao
         ) {
@@ -407,19 +439,15 @@ export default function PatientHub() {
 
         switch (type?.toLowerCase()) {
 
-            case "saude":
-                return {
-                    background: "#e3f2fd",
-                    color: "#1976d2",
-                    label: "Saúde"
-                };
-
             case "paciente":
                 return {
                     background: "#e3f2fd",
                     color: "#c6d219",
                     label: "Saúde"
                 };
+
+            case "saude":
+                return getMedicoStyle(funcao);
 
             case "responsavel":
 
@@ -494,9 +522,6 @@ export default function PatientHub() {
         loadLinks();
 
     }, [selectedPatient]);
-
-
-
 
     useEffect(() => {
 
@@ -629,6 +654,7 @@ export default function PatientHub() {
                                     Entrar com código
                                 </Button>
                             )}
+
                         {!isPaciente && myLink && (
 
                             <Button
@@ -900,7 +926,10 @@ export default function PatientHub() {
                                         {medicos.map((link) => {
 
                                             const typeStyle =
-                                                getTypeColor(link.tipo);
+                                                getTypeColor(
+                                                    link.tipo,
+                                                    link.funcao
+                                                );
 
                                             return (
 
@@ -1361,12 +1390,12 @@ export default function PatientHub() {
                 confirmText="Entrar"
             >
 
-                {userType?.toLowerCase() === "responsavel" && (<AutocompleteUI
+                {precisaEscolherFuncao && (<AutocompleteUI
                     label="Função no grupo"
-                    options={funcoesGrupo}
+                    options={opcoesFuncao}
                     error={errorFuncao}
                     value={
-                        funcoesGrupo.find(
+                        opcoesFuncao.find(
                             (option) =>
                                 option.value === funcao
                         ) || null

@@ -117,11 +117,6 @@ export default function Login() {
             });
     }
 
-
-
-
-
-
     async function handleValidateCode() {
         if (loadingValidateCode) return;
 
@@ -144,7 +139,14 @@ export default function Login() {
             localStorage.setItem("token", token);
             localStorage.setItem("CPF", CPF);
             setOpenLoginDialog(false);
-            navigate("/dashboard");
+            const redirect =
+                new URLSearchParams(
+                    location.search
+                ).get("redirect");
+
+            navigate(
+                redirect || "/dashboard"
+            );
 
         } catch (error) {
             console.log(error);

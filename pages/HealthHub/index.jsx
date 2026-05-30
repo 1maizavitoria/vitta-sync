@@ -20,7 +20,6 @@ export default function HealthHub() {
     const { selectedPatient } = usePatient();
     const hasPatientSelected = selectedPatient && selectedPatient.cpf !== cpfUsuario;
 
-    // ref para resetar o input
     const fileInputRef = useRef(null);
 
     async function loadDocuments() {
@@ -55,7 +54,7 @@ export default function HealthHub() {
             formData.append("arquivo", selectedFile);
             formData.append("nomeArquivo", nomeArquivo.trim());
 
-            const created = await uploadDocument(selectedPatient.cpf, formData);
+            await uploadDocument(selectedPatient.cpf, formData);
 
             await loadDocuments();
 
