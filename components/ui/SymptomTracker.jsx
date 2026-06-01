@@ -61,6 +61,13 @@ export function SymptomTracker() {
         return !isNaN(num) && num >= 1 && num <= 10;
     }
 
+    const formatDateString = (dateString) => {
+        if (!dateString) return "N/A";
+        const [year, month, day] = dateString.split("-");
+        return `${day}/${month}/${year}`;
+    };
+
+
     function canRegister() {
         // Verifica se todos os campos estão preenchidos
         if (!SymptomInputs.symptom || !SymptomInputs.intencity || !SymptomInputs.date) {
@@ -308,7 +315,7 @@ export function SymptomTracker() {
                         title="Data"
                         error={(error && !SymptomInputs.date) || errorDate}
                         // type="number"
-                        value={lastSymptom ? formatDate(lastSymptom.dataReferencia) : "N/A"}
+                        value={lastSymptom ? formatDateString(lastSymptom.dataReferencia) : "N/A"}
                         // unit="yyyy-MM-dd"
                         date={lastSymptom ? new Date(lastSymptom.dataRegistro).toLocaleString() : "N/A"}
                         inputValue={SymptomInputs.date}

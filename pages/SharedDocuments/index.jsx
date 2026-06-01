@@ -122,91 +122,81 @@ export default function SharedDocuments() {
 
             <Grid container spacing={3}>
 
-                {documents.map((doc) => (
+                {documents.length === 0 ? (
+                    <Typography
+                        color="text.secondary"
+                        align="center"
+                        sx={{ mt: 2, width: "100%" }}
+                    >
+                        Sem arquivos compartilhados
+                    </Typography>
+                ) : (
+                    documents.map((doc) => (
+                        <Grid item xs={12} md={6} key={doc.id}>
+                            <Paper
+                                elevation={0}
+                                sx={{
+                                    p: 3,
+                                    borderRadius: 4,
+                                    border: "1px solid #eee"
+                                }}
+                            >
+                                <Box display="flex" gap={2}>
+                                    <Avatar
+                                        sx={{
+                                            bgcolor: "#e8f5e9",
+                                            color: "#2e7d32"
+                                        }}
+                                    >
+                                        {doc.medicoNome
+                                            ?.split(" ")
+                                            .map((n) => n[0])
+                                            .slice(0, 2)
+                                            .join("")
+                                        }
+                                    </Avatar>
 
-                    <Grid item xs={12} md={6} key={doc.id}>
-
-                        <Paper
-                            elevation={0}
-                            sx={{
-                                p: 3,
-                                borderRadius: 4,
-                                border: "1px solid #eee"
-                            }}
-                        >
-
-                            <Box display="flex" gap={2}>
-
-                                <Avatar
-                                    sx={{
-                                        bgcolor: "#e8f5e9",
-                                        color: "#2e7d32"
-                                    }}
-                                >
-                                    {doc.medicoNome
-                                        ?.split(" ")
-                                        .map((n) => n[0])
-                                        .slice(0, 2)
-                                        .join("")
-                                    }
-                                </Avatar>
-
-                                <Box flex={1}>
-
-                                    <Typography fontWeight={700}>
-                                        {doc.nomeArquivo}
-                                    </Typography>
-
-                                    <Typography color="text.secondary" mb={2}>
-                                        {doc.medicoNome}
-                                    </Typography>
-
-                                    <Box display="flex" alignItems="center" gap={1} mt={2}>
-
-                                        {renderFileIcon(doc.extensao)}
-
-                                        <Typography
-                                            sx={{
-                                                cursor: "pointer",
-
-                                                "&:hover": {
-                                                    textDecoration: "underline"
-                                                }
-                                            }}
-                                            onClick={() =>
-                                                handleOpen(doc)
-                                            }
-                                        >
-                                            {doc.nomeOriginal || "Arquivo antigo"}
+                                    <Box flex={1}>
+                                        <Typography fontWeight={700}>
+                                            {doc.nomeArquivo}
                                         </Typography>
 
-                                        <Box flex={1} />
+                                        <Typography color="text.secondary" mb={2}>
+                                            {doc.medicoNome}
+                                        </Typography>
 
-                                        <IconButton onClick={() => downloadDocument(doc.id, doc.nomeOriginal)}>
-                                            <DownloadIcon color="error" />
-                                        </IconButton>
+                                        <Box display="flex" alignItems="center" gap={1} mt={2}>
+                                            {renderFileIcon(doc.extensao)}
 
+                                            <Typography
+                                                sx={{
+                                                    cursor: "pointer",
+                                                    "&:hover": { textDecoration: "underline" }
+                                                }}
+                                                onClick={() => handleOpen(doc)}
+                                            >
+                                                {doc.nomeOriginal || "Arquivo antigo"}
+                                            </Typography>
+
+                                            <Box flex={1} />
+
+                                            <IconButton onClick={() => downloadDocument(doc.id, doc.nomeOriginal)}>
+                                                <DownloadIcon color="error" />
+                                            </IconButton>
+                                        </Box>
+
+                                        <Typography variant="caption" color="text.secondary">
+                                            {new Date(doc.dataUpload).toLocaleString("pt-BR")}
+                                        </Typography>
                                     </Box>
-
-                                    <Typography
-                                        variant="caption"
-                                        color="text.secondary"
-                                    >
-                                        {new Date(doc.dataUpload)
-                                            .toLocaleString("pt-BR")}
-                                    </Typography>
-
                                 </Box>
-
-                            </Box>
-
-                        </Paper>
-
-                    </Grid>
-
-                ))}
+                            </Paper>
+                        </Grid>
+                    ))
+                )}
 
             </Grid>
+
 
             <Dialog
                 open={openViewer}

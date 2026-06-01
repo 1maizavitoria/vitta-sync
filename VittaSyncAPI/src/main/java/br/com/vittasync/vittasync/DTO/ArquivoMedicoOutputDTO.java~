@@ -1,0 +1,85 @@
+package br.com.vittasync.vittasync.DTO;
+
+
+import java.time.LocalDateTime;
+
+
+public class ArquivoMedicoOutputDTO {
+    private Integer id;
+    private String nomeArquivo;
+    private LocalDateTime dataUpload;
+    private String pacienteCpf;
+    private String extensao;
+    private String nomeOriginal;
+    private String medicoNome;
+    private String pacienteNome;
+    private Integer paginas;
+
+    public String getPacienteNome() {
+        return pacienteNome;
+    }
+
+    public void setPacienteNome(String pacienteNome) {
+        this.pacienteNome = pacienteNome;
+    }
+
+    public String getMedicoNome() {
+        return medicoNome;
+    }
+
+    public void setMedicoNome(String medicoNome) {
+        this.medicoNome = medicoNome;
+    }
+
+    public String getNomeOriginal() {
+        return nomeOriginal;
+    }
+
+    public void setNomeOriginal(String nomeOriginal) {
+        this.nomeOriginal = nomeOriginal;
+    }
+
+    public Integer getId() {
+        return id;
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
+    }
+
+    public String getNomeArquivo() {
+        return nomeArquivo;
+    }
+
+    public void setNomeArquivo(String nomeArquivo) {
+        this.nomeArquivo = nomeArquivo;
+    }
+
+    public LocalDateTime getDataUpload() {
+        return dataUpload;
+    }
+
+    public void setDataUpload(LocalDateTime dataUpload) {
+        this.dataUpload = dataUpload;
+    }
+
+    public String getPacienteCpf() {
+        return pacienteCpf;
+    }
+
+    public void setPacienteCpf(String pacienteCpf) {
+        this.pacienteCpf = pacienteCpf;
+    }
+
+    public String getExtensao() {
+        return extensao;
+    }
+
+    public void setExtensao(String extensao) {
+        this.extensao = extensao;
+    }
+
+    public Integer getPaginas() {return paginas;}
+    public void setPaginas(Integer paginas) {this.paginas = paginas;}
+
+}

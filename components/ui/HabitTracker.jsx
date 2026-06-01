@@ -66,6 +66,13 @@ export function HabitTracker() {
         return !isNaN(num) && num >= 0 && num <= 24;
     }
 
+    const formatDateString = (dateString) => {
+        if (!dateString) return "N/A";
+        const [year, month, day] = dateString.split("-");
+        return `${day}/${month}/${year}`;
+    };
+
+
     function canRegister() {
         // Verifica se todos os campos estão preenchidos
         if (!habitInputs.timeExercise || !habitInputs.timeSleep || !habitInputs.date) {
@@ -320,7 +327,7 @@ export function HabitTracker() {
                         title="Data"
                         error={(error && !habitInputs.date) || errorDate}
                         // type="number"
-                        value={lastHabit ? formatDate(lastHabit.dataReferencia) : "N/A"}
+                        value={lastHabit ? formatDateString(lastHabit.dataReferencia) : "N/A"}
                         // unit="yyyy-MM-dd"
                         date={lastHabit ? new Date(lastHabit.dataRegistro).toLocaleString() : "N/A"}
                         inputValue={habitInputs.date}

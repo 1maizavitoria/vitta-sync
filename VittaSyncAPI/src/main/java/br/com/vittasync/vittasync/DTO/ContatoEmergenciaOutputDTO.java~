@@ -1,45 +1,20 @@
-package br.com.vittasync.vittasync.Model;
+package br.com.vittasync.vittasync.DTO;
 
 
-import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
 
-@Entity
-@Table(name = "ContatoEmergencia")
-public class ContatoEmergencia {
+public class ContatoEmergenciaOutputDTO {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
-
-    @ManyToOne
-    @JoinColumn(name = "paciente_id", nullable = false)
-    private Usuario paciente;
-
-    @Column(nullable = false, length = 100)
     private String nome;
-
-    @Column(nullable = false, length = 15)
     private String telefone;
-
-    @Column(name = "data_registro")
     private LocalDateTime dataRegistro;
-
-    @Column(name = "data_modificacao")
     private LocalDateTime dataModificacao;
-
-    @Column(name = "idade")
     private Integer idade;
-
-
-    public ContatoEmergencia() {}
 
     public Integer getId() { return id; }
     public void setId(Integer id) { this.id = id; }
-
-    public Usuario getPaciente() { return paciente; }
-    public void setPaciente(Usuario paciente) { this.paciente = paciente; }
 
     public String getNome() { return nome; }
     public void setNome(String nome) { this.nome = nome; }
@@ -55,4 +30,5 @@ public class ContatoEmergencia {
 
     public Integer getIdade() { return idade; }
     public void setIdade(Integer idade) { this.idade = idade; }
+
 }
