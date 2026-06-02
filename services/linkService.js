@@ -16,10 +16,17 @@ export const removeLink = async (id) => {
     return response.data;
 };
 
-export const generateLinkCode = async () => {
+export const generateLinkCode = async (
+    pacienteId
+) => {
 
     const response =
-        await api.post("/vinculos/gerar");
+        await api.post(
+            "/vinculos/gerar",
+            {
+                pacienteId
+            }
+        );
 
     return response.data;
 };

@@ -56,6 +56,12 @@ export default function PatientHub() {
 
     const [errorFuncao, setErrorFuncao] = useState(false);
 
+    const canInvite =
+        ["paciente", "responsavel"]
+            .includes(
+                userType?.toLowerCase()
+            );
+
     const precisaEscolherFuncao =
         ["responsavel", "saude"]
             .includes(
@@ -243,9 +249,19 @@ export default function PatientHub() {
 
     async function handleGenerateCode() {
 
+        if (!selectedPatient) {
+
+            showAlert(
+                "warning",
+                "Selecione um paciente"
+            );
+
+            return;
+        }
+
         try {
 
-            const data = await generateLinkCode();
+            const data = await generateLinkCode(selectedPatient.id);
             setSelectedTab(0);
             setGeneratedCode(data.codigo);
             setGeneratedLink(data.link);
@@ -428,7 +444,7 @@ export default function PatientHub() {
 
     async function handleOpenPerfil() {
         try {
-            await refreshPatients();
+            // await refreshPatients();
             navigate("/reports")
         } catch (error) {
             console.error(error);
@@ -621,21 +637,20 @@ export default function PatientHub() {
                         gap={2}
                     >
 
-                        {userType?.toLowerCase() ===
-                            "paciente" && (
+                        {canInvite && (
 
-                                <Button
-                                    variant="contained"
-                                    onClick={handleGenerateCode}
-                                    sx={{
-                                        borderRadius: "14px",
-                                        textTransform: "none",
-                                        fontWeight: 600
-                                    }}
-                                >
-                                    Convidar participante
-                                </Button>
-                            )}
+                            <Button
+                                variant="contained"
+                                onClick={handleGenerateCode}
+                                sx={{
+                                    borderRadius: "14px",
+                                    textTransform: "none",
+                                    fontWeight: 600
+                                }}
+                            >
+                                Convidar participante
+                            </Button>
+                        )}
 
                         {userType?.toLowerCase() !==
                             "paciente" && (
