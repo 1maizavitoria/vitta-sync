@@ -11,14 +11,13 @@ import Divider from "@mui/material/Divider";
 import Avatar from "@mui/material/Avatar";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
-
+import Tooltip from "@mui/material/Tooltip";
 import DashboardIcon from "@mui/icons-material/Dashboard";
 import DescriptionIcon from "@mui/icons-material/Description";
 import LinkIcon from "@mui/icons-material/Link";
 import ShowChartIcon from "@mui/icons-material/ShowChart";
 import IconButton from "@mui/material/IconButton";
 import LogoutIcon from "@mui/icons-material/Logout";
-
 import { getUserByCpf } from "../../services/userService";
 import { useEffect, useState } from "react";
 import { logout } from "../../services/authService";
@@ -374,22 +373,24 @@ export default function Sidebar({ open, setOpen }) {
                                             </Typography>
                                         )}
 
+                                        <Tooltip title={patient.nome}>
                                         <Typography
                                             sx={{
-                                                opacity: open ? 1 : 0,
-                                                maxWidth: open ? "180px" : 0,
-                                                transition: "all .2s ease",
-                                                overflow: "hidden",
-                                                whiteSpace: "nowrap",
-                                                textOverflow: "ellipsis"
+                                            opacity: open ? 1 : 0,
+                                            maxWidth: open ? "180px" : 0,
+                                            transition: "all .2s ease",
+                                            overflow: "hidden",
+                                            whiteSpace: "normal",       
+                                            wordBreak: "break-word",   
+                                            lineHeight: 1.2,
+                                            fontSize: patient.nome.length > 25 ? "0.85rem" : "1rem", 
+                                            fontWeight: 600,
+                                            textAlign: "left"         
                                             }}
                                         >
                                             {patient.nome}
-
                                         </Typography>
-
-
-
+                                        </Tooltip>
 
                                     </>
                                     {notificationCounts[patient.id] > 0 && (

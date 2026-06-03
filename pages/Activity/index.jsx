@@ -65,16 +65,25 @@ export default function Activity() {
                 flexDirection="column"
                 gap={2}
             >
-
-                {events.map((event) => (
-
-                    <EventCard
-                        key={event.id}
-                        event={event}
-                    />
-                ))}
-
+                {events.length === 0 ? (
+                    <Typography
+                        variant="h6"
+                        color="text.secondary"
+                        align="center"
+                        sx={{ mt: 2 }}
+                    >
+                        Sem atividades
+                    </Typography>
+                ) : (
+                    events.map((event) => (
+                        <EventCard
+                            key={event.id}
+                            event={event}
+                        />
+                    ))
+                )}
             </Box>
+
 
         </Box>
     );
