@@ -17,7 +17,10 @@ export default function SymptomCard({
     dataPicker,
     inputValue,
     onInputChange,
-    showInput
+    userStyle,
+    showInput,
+    userName,
+    userFunction,
 }) {
 
     // const [showInput, setShowInput] = useState(false);
@@ -81,7 +84,35 @@ export default function SymptomCard({
                         {date}
                     </Typography>
 
-                    {/* Botão */}
+                    {/* Registrado por */}
+                    {userName && (
+
+                        <Typography
+                            variant="body2"
+                            sx={{
+                                mt: 1,
+                                fontWeight: 600
+                            }}
+                        >
+                            {userName}
+                            {" • "}
+                            <Box
+                                component="span"
+                                sx={{
+                                    color: userStyle?.color,
+                                    backgroundColor:
+                                        userStyle?.background,
+                                    px: 1,
+                                    py: 0.3,
+                                    borderRadius: 2,
+                                    ml: 0.5
+                                }}
+                            >
+                                {userFunction}
+                            </Box>
+                        </Typography>
+
+                    )}
 
                     {showInput && !dataPicker && <InputUI
                         value={inputValue}

@@ -16,8 +16,11 @@ export default function HabitCard({
     unit,
     date,
     dataPicker,
+    userName,
+    userFunction,
     inputValue,
     onInputChange,
+    userStyle,
     showInput
 }) {
 
@@ -82,7 +85,35 @@ export default function HabitCard({
                         {date}
                     </Typography>
 
-                    {/* Botão */}
+                    {/* Registrado por */}
+                    {userName && (
+
+                        <Typography
+                            variant="body2"
+                            sx={{
+                                mt: 1,
+                                fontWeight: 600
+                            }}
+                        >
+                            {userName}
+                            {" • "}
+                            <Box
+                                component="span"
+                                sx={{
+                                    color: userStyle?.color,
+                                    backgroundColor:
+                                        userStyle?.background,
+                                    px: 1,
+                                    py: 0.3,
+                                    borderRadius: 2,
+                                    ml: 0.5
+                                }}
+                            >
+                                {userFunction}
+                            </Box>
+                        </Typography>
+
+                    )}
 
                     {showInput && !dataPicker && <InputUI
                         value={inputValue}

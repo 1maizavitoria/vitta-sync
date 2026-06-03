@@ -14,9 +14,9 @@ import BedtimeIcon from "@mui/icons-material/Bedtime";
 import FitnessCenterIcon from "@mui/icons-material/FitnessCenter";
 import { CalendarIcon } from "@mui/x-date-pickers";
 
-import { formatDate } from "../../utils/formatters/formatDate";
-
 import { usePatient } from "../../context/PatientContext";
+
+import { getNomeFuncao, getResponsavelStyle, getMedicoStyle } from "../../utils/validators/userFunction";
 
 export function HabitTracker() {
     const { selectedPatient } = usePatient();
@@ -56,6 +56,29 @@ export function HabitTracker() {
         date: null,
     });
 
+    let style = null;
+
+    if (
+        lastHabit?.usuarioTipo ===
+        "responsavel"
+    ) {
+
+        style =
+            getResponsavelStyle(
+                lastHabit.usuarioFuncao
+            );
+    }
+    else if (
+        lastHabit?.usuarioTipo ===
+        "saude"
+    ) {
+
+        style =
+            getMedicoStyle(
+                lastHabit.usuarioFuncao
+            );
+    }
+
     function isValidMinutes(value) {
         const num = Number(value);
         return !isNaN(num) && num >= 0 && num <= 1440;
@@ -93,7 +116,6 @@ export function HabitTracker() {
             return false;
         }
 
-
         setErrorEx(false);
         setErrorSl(false);
         setErrorDate(false);
@@ -104,7 +126,6 @@ export function HabitTracker() {
     }
 
     async function handleRegister() {
-
 
         if (!canRegister()) return;
 
@@ -119,7 +140,6 @@ export function HabitTracker() {
         if (addHabit) {
 
             try {
-
                 await registerHabits(CPF, data);
                 const updatedHabits = await getHabits(CPF);
                 setHabit(updatedHabits);
@@ -288,6 +308,7 @@ export function HabitTracker() {
             <Grid container spacing={3}>
                 <Grid item xs={12} md={4}>
                     <HabitCard
+                        userStyle={style}
                         showInput={editing || addHabit}
                         icon={<BedtimeIcon />}
                         title="Tempo de sono"
@@ -300,11 +321,16 @@ export function HabitTracker() {
                         closeMeditionInput={closeMeditionInput}
                         onInputChange={(e) => setHabitInputs({ ...habitInputs, timeSleep: e.target.value }, setErrorSl(false))}
                         key={resetKey}
+                        userName={lastHabit?.usuarioNome}
+                        userFunction={getNomeFuncao(
+                            lastHabit?.usuarioFuncao
+                        )}
                     />
                 </Grid>
 
                 <Grid item xs={12} md={4}>
                     <HabitCard
+                        userStyle={style}
                         showInput={editing || addHabit}
                         icon={<FitnessCenterIcon />}
                         title="Tempo de exercício"
@@ -317,11 +343,16 @@ export function HabitTracker() {
                         closeMeditionInput={closeMeditionInput}
                         onInputChange={(e) => setHabitInputs({ ...habitInputs, timeExercise: e.target.value }, setErrorEx(false))}
                         key={resetKey}
+                        userName={lastHabit?.usuarioNome}
+                        userFunction={getNomeFuncao(
+                            lastHabit?.usuarioFuncao
+                        )}
                     />
                 </Grid>
 
                 <Grid item xs={12} md={4}>
                     <HabitCard
+                        userStyle={style}
                         showInput={editing || addHabit}
                         icon={<CalendarIcon />}
                         title="Data"
@@ -339,6 +370,10 @@ export function HabitTracker() {
                         }}
                         key={resetKey}
                         dataPicker={true}
+                        userName={lastHabit?.usuarioNome}
+                        userFunction={getNomeFuncao(
+                            lastHabit?.usuarioFuncao
+                        )}
                     />
                 </Grid>
 

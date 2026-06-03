@@ -17,12 +17,13 @@ export default function VitalCard({
     error = false,
     unit,
     date,
+    userName,
+    userFunction,
     inputValue,
     onInputChange,
+    userStyle,
     showInput
 }) {
-
-    // const [showInput, setShowInput] = useState(false);
 
     return (
         <Grid item xs={12} md={4} sx={{ display: "flex" }}>
@@ -83,11 +84,35 @@ export default function VitalCard({
                         {date}
                     </Typography>
 
-                    {/* Botão */}
+                    {/* Registrado por */}
+                    {userName && (
 
-                    {/* {!showInput && <ButtonUI onClick={() => setShowInput(true)} >
-                        + Adicionar Medição
-                    </ButtonUI>} */}
+                        <Typography
+                            variant="body2"
+                            sx={{
+                                mt: 1,
+                                fontWeight: 600
+                            }}
+                        >
+                            {userName}
+                            {" • "}
+                            <Box
+                                component="span"
+                                sx={{
+                                    color: userStyle?.color,
+                                    backgroundColor:
+                                        userStyle?.background,
+                                    px: 1,
+                                    py: 0.3,
+                                    borderRadius: 2,
+                                    ml: 0.5
+                                }}
+                            >
+                                {userFunction}
+                            </Box>
+                        </Typography>
+
+                    )}
 
                     {showInput && <InputUI
                         value={inputValue}

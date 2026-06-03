@@ -14,10 +14,9 @@ import { editVitalSigns, getVitalSigns, registerVitalSigns } from "../../service
 import VitalCard from "../ui/cards/VitalCard";
 import ButtonUI from "./Button";
 
-import {
-    usePatient
-} from "../../context/PatientContext";
+import { usePatient } from "../../context/PatientContext";
 
+import { getNomeFuncao, getResponsavelStyle, getMedicoStyle } from "../../utils/validators/userFunction";
 
 export function VitalTracker() {
     const { showAlert } = useAlert();
@@ -40,10 +39,8 @@ export function VitalTracker() {
 
     const [resetKey, setResetKey] = useState(0);
 
-    const userType =
-        localStorage.getItem("tipo");
-    const canEdit =
-        userType !== "saude";
+    const userType = localStorage.getItem("tipo");
+    const canEdit = userType !== "saude";
 
     const lastVital = vitals.reduce((latest, current) => {
         if (!latest) return current;
@@ -64,6 +61,29 @@ export function VitalTracker() {
     });
 
     const CPF = selectedPatient?.cpf;
+
+    let style = null;
+
+    if (
+        lastVital?.usuarioTipo ===
+        "responsavel"
+    ) {
+
+        style =
+            getResponsavelStyle(
+                lastVital.usuarioFuncao
+            );
+    }
+    else if (
+        lastVital?.usuarioTipo ===
+        "saude"
+    ) {
+
+        style =
+            getMedicoStyle(
+                lastVital.usuarioFuncao
+            );
+    }
 
     function canRegister() {
         // Verifica se todos os campos estão preenchidos
@@ -186,7 +206,6 @@ export function VitalTracker() {
 
                 setCloseMeditionInput(true);
 
-                //serve parar resetar o estado dos componentes sem o useeffect.
                 setResetKey(prev => prev + 1);
                 setAddVital(false);
 
@@ -365,6 +384,7 @@ export function VitalTracker() {
             <Grid container spacing={3}>
                 <Grid item xs={12} md={4}>
                     <VitalCard
+                        userStyle={style}
                         showInput={editing || addVital}
                         icon={<ScaleIcon />}
                         title="Peso"
@@ -381,10 +401,15 @@ export function VitalTracker() {
                             })
                         }
                         key={resetKey}
+                        userName={lastVital?.usuarioNome}
+                        userFunction={getNomeFuncao(
+                            lastVital?.usuarioFuncao
+                        )}
                     />
                 </Grid>
                 <Grid item xs={12} md={4}>
                     <VitalCard
+                        userStyle={style}
                         showInput={editing || addVital}
                         icon={<MonitorHeartIcon />}
                         title="Frequência cardíaca"
@@ -404,11 +429,16 @@ export function VitalTracker() {
                             setErrorFC(false);
                         }}
                         key={resetKey}
+                        userName={lastVital?.usuarioNome}
+                        userFunction={getNomeFuncao(
+                            lastVital?.usuarioFuncao
+                        )}
                     />
                 </Grid>
 
                 <Grid item xs={12} md={4}>
                     <VitalCard
+                        userStyle={style}
                         showInput={editing || addVital}
                         icon={<FavoriteIcon />}
                         title="Frequência respiratória"
@@ -421,11 +451,16 @@ export function VitalTracker() {
                         closeMeditionInput={closeMeditionInput}
                         onInputChange={(e) => setVitalInputs({ ...vitalInputs, frequenciaRespiratoria: e.target.value }, setErrorFR(false))}
                         key={resetKey}
+                        userName={lastVital?.usuarioNome}
+                        userFunction={getNomeFuncao(
+                            lastVital?.usuarioFuncao
+                        )}
                     />
                 </Grid>
 
                 <Grid item xs={12} md={4}>
                     <VitalCard
+                        userStyle={style}
                         showInput={editing || addVital}
                         icon={<AirIcon />}
                         title="Saturação de Oxigênio (SpO2)"
@@ -438,11 +473,16 @@ export function VitalTracker() {
                         closeMeditionInput={closeMeditionInput}
                         onInputChange={(e) => setVitalInputs({ ...vitalInputs, saturacao: e.target.value }, setErrorSPO2(false))}
                         key={resetKey}
+                        userName={lastVital?.usuarioNome}
+                        userFunction={getNomeFuncao(
+                            lastVital?.usuarioFuncao
+                        )}
                     />
                 </Grid>
 
                 <Grid item xs={12} md={4}>
                     <VitalCard
+                        userStyle={style}
                         showInput={editing || addVital}
                         icon={<DeviceThermostatIcon />}
                         title="Temperatura Corporal"
@@ -455,11 +495,16 @@ export function VitalTracker() {
                         closeMeditionInput={closeMeditionInput}
                         onInputChange={(e) => setVitalInputs({ ...vitalInputs, temperatura: e.target.value }, setErrorTemp(false))}
                         key={resetKey}
+                        userName={lastVital?.usuarioNome}
+                        userFunction={getNomeFuncao(
+                            lastVital?.usuarioFuncao
+                        )}
                     />
                 </Grid>
 
                 <Grid item xs={12} md={4}>
                     <VitalCard
+                        userStyle={style}
                         showInput={editing || addVital}
                         icon={<MonitorHeartIcon />}
                         title="Pressão sistólica"
@@ -472,11 +517,16 @@ export function VitalTracker() {
                         closeMeditionInput={closeMeditionInput}
                         onInputChange={(e) => setVitalInputs({ ...vitalInputs, sistolica: e.target.value }, setErrorSistolica(false))}
                         key={resetKey}
+                        userName={lastVital?.usuarioNome}
+                        userFunction={getNomeFuncao(
+                            lastVital?.usuarioFuncao
+                        )}
                     />
                 </Grid>
 
                 <Grid item xs={12} md={4}>
                     <VitalCard
+                        userStyle={style}
                         showInput={editing || addVital}
                         icon={<MonitorHeartIcon />}
                         title="Pressão diastólica"
@@ -489,6 +539,10 @@ export function VitalTracker() {
                         closeMeditionInput={closeMeditionInput}
                         onInputChange={(e) => setVitalInputs({ ...vitalInputs, diastolica: e.target.value }, setErrorDiastolica(false))}
                         key={resetKey}
+                        userName={lastVital?.usuarioNome}
+                        userFunction={getNomeFuncao(
+                            lastVital?.usuarioFuncao
+                        )}
                     />
                 </Grid>
 

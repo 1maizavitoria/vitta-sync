@@ -3,7 +3,7 @@ import FavoriteIcon from "@mui/icons-material/Favorite";
 import MonitorHeartIcon from "@mui/icons-material/MonitorHeart";
 import AirIcon from '@mui/icons-material/Air';
 import DeviceThermostatIcon from '@mui/icons-material/DeviceThermostat';
-import { Box, Paper } from "@mui/material";
+import { Box, Paper, Typography } from "@mui/material";
 import { useEffect, useState } from "react";
 import { useAlert } from "../../hooks/useAlert";
 import { editSymptom, getSymptom, registerSymptom } from "../../services/symptomService";
@@ -14,7 +14,7 @@ import BedtimeIcon from "@mui/icons-material/Bedtime";
 import FitnessCenterIcon from "@mui/icons-material/FitnessCenter";
 import { CalendarIcon } from "@mui/x-date-pickers";
 import SymptomCard from "../ui/cards/SymptomCard";
-import { formatDate } from "../../utils/formatters/formatDate";
+import { getNomeFuncao, getResponsavelStyle, getMedicoStyle } from "../../utils/validators/userFunction";
 
 import { usePatient } from "../../context/PatientContext";
 
@@ -43,6 +43,29 @@ export function SymptomTracker() {
             ? current
             : latest;
     }, null);
+
+    let style = null;
+
+    if (
+        lastSymptom?.usuarioTipo ===
+        "responsavel"
+    ) {
+
+        style =
+            getResponsavelStyle(
+                lastSymptom.usuarioFuncao
+            );
+    }
+    else if (
+        lastSymptom?.usuarioTipo ===
+        "saude"
+    ) {
+
+        style =
+            getMedicoStyle(
+                lastSymptom.usuarioFuncao
+            );
+    }
 
     const [SymptomInputs, setSymptomInputs] = useState({
         symptom: "",
@@ -276,6 +299,7 @@ export function SymptomTracker() {
 
                 <Grid item xs={12} md={4}>
                     <SymptomCard
+                        userStyle={style}
                         showInput={editing || addSymptom}
                         icon={<FitnessCenterIcon />}
                         title="Sintoma"
@@ -288,11 +312,16 @@ export function SymptomTracker() {
                         closeMeditionInput={closeMeditionInput}
                         onInputChange={(e) => setSymptomInputs({ ...SymptomInputs, symptom: e.target.value }, setErrorIntensity(false))}
                         key={resetKey}
+                        userName={lastSymptom?.usuarioNome}
+                        userFunction={getNomeFuncao(
+                            lastSymptom?.usuarioFuncao
+                        )}
                     />
                 </Grid>
 
                 <Grid item xs={12} md={4}>
                     <SymptomCard
+                        userStyle={style}
                         showInput={editing || addSymptom}
                         icon={<BedtimeIcon />}
                         title="Intensidade"
@@ -305,11 +334,16 @@ export function SymptomTracker() {
                         closeMeditionInput={closeMeditionInput}
                         onInputChange={(e) => setSymptomInputs({ ...SymptomInputs, intencity: e.target.value }, setErrorSymptom(false))}
                         key={resetKey}
+                        userName={lastSymptom?.usuarioNome}
+                        userFunction={getNomeFuncao(
+                            lastSymptom?.usuarioFuncao
+                        )}
                     />
                 </Grid>
 
                 <Grid item xs={12} md={4}>
                     <SymptomCard
+                        userStyle={style}
                         showInput={editing || addSymptom}
                         icon={<CalendarIcon />}
                         title="Data"
@@ -327,6 +361,12 @@ export function SymptomTracker() {
                         }}
                         key={resetKey}
                         dataPicker={true}
+                        userName={lastSymptom?.usuarioNome}
+                        userFunction={getNomeFuncao(
+                            lastSymptom?.usuarioFuncao
+                        )}
+
+
                     />
                 </Grid>
 
