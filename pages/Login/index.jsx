@@ -15,6 +15,8 @@ import { useAlert } from "../../hooks/useAlert";
 import { validatePassword } from "../../utils/validators/passwordValidator";
 import PasswordTooltip from "../../components/ui/Tooltip";
 
+import { isTokenExpired } from "../../utils/auth/auth";
+
 export default function Login() {
     const { showAlert } = useAlert();
 
@@ -53,9 +55,7 @@ export default function Login() {
     // Regras de validação da senha para o tooltip
     const rulesPassword = validatePassword(forgotNewPassword);
 
-
     const navigate = useNavigate();
-
 
     const canLogin = () => {
         if (CPF === "" || password === "") {
@@ -295,6 +295,14 @@ export default function Login() {
         return () => clearTimeout(timer);
 
     }, [seconds]);
+
+    useEffect(() => {
+        const token = localStorage.getItem("token");
+
+        if (token && !isTokenExpired(token)) {
+            navigate("/dashboard");
+        }
+    }, []);
 
     return (
         <Box>

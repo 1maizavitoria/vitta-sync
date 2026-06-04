@@ -17,6 +17,8 @@ import { isValidEmail } from "../../utils/formatters/formatEmail";
 import { validatePassword } from "../../utils/validators/passwordValidator";
 import { getDateLimit, isUnder18 } from "../../utils/validators/dateValidator";
 import { formatPhone, isValidPhone } from "../../utils/formatters/formatPhone";
+import { isTokenExpired } from "../../utils/auth/auth";
+
 
 export default function Register() {
     const { showAlert } = useAlert();
@@ -227,6 +229,14 @@ export default function Register() {
         setDateLimit(getDateLimit(userType));
     }, [userType]);
 
+    useEffect(() => {
+        const token = localStorage.getItem("token");
+
+        if (token && !isTokenExpired(token)) {
+            navigate("/dashboard");
+        }
+    }, []);
+
     return (
         <Box>
             <Grid
@@ -400,7 +410,7 @@ export default function Register() {
                                 value={birthDate}
                                 onChange={setBirthDate}
                             />
-    
+
 
                             <Tooltip
                                 title={<PasswordTooltip rules={rulesPassword} />}
