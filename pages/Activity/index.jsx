@@ -11,7 +11,6 @@ import EventCard from "../../components/ui/cards/EventCard";
 export default function Activity() {
 
     const { selectedPatient } = usePatient();
-
     const [events, setEvents] = useState([]);
 
     async function loadEvents() {
@@ -42,7 +41,6 @@ export default function Activity() {
     useEffect(() => {
 
         loadEvents();
-
 
     }, [selectedPatient]);
 
@@ -83,8 +81,6 @@ export default function Activity() {
                     ))
                 )}
             </Box>
-
-
         </Box>
     );
 }

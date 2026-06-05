@@ -1,4 +1,4 @@
-import { Box, Button, Grid, Paper, Tooltip, Typography, Radio, RadioGroup, FormControlLabel, FormLabel } from "@mui/material";
+import { Container, Box, Button, Grid, Paper, Tooltip, Typography, Radio, RadioGroup, FormControlLabel, FormLabel } from "@mui/material";
 import ButtonUI from "../../components/ui/Button";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -305,277 +305,302 @@ export default function Login() {
     }, []);
 
     return (
-        <Box>
-            <Grid
-                container
-                justifyContent="center"
-                alignItems="center"
-            >
-                <Grid item>
+        <Box
+            sx={{
+                minHeight: "50vh",
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center"
+            }}
+        >
+            <Container maxWidth="sm">
+                <Paper
+                    elevation={5}
+                    sx={{
+                        width: "100%",
+                        maxWidth: 420,
+                        mx: "auto",
+                        borderRadius: 3,
+                        p: { xs: 2, sm: 3, md: 4 }
+                    }}
+                >
 
-                    <Paper elevation={5} sx={{ p: 4, width: 360, }}>
-                        <Box
-                            display="flex"
-                            flexDirection="column"
-                            alignItems="center"
-                            gap={2}
+                    <Box
+                        display="flex"
+                        flexDirection="column"
+                        alignItems="center"
+                        gap={2}
 
-                        >
-                            <Box textAlign="center" mb={2}>
-                                <Typography
-                                    sx={{
-                                        fontFamily: 'Inter, sans-serif',
-                                        fontWeight: 600,
-                                        fontSize: '28px',
-                                        color: '#1a1a1a',
-                                        letterSpacing: '0.5px',
-                                    }}
-                                >
-                                    Vitta<span style={{ fontWeight: 400 }}>Sync</span>
-                                </Typography>
+                    >
+                        <Box textAlign="center" mb={2}>
+                            <Typography
+                                sx={{
+                                    fontFamily: 'Inter, sans-serif',
+                                    fontWeight: 600,
+                                    fontSize: '28px',
+                                    color: '#1a1a1a',
+                                    letterSpacing: '0.5px',
+                                }}
+                            >
+                                Vitta<span style={{ fontWeight: 400 }}>Sync</span>
+                            </Typography>
 
-                                <Typography
-                                    sx={{
-                                        fontFamily: 'Inter, sans-serif',
-                                        fontWeight: 500,
-                                        fontSize: '20px',
-                                        color: '#4a4a4a',
-                                        mt: 0.5,
-                                    }}
-                                >
-                                    Login
-                                </Typography>
-                            </Box>
+                            <Typography
+                                sx={{
+                                    fontFamily: 'Inter, sans-serif',
+                                    fontWeight: 500,
+                                    fontSize: '20px',
+                                    color: '#4a4a4a',
+                                    mt: 0.5,
+                                }}
+                            >
+                                Login
+                            </Typography>
+                        </Box>
 
-                            <InputUI
-                                label="CPF"
-                                placeholder="999.999.999-99"
-                                limit={14}
-                                error={errorCPF}
-                                value={formatCPF(CPF)}
-                                onChange={(e) => (
-                                    setCPF(e.target.value.replace(/\D/g, "")),
-                                    setErrorCPF(false),
-                                    setOpenForgotDialog(false)
-                                )}
-                            />
+                        <InputUI
+                            label="CPF"
+                            placeholder="999.999.999-99"
+                            limit={14}
+                            error={errorCPF}
+                            value={formatCPF(CPF)}
+                            onChange={(e) => (
+                                setCPF(e.target.value.replace(/\D/g, "")),
+                                setErrorCPF(false),
+                                setOpenForgotDialog(false)
+                            )}
+                        />
 
-                            <InputUI
-                                label="Senha"
-                                placeholder="Digite sua senha"
-                                type="password"
-                                error={errorPassword}
-                                showPasswordToggle={true}
-                                value={password}
-                                onChange={(e) => (
-                                    setPassword(e.target.value),
-                                    setErrorPassword(false)
-                                )}
-                            />
+                        <InputUI
+                            label="Senha"
+                            placeholder="Digite sua senha"
+                            type="password"
+                            error={errorPassword}
+                            showPasswordToggle={true}
+                            value={password}
+                            onChange={(e) => (
+                                setPassword(e.target.value),
+                                setErrorPassword(false)
+                            )}
+                        />
 
-                            <Box width="100%">
-                                <FormLabel
-                                    sx={{
-                                        fontSize: "14px",
-                                        color: "#4a4a4a",
-                                        fontFamily: "Inter, sans-serif",
-                                    }}
-                                >
-                                    Receber código por
-                                </FormLabel>
+                        <Box width="100%">
+                            <FormLabel
+                                sx={{
+                                    fontSize: "14px",
+                                    color: "#4a4a4a",
+                                    fontFamily: "Inter, sans-serif",
+                                }}
+                            >
+                                Receber código por
+                            </FormLabel>
 
-                                <RadioGroup
-                                    row
-                                    value={channel}
-                                    onChange={(e) => setChannel(e.target.value)}
-                                >
-                                    <FormControlLabel
-                                        value="email"
-                                        control={<Radio size="small" />}
-                                        label="Email"
-                                    />
+                            <RadioGroup
+                                row
+                                value={channel}
+                                onChange={(e) => setChannel(e.target.value)}
+                            >
+                                <FormControlLabel
+                                    value="email"
+                                    control={<Radio size="small" />}
+                                    label="Email"
+                                />
 
-                                    <FormControlLabel
-                                        value="sms"
-                                        control={<Radio size="small" />}
-                                        label="SMS"
-                                    />
+                                <FormControlLabel
+                                    value="sms"
+                                    control={<Radio size="small" />}
+                                    label="SMS"
+                                />
 
-                                    {/* <FormControlLabel
+                                {/* <FormControlLabel
                                         value="ambos"
                                         control={<Radio size="small" />}
                                         label="Ambos"
                                     /> */}
-                                </RadioGroup>
-                            </Box>
-
-                            <ButtonUI
-                                onClick={handleLogin}
-                                disabled={loadingLogin}
-                            >
-                                {loadingLogin ? "Entrando..." : "Entrar"}
-                            </ButtonUI>
-
-                            <LinkUI onClick={() => (
-                                setOpenForgotDialog(true)
-                            )}
-                                variant="action"
-                            >
-                                Esqueceu a senha ?
-                            </LinkUI>
-
-                            <p style={{ fontFamily: 'Inter, sans-serif', fontSize: '14px' }}>
-                                Não tem conta?
-                                <LinkUI to="/register" variant="action">
-                                    Cadastrar
-                                </LinkUI>
-                            </p>
-
-                            {/* Diálogo pra varificação de 2 fatores na trocar de senha */}
-                            <DialogUI
-                                title={"Trocar de senha"}
-                                disabledConfirm={
-                                    loadingChangePassword || !forgotEmailConfirm
-                                }
-                                disabledClose={
-                                    loadingForgotPassword || loadingChangePassword
-                                }
-                                open={openForgotDialog}
-                                confirmText={
-                                    loadingChangePassword
-                                        ? "Alterando..."
-                                        : "Confirmar"
-                                }
-                                onClose={() => (
-                                    setOpenForgotDialog(false),
-                                    setForgotError(false),
-                                    setForgotErrorCode(false),
-                                    setForgotError(false),
-                                    setForgotEmailError(false),
-                                    setForgotEmailConfirm(false),
-                                    setForgotCode(""),
-                                    setForgotEmail(""),
-                                    setForgotNewPassword("")
-                                )}
-                                disabledConfirm={!forgotEmailConfirm}
-                                onConfirm={() => {
-                                    handleChangeCodePassword({
-                                        code: forgotCode,
-                                        newPassword: forgotNewPassword,
-                                    });
-                                }}
-                            >
-                                {!forgotEmailConfirm && <Box display="flex" gap={2} alignItems="center">
-                                    <InputUI
-                                        label="Email"
-                                        style={{ flex: 1 }}
-                                        error={forgotEmailError && (forgotEmail === "" || !isValidEmail(forgotEmail))}
-                                        type="text"
-                                        placeholder="Digite seu email"
-                                        value={forgotEmail}
-                                        onChange={(e) => setForgotEmail(e.target.value)}
-                                    />
-
-                                    <ButtonUI
-                                        disabled={loadingForgotPassword}
-                                        onClick={() => handleValidateCodePassword(forgotEmail)}
-                                    >
-                                        {
-                                            loadingForgotPassword
-                                                ? "Enviando..."
-                                                : "Enviar Código"
-                                        }
-                                    </ButtonUI>
-                                </Box>}
-
-                                {forgotEmailConfirm && <InputUI
-                                    label="Código"
-                                    error={forgotError && (forgotCode === "" || forgotErrorCode)}
-                                    type="text"
-                                    placeholder="Digite o código"
-                                    value={forgotCode}
-                                    onChange={(e) => setForgotCode(e.target.value)}
-                                />}
-
-                                {forgotEmailConfirm && <Tooltip
-                                    title={<PasswordTooltip rules={rulesPassword} />}
-                                    placement="right"
-                                    arrow
-                                >
-                                    <InputUI
-                                        label="Nova senha"
-                                        error={forgotError && (forgotNewPassword === "" || !rulesPassword.isValid)}
-                                        type="password"
-                                        placeholder="Digite sua nova senha"
-                                        showPasswordToggle={true}
-                                        value={forgotNewPassword}
-                                        onChange={(e) => {
-                                            setForgotNewPassword(e.target.value)
-                                        }}
-                                    />
-                                </Tooltip>}
-
-                            </DialogUI>
-
-                            {/* Diálogo para de verificação de 2 fatores no login */}
-                            <DialogUI
-                                disabledClose={loadingValidateCode}
-                                disabledConfirm={loadingValidateCode}
-                                confirmText={
-                                    loadingValidateCode
-                                        ? "Validando..."
-                                        : "Confirmar"
-                                }
-                                open={openLoginDialog}
-                                onClose={() => (
-                                    setOpenLoginDialog(false),
-                                    setErrorLoginCode(false),
-                                    setErrorCode(false),
-                                    setCode("")
-                                )}
-                                title={"Digite seu código"}
-                                onConfirm={() => {
-
-                                    if (!code) {
-
-                                        setErrorLoginCode(true);
-                                        showAlert("error", "Digite o código enviado");
-                                        return;
-                                    }
-
-                                    handleValidateCode();
-                                }}
-                            >
-                                <Box display="flex" gap={2} alignItems="center">
-                                    <InputUI
-                                        type="text"
-                                        error={errorLoginCode || errorCode}
-                                        placeholder="Digite o código"
-                                        value={code}
-                                        onChange={(e) => {
-                                            setCode(e.target.value);
-                                            setErrorLoginCode(false);
-                                            setErrorCode(false);
-                                        }}
-
-                                    />
-
-                                    <ButtonUI
-                                        minWidth="240px"
-                                        disabled={disabled}
-                                        onClick={handleResendCode}
-
-                                    >
-                                        {disabled ? `Aguarde ${seconds}s` : "Reenviar Código"}
-                                    </ButtonUI>
-
-                                </Box>
-                            </DialogUI>
-
+                            </RadioGroup>
                         </Box>
-                    </Paper >
-                </Grid >
-            </Grid>
+
+                        <ButtonUI
+                            onClick={handleLogin}
+                            disabled={loadingLogin}
+                        >
+                            {loadingLogin ? "Entrando..." : "Entrar"}
+                        </ButtonUI>
+
+                        <LinkUI onClick={() => (
+                            setOpenForgotDialog(true)
+                        )}
+                            variant="action"
+                        >
+                            Esqueceu a senha ?
+                        </LinkUI>
+
+                        <p style={{ fontFamily: 'Inter, sans-serif', fontSize: '14px' }}>
+                            Não tem conta?
+                            <LinkUI to="/register" variant="action">
+                                Cadastrar
+                            </LinkUI>
+                        </p>
+
+                        {/* Diálogo pra varificação de 2 fatores na trocar de senha */}
+                        <DialogUI
+                            title={"Trocar de senha"}
+                            disabledConfirm={
+                                loadingChangePassword || !forgotEmailConfirm
+                            }
+                            disabledClose={
+                                loadingForgotPassword || loadingChangePassword
+                            }
+                            open={openForgotDialog}
+                            confirmText={
+                                loadingChangePassword
+                                    ? "Alterando..."
+                                    : "Confirmar"
+                            }
+                            onClose={() => (
+                                setOpenForgotDialog(false),
+                                setForgotError(false),
+                                setForgotErrorCode(false),
+                                setForgotError(false),
+                                setForgotEmailError(false),
+                                setForgotEmailConfirm(false),
+                                setForgotCode(""),
+                                setForgotEmail(""),
+                                setForgotNewPassword("")
+                            )}
+                            disabledConfirm={!forgotEmailConfirm}
+                            onConfirm={() => {
+                                handleChangeCodePassword({
+                                    code: forgotCode,
+                                    newPassword: forgotNewPassword,
+                                });
+                            }}
+                        >
+                            {!forgotEmailConfirm && <Box
+                                sx={{
+                                    display: "flex",
+                                    flexDirection: { xs: "column", sm: "row" },
+                                    gap: 2,
+                                    alignItems: "center"
+                                }}
+                            >
+                                <InputUI
+                                    label="Email"
+                                    style={{ flex: 1 }}
+                                    error={forgotEmailError && (forgotEmail === "" || !isValidEmail(forgotEmail))}
+                                    type="text"
+                                    placeholder="Digite seu email"
+                                    value={forgotEmail}
+                                    onChange={(e) => setForgotEmail(e.target.value)}
+                                />
+
+                                <ButtonUI
+                                    disabled={loadingForgotPassword}
+                                    onClick={() => handleValidateCodePassword(forgotEmail)}
+                                >
+                                    {
+                                        loadingForgotPassword
+                                            ? "Enviando..."
+                                            : "Enviar Código"
+                                    }
+                                </ButtonUI>
+                            </Box>}
+
+                            {forgotEmailConfirm && <InputUI
+                                label="Código"
+                                error={forgotError && (forgotCode === "" || forgotErrorCode)}
+                                type="text"
+                                placeholder="Digite o código"
+                                value={forgotCode}
+                                onChange={(e) => setForgotCode(e.target.value)}
+                            />}
+
+                            {forgotEmailConfirm && <Tooltip
+                                title={<PasswordTooltip rules={rulesPassword} />}
+                                placement="right"
+                                arrow
+                            >
+                                <InputUI
+                                    label="Nova senha"
+                                    error={forgotError && (forgotNewPassword === "" || !rulesPassword.isValid)}
+                                    type="password"
+                                    placeholder="Digite sua nova senha"
+                                    showPasswordToggle={true}
+                                    value={forgotNewPassword}
+                                    onChange={(e) => {
+                                        setForgotNewPassword(e.target.value)
+                                    }}
+                                />
+                            </Tooltip>}
+
+                        </DialogUI>
+
+                        {/* Diálogo para de verificação de 2 fatores no login */}
+                        <DialogUI
+                            disabledClose={loadingValidateCode}
+                            disabledConfirm={loadingValidateCode}
+                            confirmText={
+                                loadingValidateCode
+                                    ? "Validando..."
+                                    : "Confirmar"
+                            }
+                            open={openLoginDialog}
+                            onClose={() => (
+                                setOpenLoginDialog(false),
+                                setErrorLoginCode(false),
+                                setErrorCode(false),
+                                setCode("")
+                            )}
+                            title={"Digite seu código"}
+                            onConfirm={() => {
+
+                                if (!code) {
+
+                                    setErrorLoginCode(true);
+                                    showAlert("error", "Digite o código enviado");
+                                    return;
+                                }
+
+                                handleValidateCode();
+                            }}
+                        >
+
+                            <Box
+                                sx={{
+                                    display: "flex",
+                                    flexDirection: { xs: "column", sm: "row" },
+                                    gap: 2,
+                                    alignItems: "center"
+                                }}
+                            >
+                                <InputUI
+                                    type="text"
+                                    error={errorLoginCode || errorCode}
+                                    placeholder="Digite o código"
+                                    value={code}
+                                    onChange={(e) => {
+                                        setCode(e.target.value);
+                                        setErrorLoginCode(false);
+                                        setErrorCode(false);
+                                    }}
+
+                                />
+
+                                <ButtonUI
+                                    minWidth="180px"
+                                    disabled={disabled}
+                                    onClick={handleResendCode}
+
+                                >
+                                    {disabled ? `Aguarde ${seconds}s` : "Reenviar Código"}
+                                </ButtonUI>
+
+                            </Box>
+                        </DialogUI>
+
+                    </Box>
+                </Paper >
+            </Container>
         </Box >
     )
 

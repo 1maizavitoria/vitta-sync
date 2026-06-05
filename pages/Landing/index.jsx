@@ -89,8 +89,8 @@ export default function Landing() {
     ];
 
     return (
-        <Box >
-            {/* health monitoring */}
+        <Box>
+            {/* hero section */}
             <Box
                 sx={{
                     display: "grid",
@@ -98,17 +98,12 @@ export default function Landing() {
                         xs: "1fr",
                         lg: "1.2fr 0.8fr"
                     },
-                    gap: {
-                        xs: 6,
-                        md: 8
-                    },
+                    gap: { xs: 5, md: 8 },
                     alignItems: "center",
                 }}
             >
-
                 {/* LEFT */}
-                <Box sx={{ flex: 1 }}>
-
+                <Box>
                     {/* Badge */}
                     <Box
                         sx={{
@@ -118,12 +113,12 @@ export default function Landing() {
                             px: 2,
                             py: 1,
                             borderRadius: "999px",
-                            mb: 5
+                            mb: { xs: 3, md: 5 }
                         }}
                     >
                         <Typography
                             sx={{
-                                fontSize: 14,
+                                fontSize: { xs: 12, md: 14 },
                                 fontWeight: 600,
                                 color: "#4c8c42"
                             }}
@@ -135,22 +130,16 @@ export default function Landing() {
                     {/* Title */}
                     <Typography
                         sx={{
-                            fontSize: {
-                                xs: 42,
-                                md: 72
-                            },
+                            fontSize: { xs: 34, sm: 48, md: 72 },
                             lineHeight: 1.05,
                             fontWeight: 800,
                             color: "#08142b",
                             maxWidth: "620px",
-                            mb: 4
+                            mb: { xs: 3, md: 4 }
                         }}
                     >
                         Sua saúde em{" "}
-                        <Box
-                            component="span"
-                            sx={{ color: "#4c9a45" }}
-                        >
+                        <Box component="span" sx={{ color: "#4c9a45" }}>
                             sincronia
                         </Box>{" "}
                         com você
@@ -159,11 +148,11 @@ export default function Landing() {
                     {/* Description */}
                     <Typography
                         sx={{
-                            fontSize: 22,
+                            fontSize: { xs: 16, md: 22 },
                             color: "#5f6b7a",
                             lineHeight: 1.7,
                             maxWidth: "700px",
-                            mb: 5
+                            mb: { xs: 4, md: 5 }
                         }}
                     >
                         Monitore seus sinais vitais em tempo real,
@@ -175,22 +164,23 @@ export default function Landing() {
                     <Box
                         sx={{
                             display: "flex",
+                            flexDirection: { xs: "column", sm: "row" },
                             gap: 2,
-                            mb: 7
+                            mb: { xs: 5, md: 7 }
                         }}
                     >
-
                         <Button
                             variant="contained"
+                            fullWidth={{ xs: true, sm: false }}
                             sx={{
                                 bgcolor: "#b7d995",
                                 color: "#08142b",
-                                px: 4,
-                                py: 2,
+                                px: { xs: 3, md: 4 },
+                                py: { xs: 1.5, md: 2 },
                                 borderRadius: "16px",
                                 textTransform: "none",
                                 fontWeight: 700,
-                                fontSize: 18,
+                                fontSize: { xs: 16, md: 18 },
                                 boxShadow: "none",
                                 "&:hover": {
                                     bgcolor: "#a7ca84",
@@ -206,29 +196,28 @@ export default function Landing() {
                             sx={{
                                 borderColor: "#d6d6d6",
                                 color: "#08142b",
-                                px: 4,
-                                py: 2,
+                                px: { xs: 3, md: 4 },
+                                py: { xs: 1.5, md: 2 },
                                 borderRadius: "16px",
                                 textTransform: "none",
                                 fontWeight: 600,
-                                fontSize: 18
+                                fontSize: { xs: 16, md: 18 }
                             }}
                         >
                             ▶ Ver Demonstração
                         </Button>
-
                     </Box>
 
                     {/* Stats */}
                     <Box
                         sx={{
                             display: "flex",
-                            gap: 8,
+                            gap: { xs: 4, md: 8 },
                             pt: 4,
-                            borderTop: "1px solid #dddddd"
+                            borderTop: "1px solid #dddddd",
+                            flexWrap: "wrap"
                         }}
                     >
-
                         {[
                             ["10K+", "Usuários Ativos"],
                             ["500+", "Médicos Parceiros"],
@@ -237,43 +226,36 @@ export default function Landing() {
                             <Box key={label}>
                                 <Typography
                                     sx={{
-                                        fontSize: 42,
+                                        fontSize: { xs: 28, md: 42 },
                                         fontWeight: 800,
                                         color: "#08142b"
                                     }}
                                 >
                                     {value}
                                 </Typography>
-
-                                <Typography
-                                    sx={{
-                                        color: "#6f7785"
-                                    }}
-                                >
+                                <Typography sx={{ color: "#6f7785", fontSize: { xs: 13, md: 15 } }}>
                                     {label}
                                 </Typography>
                             </Box>
                         ))}
-
                     </Box>
-
                 </Box>
 
-                {/* RIGHT */}
+                {/* RIGHT — card de frequência cardíaca */}
                 <Paper
                     elevation={0}
                     sx={{
-                        width: 520,
+                        width: "100%",       // ← era 520px fixo
+                        maxWidth: 520,
                         borderRadius: "28px",
-                        p: 4,
+                        p: { xs: 3, md: 4 },
                         bgcolor: "white",
                         boxShadow: "0 20px 50px rgba(0,0,0,0.10)"
                     }}
                 >
-
                     <Typography
                         sx={{
-                            fontSize: 28,
+                            fontSize: { xs: 20, md: 28 },
                             fontWeight: 700,
                             color: "#08142b",
                             mb: 1
@@ -282,69 +264,47 @@ export default function Landing() {
                         Frequência Cardíaca
                     </Typography>
 
-                    <Typography
-                        sx={{
-                            color: "#6c7480",
-                            mb: 4
-                        }}
-                    >
+                    <Typography sx={{ color: "#6c7480", mb: 3, fontSize: { xs: 13, md: 15 } }}>
                         Últimos 7 dias - Tendência Semanal
                     </Typography>
 
                     {/* KPI */}
                     <Box
                         sx={{
-                            background:
-                                "linear-gradient(90deg, #c6eee6 0%, #b6d98e 100%)",
+                            background: "linear-gradient(90deg, #c6eee6 0%, #b6d98e 100%)",
                             borderRadius: "20px",
-                            p: 3,
-                            mb: 4
+                            p: { xs: 2.5, md: 3 },
+                            mb: 3
                         }}
                     >
-
                         <Typography
                             sx={{
-                                fontSize: 56,
+                                fontSize: { xs: 42, md: 56 },
                                 fontWeight: 800,
                                 color: "#08142b"
                             }}
                         >
                             72
-                            <Box
-                                component="span"
-                                sx={{
-                                    fontSize: 24,
-                                    ml: 1,
-                                    fontWeight: 500
-                                }}
-                            >
+                            <Box component="span" sx={{ fontSize: { xs: 18, md: 24 }, ml: 1, fontWeight: 500 }}>
                                 bpm
                             </Box>
                         </Typography>
-
-                        <Typography
-                            sx={{
-                                color: "#42505e"
-                            }}
-                        >
+                        <Typography sx={{ color: "#42505e", fontSize: { xs: 13, md: 15 } }}>
                             Valor atual - Normal
                         </Typography>
-
                     </Box>
 
                     {/* Fake Chart */}
                     <Box
                         sx={{
-                            height: 240,
+                            height: { xs: 160, md: 240 },
                             borderRadius: "20px",
                             bgcolor: "#fafafa",
-                            mb: 4,
+                            mb: 3,
                             position: "relative",
                             overflow: "hidden"
                         }}
                     >
-
-                        {/* linhas */}
                         {[1, 2, 3, 4].map((i) => (
                             <Box
                                 key={i}
@@ -357,39 +317,24 @@ export default function Landing() {
                                 }}
                             />
                         ))}
-
-                        {/* linha fake */}
                         <svg
                             width="100%"
                             height="100%"
                             viewBox="0 0 500 240"
-                            style={{
-                                position: "absolute",
-                                inset: 0
-                            }}
+                            style={{ position: "absolute", inset: 0 }}
                         >
                             <path
-                                d="M20 140
-                                   C 80 110, 120 160, 180 135
-                                   S 280 90, 340 130
-                                   S 430 145, 480 110"
+                                d="M20 140 C 80 110, 120 160, 180 135 S 280 90, 340 130 S 430 145, 480 110"
                                 fill="none"
                                 stroke="#a6d38c"
                                 strokeWidth="4"
                                 strokeLinecap="round"
                             />
                         </svg>
-
                     </Box>
 
                     {/* Bottom stats */}
-                    <Box
-                        sx={{
-                            display: "flex",
-                            gap: 2
-                        }}
-                    >
-
+                    <Box sx={{ display: "flex", gap: { xs: 1.5, md: 2 } }}>
                         {[
                             ["Mínimo", "65"],
                             ["Média", "72"],
@@ -401,60 +346,35 @@ export default function Landing() {
                                     flex: 1,
                                     bgcolor: "#f8f8f8",
                                     borderRadius: "18px",
-                                    py: 3,
+                                    py: { xs: 2, md: 3 },
                                     textAlign: "center"
                                 }}
                             >
-
-                                <Typography
-                                    sx={{
-                                        color: "#7b8592",
-                                        mb: 1
-                                    }}
-                                >
+                                <Typography sx={{ color: "#7b8592", mb: 0.5, fontSize: { xs: 12, md: 14 } }}>
                                     {label}
                                 </Typography>
-
                                 <Typography
                                     sx={{
-                                        fontSize: 34,
+                                        fontSize: { xs: 24, md: 34 },
                                         fontWeight: 800,
                                         color: "#08142b"
                                     }}
                                 >
                                     {value}
                                 </Typography>
-
                             </Box>
                         ))}
-
                     </Box>
-
                 </Paper>
-
             </Box>
 
             {/* 5 vital signs */}
-            <Box
-                sx={{
-                    pt: 12
-                }}
-            >
-
+            <Box sx={{ pt: { xs: 8, md: 12 } }}>
                 {/* Header */}
-                <Box
-                    sx={{
-                        textAlign: "center",
-                        mb: 8
-                    }}
-                >
-
+                <Box sx={{ textAlign: "center", mb: { xs: 5, md: 8 } }}>
                     <Typography
                         sx={{
-                            fontSize: {
-                                xs: 36,
-                                md: 58
-                            },
+                            fontSize: { xs: 28, sm: 40, md: 58 },
                             fontWeight: 800,
                             color: "#08142b",
                             lineHeight: 1.1,
@@ -462,23 +382,14 @@ export default function Landing() {
                         }}
                     >
                         Monitoramento Completo dos{" "}
-                        <Box
-                            component="span"
-                            sx={{
-                                color: "#5da14f"
-                            }}
-                        >
+                        <Box component="span" sx={{ color: "#5da14f" }}>
                             5 Sinais Vitais
                         </Box>
                     </Typography>
-
-                    <Typography sx={{ fontSize: 22, color: "#5f6b7a" }} >
-                        Registre, analise e compartilhe seus dados de saúde
-                        com precisão médica
+                    <Typography sx={{ fontSize: { xs: 15, md: 22 }, color: "#5f6b7a", px: { xs: 1, md: 0 } }}>
+                        Registre, analise e compartilhe seus dados de saúde com precisão médica
                     </Typography>
-
                 </Box>
-
 
                 <Box
                     sx={{
@@ -487,103 +398,68 @@ export default function Landing() {
                         mx: "auto",
                         display: "grid",
                         gridTemplateColumns: {
-                            xs: "1fr",
-                            md: "repeat(5, 1fr)"
+                            xs: "1fr",           // 1 coluna em mobile
+                            sm: "repeat(2, 1fr)", // 2 colunas em sm
+                            md: "repeat(3, 1fr)", // 3 colunas em md  ← era repeat(5,1fr) que ficava muito apertado
+                            lg: "repeat(5, 1fr)"  // 5 colunas só em telas grandes
                         },
                         gap: 3,
-
                     }}
                 >
                     {cards.map((card) => (
-                        <Grid
-                            item
-                            xs={12}
-                            sm={6}
-                            md={4}
+                        <Paper
+                            elevation={0}
                             key={card.title}
+                            sx={{
+                                p: 3,
+                                borderRadius: "24px",
+                                border: "1px solid #e7e7e7",
+                                transition: "0.25s ease",
+                                cursor: "pointer",
+                                minHeight: { xs: "auto", md: 260 },
+                                "&:hover": {
+                                    transform: "translateY(-4px)",
+                                    boxShadow: "0 10px 25px rgba(0,0,0,0.06)"
+                                }
+                            }}
                         >
-
-                            <Paper
-                                elevation={0}
+                            <Box
                                 sx={{
-                                    p: 3,
-                                    borderRadius: "24px",
-                                    border: "1px solid #e7e7e7",
-                                    transition: "0.25s ease",
-                                    cursor: "pointer",
-                                    minHeight: 260,
-
-                                    "&:hover": {
-                                        transform: "translateY(-4px)",
-                                        boxShadow:
-                                            "0 10px 25px rgba(0,0,0,0.06)"
-                                    }
+                                    width: 56,
+                                    height: 56,
+                                    borderRadius: "16px",
+                                    background: "linear-gradient(135deg, #c7ebd8 0%, #b4d89d 100%)",
+                                    display: "flex",
+                                    alignItems: "center",
+                                    justifyContent: "center",
+                                    color: "white",
+                                    mb: 3,
+                                    "& svg": { fontSize: 28 }
                                 }}
                             >
-
-                                {/* Icon */}
-                                <Box
-                                    sx={{
-                                        width: 56,
-                                        height: 56,
-                                        borderRadius: "16px",
-                                        background:
-                                            "linear-gradient(135deg, #c7ebd8 0%, #b4d89d 100%)",
-                                        display: "flex",
-                                        alignItems: "center",
-                                        justifyContent: "center",
-                                        color: "white",
-                                        mb: 3,
-
-                                        "& svg": {
-                                            fontSize: 28
-                                        }
-                                    }}
-                                >
-                                    {card.icon}
-                                </Box>
-
-                                {/* Title */}
-                                <Typography
-                                    sx={{
-                                        fontSize: 18,
-                                        fontWeight: 700,
-                                        color: "#08142b",
-                                        mb: 2,
-                                        lineHeight: 1.3
-                                    }}
-                                >
-                                    {card.title}
-                                </Typography>
-
-                                {/* Description */}
-                                <Typography
-                                    sx={{
-                                        color: "#5f6b7a",
-                                        lineHeight: 1.7,
-                                        fontSize: 15
-                                    }}
-                                >
-                                    {card.description}
-                                </Typography>
-
-                            </Paper>
-
-                        </Grid>
+                                {card.icon}
+                            </Box>
+                            <Typography
+                                sx={{
+                                    fontSize: 18,
+                                    fontWeight: 700,
+                                    color: "#08142b",
+                                    mb: 2,
+                                    lineHeight: 1.3
+                                }}
+                            >
+                                {card.title}
+                            </Typography>
+                            <Typography sx={{ color: "#5f6b7a", lineHeight: 1.7, fontSize: 15 }}>
+                                {card.description}
+                            </Typography>
+                        </Paper>
                     ))}
                 </Box>
-
-
             </Box>
 
             {/* BENEFITS */}
-            <Box
-                sx={{
-                    width: "100%",
-                    py: 8
-                }}
-            >
-
+            <Box sx={{ width: "100%", py: { xs: 5, md: 8 } }}>
                 <Box
                     sx={{
                         width: "100%",
@@ -592,12 +468,12 @@ export default function Landing() {
                         display: "grid",
                         gridTemplateColumns: {
                             xs: "1fr",
+                            sm: "repeat(2, 1fr)",
                             md: "repeat(3, 1fr)"
                         },
                         gap: 3
                     }}
                 >
-
                     {benefits.map((item) => (
                         <Paper
                             key={item.title}
@@ -611,105 +487,54 @@ export default function Landing() {
                                 gap: 2
                             }}
                         >
-
-                            {/* Icon */}
                             <Box
                                 sx={{
                                     minWidth: 48,
                                     width: 48,
                                     height: 48,
                                     borderRadius: "14px",
-                                    background:
-                                        "linear-gradient(135deg, #c7ebd8 0%, #b4d89d 100%)",
+                                    background: "linear-gradient(135deg, #c7ebd8 0%, #b4d89d 100%)",
                                     display: "flex",
                                     alignItems: "center",
                                     justifyContent: "center",
                                     color: "white",
-
-                                    "& svg": {
-                                        fontSize: 24
-                                    }
+                                    "& svg": { fontSize: 24 }
                                 }}
                             >
                                 {item.icon}
                             </Box>
-
-                            {/* Content */}
                             <Box>
-
-                                <Typography
-                                    sx={{
-                                        fontWeight: 700,
-                                        fontSize: 18,
-                                        color: "#08142b",
-                                        mb: 1
-                                    }}
-                                >
+                                <Typography sx={{ fontWeight: 700, fontSize: 18, color: "#08142b", mb: 1 }}>
                                     {item.title}
                                 </Typography>
-
-                                <Typography
-                                    sx={{
-                                        color: "#5f6b7a",
-                                        lineHeight: 1.6,
-                                        fontSize: 15
-                                    }}
-                                >
+                                <Typography sx={{ color: "#5f6b7a", lineHeight: 1.6, fontSize: 15 }}>
                                     {item.description}
                                 </Typography>
-
                             </Box>
-
                         </Paper>
                     ))}
-
                 </Box>
-
             </Box>
 
             {/* FOOTER */}
-            <Box
-                component="footer"
-            >
+            <Box component="footer">
                 <Box
                     sx={{
                         width: "100%",
                         maxWidth: "1250px",
                         mx: "auto",
-
-                        /* BORDA ARREDONDADA */
-                        borderRadius: {
-                            xs: "24px",
-                            md: "36px"
-                        },
-
-                        /* FUNDO */
+                        borderRadius: { xs: "24px", md: "36px" },
                         bgcolor: "#f3fff7",
-
-                        /* SOMBRA VERDE CLARA */
                         boxShadow: `
-                0 10px 30px rgba(134, 239, 172, 0.18),
-                0 0 80px rgba(134, 239, 172, 0.12)
-            `,
-
-                        /* BORDA SUAVE */
+                            0 10px 30px rgba(134, 239, 172, 0.18),
+                            0 0 80px rgba(134, 239, 172, 0.12)
+                        `,
                         border: "1px solid rgba(134,239,172,0.25)",
-
-                        /* ESPAÇAMENTO */
-                        p: {
-                            xs: 3,
-                            sm: 4,
-                            md: 6
-                        },
-
-                        /* RESPONSIVO */
+                        p: { xs: 3, sm: 4, md: 6 },
                         overflow: "hidden",
-
-                        /* EFEITO SUAVE */
                         transition: "0.3s ease"
                     }}
                 >
-
                     {/* TOP */}
                     <Box
                         sx={{
@@ -719,60 +544,36 @@ export default function Landing() {
                                 sm: "repeat(2, 1fr)",
                                 md: "2fr 1fr 1fr 1.3fr"
                             },
-                            gap: {
-                                xs: 5,
-                                md: 6
-                            },
+                            gap: { xs: 4, md: 6 },
                             mb: 5
                         }}
                     >
-
                         {/* BRAND */}
                         <Box>
-
-                            <Box
-                                sx={{
-                                    display: "flex",
-                                    alignItems: "center",
-                                    gap: 1.5,
-                                    mb: 3
-                                }}
-                            >
-
+                            <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, mb: 3 }}>
                                 <Box
                                     sx={{
                                         width: 44,
                                         height: 44,
                                         borderRadius: "16px",
-                                        background:
-                                            "linear-gradient(135deg, #7dd3fc 0%, #86efac 100%)",
+                                        background: "linear-gradient(135deg, #7dd3fc 0%, #86efac 100%)",
                                         display: "flex",
                                         alignItems: "center",
                                         justifyContent: "center",
-                                        boxShadow:
-                                            "0 8px 20px rgba(125,211,252,0.35)"
+                                        boxShadow: "0 8px 20px rgba(125,211,252,0.35)"
                                     }}
                                 >
-                                    <MonitorHeartOutlinedIcon
-                                        sx={{
-                                            color: "#0f172a"
-                                        }}
-                                    />
+                                    <MonitorHeartOutlinedIcon sx={{ color: "#0f172a" }} />
                                 </Box>
-
                                 <Typography
                                     sx={{
-                                        fontSize: {
-                                            xs: 28,
-                                            md: 34
-                                        },
+                                        fontSize: { xs: 26, md: 34 },
                                         fontWeight: 800,
                                         color: "#0f172a"
                                     }}
                                 >
                                     VittaSync
                                 </Typography>
-
                             </Box>
 
                             <Typography
@@ -784,19 +585,10 @@ export default function Landing() {
                                     fontSize: 15
                                 }}
                             >
-                                Monitoramento inteligente de saúde
-                                conectado ao seu estilo de vida.
+                                Monitoramento inteligente de saúde conectado ao seu estilo de vida.
                             </Typography>
 
-                            {/* Social */}
-                            <Box
-                                sx={{
-                                    display: "flex",
-                                    gap: 1.5,
-                                    flexWrap: "wrap"
-                                }}
-                            >
-
+                            <Box sx={{ display: "flex", gap: 1.5, flexWrap: "wrap" }}>
                                 {[
                                     <FacebookOutlinedIcon />,
                                     <TwitterIcon />,
@@ -810,50 +602,30 @@ export default function Landing() {
                                             height: 46,
                                             borderRadius: "16px",
                                             background: "white",
-                                            border:
-                                                "1px solid rgba(15,23,42,0.06)",
+                                            border: "1px solid rgba(15,23,42,0.06)",
                                             display: "flex",
                                             alignItems: "center",
                                             justifyContent: "center",
                                             cursor: "pointer",
                                             transition: "0.25s",
-
                                             "&:hover": {
                                                 transform: "translateY(-3px)",
-                                                boxShadow:
-                                                    "0 10px 20px rgba(15,23,42,0.08)"
+                                                boxShadow: "0 10px 20px rgba(15,23,42,0.08)"
                                             }
                                         }}
                                     >
                                         {icon}
                                     </Box>
                                 ))}
-
                             </Box>
-
                         </Box>
 
                         {/* LINKS */}
                         <Box>
-
-                            <Typography
-                                sx={{
-                                    fontWeight: 700,
-                                    mb: 3,
-                                    fontSize: 18,
-                                    color: "#0f172a"
-                                }}
-                            >
+                            <Typography sx={{ fontWeight: 700, mb: 3, fontSize: 18, color: "#0f172a" }}>
                                 Links Rápidos
                             </Typography>
-
-                            {[
-                                "Funcionalidades",
-                                "Monitoramento",
-                                "Análise",
-                                "Relatórios",
-                                "Sobre Nós"
-                            ].map((item) => (
+                            {["Funcionalidades", "Monitoramento", "Análise", "Relatórios", "Sobre Nós"].map((item) => (
                                 <Typography
                                     key={item}
                                     sx={{
@@ -861,40 +633,20 @@ export default function Landing() {
                                         mb: 2,
                                         cursor: "pointer",
                                         transition: "0.2s",
-
-                                        "&:hover": {
-                                            color: "#2563eb",
-                                            pl: 0.5
-                                        }
+                                        "&:hover": { color: "#2563eb", pl: 0.5 }
                                     }}
                                 >
                                     {item}
                                 </Typography>
                             ))}
-
                         </Box>
 
                         {/* SUPORTE */}
                         <Box>
-
-                            <Typography
-                                sx={{
-                                    fontWeight: 700,
-                                    mb: 3,
-                                    fontSize: 18,
-                                    color: "#0f172a"
-                                }}
-                            >
+                            <Typography sx={{ fontWeight: 700, mb: 3, fontSize: 18, color: "#0f172a" }}>
                                 Suporte
                             </Typography>
-
-                            {[
-                                "Central de Ajuda",
-                                "Documentação",
-                                "FAQ",
-                                "Privacidade",
-                                "Termos de Uso"
-                            ].map((item) => (
+                            {["Central de Ajuda", "Documentação", "FAQ", "Privacidade", "Termos de Uso"].map((item) => (
                                 <Typography
                                     key={item}
                                     sx={{
@@ -902,46 +654,23 @@ export default function Landing() {
                                         mb: 2,
                                         cursor: "pointer",
                                         transition: "0.2s",
-
-                                        "&:hover": {
-                                            color: "#2563eb",
-                                            pl: 0.5
-                                        }
+                                        "&:hover": { color: "#2563eb", pl: 0.5 }
                                     }}
                                 >
                                     {item}
                                 </Typography>
                             ))}
-
                         </Box>
 
                         {/* CONTACT */}
                         <Box>
-
-                            <Typography
-                                sx={{
-                                    fontWeight: 700,
-                                    mb: 3,
-                                    fontSize: 18,
-                                    color: "#0f172a"
-                                }}
-                            >
+                            <Typography sx={{ fontWeight: 700, mb: 3, fontSize: 18, color: "#0f172a" }}>
                                 Contato
                             </Typography>
-
                             {[
-                                {
-                                    icon: <EmailOutlinedIcon />,
-                                    text: "contato@vittasync.com.br"
-                                },
-                                {
-                                    icon: <PhoneOutlinedIcon />,
-                                    text: "(11) 4000-0000"
-                                },
-                                {
-                                    icon: <LocationOnOutlinedIcon />,
-                                    text: "São Paulo, SP - Brasil"
-                                }
+                                { icon: <EmailOutlinedIcon />, text: "contato@vittasync.com.br" },
+                                { icon: <PhoneOutlinedIcon />, text: "(11) 4000-0000" },
+                                { icon: <LocationOnOutlinedIcon />, text: "São Paulo, SP - Brasil" }
                             ].map((item) => (
                                 <Box
                                     key={item.text}
@@ -954,78 +683,47 @@ export default function Landing() {
                                     }}
                                 >
                                     {item.icon}
-
-                                    <Typography>
+                                    <Typography sx={{ fontSize: { xs: 14, md: 16 }, wordBreak: "break-word" }}>
                                         {item.text}
                                     </Typography>
-
                                 </Box>
                             ))}
-
                         </Box>
-
                     </Box>
 
                     {/* BOTTOM */}
                     <Box
                         sx={{
-                            borderTop:
-                                "1px solid rgba(15,23,42,0.08)",
+                            borderTop: "1px solid rgba(15,23,42,0.08)",
                             pt: 3,
                             display: "flex",
+                            flexDirection: { xs: "column", sm: "row" },
                             justifyContent: "space-between",
-                            alignItems: "center",
-                            flexWrap: "wrap",
+                            alignItems: { xs: "flex-start", sm: "center" },
                             gap: 2
                         }}
                     >
-
-                        <Typography
-                            sx={{
-                                color: "#64748b",
-                                fontSize: 14
-                            }}
-                        >
+                        <Typography sx={{ color: "#64748b", fontSize: 14 }}>
                             © 2026 VittaSync. Todos os direitos reservados.
                         </Typography>
-
-                        <Box
-                            sx={{
-                                display: "flex",
-                                gap: 3,
-                                flexWrap: "wrap"
-                            }}
-                        >
-
-                            {[
-                                "Política de Privacidade",
-                                "Termos de Serviço",
-                                "Cookies"
-                            ].map((item) => (
+                        <Box sx={{ display: "flex", gap: { xs: 2, md: 3 }, flexWrap: "wrap" }}>
+                            {["Política de Privacidade", "Termos de Serviço", "Cookies"].map((item) => (
                                 <Typography
                                     key={item}
                                     sx={{
                                         color: "#475569",
                                         cursor: "pointer",
-
-                                        "&:hover": {
-                                            color: "#2563eb"
-                                        }
+                                        fontSize: { xs: 13, md: 15 },
+                                        "&:hover": { color: "#2563eb" }
                                     }}
                                 >
                                     {item}
                                 </Typography>
                             ))}
-
                         </Box>
-
                     </Box>
-
                 </Box>
-
             </Box>
-
-
         </Box>
     );
 }

@@ -244,20 +244,37 @@ export default function Register() {
                 justifyContent="center"
                 alignItems="center"
             >
-                <Grid item>
-                    <Paper elevation={5} sx={{ p: 4, width: 360, }}>
+                <Grid
+                    item
+                    xs={12}
+                    display="flex"
+                    justifyContent="center"
+                >
+                    <Paper
+                        elevation={5}
+                        sx={{
+                            width: {
+                                xs: "95%",
+                                sm: 420
+                            },
+                            maxWidth: 520,
+                            mx: "auto",
+                            borderRadius: 3,
+                            p: { xs: 2, sm: 3, md: 4 }
+                        }}
+                    >
                         <Box
                             display="flex"
                             flexDirection="column"
                             alignItems="center"
                             gap={1}
                         >
-                            <Box textAlign="center" mb={2}>
+                            <Box textAlign="center" mb={2} >
                                 <Typography
                                     sx={{
                                         fontFamily: 'Inter, sans-serif',
                                         fontWeight: 600,
-                                        fontSize: '28px',
+                                        fontSize: { xs: '22px', sm: '28px' },
                                         color: '#1a1a1a',
                                         letterSpacing: '0.5px',
                                     }}
@@ -269,7 +286,7 @@ export default function Register() {
                                     sx={{
                                         fontFamily: 'Inter, sans-serif',
                                         fontWeight: 500,
-                                        fontSize: '20px',
+                                        fontSize: { xs: '18px', sm: '20px' },
                                         color: '#4a4a4a',
                                         mt: 0.5,
                                     }}
