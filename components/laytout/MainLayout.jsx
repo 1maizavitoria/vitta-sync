@@ -8,18 +8,25 @@ import Toolbar from "@mui/material/Toolbar";
 import Sidebar from "./Sidebar";
 import { useState } from "react";
 
+import { usePatient } from "../../context/PatientContext";
+
 export default function MainLayout() {
     const { alert } = useAlert();
-    const [open, setOpen] = useState(false); // começa fechado (melhor UX)
+    const [open, setOpen] = useState(false);
+    const { selectedPatient } = usePatient();
 
     return (
         <Box sx={{ display: "flex" }}>
 
-            <Navbar open={open} setOpen={setOpen} />
+            <Navbar
+                open={open}
+                setOpen={setOpen}
+                selectedPatient={selectedPatient}
+            />
 
             <Sidebar open={open} setOpen={setOpen} />
 
-            <Box component="main" sx={{ flexGrow: 1, p: 3 }}>
+            <Box component="main" sx={{ flexGrow: 1, p: 0 }}>
                 <Toolbar /> {/* OFFSET DA NAVBAR */}
 
                 {alert && (

@@ -47,6 +47,7 @@ export default function HealthTreacker() {
 
         <Box
             sx={{
+                ml: 10,
                 gridTemplateColumns: {
                     xs: "1fr",
                     lg: "1fr 340px",

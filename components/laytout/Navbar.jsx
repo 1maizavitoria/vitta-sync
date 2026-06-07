@@ -11,16 +11,14 @@ import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 import MenuIcon from '@mui/icons-material/Menu';
 
 import ButtonUI from "../ui/Button";
-import { usePatient } from "../../context/PatientContext";
 import { Navigate, useLocation, useNavigate } from "react-router-dom";
 
 import Chip from "@mui/material/Chip";
 
-export default function Navbar() {
+export default function Navbar({ selectedPatient }) {
     const navigate = useNavigate();
     const location = useLocation();
-    const { selectedPatient } = usePatient();
-    console.log("Paciente selecionado no Navbar:", selectedPatient);
+
     const currentUser = {
         nome: localStorage.getItem("nome"),
         tipo: localStorage.getItem("tipo")
@@ -42,13 +40,20 @@ export default function Navbar() {
         saude: "Saúde"
     }[displayType] || displayType;
 
+    const isPublicPage =
+        location.pathname === "/" ||
+        location.pathname === "/login" ||
+        location.pathname === "/register" ||
+        location.pathname === "/entrar";
+
     return (
 
         <AppBar
+
             position="fixed"
             elevation={1}
             sx={{
-                zIndex: (theme) => theme.zIndex.drawer + 1,
+                zIndex: (theme) => theme.zIndex.drawer + 2,
                 backgroundColor: "#fff",
                 color: "#000"
             }}
@@ -60,11 +65,22 @@ export default function Navbar() {
                     alignItems: "center",
                 }}
             >
-                <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+                <Box
+                    sx={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: 1,
+                        flexShrink: 0
+                    }}
+                >
 
                     <Typography
                         sx={{
-                            fontSize: "2rem",
+                            fontSize: {
+                                xs: "1.3rem",
+                                sm: "1.6rem",
+                                md: "2rem"
+                            },
                             fontWeight: 700,
                             color: "#5A9B4D",
                             lineHeight: 1,
@@ -74,18 +90,34 @@ export default function Navbar() {
                     </Typography>
                 </Box>
 
-                <Box>
+                {!isPublicPage && <Box
+                    sx={{
+                        flex: 1,
+                        minWidth: 0,
+                        display: "flex",
+                        justifyContent: "center"
+                    }}
+                >
                     <Box
                         sx={{
                             display: "flex",
                             alignItems: "center",
-                            gap: 1.5
+                            gap: 1.5,
+                            minWidth: 0
                         }}
                     >
                         <Typography
                             sx={{
                                 fontWeight: 700,
-                                fontSize: "1rem"
+                                fontSize: "1rem",
+                                maxWidth: {
+                                    xs: 120,
+                                    sm: 180,
+                                    md: "none"
+                                },
+                                overflow: "hidden",
+                                textOverflow: "ellipsis",
+                                whiteSpace: "nowrap"
                             }}
                         >
                             {displayName}
@@ -99,7 +131,7 @@ export default function Navbar() {
                             }}
                         />
                     </Box>
-                </Box>
+                </Box>}
 
                 {/* DIREITA */}
                 <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>

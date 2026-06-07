@@ -38,17 +38,19 @@ export default function Documents() {
         <Paper
             elevation={0}
             sx={{
-                p: 3,
-                borderRadius: 4
+                ml: 10,
+                p: 2
             }}
         >
 
             <Tabs
                 value={tab}
-                onChange={(_, value) =>
-                    setTab(value)
-                }
+                onChange={(_, value) => setTab(value)}
+                variant="scrollable"
+                scrollButtons="auto"
                 sx={{
+                    flex: 1,
+                    minWidth: 0,
                     mb: 3,
                     p: 0.5,
                     borderRadius: "20px",
@@ -66,8 +68,10 @@ export default function Documents() {
                         value={item.value}
                         label={item.label}
                         sx={{
+                            flex: 1,
+                            minWidth: 0,
+
                             borderRadius: "16px",
-                            minHeight: 52,
                             textTransform: "none",
                             fontWeight: 700,
                             mx: 0.5,
@@ -85,15 +89,12 @@ export default function Documents() {
 
                 ))}
             </Tabs>
+
             <Box>
 
-                {tab === "documents" && hasPatientSelected && (
-                    <SharedDocuments />
-                )}
+                {tab === "documents" && hasPatientSelected && (<SharedDocuments />)}
 
-                {tab === "upload" && userType === "saude" && (
-                    <HealthHub />
-                )}
+                {tab === "upload" && userType === "saude" && (<HealthHub />)}
 
             </Box>
 

@@ -254,11 +254,16 @@ export default function Sidebar({ open, setOpen }) {
             }}
 
             sx={{
+                zIndex: (theme) => theme.zIndex.drawer + 1,
+                position: "fixed",
                 width: drawerWidth,
                 transition: "width .28s cubic-bezier(0.4, 0, 0.2, 1)",
                 overflowX: "hidden",
                 flexShrink: 0,
                 "& .MuiDrawer-paper": {
+                    position: "fixed",
+                    left: 0,
+                    top: 0,
                     width: drawerWidth,
                     transition: "width .28s cubic-bezier(0.4, 0, 0.2, 1)",
                     overflowX: "hidden",

@@ -463,7 +463,8 @@ export default function PatientHub() {
             p={4}
             sx={{
                 minHeight: "100vh",
-                backgroundColor: "#f8fafc"
+                backgroundColor: "#f8fafc",
+                ml: 8
             }}
         >
 
@@ -571,7 +572,8 @@ export default function PatientHub() {
                                     sx={{
                                         borderRadius: "14px",
                                         textTransform: "none",
-                                        fontWeight: 600
+                                        fontWeight: 600,
+                                        zIndex: 0
                                     }}
                                 >
                                     Entrar com código

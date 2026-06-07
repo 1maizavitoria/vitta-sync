@@ -196,7 +196,20 @@ export default function Perfil() {
 
     return (
         <Paper elevation={3} sx={{ p: 3, borderRadius: 3 }}>
-            <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
+            <Box
+                display="flex"
+                flexDirection={{
+                    xs: "column",
+                    md: "row"
+                }}
+                justifyContent="space-between"
+                alignItems={{
+                    xs: "flex-start",
+                    md: "center"
+                }}
+                gap={2}
+                mb={2}
+            >
                 <Box>
                     <Typography
                         variant="h4"
@@ -227,6 +240,7 @@ export default function Perfil() {
 
                     <Box
                         display="flex"
+                        flexWrap="wrap"
                         gap={1}
                     >
 

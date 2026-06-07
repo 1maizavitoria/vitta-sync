@@ -37,7 +37,8 @@ export default function InputUI({
                 ...props.sx,
 
                 '& .MuiInputLabel-root': {
-                    transform: 'translate(14px, 9px) scale(1)', // posição inicial
+                    transform: 'translate(14px, 9px) scale(1)',
+                    // posição inicial
                 },
 
                 '& .MuiInputLabel-root.Mui-focused, & .MuiInputLabel-root.MuiFormLabel-filled': {
@@ -48,9 +49,13 @@ export default function InputUI({
 
                 '& .MuiOutlinedInput-root': {
 
+                    '& .MuiOutlinedInput-input': {
+                        whiteSpace: 'nowrap',
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                    },
 
                     position: 'relative',
-
                     borderRadius: '30px',
                     backgroundColor: '#e0e0e0', // cinza padrão
 

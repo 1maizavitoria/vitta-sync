@@ -46,7 +46,7 @@ export default function Activity() {
 
     return (
 
-        <Box p={4}>
+        <Box p={4} sx={{ ml: 10 }}>
 
             <Typography
                 variant="h4"

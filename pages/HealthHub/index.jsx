@@ -92,8 +92,21 @@ export default function HealthHub() {
     }, []);
 
     return (
-        <Box>
-            <Box display="flex" justifyContent="space-between" alignItems="center" mb={4}>
+        <Box >
+            <Box
+                display="flex"
+                flexDirection={{
+                    xs: "column",
+                    md: "row"
+                }}
+                justifyContent="space-between"
+                alignItems={{
+                    xs: "flex-start",
+                    md: "center"
+                }}
+                gap={2}
+                mb={4}
+            >
                 <Box>
                     <Typography variant="h4" fontWeight={700}>
                         Gerenciar documentos
