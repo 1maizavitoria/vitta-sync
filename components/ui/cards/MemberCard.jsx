@@ -56,21 +56,18 @@ export default function MemberCard({
 
                     <Box
                         sx={{
-                            width: 60,
-                            height: 60,
-                            borderRadius: "18px",
-
+                            width: 52,
+                            height: 52,
+                            fontSize: "1rem",
+                            boxShadow: "0 4px 10px rgba(0,0,0,0.12)",
                             background:
-                                "linear-gradient(to right, #00b7ff, #00ff55)",
-
+                                "linear-gradient(90deg, #69f08a, #F3FFE8)",
+                            color: "#1B1B1B",
+                            fontWeight: 700,
                             display: "flex",
                             alignItems: "center",
                             justifyContent: "center",
-
-                            color: "#fff",
-
-                            fontWeight: 700,
-                            fontSize: "1.2rem"
+                            borderRadius: "16px",
                         }}
                     >
 
@@ -85,8 +82,8 @@ export default function MemberCard({
                         <Typography
                             variant="h6"
                             sx={{
-                                fontWeight:
-                                    highlight ? 700 : 600
+                                fontWeight: 700,
+                                fontSize: "1rem",
                             }}
                         >
                             {link.nome}

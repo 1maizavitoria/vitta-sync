@@ -1,12 +1,22 @@
-import { Accordion, AccordionSummary, Box, Typography } from "@mui/material";
+import {
+    Box,
+    Typography,
+    Tabs,
+    Tab
+} from "@mui/material";
+
+import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
+import DirectionsWalkIcon from "@mui/icons-material/DirectionsWalk";
+import AssignmentOutlinedIcon from "@mui/icons-material/AssignmentOutlined";
+
 import { HabitTracker } from "../../components/ui/HabitTracker";
 import { VitalTracker } from "../../components/ui/VitalTracker";
 
-
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import ReminderCard from "../../components/ui/cards/RemindCard";
+
 import { SymptomTracker } from "../../components/ui/SymptomTracker";
 import { usePatient } from "../../context/PatientContext";
+import { useState } from "react";
 
 export default function HealthTreacker() {
     const { selectedPatient } = usePatient();
@@ -14,6 +24,25 @@ export default function HealthTreacker() {
         localStorage
             .getItem("tipo")
             ?.toLowerCase();
+
+    const [tab, setTab] = useState(0);
+    const tabs = [
+        {
+            label: "Sinais Vitais",
+            icon: <FavoriteBorderIcon />,
+            component: <VitalTracker />
+        },
+        {
+            label: "Hábitos",
+            icon: <DirectionsWalkIcon />,
+            component: <HabitTracker />
+        },
+        {
+            label: "Sintomas",
+            icon: <AssignmentOutlinedIcon />,
+            component: <SymptomTracker />
+        }
+    ];
     return (
 
         <Box
@@ -71,92 +100,59 @@ export default function HealthTreacker() {
                     alignItems: "start",
                 }}>
                 <Box>
-
-                    <Accordion
-                        defaultExpanded
+                    <Tabs
+                        value={tab}
+                        onChange={(e, newValue) => setTab(newValue)}
+                        variant="fullWidth"
                         sx={{
-                            borderRadius: "20px !important",
-                            overflow: "hidden",
-                            boxShadow:
-                                "0 4px 14px rgba(0,0,0,0.06)",
+                            mb: 1,
+                            p: 0.5,
+                            borderRadius: "20px",
+                            background: "#F7FAF9",
 
-                            border: "1px solid #ECECEC",
-
-                            "&:before": {
+                            "& .MuiTabs-indicator": {
                                 display: "none",
                             },
-                        }}>
-                        <AccordionSummary
-                            expandIcon={<ExpandMoreIcon />}
-                            aria-controls="panel1-content"
-                            id="panel1-header"
-                        >
-                            <Typography variant="h5" fontWeight="bold" >
-                                Sinais Vitais
-                            </Typography>
-                        </AccordionSummary>
+                        }}
+                    >
+                        {tabs.map((item, index) => (
+                            <Tab
+                                key={index}
+                                icon={item.icon}
+                                iconPosition="start"
+                                label={item.label}
+                                sx={{
+                                    borderRadius: "16px",
+                                    minHeight: 52,
+                                    textTransform: "none",
+                                    fontWeight: 700,
+                                    mx: 0.5,
+                                    color: "#4B5563",
 
-                        <VitalTracker />
+                                    "&.Mui-selected": {
+                                        color: "#1F2937",
+                                        background:
+                                            "linear-gradient(90deg, #BEE8D7 0%, #B7D88A 100%)",
+                                        boxShadow:
+                                            "0 4px 10px rgba(0,0,0,0.10)",
+                                    },
+                                }}
+                            />
+                        ))}
+                    </Tabs>
 
-                    </Accordion>
-
-                    <Accordion
-                        defaultExpanded
+                    <Box
                         sx={{
-                            borderRadius: "20px !important",
-                            overflow: "hidden",
-                            boxShadow:
-                                "0 4px 14px rgba(0,0,0,0.06)",
-
+                            mt: -1,
+                            p: 3,
                             border: "1px solid #ECECEC",
-
-                            "&:before": {
-                                display: "none",
-                            },
-                        }}>
-                        <AccordionSummary
-                            expandIcon={<ExpandMoreIcon />}
-                            aria-controls="panel1-content"
-                            id="panel2-header"
-                        >
-                            <Typography variant="h5" fontWeight="bold" >
-                                Hábitos
-                            </Typography>
-
-                        </AccordionSummary>
-
-                        <HabitTracker />
-
-                    </Accordion>
-
-                    <Accordion
-                        defaultExpanded
-                        sx={{
-                            borderRadius: "20px !important",
-                            overflow: "hidden",
-                            boxShadow:
-                                "0 4px 14px rgba(0,0,0,0.06)",
-
-                            border: "1px solid #ECECEC",
-
-                            "&:before": {
-                                display: "none",
-                            },
-                        }}>
-                        <AccordionSummary
-                            expandIcon={<ExpandMoreIcon />}
-                            aria-controls="panel1-content"
-                            id="panel3-header"
-                        >
-                            <Typography variant="h5" fontWeight="bold" >
-                                Diário de Sintomas
-                            </Typography>
-
-                        </AccordionSummary>
-
-                        <SymptomTracker />
-
-                    </Accordion>
+                            borderRadius: "20px",
+                            background: "#FFF",
+                            boxShadow: "0 4px 14px rgba(0,0,0,0.06)",
+                        }}
+                    >
+                        {tabs[tab].component}
+                    </Box>
 
 
                 </Box>

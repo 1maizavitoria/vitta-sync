@@ -374,22 +374,22 @@ export default function Sidebar({ open, setOpen }) {
                                         )}
 
                                         <Tooltip title={patient.nome}>
-                                        <Typography
-                                            sx={{
-                                            opacity: open ? 1 : 0,
-                                            maxWidth: open ? "180px" : 0,
-                                            transition: "all .2s ease",
-                                            overflow: "hidden",
-                                            whiteSpace: "normal",       
-                                            wordBreak: "break-word",   
-                                            lineHeight: 1.2,
-                                            fontSize: patient.nome.length > 25 ? "0.85rem" : "1rem", 
-                                            fontWeight: 600,
-                                            textAlign: "left"         
-                                            }}
-                                        >
-                                            {patient.nome}
-                                        </Typography>
+                                            <Typography
+                                                sx={{
+                                                    opacity: open ? 1 : 0,
+                                                    maxWidth: open ? "180px" : 0,
+                                                    transition: "all .2s ease",
+                                                    overflow: "hidden",
+                                                    whiteSpace: "normal",
+                                                    wordBreak: "break-word",
+                                                    lineHeight: 1.2,
+                                                    fontSize: patient.nome.length > 25 ? "0.85rem" : "1rem",
+                                                    fontWeight: 600,
+                                                    textAlign: "left"
+                                                }}
+                                            >
+                                                {patient.nome}
+                                            </Typography>
                                         </Tooltip>
 
                                     </>

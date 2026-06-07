@@ -129,15 +129,6 @@ export default function HabitCard({
                         error={error}
                     >
                     </DatePickerUI>}
-
-                    {/* <DatePickerUI
-                        label="Data de nascimento"
-                        dateLimit={dateLimit}
-                        error={error && birthDate == null}
-                        value={birthDate}
-                        onChange={setBirthDate}
-                    /> */}
-
                 </CardContent>
             </Card>
         </Grid>

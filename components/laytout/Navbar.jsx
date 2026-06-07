@@ -11,14 +11,36 @@ import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 import MenuIcon from '@mui/icons-material/Menu';
 
 import ButtonUI from "../ui/Button";
+import { usePatient } from "../../context/PatientContext";
 import { Navigate, useLocation, useNavigate } from "react-router-dom";
 
-export default function Navbar({
-    title = "",
-    subtitle = ""
-}) {
+import Chip from "@mui/material/Chip";
+
+export default function Navbar() {
     const navigate = useNavigate();
     const location = useLocation();
+    const { selectedPatient } = usePatient();
+    console.log("Paciente selecionado no Navbar:", selectedPatient);
+    const currentUser = {
+        nome: localStorage.getItem("nome"),
+        tipo: localStorage.getItem("tipo")
+    };
+
+    const displayName =
+        selectedPatient?.nome ||
+        currentUser.nome;
+
+    const displayType = selectedPatient?.tipo
+        ? selectedPatient.tipo
+        : selectedPatient
+            ? "paciente"
+            : currentUser.tipo;
+
+    const displayTypeLabel = {
+        paciente: "Paciente",
+        responsavel: "Responsável",
+        saude: "Saúde"
+    }[displayType] || displayType;
 
     return (
 
@@ -53,13 +75,30 @@ export default function Navbar({
                 </Box>
 
                 <Box>
-                    <Typography variant="h6" fontWeight="bold">
-                        {title}
-                    </Typography>
+                    <Box
+                        sx={{
+                            display: "flex",
+                            alignItems: "center",
+                            gap: 1.5
+                        }}
+                    >
+                        <Typography
+                            sx={{
+                                fontWeight: 700,
+                                fontSize: "1rem"
+                            }}
+                        >
+                            {displayName}
+                        </Typography>
 
-                    <Typography variant="body2" color="text.secondary">
-                        {subtitle}
-                    </Typography>
+                        <Chip
+                            label={displayTypeLabel}
+                            size="small"
+                            sx={{
+                                fontWeight: 600
+                            }}
+                        />
+                    </Box>
                 </Box>
 
                 {/* DIREITA */}

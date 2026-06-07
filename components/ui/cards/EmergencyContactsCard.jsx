@@ -27,58 +27,55 @@ export default function EmergencyContacts() {
     const loggedCpf = localStorage.getItem("CPF");
     const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
     const [selectedContactId, setSelectedContactId] = useState(null);
+    const [editingId, setEditingId] = useState(null);
 
-    const [errors,
-        setErrors] =
-        useState({
-            nome: "",
-            telefone: ""
-        });
-    const [editingId,
-        setEditingId] =
-        useState(null);
+    const [hasError, setHasError] = useState({
+        nome: false,
+        telefone: false
+    });
 
-    const [editData,
-        setEditData] =
-        useState({
-            nome: "",
-            telefone: ""
-        });
+    const [editData, setEditData] = useState({
+        nome: "",
+        telefone: ""
+    });
 
-    function validateForm() {
+    function validateContact(data) {
 
         const newErrors = {
-            nome: "",
-            telefone: ""
+            nome: false,
+            telefone: false
         };
 
-        if (
-            formData.nome
-                .trim()
-                .length < 5
-        ) {
+        if (data.nome.trim().length < 5) {
 
-            newErrors.nome =
-                "Nome deve ter no mínimo 5 caracteres";
+            newErrors.nome = true;
+
+            showAlert(
+                "warning",
+                "Nome deve ter no mínimo 5 caracteres"
+            );
         }
 
-        if (
-            !isValidPhone(
-                formData.telefone
-            )
-        ) {
+        if (!isValidPhone(data.telefone)) {
 
-            newErrors.telefone =
-                "Telefone inválido";
+            newErrors.telefone = true;
+
+            showAlert(
+                "warning",
+                "Telefone inválido"
+            );
         }
 
-        setErrors(newErrors);
+        setHasError(newErrors);
 
         return !(
-            newErrors.nome
-            ||
+            newErrors.nome ||
             newErrors.telefone
         );
+    }
+
+    function validateForm() {
+        return validateContact(formData);
     }
 
     function startEdit(contact) {
@@ -114,6 +111,11 @@ export default function EmergencyContacts() {
             });
 
             setAdding(false);
+
+            setHasError({
+                nome: false,
+                telefone: false
+            });
 
             showAlert(
                 "success",
@@ -169,6 +171,10 @@ export default function EmergencyContacts() {
     }
 
     async function saveEdit(id) {
+
+        if (!validateContact(editData)) {
+            return;
+        }
 
         try {
 
@@ -336,22 +342,32 @@ export default function EmergencyContacts() {
                                             <InputUI
                                                 label="Nome"
                                                 value={editData.nome}
-                                                onChange={(e) =>
+                                                error={hasError.nome}
+                                                onChange={(e) => {
                                                     setEditData({
                                                         ...editData,
                                                         nome:
                                                             e.target.value
-                                                    })
+                                                    });
+                                                    setHasError({
+                                                        ...hasError,
+                                                        nome: false
+                                                    });
                                                 }
+
+                                                }
+
                                             />
 
                                             <InputUI
                                                 label="Telefone"
+                                                error={hasError.telefone}
                                                 placeholder="(11) 99999-9999"
                                                 limit={15}
                                                 value={formatPhone(
                                                     editData.telefone
                                                 )}
+                                                error={hasError.telefone}
                                                 onChange={(e) => {
 
                                                     const rawValue =
@@ -362,6 +378,11 @@ export default function EmergencyContacts() {
                                                         ...editData,
                                                         telefone:
                                                             rawValue
+                                                    });
+
+                                                    setHasError({
+                                                        ...hasError,
+                                                        telefone: false
                                                     });
                                                 }}
                                             />
@@ -547,8 +568,6 @@ export default function EmergencyContacts() {
                     >
                         +
                     </Button>
-
-
                 </Box>
             )}
 
@@ -577,15 +596,14 @@ export default function EmergencyContacts() {
 
                                 <InputUI
                                     label="Nome"
-                                    error={!!errors.nome}
-                                    helperText={errors.nome}
+                                    error={hasError.nome}
                                     fullWidth
                                     value={formData.nome}
                                     onChange={(e) => {
 
-                                        setErrors({
-                                            ...errors,
-                                            nome: ""
+                                        setHasError({
+                                            ...hasError,
+                                            nome: false
                                         });
 
                                         setFormData({
@@ -601,8 +619,7 @@ export default function EmergencyContacts() {
 
                                 <InputUI
                                     label="Telefone"
-                                    error={!!errors.telefone}
-                                    helperText={errors.telefone}
+                                    error={hasError.telefone}
                                     fullWidth
                                     placeholder="(11) 99999-9999"
                                     limit={15}
@@ -615,22 +632,21 @@ export default function EmergencyContacts() {
                                             e.target.value
                                                 .replace(/\D/g, "");
 
-                                        setErrors({
-                                            ...errors,
-                                            telefone: ""
+                                        setHasError({
+                                            ...hasError,
+                                            telefone: false
                                         });
 
                                         setFormData({
                                             ...formData,
                                             telefone: rawValue
                                         });
+
                                     }}
                                 />
 
                             </Grid>
-
                         </Grid>
-
 
                         <Box
                             display="flex"
@@ -648,6 +664,11 @@ export default function EmergencyContacts() {
                                         nome: "",
                                         telefone: ""
                                     });
+
+                                    setHasError({
+                                        nome: false,
+                                        telefone: false
+                                    });
                                 }}
                             >
                                 Cancelar
@@ -662,10 +683,7 @@ export default function EmergencyContacts() {
 
                         </Box>
                     </Box>
-
                 </Paper>
-
-
             )}
 
             <DialogUI

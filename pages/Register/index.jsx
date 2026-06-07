@@ -55,8 +55,6 @@ export default function Register() {
     const rulesPassword = validatePassword(password);
     const repeatRulesPassword = validatePassword(repeatPassword);
 
-
-
     function isValidPositiveNumber(value) {
         return !isNaN(value) && Number(value) > 0;
     }
