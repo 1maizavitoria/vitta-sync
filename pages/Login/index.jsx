@@ -10,7 +10,7 @@ import { formatCPF, isValidCpf } from "../../utils/formatters/formatCPF";
 import { isValidEmail } from "../../utils/formatters/formatEmail";
 import { useAlert } from "../../hooks/useAlert";
 
-import { usePatient } from "../../context/PatientContext";
+// import { usePatient } from "../../context/PatientContext";
 
 import { validatePassword } from "../../utils/validators/passwordValidator";
 import PasswordTooltip from "../../components/ui/Tooltip";

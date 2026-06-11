@@ -20,7 +20,8 @@ public class Usuario {
     @Column(nullable = false, length = 50)
     private String nome;
 
-    @Column(nullable = false, unique = true, length = 50)
+    //Teste apagar
+    @Column(nullable = false, unique = false, length = 50)
     private String email;
 
     @Column(nullable = false, length = 15)

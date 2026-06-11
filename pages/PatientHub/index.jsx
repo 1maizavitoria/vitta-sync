@@ -156,7 +156,6 @@ export default function PatientHub() {
     }
 
     async function handleGenerateCode() {
-
         if (!selectedPatient) {
 
             showAlert(
