@@ -1,4 +1,0 @@
-package br.com.vittasync.vittasync.Exception;
-
-public class RecursoNaoEncontradoExceptionTest {
-}

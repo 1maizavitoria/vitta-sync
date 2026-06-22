@@ -11,10 +11,7 @@
     "front": "npm run dev",
     "back": "cd VittaSyncAPI && mvn spring-boot:run",
     "start-all": "concurrently \"npm run front\" \"npm run back\"",
-
-    "test-front": "vitest --coverage && mkdir reports\\frontend 2>nul && xcopy /E /I /Y coverage reports\\frontend",
-    "test-back": "cd VittaSyncAPI && mvn clean test jacoco:report && mkdir ..\\reports\\backend 2>nul && xcopy /E /I /Y target\\site\\jacoco ..\\reports\\backend",
-    "test-all": "concurrently \"npm run test-front\" \"npm run test-back\""
+    "test": "vitest"
   },
   "dependencies": {
     "@emotion/react": "^11.14.0",

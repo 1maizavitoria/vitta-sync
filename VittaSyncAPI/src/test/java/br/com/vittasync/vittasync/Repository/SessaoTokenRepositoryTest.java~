@@ -1,4 +1,0 @@
-package br.com.vittasync.vittasync.Repository;
-
-public class SessaoTokenRepositoryTest {
-}
