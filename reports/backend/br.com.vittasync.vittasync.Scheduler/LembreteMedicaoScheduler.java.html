@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="pt"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>LembreteMedicaoScheduler.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report"></a> &gt; <a href="index.source.html" class="el_package">br.com.vittasync.vittasync.Scheduler</a> &gt; <span class="el_source">LembreteMedicaoScheduler.java</span></div><h1>LembreteMedicaoScheduler.java</h1><pre class="source lang-java linenums">package br.com.vittasync.vittasync.Scheduler;
+
+
+import br.com.vittasync.vittasync.Model.LembreteMedicao;
+import br.com.vittasync.vittasync.Model.Usuario;
+import br.com.vittasync.vittasync.Service.LembreteMedicaoService;
+import br.com.vittasync.vittasync.Service.NotificacaoService;
+import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.stereotype.Component;
+import java.time.DayOfWeek;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.temporal.ChronoUnit;
+import java.util.List;
+
+
+@Component
+public class LembreteMedicaoScheduler {
+
+    private final LembreteMedicaoService service;
+    private final NotificacaoService notificacaoService;
+
+    public LembreteMedicaoScheduler(
+            LembreteMedicaoService service,
+            NotificacaoService notificationService
+<span class="fc" id="L26">    ) {</span>
+
+<span class="fc" id="L28">        this.service = service;</span>
+<span class="fc" id="L29">        this.notificacaoService = notificationService;</span>
+<span class="fc" id="L30">    }</span>
+
+    @Scheduled(cron = &quot;0 * * * * *&quot;)
+    public void enviarLembretes() {
+
+        LocalDateTime agora =
+<span class="fc" id="L36">                LocalDateTime.now();</span>
+
+<span class="fc" id="L38">        DayOfWeek dia =</span>
+<span class="fc" id="L39">                agora.getDayOfWeek();</span>
+
+<span class="fc" id="L41">        LocalTime horaAtual =</span>
+<span class="fc" id="L42">                agora.toLocalTime()</span>
+<span class="fc" id="L43">                        .truncatedTo(ChronoUnit.MINUTES);</span>
+
+<span class="fc" id="L45">        List&lt;LembreteMedicao&gt; lembretes =</span>
+<span class="fc" id="L46">                service.searchLembreteAtivo();</span>
+
+<span class="fc bfc" id="L48" title="All 2 branches covered.">        for (LembreteMedicao lembrete : lembretes) {</span>
+
+<span class="fc" id="L50">            LocalTime horarioLembrete =</span>
+<span class="fc" id="L51">                    lembrete.getHorario()</span>
+<span class="fc" id="L52">                            .truncatedTo(ChronoUnit.MINUTES);</span>
+
+<span class="fc" id="L54">            if (</span>
+<span class="pc bpc" id="L55" title="1 of 2 branches missed.">                    lembrete.isAtivo()</span>
+
+<span class="fc" id="L57">                            &amp;&amp; lembrete.getDiasSemana()</span>
+<span class="fc" id="L58">                            .toUpperCase()</span>
+<span class="pc bpc" id="L59" title="1 of 2 branches missed.">                            .contains(dia.name())</span>
+
+<span class="pc bpc" id="L61" title="1 of 2 branches missed.">                            &amp;&amp; horarioLembrete.equals(horaAtual)</span>
+            ) {
+
+<span class="fc" id="L64">                Usuario usuario =</span>
+<span class="fc" id="L65">                        lembrete.getUsuario();</span>
+
+<span class="fc" id="L67">                String mensagem =</span>
+                        &quot;Este é um lembrete para &quot;
+                                + &quot;registrar suas medições &quot;
+                                + &quot;de saúde na plataforma &quot;
+                                + &quot;VittaSync.&quot;;
+
+<span class="fc" id="L73">                if (</span>
+<span class="pc bpc" id="L74" title="1 of 2 branches missed.">                        Boolean.TRUE.equals(</span>
+<span class="fc" id="L75">                                lembrete.getEnviarEmail()</span>
+                        )
+                ) {
+
+<span class="fc" id="L79">                    notificacaoService.enviarLembrete(</span>
+                            usuario,
+                            mensagem,
+                            &quot;email&quot;
+                    );
+                }
+
+<span class="fc" id="L86">                if (</span>
+<span class="pc bpc" id="L87" title="1 of 2 branches missed.">                        Boolean.TRUE.equals(</span>
+<span class="fc" id="L88">                                lembrete.getEnviarSms()</span>
+                        )
+                ) {
+
+<span class="fc" id="L92">                    notificacaoService.enviarLembrete(</span>
+                            usuario,
+                            mensagem,
+                            &quot;sms&quot;
+                    );
+                }
+            }
+<span class="fc" id="L99">        }</span>
+<span class="fc" id="L100">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.15.202606040825</span></div></body></html>

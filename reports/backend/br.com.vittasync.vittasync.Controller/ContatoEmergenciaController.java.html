@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="pt"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ContatoEmergenciaController.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report"></a> &gt; <a href="index.source.html" class="el_package">br.com.vittasync.vittasync.Controller</a> &gt; <span class="el_source">ContatoEmergenciaController.java</span></div><h1>ContatoEmergenciaController.java</h1><pre class="source lang-java linenums">package br.com.vittasync.vittasync.Controller;
+
+
+import br.com.vittasync.vittasync.DTO.ContatoEmergenciaInputDTO;
+import br.com.vittasync.vittasync.DTO.ContatoEmergenciaOutputDTO;
+import br.com.vittasync.vittasync.Model.ContatoEmergencia;
+import br.com.vittasync.vittasync.Model.Usuario;
+import br.com.vittasync.vittasync.Service.ContatoEmergenciaService;
+import br.com.vittasync.vittasync.Service.JwtService;
+import br.com.vittasync.vittasync.Service.UsuarioService;
+import br.com.vittasync.vittasync.Service.PermissaoService;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+import java.util.List;
+import java.util.stream.Collectors;
+
+
+@RestController
+@RequestMapping(&quot;/contatoemergencia&quot;)
+public class ContatoEmergenciaController {
+
+    private final ContatoEmergenciaService service;
+    private final JwtService jwtService;
+    private final UsuarioService usuarioService;
+    private final PermissaoService permissaoService;
+
+    public ContatoEmergenciaController(ContatoEmergenciaService service,
+                                       JwtService jwtService,
+                                       UsuarioService usuarioService,
+<span class="fc" id="L30">                                       PermissaoService permissaoService) {</span>
+<span class="fc" id="L31">        this.service = service;</span>
+<span class="fc" id="L32">        this.jwtService = jwtService;</span>
+<span class="fc" id="L33">        this.usuarioService = usuarioService;</span>
+<span class="fc" id="L34">        this.permissaoService = permissaoService;</span>
+<span class="fc" id="L35">    }</span>
+
+    @PostMapping(&quot;/cadastrar/{cpf}&quot;)
+    public ResponseEntity&lt;ContatoEmergenciaOutputDTO&gt; cadastrar(@PathVariable String cpf,
+                                                                @RequestHeader(&quot;Authorization&quot;) String authHeader,
+                                                                @RequestBody ContatoEmergenciaInputDTO dto) {
+<span class="fc" id="L41">        String token = authHeader.replace(&quot;Bearer &quot;, &quot;&quot;);</span>
+<span class="fc" id="L42">        String cpfDoToken = jwtService.extrairCpf(token);</span>
+
+<span class="fc" id="L44">        Usuario paciente = usuarioService.searchByCpf(cpf);</span>
+<span class="fc" id="L45">        Usuario usuarioLogado = usuarioService.searchByCpf(cpfDoToken);</span>
+
+<span class="pc bpc" id="L47" title="1 of 2 branches missed.">        if (!permissaoService.podeEditarPaciente(usuarioLogado.getId(), paciente.getId())) {</span>
+<span class="nc" id="L48">            return ResponseEntity.status(403).build();</span>
+        }
+
+<span class="fc" id="L51">        ContatoEmergencia contato = new ContatoEmergencia();</span>
+<span class="fc" id="L52">        contato.setPaciente(paciente);</span>
+<span class="fc" id="L53">        contato.setNome(dto.getNome());</span>
+<span class="fc" id="L54">        contato.setTelefone(dto.getTelefone());</span>
+
+<span class="fc" id="L56">        ContatoEmergencia salvo = service.create(usuarioLogado.getId(), paciente, contato);</span>
+<span class="fc" id="L57">        return ResponseEntity.ok(toOutputDTO(salvo));</span>
+    }
+
+    @GetMapping(&quot;/listar/{cpf}&quot;)
+    public ResponseEntity&lt;List&lt;ContatoEmergenciaOutputDTO&gt;&gt; listar(@PathVariable String cpf,
+                                                                   @RequestHeader(&quot;Authorization&quot;) String authHeader) {
+<span class="fc" id="L63">        String token = authHeader.replace(&quot;Bearer &quot;, &quot;&quot;);</span>
+<span class="fc" id="L64">        String cpfDoToken = jwtService.extrairCpf(token);</span>
+
+<span class="fc" id="L66">        Usuario paciente = usuarioService.searchByCpf(cpf);</span>
+<span class="fc" id="L67">        Usuario usuarioLogado = usuarioService.searchByCpf(cpfDoToken);</span>
+
+<span class="fc bfc" id="L69" title="All 2 branches covered.">        if (!permissaoService.podeVisualizarPaciente(usuarioLogado.getId(), paciente.getId())) {</span>
+<span class="fc" id="L70">            return ResponseEntity.status(403).build();</span>
+        }
+
+<span class="fc" id="L73">        List&lt;ContatoEmergencia&gt; contatos = service.listar(usuarioLogado.getId(), paciente);</span>
+<span class="fc" id="L74">        return ResponseEntity.ok(contatos.stream().map(this::toOutputDTO).collect(Collectors.toList()));</span>
+    }
+
+    @PutMapping(&quot;/editar/{id}/{cpf}&quot;)
+    public ResponseEntity&lt;ContatoEmergenciaOutputDTO&gt; editar(@PathVariable Integer id,
+                                                             @PathVariable String cpf,
+                                                             @RequestHeader(&quot;Authorization&quot;) String authHeader,
+                                                             @RequestBody ContatoEmergenciaInputDTO dto) {
+<span class="fc" id="L82">        String token = authHeader.replace(&quot;Bearer &quot;, &quot;&quot;);</span>
+<span class="fc" id="L83">        String cpfDoToken = jwtService.extrairCpf(token);</span>
+
+<span class="fc" id="L85">        Usuario paciente = usuarioService.searchByCpf(cpf);</span>
+<span class="fc" id="L86">        Usuario usuarioLogado = usuarioService.searchByCpf(cpfDoToken);</span>
+
+<span class="pc bpc" id="L88" title="1 of 2 branches missed.">        if (!permissaoService.podeEditarPaciente(usuarioLogado.getId(), paciente.getId())) {</span>
+<span class="nc" id="L89">            return ResponseEntity.status(403).build();</span>
+        }
+
+<span class="fc" id="L92">        ContatoEmergencia contato = new ContatoEmergencia();</span>
+<span class="fc" id="L93">        contato.setId(id);</span>
+<span class="fc" id="L94">        contato.setNome(dto.getNome());</span>
+<span class="fc" id="L95">        contato.setTelefone(dto.getTelefone());</span>
+<span class="fc" id="L96">        contato.setPaciente(paciente);</span>
+
+<span class="fc" id="L98">        ContatoEmergencia atualizado = service.update(usuarioLogado.getId(), contato);</span>
+<span class="fc" id="L99">        return ResponseEntity.ok(toOutputDTO(atualizado));</span>
+    }
+
+    @DeleteMapping(&quot;/deletar/{id}/{cpf}&quot;)
+    public ResponseEntity&lt;Void&gt; deletar(@PathVariable Integer id,
+                                        @PathVariable String cpf,
+                                        @RequestHeader(&quot;Authorization&quot;) String authHeader) {
+<span class="fc" id="L106">        String token = authHeader.replace(&quot;Bearer &quot;, &quot;&quot;);</span>
+<span class="fc" id="L107">        String cpfDoToken = jwtService.extrairCpf(token);</span>
+
+<span class="fc" id="L109">        Usuario paciente = usuarioService.searchByCpf(cpf);</span>
+<span class="fc" id="L110">        Usuario usuarioLogado = usuarioService.searchByCpf(cpfDoToken);</span>
+
+<span class="pc bpc" id="L112" title="1 of 2 branches missed.">        if (!permissaoService.podeEditarPaciente(usuarioLogado.getId(), paciente.getId())) {</span>
+<span class="nc" id="L113">            return ResponseEntity.status(403).build();</span>
+        }
+
+<span class="fc" id="L116">        service.delete(usuarioLogado.getId(), id);</span>
+<span class="fc" id="L117">        return ResponseEntity.noContent().build();</span>
+    }
+
+    private ContatoEmergenciaOutputDTO toOutputDTO(ContatoEmergencia entity) {
+<span class="fc" id="L121">        ContatoEmergenciaOutputDTO dto = new ContatoEmergenciaOutputDTO();</span>
+<span class="fc" id="L122">        dto.setId(entity.getId());</span>
+<span class="fc" id="L123">        dto.setNome(entity.getNome());</span>
+<span class="fc" id="L124">        dto.setTelefone(entity.getTelefone());</span>
+<span class="fc" id="L125">        dto.setDataRegistro(entity.getDataRegistro());</span>
+<span class="fc" id="L126">        dto.setDataModificacao(entity.getDataModificacao());</span>
+<span class="fc" id="L127">        return dto;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.15.202606040825</span></div></body></html>

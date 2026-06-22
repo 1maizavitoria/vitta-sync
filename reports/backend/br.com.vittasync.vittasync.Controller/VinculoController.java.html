@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="pt"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>VinculoController.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report"></a> &gt; <a href="index.source.html" class="el_package">br.com.vittasync.vittasync.Controller</a> &gt; <span class="el_source">VinculoController.java</span></div><h1>VinculoController.java</h1><pre class="source lang-java linenums">package br.com.vittasync.vittasync.Controller;
+
+
+import br.com.vittasync.vittasync.DTO.*;
+import br.com.vittasync.vittasync.Exception.RecursoNaoEncontradoException;
+import br.com.vittasync.vittasync.Repository.VinculoRepository;
+
+import br.com.vittasync.vittasync.Model.Usuario;
+import br.com.vittasync.vittasync.Model.Vinculo;
+
+import br.com.vittasync.vittasync.Service.*;
+
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+
+@RestController
+@RequestMapping(&quot;/vinculos&quot;)
+public class VinculoController {
+
+    private final VinculoService service;
+    private final JwtService jwtService;
+    private final UsuarioService usuarioService;
+    private final PermissaoService permissaoService;
+    private final VinculoRepository vinculoRepository;
+
+    public VinculoController(
+            VinculoService service,
+            JwtService jwtService,
+            UsuarioService usuarioService,
+            PermissaoService permissaoService,
+            VinculoRepository vinculoRepository
+<span class="fc" id="L34">    ) {</span>
+<span class="fc" id="L35">        this.service = service;</span>
+<span class="fc" id="L36">        this.jwtService = jwtService;</span>
+<span class="fc" id="L37">        this.usuarioService = usuarioService;</span>
+<span class="fc" id="L38">        this.permissaoService = permissaoService;</span>
+<span class="fc" id="L39">        this.vinculoRepository = vinculoRepository;</span>
+<span class="fc" id="L40">    }</span>
+
+    @PostMapping(&quot;/gerar&quot;)
+    public ResponseEntity&lt;ConviteVinculoOutputDTO&gt; gerarCodigo(@RequestHeader(&quot;Authorization&quot;) String authHeader) {
+
+<span class="fc" id="L45">        String token = authHeader.replace(&quot;Bearer &quot;, &quot;&quot;);</span>
+
+<span class="fc" id="L47">        String cpf = jwtService.extrairCpf(token);</span>
+
+<span class="fc" id="L49">        Usuario usuario = usuarioService.searchByCpf(cpf);</span>
+
+<span class="fc" id="L51">        ConviteVinculoOutputDTO output = service.gerarCodigo(usuario.getId());</span>
+
+<span class="fc" id="L53">        return ResponseEntity.ok(output);</span>
+    }
+
+    @PostMapping(&quot;/entrar&quot;)
+    public ResponseEntity&lt;PacienteResumoDTO&gt; entrarComCodigo(@RequestHeader(&quot;Authorization&quot;) String authHeader, @RequestBody VinculoInputDTO dto) {
+
+<span class="fc" id="L59">        String token = authHeader.replace(&quot;Bearer &quot;, &quot;&quot;);</span>
+
+<span class="fc" id="L61">        String cpf = jwtService.extrairCpf(token);</span>
+
+<span class="fc" id="L63">        Usuario usuario = usuarioService.searchByCpf(cpf);</span>
+
+<span class="fc" id="L65">        PacienteResumoDTO paciente =</span>
+<span class="fc" id="L66">                service.entrarComCodigo(</span>
+<span class="fc" id="L67">                        dto.getCodigo(),</span>
+<span class="fc" id="L68">                        dto.getFuncao(),</span>
+<span class="fc" id="L69">                        usuario.getId()</span>
+                );
+
+<span class="fc" id="L72">        return ResponseEntity.ok(paciente);</span>
+    }
+
+    @PostMapping(&quot;/enviar-email&quot;)
+    public ResponseEntity&lt;Void&gt; enviarEmail(@RequestBody EnviarConviteDTO dto) {
+
+<span class="fc" id="L78">        service.enviarConviteEmail(dto.getEmail(), dto.getCodigo());</span>
+
+<span class="fc" id="L80">        return ResponseEntity.ok().build();</span>
+    }
+
+    @DeleteMapping(&quot;/{id}&quot;)
+    public ResponseEntity&lt;Void&gt; removerVinculo(@PathVariable Long id, @RequestHeader(&quot;Authorization&quot;) String authHeader) {
+
+<span class="fc" id="L86">        String token = authHeader.replace(&quot;Bearer &quot;, &quot;&quot;);</span>
+
+<span class="fc" id="L88">        String cpfDoToken = jwtService.extrairCpf(token);</span>
+
+<span class="fc" id="L90">        Usuario usuarioLogado = usuarioService.searchByCpf(cpfDoToken);</span>
+
+<span class="pc" id="L92">        Vinculo vinculo = vinculoRepository.findById(id).orElseThrow(() -&gt; new RecursoNaoEncontradoException(&quot;Vínculo não encontrado&quot;));</span>
+
+<span class="pc bpc" id="L94" title="1 of 2 branches missed.">        if (!permissaoService.podeRemoverVinculo(usuarioLogado.getId(), vinculo)) {</span>
+<span class="nc" id="L95">            return ResponseEntity.status(403).build();</span>
+        }
+
+<span class="fc" id="L98">        service.removerVinculo(id, usuarioLogado.getId());</span>
+
+<span class="fc" id="L100">        return ResponseEntity.noContent().build();</span>
+    }
+
+    @GetMapping()
+    public ResponseEntity&lt;List&lt;VinculoOutputDTO&gt;&gt; listar(@RequestHeader(&quot;Authorization&quot;) String authHeader) {
+
+<span class="fc" id="L106">        String token = authHeader.replace(&quot;Bearer &quot;, &quot;&quot;);</span>
+
+<span class="fc" id="L108">        String cpf = jwtService.extrairCpf(token);</span>
+
+<span class="fc" id="L110">        Usuario usuario = usuarioService.searchByCpf(cpf);</span>
+
+<span class="fc" id="L112">        return ResponseEntity.ok(service.listar(usuario.getId()));</span>
+    }
+
+    @GetMapping(&quot;/pacientes&quot;)
+    public ResponseEntity&lt;List&lt;PacienteResumoDTO&gt;&gt; listarPacientes(@RequestHeader(&quot;Authorization&quot;) String authHeader) {
+
+<span class="fc" id="L118">        String token = authHeader.replace(&quot;Bearer &quot;, &quot;&quot;);</span>
+<span class="fc" id="L119">        String cpf = jwtService.extrairCpf(token);</span>
+<span class="fc" id="L120">        Usuario usuario = usuarioService.searchByCpf(cpf);</span>
+<span class="fc" id="L121">        return ResponseEntity.ok(service.listarPacientesDoUsuario(usuario.getId()));</span>
+    }
+
+    @GetMapping(&quot;/paciente/{id}&quot;)
+    public ResponseEntity&lt;List&lt;VinculoOutputDTO&gt;&gt; listarPorPaciente(@PathVariable Integer id) {
+
+<span class="fc" id="L127">        return ResponseEntity.ok(service.listarPorPaciente(id));</span>
+    }
+
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.15.202606040825</span></div></body></html>

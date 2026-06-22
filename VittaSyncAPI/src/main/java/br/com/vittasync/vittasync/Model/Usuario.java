@@ -19,8 +19,8 @@ public class Usuario {
 
     @Column(nullable = false, length = 50)
     private String nome;
-    //apagar
-    @Column(nullable = false, unique = false, length = 50)
+
+    @Column(nullable = false, unique = true, length = 50)
     private String email;
 
     @Column(nullable = false, length = 15)
@@ -31,6 +31,9 @@ public class Usuario {
 
     @Column(name = "altura")
     private Double altura;
+
+    @Column(name = "funcao_responsavel")
+    private String funcaoResponsavel;
 
     @Column(nullable = false, length = 64)
     private String senha;
@@ -67,6 +70,9 @@ public class Usuario {
 
     public Double getAltura() { return altura; }
     public void setAltura(Double altura) { this.altura = altura; }
+
+    public String getFuncaoResponsavel() { return funcaoResponsavel; }
+    public void setFuncaoResponsavel(String funcaoResponsavel) { this.funcaoResponsavel = funcaoResponsavel; }
 
     public String getSenha() { return senha; }
     public void setSenha(String senha) { this.senha = senha; }

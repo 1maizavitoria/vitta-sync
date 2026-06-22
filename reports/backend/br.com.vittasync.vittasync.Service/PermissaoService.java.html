@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="pt"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>PermissaoService.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report"></a> &gt; <a href="index.source.html" class="el_package">br.com.vittasync.vittasync.Service</a> &gt; <span class="el_source">PermissaoService.java</span></div><h1>PermissaoService.java</h1><pre class="source lang-java linenums">package br.com.vittasync.vittasync.Service;
+
+import br.com.vittasync.vittasync.Model.Usuario;
+import br.com.vittasync.vittasync.Model.Vinculo;
+import br.com.vittasync.vittasync.Repository.UsuarioRepository;
+import br.com.vittasync.vittasync.Repository.VinculoRepository;
+
+import org.springframework.stereotype.Service;
+
+@Service
+public class PermissaoService {
+
+    private final UsuarioRepository usuarioRepository;
+
+    private final VinculoRepository vinculoRepository;
+
+<span class="fc" id="L17">    public PermissaoService(UsuarioRepository usuarioRepository, VinculoRepository vinculoRepository) {</span>
+<span class="fc" id="L18">        this.usuarioRepository = usuarioRepository;</span>
+<span class="fc" id="L19">        this.vinculoRepository = vinculoRepository;</span>
+<span class="fc" id="L20">    }</span>
+
+    public boolean podeVisualizarPaciente(Integer usuarioId, Integer pacienteId) {
+
+<span class="fc bfc" id="L24" title="All 2 branches covered.">        if (usuarioId.equals(pacienteId)) {</span>
+<span class="fc" id="L25">            return true;</span>
+        }
+
+<span class="fc" id="L28">        return vinculoRepository.existsByPacienteIdAndUsuarioId(pacienteId, usuarioId);</span>
+    }
+
+    public boolean podeEditarPaciente(Integer usuarioId, Integer pacienteId) {
+
+<span class="fc bfc" id="L33" title="All 2 branches covered.">        if (usuarioId.equals(pacienteId)) {</span>
+<span class="fc" id="L34">            return true;</span>
+        }
+
+<span class="fc" id="L37">        return vinculoRepository.existsByPacienteIdAndUsuarioIdAndTipo(pacienteId, usuarioId, &quot;responsavel&quot;);</span>
+    }
+
+    public boolean podeRemoverVinculo(Integer usuarioLogadoId, Vinculo vinculoAlvo) {
+
+        // paciente remove qualquer vínculo dele
+<span class="fc bfc" id="L43" title="All 2 branches covered.">        if (usuarioLogadoId.equals(vinculoAlvo.getPacienteId())) {</span>
+<span class="fc" id="L44">            return true;</span>
+        }
+
+<span class="fc" id="L47">        Usuario usuarioLogado = usuarioRepository.findById(usuarioLogadoId).orElse(null);</span>
+
+<span class="fc bfc" id="L49" title="All 2 branches covered.">        if (usuarioLogado == null) {</span>
+<span class="fc" id="L50">            return false;</span>
+        }
+
+        // médico ou responsável removendo o PRÓPRIO vínculo
+<span class="fc bfc" id="L54" title="All 2 branches covered.">        if (usuarioLogadoId.equals(vinculoAlvo.getUsuarioId())) {</span>
+<span class="fc" id="L55">            return true;</span>
+        }
+
+        // responsável removendo médicos do paciente
+<span class="pc bpc" id="L59" title="1 of 2 branches missed.">        if (usuarioLogado.getTipo().equalsIgnoreCase(&quot;responsavel&quot;)</span>
+<span class="pc bpc" id="L60" title="1 of 2 branches missed.">                &amp;&amp; vinculoAlvo.getTipo().equalsIgnoreCase(&quot;saude&quot;)) {</span>
+
+<span class="fc" id="L62">            return vinculoRepository.existsByPacienteIdAndUsuarioIdAndTipo(vinculoAlvo.getPacienteId(), usuarioLogadoId, &quot;responsavel&quot;);</span>
+        }
+
+<span class="nc" id="L65">        return false;</span>
+    }
+
+    public boolean isMedico(Usuario usuario) {
+<span class="fc" id="L69">        return usuario.getTipo().equalsIgnoreCase(&quot;saude&quot;);</span>
+    }
+
+    public boolean medicoVinculadoAoPaciente(Integer medicoId, Integer pacienteId) {
+<span class="fc" id="L73">        return vinculoRepository.existsByPacienteIdAndUsuarioIdAndTipo(pacienteId, medicoId, &quot;saude&quot;);</span>
+    }
+
+    public boolean responsavelVinculadoAoPaciente(Integer responsavelId, Integer pacienteId) {
+<span class="fc" id="L77">        return vinculoRepository.existsByPacienteIdAndUsuarioIdAndTipo(pacienteId, responsavelId, &quot;responsavel&quot;);</span>
+    }
+
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.15.202606040825</span></div></body></html>

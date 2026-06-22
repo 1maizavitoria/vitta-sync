@@ -1,0 +1,4 @@
+package br.com.vittasync.vittasync.Security;
+
+public class JwtFilterTest {
+}

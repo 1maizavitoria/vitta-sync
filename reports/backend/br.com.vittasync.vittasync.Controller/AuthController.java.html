@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="pt"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>AuthController.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report"></a> &gt; <a href="index.source.html" class="el_package">br.com.vittasync.vittasync.Controller</a> &gt; <span class="el_source">AuthController.java</span></div><h1>AuthController.java</h1><pre class="source lang-java linenums">package br.com.vittasync.vittasync.Controller;
+
+
+import br.com.vittasync.vittasync.DTO.LoginDTO;
+import br.com.vittasync.vittasync.DTO.RedefinirSenhaDTO;
+import br.com.vittasync.vittasync.DTO.SolicitarRedefinicaoDTO;
+import br.com.vittasync.vittasync.Service.AuthService;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+
+@RestController
+@RequestMapping(&quot;/auth&quot;)
+public class AuthController {
+
+    private final AuthService authService;
+
+<span class="fc" id="L18">    public AuthController(AuthService authService) {</span>
+<span class="fc" id="L19">        this.authService = authService;</span>
+<span class="fc" id="L20">    }</span>
+
+    @PostMapping(&quot;/login&quot;)
+    public ResponseEntity&lt;Void&gt; login(
+            @RequestBody LoginDTO loginDTO
+    ) {
+
+<span class="fc" id="L27">        authService.login(</span>
+<span class="fc" id="L28">                loginDTO.getCpf(),</span>
+<span class="fc" id="L29">                loginDTO.getSenha(),</span>
+<span class="fc" id="L30">                loginDTO.getCanal()</span>
+        );
+
+<span class="fc" id="L33">        return ResponseEntity.ok().build();</span>
+    }
+
+    @PostMapping(&quot;/validar-codigo-login&quot;)
+    public ResponseEntity&lt;String&gt; validarCodigoLogin(
+            @RequestParam String codigo
+    ) {
+
+<span class="fc" id="L41">        String token =</span>
+<span class="fc" id="L42">                authService.validarCodigoLogin(codigo);</span>
+
+<span class="fc" id="L44">        return ResponseEntity.ok(token);</span>
+    }
+
+    @PostMapping(&quot;/enviar-codigo-redefinir-senha&quot;)
+    public ResponseEntity&lt;Void&gt; enviarCodigoRedefinirSenha(
+            @RequestBody SolicitarRedefinicaoDTO dto
+    ) {
+
+<span class="fc" id="L52">        authService.enviarCodigoRedefinirSenha(</span>
+<span class="fc" id="L53">                dto.getEmail(),</span>
+<span class="fc" id="L54">                dto.getCanal()</span>
+        );
+
+<span class="fc" id="L57">        return ResponseEntity.ok().build();</span>
+    }
+
+    @PostMapping(&quot;/redefinir-senha&quot;)
+    public ResponseEntity&lt;Void&gt; redefinirSenha(
+            @RequestBody RedefinirSenhaDTO dto
+    ) {
+
+<span class="fc" id="L65">        authService.redefinirSenha(</span>
+<span class="fc" id="L66">                dto.getCodigo(),</span>
+<span class="fc" id="L67">                dto.getNovaSenha()</span>
+        );
+
+<span class="fc" id="L70">        return ResponseEntity.ok().build();</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.15.202606040825</span></div></body></html>

@@ -42,6 +42,7 @@ public class UsuarioController {
         usuario.setTelefone(dto.getTelefone());
         usuario.setPesoInicial(dto.getPesoInicial());
         usuario.setAltura(dto.getAltura());
+        usuario.setFuncaoResponsavel(dto.getFuncaoResponsavel());
         usuario.setSenha(HashUtil.hashSenha(dto.getSenha()));
         usuario.setTipo(dto.getTipo());
         usuario.setConselho(dto.getConselho());
@@ -71,6 +72,7 @@ public class UsuarioController {
             usuario.setEmail(dto.getEmail());
             usuario.setTelefone(dto.getTelefone());
             usuario.setAltura(dto.getAltura());
+            usuario.setFuncaoResponsavel(dto.getFuncaoResponsavel());
             usuario.setDataNascimento(dto.getDataNascimento());
             usuario.setTelefone(dto.getTelefone());
             usuario.setPesoInicial(dto.getPesoInicial());
@@ -132,6 +134,7 @@ public class UsuarioController {
         out.setTelefone(usuario.getTelefone());
         out.setPesoInicial(usuario.getPesoInicial());
         out.setAltura(usuario.getAltura());
+        out.setFuncaoResponsavel(usuario.getFuncaoResponsavel());
         out.setTipo(usuario.getTipo());
         out.setConselho(usuario.getConselho());
         out.setDataNascimento(usuario.getDataNascimento());

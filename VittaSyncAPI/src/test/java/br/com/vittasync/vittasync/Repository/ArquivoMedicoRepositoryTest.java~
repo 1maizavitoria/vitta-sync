@@ -1,0 +1,93 @@
+package br.com.vittasync.vittasync.Repository;
+
+import br.com.vittasync.vittasync.Model.ArquivoMedico;
+import br.com.vittasync.vittasync.Model.Usuario;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.UUID;
+
+import static org.assertj.core.api.Assertions.assertThat;
+
+@DataJpaTest
+@Transactional
+@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE) // usa MySQL real
+class ArquivoMedicoRepositoryTest {
+
+    @Autowired
+    private ArquivoMedicoRepository arquivoMedicoRepository;
+
+    @Autowired
+    private UsuarioRepository usuarioRepository;
+
+    @BeforeEach
+    void limparBanco() {
+        arquivoMedicoRepository.deleteAll();
+        usuarioRepository.deleteAll();
+    }
+
+    private Usuario criarUsuario(String nome, String tipo) {
+        String unique = UUID.randomUUID().toString().replace("-", "").substring(0, 11);
+        Usuario u = new Usuario();
+        u.setCpf(unique);                                // CPF único
+        u.setNome(nome);
+        u.setEmail("user" + unique + "@test.com");       // e-mail único
+        u.setTelefone("41" + unique);                    // telefone único
+        u.setSenha("senha" + unique);
+        u.setTipo(tipo);
+        u.setDataNascimento(LocalDate.of(1990, 1, 1));
+        u.setDataCadastro(LocalDateTime.now());
+        return usuarioRepository.save(u);
+    }
+
+    @Test
+    void testFindByPaciente() {
+        Usuario paciente = criarUsuario("Paciente Teste", "PACIENTE");
+        Usuario medico   = criarUsuario("Dr. Teste", "MEDICO");
+
+        ArquivoMedico arquivo = new ArquivoMedico();
+        arquivo.setPaciente(paciente);
+        arquivo.setMedico(medico);
+        arquivo.setNomeArquivo("exame_sangue.pdf");
+        arquivo.setArquivo("conteudo".getBytes());
+        arquivo.setDataUpload(LocalDateTime.now());
+        arquivo.setExtensao("pdf");
+        arquivo.setNomeOriginal("exame_sangue_original.pdf");
+
+        arquivoMedicoRepository.save(arquivo);
+
+        List<ArquivoMedico> resultados = arquivoMedicoRepository.findByPaciente(paciente);
+
+        assertThat(resultados).hasSize(1);
+        assertThat(resultados.get(0).getNomeArquivo()).isEqualTo("exame_sangue.pdf");
+    }
+
+    @Test
+    void testFindByMedico() {
+        Usuario paciente = criarUsuario("Paciente 2", "PACIENTE");
+        Usuario medico   = criarUsuario("Dr. Outro", "MEDICO");
+
+        ArquivoMedico arquivo = new ArquivoMedico();
+        arquivo.setPaciente(paciente);
+        arquivo.setMedico(medico);
+        arquivo.setNomeArquivo("raio_x.jpg");
+        arquivo.setArquivo("imagem".getBytes());
+        arquivo.setDataUpload(LocalDateTime.now());
+        arquivo.setExtensao("jpg");
+        arquivo.setNomeOriginal("raio_x_original.jpg");
+
+        arquivoMedicoRepository.save(arquivo);
+
+        List<ArquivoMedico> resultados = arquivoMedicoRepository.findByMedico(medico);
+
+        assertThat(resultados).hasSize(1);
+        assertThat(resultados.get(0).getNomeArquivo()).isEqualTo("raio_x.jpg");
+    }
+}

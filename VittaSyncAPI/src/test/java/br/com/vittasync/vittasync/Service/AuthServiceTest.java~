@@ -1,0 +1,4 @@
+package br.com.vittasync.vittasync.Service;
+
+public class AuthServiceTest {
+}

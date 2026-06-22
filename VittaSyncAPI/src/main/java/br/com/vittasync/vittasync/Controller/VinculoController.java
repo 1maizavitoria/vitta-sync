@@ -40,16 +40,15 @@ public class VinculoController {
     }
 
     @PostMapping("/gerar")
-    public ResponseEntity<ConviteVinculoOutputDTO> gerarCodigo(
-            @RequestHeader("Authorization") String authHeader,
-            @RequestBody GerarConviteDTO dto
-    ) {
+    public ResponseEntity<ConviteVinculoOutputDTO> gerarCodigo(@RequestHeader("Authorization") String authHeader) {
 
         String token = authHeader.replace("Bearer ", "");
+
         String cpf = jwtService.extrairCpf(token);
+
         Usuario usuario = usuarioService.searchByCpf(cpf);
-        ConviteVinculoOutputDTO output =
-                service.gerarCodigo(usuario.getId(), dto.getPacienteId());
+
+        ConviteVinculoOutputDTO output = service.gerarCodigo(usuario.getId());
 
         return ResponseEntity.ok(output);
     }
@@ -58,8 +57,11 @@ public class VinculoController {
     public ResponseEntity<PacienteResumoDTO> entrarComCodigo(@RequestHeader("Authorization") String authHeader, @RequestBody VinculoInputDTO dto) {
 
         String token = authHeader.replace("Bearer ", "");
+
         String cpf = jwtService.extrairCpf(token);
+
         Usuario usuario = usuarioService.searchByCpf(cpf);
+
         PacienteResumoDTO paciente =
                 service.entrarComCodigo(
                         dto.getCodigo(),
@@ -74,6 +76,7 @@ public class VinculoController {
     public ResponseEntity<Void> enviarEmail(@RequestBody EnviarConviteDTO dto) {
 
         service.enviarConviteEmail(dto.getEmail(), dto.getCodigo());
+
         return ResponseEntity.ok().build();
     }
 
@@ -81,8 +84,11 @@ public class VinculoController {
     public ResponseEntity<Void> removerVinculo(@PathVariable Long id, @RequestHeader("Authorization") String authHeader) {
 
         String token = authHeader.replace("Bearer ", "");
+
         String cpfDoToken = jwtService.extrairCpf(token);
+
         Usuario usuarioLogado = usuarioService.searchByCpf(cpfDoToken);
+
         Vinculo vinculo = vinculoRepository.findById(id).orElseThrow(() -> new RecursoNaoEncontradoException("Vínculo não encontrado"));
 
         if (!permissaoService.podeRemoverVinculo(usuarioLogado.getId(), vinculo)) {
@@ -90,6 +96,7 @@ public class VinculoController {
         }
 
         service.removerVinculo(id, usuarioLogado.getId());
+
         return ResponseEntity.noContent().build();
     }
 
@@ -97,8 +104,11 @@ public class VinculoController {
     public ResponseEntity<List<VinculoOutputDTO>> listar(@RequestHeader("Authorization") String authHeader) {
 
         String token = authHeader.replace("Bearer ", "");
+
         String cpf = jwtService.extrairCpf(token);
+
         Usuario usuario = usuarioService.searchByCpf(cpf);
+
         return ResponseEntity.ok(service.listar(usuario.getId()));
     }
 

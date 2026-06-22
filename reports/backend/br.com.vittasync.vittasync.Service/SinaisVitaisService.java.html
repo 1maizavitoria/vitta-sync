@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="pt"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>SinaisVitaisService.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report"></a> &gt; <a href="index.source.html" class="el_package">br.com.vittasync.vittasync.Service</a> &gt; <span class="el_source">SinaisVitaisService.java</span></div><h1>SinaisVitaisService.java</h1><pre class="source lang-java linenums">package br.com.vittasync.vittasync.Service;
+
+import br.com.vittasync.vittasync.Exception.RecursoNaoEncontradoException;
+import br.com.vittasync.vittasync.Model.SinaisVitais;
+import br.com.vittasync.vittasync.Repository.SinaisVitaisRepository;
+import br.com.vittasync.vittasync.Util.EventoPrioridades;
+import br.com.vittasync.vittasync.Util.EventoTipos;
+import org.springframework.stereotype.Service;
+
+import java.time.LocalDateTime;
+import java.util.List;
+
+
+@Service
+public class SinaisVitaisService {
+
+    private final SinaisVitaisRepository repository;
+    private final EventoPacienteService eventoPacienteService;
+    private final EventoClinicoService eventoClinicoService;
+
+    public SinaisVitaisService(
+            SinaisVitaisRepository repository,
+            EventoPacienteService eventoPacienteService,
+            EventoClinicoService eventoClinicoService
+<span class="fc" id="L25">    ) {</span>
+<span class="fc" id="L26">        this.repository = repository;</span>
+<span class="fc" id="L27">        this.eventoPacienteService = eventoPacienteService;</span>
+<span class="fc" id="L28">        this.eventoClinicoService = eventoClinicoService;</span>
+<span class="fc" id="L29">    }</span>
+
+    public SinaisVitais create(
+            SinaisVitais sinais,
+            Integer usuarioLogadoId
+    ) {
+
+<span class="fc" id="L36">        sinais.setRegistradoPorUsuarioId(usuarioLogadoId);</span>
+<span class="fc" id="L37">        sinais.setDataRegistro(LocalDateTime.now());</span>
+<span class="fc" id="L38">        sinais.setDataModificacao(null);</span>
+
+<span class="fc" id="L40">        SinaisVitais salvo = repository.save(sinais);</span>
+
+<span class="fc" id="L42">        eventoPacienteService.criarEvento(</span>
+<span class="fc" id="L43">                sinais.getPaciente().getId(),</span>
+                usuarioLogadoId,
+                EventoTipos.SINAIS_VITAIS_CRIADOS,
+                &quot;Sinais vitais registrados&quot;,
+                &quot;Novos sinais vitais foram registrados&quot;,
+                EventoPrioridades.NORMAL
+        );
+
+<span class="fc" id="L51">        eventoClinicoService.analisarSinaisVitais(</span>
+                salvo,
+                usuarioLogadoId
+        );
+
+<span class="fc" id="L56">        return salvo;</span>
+    }
+
+    public SinaisVitais update(Integer id, SinaisVitais novosDados, Integer usuarioLogadoId) {
+<span class="fc" id="L60">        SinaisVitais existente = repository.findById(id)</span>
+<span class="fc" id="L61">                .orElseThrow(() -&gt; new RecursoNaoEncontradoException(&quot;Sinais vitais não encontrados&quot;));</span>
+<span class="fc" id="L62">        existente.setPeso(novosDados.getPeso());</span>
+<span class="fc" id="L63">        existente.setFcBpm(novosDados.getFcBpm());</span>
+<span class="fc" id="L64">        existente.setFrRpm(novosDados.getFrRpm());</span>
+<span class="fc" id="L65">        existente.setPaSistolica(novosDados.getPaSistolica());</span>
+<span class="fc" id="L66">        existente.setPaDiastolica(novosDados.getPaDiastolica());</span>
+<span class="fc" id="L67">        existente.setTempCelcius(novosDados.getTempCelcius());</span>
+<span class="fc" id="L68">        existente.setSpo2Porcento(novosDados.getSpo2Porcento());</span>
+<span class="fc" id="L69">        existente.setDataModificacao(LocalDateTime.now());</span>
+<span class="fc" id="L70">        SinaisVitais atualizado = repository.save(existente);</span>
+<span class="fc" id="L71">        eventoPacienteService.criarEvento(</span>
+<span class="fc" id="L72">                existente.getPaciente().getId(),</span>
+                usuarioLogadoId,
+                EventoTipos.SINAIS_VITAIS_EDITADOS,
+                &quot;Sinais vitais atualizados&quot;,
+                &quot;Sinais vitais foram atualizados&quot;,
+                EventoPrioridades.NORMAL
+        );
+<span class="fc" id="L79">        return atualizado;</span>
+    }
+
+    public void delete(Integer id, Integer usuarioLogadoId) {
+<span class="fc bfc" id="L83" title="All 2 branches covered.">        if (!repository.existsById(id)) {</span>
+<span class="fc" id="L84">            throw new RecursoNaoEncontradoException(&quot;Sinais vitais não encontrados&quot;);</span>
+        }
+<span class="fc" id="L86">        SinaisVitais sinais =</span>
+<span class="fc" id="L87">                repository.findById(id)</span>
+<span class="fc" id="L88">                        .orElseThrow(() -&gt;</span>
+<span class="nc" id="L89">                                new RecursoNaoEncontradoException(</span>
+                                        &quot;Sinais vitais não encontrados&quot;
+                                )
+                        );
+<span class="fc" id="L93">        eventoPacienteService.criarEvento(</span>
+<span class="fc" id="L94">                sinais.getPaciente().getId(),</span>
+                usuarioLogadoId,
+                EventoTipos.SINAIS_VITAIS_REMOVIDOS,
+                &quot;Sinais vitais removidos&quot;,
+                &quot;Um registro de sinais vitais foi removido&quot;,
+                EventoPrioridades.NORMAL
+        );
+<span class="fc" id="L101">        repository.deleteById(id);</span>
+<span class="fc" id="L102">    }</span>
+
+    public List&lt;SinaisVitais&gt; findByPacienteCpf(String cpf) {
+<span class="fc" id="L105">        return repository.findByPacienteCpf(cpf);</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.15.202606040825</span></div></body></html>

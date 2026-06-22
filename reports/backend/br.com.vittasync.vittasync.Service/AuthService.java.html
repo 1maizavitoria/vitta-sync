@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="pt"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>AuthService.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report"></a> &gt; <a href="index.source.html" class="el_package">br.com.vittasync.vittasync.Service</a> &gt; <span class="el_source">AuthService.java</span></div><h1>AuthService.java</h1><pre class="source lang-java linenums">package br.com.vittasync.vittasync.Service;
+
+
+import br.com.vittasync.vittasync.Exception.DadosInvalidosException;
+import br.com.vittasync.vittasync.Model.CodigoVerificacao;
+import br.com.vittasync.vittasync.Model.Usuario;
+import br.com.vittasync.vittasync.Util.HashUtil;
+import org.springframework.stereotype.Service;
+
+
+@Service
+public class AuthService {
+
+    private final UsuarioService usuarioService;
+    private final CodigoVerificacaoService codigoService;
+    private final NotificacaoService notificacaoService;
+    private final JwtService jwtService;
+    private final SessaoService sessaoService;
+
+    public AuthService(
+            UsuarioService usuarioService,
+            CodigoVerificacaoService codigoService,
+            NotificacaoService notificacaoService,
+            JwtService jwtService,
+            SessaoService sessaoService
+<span class="fc" id="L26">    ) {</span>
+
+<span class="fc" id="L28">        this.usuarioService = usuarioService;</span>
+<span class="fc" id="L29">        this.codigoService = codigoService;</span>
+<span class="fc" id="L30">        this.notificacaoService = notificacaoService;</span>
+<span class="fc" id="L31">        this.jwtService = jwtService;</span>
+<span class="fc" id="L32">        this.sessaoService = sessaoService;</span>
+<span class="fc" id="L33">    }</span>
+
+    public void login(
+            String cpf,
+            String senha,
+            String canal
+    ) {
+
+<span class="fc" id="L41">        Usuario usuario =</span>
+<span class="fc" id="L42">                usuarioService.searchByCpf(cpf);</span>
+
+<span class="fc" id="L44">        String senhaHash =</span>
+<span class="fc" id="L45">                HashUtil.hashSenha(senha);</span>
+
+<span class="fc" id="L47">        if (</span>
+<span class="fc" id="L48">                !usuario.getSenha()</span>
+<span class="fc bfc" id="L49" title="All 2 branches covered.">                        .equals(senhaHash)</span>
+        ) {
+
+<span class="fc" id="L52">            throw new DadosInvalidosException(</span>
+                    &quot;Dados inseridos inválidos&quot;
+            );
+        }
+
+<span class="fc" id="L57">        CodigoVerificacao codigo =</span>
+<span class="fc" id="L58">                codigoService.gerarCodigo(</span>
+                        usuario,
+                        &quot;LOGIN&quot;
+                );
+
+<span class="fc" id="L63">        notificacaoService.enviarCodigo(</span>
+                usuario,
+<span class="fc" id="L65">                codigo.getCodigo(),</span>
+                canal
+        );
+<span class="fc" id="L68">    }</span>
+
+    public String validarCodigoLogin(
+            String codigo
+    ) {
+
+<span class="fc" id="L74">        CodigoVerificacao cv =</span>
+<span class="fc" id="L75">                codigoService.validarCodigo(</span>
+                        codigo,
+                        &quot;LOGIN&quot;
+                );
+
+<span class="fc" id="L80">        Usuario usuario =</span>
+<span class="fc" id="L81">                cv.getUsuario();</span>
+
+<span class="fc" id="L83">        String token =</span>
+<span class="fc" id="L84">                jwtService.gerarToken(</span>
+<span class="fc" id="L85">                        usuario.getCpf()</span>
+                );
+
+<span class="fc" id="L88">        sessaoService.registrarToken(token);</span>
+
+<span class="fc" id="L90">        return token;</span>
+    }
+
+    public void enviarCodigoRedefinirSenha(
+            String email,
+            String canal
+    ) {
+
+<span class="fc" id="L98">        Usuario usuario =</span>
+<span class="fc" id="L99">                usuarioService.searchByEmail(email);</span>
+
+<span class="fc" id="L101">        CodigoVerificacao codigo =</span>
+<span class="fc" id="L102">                codigoService.gerarCodigo(</span>
+                        usuario,
+                        &quot;REDEFINIR_SENHA&quot;
+                );
+
+<span class="fc" id="L107">        notificacaoService.enviarCodigo(</span>
+                usuario,
+<span class="fc" id="L109">                codigo.getCodigo(),</span>
+                canal
+        );
+<span class="fc" id="L112">    }</span>
+
+    public void redefinirSenha(
+            String codigo,
+            String novaSenha
+    ) {
+
+<span class="fc" id="L119">        CodigoVerificacao cv =</span>
+<span class="fc" id="L120">                codigoService.validarCodigo(</span>
+                        codigo,
+                        &quot;REDEFINIR_SENHA&quot;
+                );
+
+<span class="fc" id="L125">        Usuario usuario =</span>
+<span class="fc" id="L126">                cv.getUsuario();</span>
+
+<span class="fc" id="L128">        usuario.setSenha(</span>
+<span class="fc" id="L129">                HashUtil.hashSenha(novaSenha)</span>
+        );
+
+<span class="fc" id="L132">        usuarioService.update(usuario);</span>
+<span class="fc" id="L133">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.15.202606040825</span></div></body></html>
