@@ -1,0 +1,124 @@
+package br.com.vittasync.vittasync.Service;
+
+import br.com.vittasync.vittasync.Exception.RecursoNaoEncontradoException;
+import br.com.vittasync.vittasync.Model.EventoPaciente;
+import br.com.vittasync.vittasync.Model.EventoVisualizacao;
+import br.com.vittasync.vittasync.Model.Usuario;
+import br.com.vittasync.vittasync.Model.Vinculo;
+import br.com.vittasync.vittasync.Repository.EventoPacienteRepository;
+import br.com.vittasync.vittasync.Repository.EventoVisualizacaoRepository;
+import br.com.vittasync.vittasync.Repository.UsuarioRepository;
+import br.com.vittasync.vittasync.Repository.VinculoRepository;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+
+import java.util.List;
+import java.util.Optional;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.*;
+
+class EventoPacienteServiceTest {
+
+    private EventoPacienteRepository eventoPacienteRepository;
+    private VinculoRepository vinculoRepository;
+    private UsuarioRepository usuarioRepository;
+    private EventoVisualizacaoRepository eventoVisualizacaoRepository;
+    private EventoPacienteService service;
+
+    @BeforeEach
+    void setup() {
+        eventoPacienteRepository = mock(EventoPacienteRepository.class);
+        vinculoRepository = mock(VinculoRepository.class);
+        usuarioRepository = mock(UsuarioRepository.class);
+        eventoVisualizacaoRepository = mock(EventoVisualizacaoRepository.class);
+
+        service = new EventoPacienteService(
+                eventoPacienteRepository,
+                vinculoRepository,
+                usuarioRepository,
+                eventoVisualizacaoRepository
+        );
+    }
+
+    @Test
+    void testCriarEventoSalvaEventoEVisualizacoes() {
+        EventoPaciente evento = new EventoPaciente();
+        evento.setId(1);
+
+        when(eventoPacienteRepository.save(any(EventoPaciente.class))).thenReturn(evento);
+
+        Vinculo vinculo = new Vinculo();
+        vinculo.setUsuarioId(2);
+        when(vinculoRepository.findByPacienteId(10)).thenReturn(List.of(vinculo));
+
+        Usuario usuario = new Usuario();
+        usuario.setId(2);
+        when(usuarioRepository.findById(2)).thenReturn(Optional.of(usuario));
+
+        service.criarEvento(10, 1, "TIPO", "Titulo", "Descricao", "NORMAL");
+
+        verify(eventoPacienteRepository, times(1)).save(any(EventoPaciente.class));
+        verify(eventoVisualizacaoRepository, times(1)).save(any(EventoVisualizacao.class));
+    }
+
+    @Test
+    void testListarPorPaciente() {
+        when(eventoPacienteRepository.findByPacienteIdOrderByCriadoEmDesc(10))
+                .thenReturn(List.of(new EventoPaciente()));
+
+        List<EventoPaciente> eventos = service.listarPorPaciente(10);
+
+        assertThat(eventos).hasSize(1);
+        verify(eventoPacienteRepository).findByPacienteIdOrderByCriadoEmDesc(10);
+    }
+
+    @Test
+    void testMarcarComoVisualizadosUsuarioNaoEncontrado() {
+        when(usuarioRepository.findById(99)).thenReturn(Optional.empty());
+
+        assertThrows(RecursoNaoEncontradoException.class,
+                () -> service.marcarComoVisualizados(10, 99));
+    }
+
+    @Test
+    void testMarcarComoVisualizadosAtualizaVisualizacoes() {
+        Usuario usuario = new Usuario();
+        usuario.setId(2);
+        when(usuarioRepository.findById(2)).thenReturn(Optional.of(usuario));
+
+        EventoVisualizacao vis = new EventoVisualizacao();
+        vis.setVisualizado(false);
+
+        when(eventoVisualizacaoRepository.findByUsuarioAndVisualizadoFalseAndEventoPacientePacienteId(usuario, 10))
+                .thenReturn(List.of(vis));
+
+        service.marcarComoVisualizados(10, 2);
+
+        assertThat(vis.getVisualizado()).isTrue();
+        verify(eventoVisualizacaoRepository).saveAll(List.of(vis));
+    }
+
+    @Test
+    void testContarNaoVisualizadosUsuarioNaoEncontrado() {
+        when(usuarioRepository.findById(99)).thenReturn(Optional.empty());
+
+        assertThrows(RecursoNaoEncontradoException.class,
+                () -> service.contarNaoVisualizados(10, 99));
+    }
+
+    @Test
+    void testContarNaoVisualizadosRetornaValor() {
+        Usuario usuario = new Usuario();
+        usuario.setId(2);
+        when(usuarioRepository.findById(2)).thenReturn(Optional.of(usuario));
+
+        when(eventoVisualizacaoRepository.countByUsuarioAndVisualizadoFalseAndEventoPacientePacienteId(usuario, 10))
+                .thenReturn(5L);
+
+        Long count = service.contarNaoVisualizados(10, 2);
+
+        assertThat(count).isEqualTo(5L);
+    }
+}

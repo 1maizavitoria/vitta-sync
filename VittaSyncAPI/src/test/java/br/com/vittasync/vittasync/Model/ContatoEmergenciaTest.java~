@@ -1,0 +1,4 @@
+package br.com.vittasync.vittasync.Model;
+
+public class ContatoEmergenciaTest {
+}

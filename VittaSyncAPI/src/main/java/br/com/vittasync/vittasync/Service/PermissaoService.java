@@ -38,7 +38,7 @@ public class PermissaoService {
     }
 
     public boolean podeRemoverVinculo(Integer usuarioLogadoId, Vinculo vinculoAlvo) {
-        System.out.println("ENTROU NO PODE REMOVER VINCULO");
+
         // paciente remove qualquer vínculo dele
         if (usuarioLogadoId.equals(vinculoAlvo.getPacienteId())) {
             return true;
@@ -47,14 +47,8 @@ public class PermissaoService {
         Usuario usuarioLogado = usuarioRepository.findById(usuarioLogadoId).orElse(null);
 
         if (usuarioLogado == null) {
-            System.out.println("usuarioLogadoId = " + usuarioLogadoId);
             return false;
         }
-        System.out.println("usuarioLogadoId = " + usuarioLogadoId);
-        System.out.println("usuarioLogadoTipo = " + usuarioLogado.getTipo());
-        System.out.println("vinculoPacienteId = " + vinculoAlvo.getPacienteId());
-        System.out.println("vinculoUsuarioId = " + vinculoAlvo.getUsuarioId());
-        System.out.println("vinculoTipo = " + vinculoAlvo.getTipo());
 
         // médico ou responsável removendo o PRÓPRIO vínculo
         if (usuarioLogadoId.equals(vinculoAlvo.getUsuarioId())) {

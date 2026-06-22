@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="pt"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>DiarioSintomas.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report"></a> &gt; <a href="index.source.html" class="el_package">br.com.vittasync.vittasync.Model</a> &gt; <span class="el_source">DiarioSintomas.java</span></div><h1>DiarioSintomas.java</h1><pre class="source lang-java linenums">package br.com.vittasync.vittasync.Model;
+
+
+import jakarta.persistence.*;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+
+
+@Entity
+@Table(name = &quot;DiarioSintomas&quot;)
+public class DiarioSintomas {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Integer id;
+
+    @ManyToOne
+    @JoinColumn(name = &quot;paciente_id&quot;, nullable = false)
+    private Usuario paciente;
+
+    @Column(nullable = false)
+    private String sintoma;
+
+    @Column(name = &quot;intensidade_dor&quot;, nullable = false)
+    private Integer intensidadeDor;
+
+    @Column(name = &quot;data_referencia&quot;, nullable = false)
+    private LocalDate dataReferencia;
+
+    @Column(name = &quot;data_registro&quot;)
+    private LocalDateTime dataRegistro;
+
+    @Column(name = &quot;data_modificacao&quot;)
+    private LocalDateTime dataModificacao;
+
+    @Column(name = &quot;registrado_por_usuario_id&quot;)
+    private Integer registradoPorUsuarioId;
+
+<span class="fc" id="L39">    public DiarioSintomas() {}</span>
+
+<span class="fc" id="L41">    public Integer getId() { return id; }</span>
+<span class="fc" id="L42">    public void setId(Integer id) { this.id = id; }</span>
+
+<span class="fc" id="L44">    public Usuario getPaciente() { return paciente; }</span>
+<span class="fc" id="L45">    public void setPaciente(Usuario paciente) { this.paciente = paciente; }</span>
+
+<span class="fc" id="L47">    public String getSintoma() { return sintoma; }</span>
+<span class="fc" id="L48">    public void setSintoma(String sintoma) { this.sintoma = sintoma; }</span>
+
+<span class="fc" id="L50">    public Integer getIntensidadeDor() { return intensidadeDor; }</span>
+<span class="fc" id="L51">    public void setIntensidadeDor(Integer intensidadeDor) { this.intensidadeDor = intensidadeDor; }</span>
+
+<span class="fc" id="L53">    public LocalDate getDataReferencia() { return dataReferencia; }</span>
+<span class="fc" id="L54">    public void setDataReferencia(LocalDate dataReferencia) { this.dataReferencia = dataReferencia; }</span>
+
+<span class="fc" id="L56">    public LocalDateTime getDataRegistro() { return dataRegistro; }</span>
+<span class="fc" id="L57">    public void setDataRegistro(LocalDateTime dataRegistro) { this.dataRegistro = dataRegistro; }</span>
+
+<span class="fc" id="L59">    public LocalDateTime getDataModificacao() { return dataModificacao; }</span>
+<span class="fc" id="L60">    public void setDataModificacao(LocalDateTime dataModificacao) { this.dataModificacao = dataModificacao; }</span>
+
+<span class="fc" id="L62">    public Integer getRegistradoPorUsuarioId() { return registradoPorUsuarioId; }</span>
+<span class="fc" id="L63">    public void setRegistradoPorUsuarioId(Integer registradoPorUsuarioId) { this.registradoPorUsuarioId = registradoPorUsuarioId; }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.15.202606040825</span></div></body></html>

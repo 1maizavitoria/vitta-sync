@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="pt"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>SinaisVitais.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report"></a> &gt; <a href="index.source.html" class="el_package">br.com.vittasync.vittasync.Model</a> &gt; <span class="el_source">SinaisVitais.java</span></div><h1>SinaisVitais.java</h1><pre class="source lang-java linenums">package br.com.vittasync.vittasync.Model;
+
+
+import jakarta.persistence.*;
+import java.time.LocalDateTime;
+
+
+@Entity
+@Table(name = &quot;SinaisVitais&quot;)
+public class SinaisVitais {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Integer id;
+
+    @ManyToOne
+    @JoinColumn(name = &quot;paciente_id&quot;, nullable = false)
+    private Usuario paciente;
+
+    @Column(name = &quot;peso&quot;)
+    private Double peso;
+
+    @Column(name = &quot;fc_bpm&quot;)
+    private Integer fcBpm;
+
+    @Column(name = &quot;fr_rpm&quot;)
+    private Integer frRpm;
+
+    @Column(name = &quot;pa_sistolica&quot;)
+    private Integer paSistolica;
+
+    @Column(name = &quot;pa_diastolica&quot;)
+    private Integer paDiastolica;
+
+    @Column(name = &quot;temp_celcius&quot;)
+    private Double tempCelcius;
+
+    @Column(name = &quot;spo2_porcento&quot;)
+    private Integer spo2Porcento;
+
+    @Column(name = &quot;data_registro&quot;)
+    private LocalDateTime dataRegistro;
+
+    @Column(name = &quot;data_modificacao&quot;)
+    private LocalDateTime dataModificacao;
+
+    @Column(name = &quot;registrado_por_usuario_id&quot;)
+    private Integer registradoPorUsuarioId;
+
+<span class="fc" id="L50">    public SinaisVitais() {}</span>
+
+<span class="fc" id="L52">    public Integer getId() { return id; }</span>
+<span class="fc" id="L53">    public void setId(Integer id) { this.id = id; }</span>
+
+<span class="fc" id="L55">    public Usuario getPaciente() { return paciente; }</span>
+<span class="fc" id="L56">    public void setPaciente(Usuario paciente) { this.paciente = paciente; }</span>
+
+<span class="fc" id="L58">    public Double getPeso() { return peso; }</span>
+<span class="fc" id="L59">    public void setPeso(Double peso) {this.peso = peso;}</span>
+
+<span class="fc" id="L61">    public Integer getFcBpm() { return fcBpm; }</span>
+<span class="fc" id="L62">    public void setFcBpm(Integer fcBpm) { this.fcBpm = fcBpm; }</span>
+
+<span class="fc" id="L64">    public Integer getFrRpm() { return frRpm; }</span>
+<span class="fc" id="L65">    public void setFrRpm(Integer frRpm) { this.frRpm = frRpm; }</span>
+
+<span class="fc" id="L67">    public Integer getPaSistolica() { return paSistolica; }</span>
+<span class="fc" id="L68">    public void setPaSistolica(Integer paSistolica) { this.paSistolica = paSistolica; }</span>
+
+<span class="fc" id="L70">    public Integer getPaDiastolica() { return paDiastolica; }</span>
+<span class="fc" id="L71">    public void setPaDiastolica(Integer paDiastolica) { this.paDiastolica = paDiastolica; }</span>
+
+<span class="fc" id="L73">    public Double getTempCelcius() { return tempCelcius; }</span>
+<span class="fc" id="L74">    public void setTempCelcius(Double tempCelcius) { this.tempCelcius = tempCelcius; }</span>
+
+<span class="fc" id="L76">    public Integer getSpo2Porcento() { return spo2Porcento; }</span>
+<span class="fc" id="L77">    public void setSpo2Porcento(Integer spo2Porcento) { this.spo2Porcento = spo2Porcento; }</span>
+
+<span class="fc" id="L79">    public LocalDateTime getDataRegistro() { return dataRegistro; }</span>
+<span class="fc" id="L80">    public void setDataRegistro(LocalDateTime dataRegistro) { this.dataRegistro = dataRegistro; }</span>
+
+<span class="fc" id="L82">    public LocalDateTime getDataModificacao() { return dataModificacao; }</span>
+<span class="fc" id="L83">    public void setDataModificacao(LocalDateTime dataModificacao) { this.dataModificacao = dataModificacao; }</span>
+
+    public Integer getRegistradoPorUsuarioId() {
+<span class="fc" id="L86">        return registradoPorUsuarioId;</span>
+    }
+
+    public void setRegistradoPorUsuarioId(
+            Integer registradoPorUsuarioId
+    ) {
+<span class="fc" id="L92">        this.registradoPorUsuarioId =</span>
+                registradoPorUsuarioId;
+<span class="fc" id="L94">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.15.202606040825</span></div></body></html>

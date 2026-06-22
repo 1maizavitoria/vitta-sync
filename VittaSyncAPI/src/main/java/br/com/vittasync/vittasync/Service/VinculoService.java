@@ -49,30 +49,13 @@ public class VinculoService {
 
     }
 
-    public ConviteVinculoOutputDTO gerarCodigo(Integer usuarioLogadoId,
-                                               Integer pacienteId) {
+    public ConviteVinculoOutputDTO gerarCodigo(Integer usuarioId) {
 
-        Usuario usuarioLogado = usuarioRepository.findById(usuarioLogadoId)
-                .orElseThrow(() -> new RecursoNaoEncontradoException("Usuário não encontrado"));
+        Usuario usuario = usuarioRepository.findById(usuarioId).orElseThrow(() -> new RecursoNaoEncontradoException("Usuário não encontrado"));
 
-        Usuario paciente = usuarioRepository.findById(pacienteId)
-                .orElseThrow(() -> new RecursoNaoEncontradoException("Paciente não encontrado"));
+        if (!usuario.getTipo().equalsIgnoreCase("paciente")) {
 
-        if (!paciente.getTipo().equalsIgnoreCase("paciente")) {
-            throw new RuntimeException("Usuário selecionado não é um paciente");
-        }
-
-        if (usuarioLogado.getTipo().equalsIgnoreCase("responsavel")) {
-
-            boolean possuiVinculo =
-                    vinculoRepository.existsByPacienteIdAndUsuarioId(
-                            pacienteId,
-                            usuarioLogadoId
-                    );
-
-            if (!possuiVinculo) {
-                throw new RuntimeException("Você não possui acesso a este paciente");
-            }
+            throw new RuntimeException("Somente pacientes podem gerar vínculo");
         }
 
         String codigo;
@@ -85,7 +68,7 @@ public class VinculoService {
 
         ConviteVinculo convite = new ConviteVinculo();
 
-        convite.setPacienteId(pacienteId);
+        convite.setPacienteId(usuario.getId());
 
         convite.setCodigo(codigo);
 

@@ -1,0 +1,43 @@
+package br.com.vittasync.vittasync.Controller;
+
+import br.com.vittasync.vittasync.Model.Usuario;
+import br.com.vittasync.vittasync.Service.EventoPacienteService;
+import br.com.vittasync.vittasync.Service.JwtService;
+import br.com.vittasync.vittasync.Service.UsuarioService;
+import br.com.vittasync.vittasync.Service.PermissaoService;
+import br.com.vittasync.vittasync.Service.SessaoService;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.web.servlet.MockMvc;
+
+import static org.mockito.Mockito.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
+@SpringBootTest
+@AutoConfigureMockMvc
+class EventoPacienteControllerTest {
+
+    @Autowired
+    private MockMvc mockMvc;
+
+    @MockBean private EventoPacienteService service;
+    @MockBean private JwtService jwtService;
+    @MockBean private UsuarioService usuarioService;
+    @MockBean private PermissaoService permissaoService;
+    @MockBean private SessaoService sessaoService;
+
+    @Test
+    void testListUnauthorized() throws Exception {
+        when(jwtService.extrairCpf(anyString())).thenReturn("123");
+        when(usuarioService.searchByCpf(anyString())).thenReturn(new Usuario());
+        when(permissaoService.podeVisualizarPaciente(anyInt(), anyInt())).thenReturn(false);
+
+        mockMvc.perform(get("/eventos/paciente/2")
+                        .header("Authorization","Bearer token"))
+                .andExpect(status().isUnauthorized());
+    }
+}
