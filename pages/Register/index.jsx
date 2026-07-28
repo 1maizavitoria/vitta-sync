@@ -1,27 +1,33 @@
-import { Box, FormGroup, Grid, Paper, Tooltip, Typography } from "@mui/material";
+import { Box, Container, IconButton, Paper, Stack, Tooltip, Typography } from "@mui/material";
+import ArrowBackIcon from "@mui/icons-material/ArrowBack";
+import PersonAddAltOutlinedIcon from "@mui/icons-material/PersonAddAltOutlined";
+import MonitorHeartOutlinedIcon from "@mui/icons-material/MonitorHeartOutlined";
+import { useTheme } from "@mui/material/styles";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { createUser } from "../../services/userService";
 
-import { useAlert } from "../../hooks/useAlert";
-
-import ButtonUI from "../../components/ui/Button";
-import InputUI from "../../components/ui/Input";
 import AutocompleteUI from "../../components/ui/Autocomplete";
+import ButtonUI from "../../components/ui/Button";
 import DatePickerUI from "../../components/ui/DatePicker";
-import CheckboxUI from "../../components/ui/Checkbox";
+import InputUI from "../../components/ui/Input";
+import LinkUI from "../../components/ui/Link";
 import PasswordTooltip from "../../components/ui/Tooltip";
-
+import { useAlert } from "../../hooks/useAlert";
+import { useI18n } from "../../src/i18n";
+import { createUser } from "../../services/userService";
 import { formatCPF, isValidCpf } from "../../utils/formatters/formatCPF"
-import { isValidEmail } from "../../utils/formatters/formatEmail";
-import { validatePassword } from "../../utils/validators/passwordValidator";
-import { getDateLimit, isUnder18 } from "../../utils/validators/dateValidator";
 import { formatPhone, isValidPhone } from "../../utils/formatters/formatPhone";
+import { isValidEmail } from "../../utils/formatters/formatEmail";
+import { getDateLimit, isUnder18 } from "../../utils/validators/dateValidator";
 import { isTokenExpired } from "../../utils/auth/auth";
-
+import { validatePassword } from "../../utils/validators/passwordValidator";
 
 export default function Register() {
     const { showAlert } = useAlert();
+    const { t } = useI18n();
+    const theme = useTheme();
+    const vitta = theme.vitta;
+    const isDark = theme.palette.mode === "dark";
 
     const [errorName, setErrorName] = useState(false);
     const [errorCPF, setErrorCPF] = useState(false);
@@ -55,6 +61,17 @@ export default function Register() {
     const rulesPassword = validatePassword(password);
     const repeatRulesPassword = validatePassword(repeatPassword);
 
+    const userTypeOptions = [
+        { value: "paciente", label: t("auth.patient") },
+        { value: "responsavel", label: t("auth.responsible") },
+        { value: "saude", label: t("auth.healthProfessional") }
+    ];
+
+    const fieldSx = {
+        width: "100%",
+        minWidth: 0
+    };
+
     function isValidPositiveNumber(value) {
         return !isNaN(value) && Number(value) > 0;
     }
@@ -83,57 +100,57 @@ export default function Register() {
             setErrorPassword(password == "");
             setErrorRepeatPassword(repeatPassword == "");
             setErrorAdvice(userType?.value === "saude" && advice == "");
-            showAlert("error", "Preencha todos os campos");
+            showAlert("error", t("messages.fillAll"));
             return false;
         }
 
         if (name.length < 5) {
             setErrorName(true);
-            showAlert("error", "O nome deve ter pelo menos 5 caracteres");
+            showAlert("error", t("messages.shortName"));
             return false;
         }
 
         if (!isValidCpf(CPF)) {
             setErrorCPF(true);
-            showAlert("error", "CPF inválido");
+            showAlert("error", t("messages.invalidCpf"));
             return false;
         }
 
         if (!isValidPhone(phone)) {
             setErrorPhone(true);
-            showAlert("error", "Telefone inválido");
+            showAlert("error", t("messages.invalidPhone"));
             return false;
         }
 
         if (userType?.value === "paciente" && !isValidPositiveNumber(initialWeight)) {
             setErrorWeight(true);
-            showAlert("error", "Peso inválido");
+            showAlert("error", t("messages.invalidWeight"));
             return false;
         }
 
         if (userType?.value === "paciente" && !isValidPositiveNumber(height)) {
             setErrorHeight(true);
-            showAlert("error", "Altura inválida");
+            showAlert("error", t("messages.invalidHeight"));
             return false;
         }
 
         if (!isValidEmail(email)) {
             setErrorEmail(true);
-            showAlert("error", "Email inválido");
+            showAlert("error", t("messages.invalidEmail"));
             return false;
         }
 
         if (!rulesPassword.isValid || !repeatRulesPassword.isValid) {
             setErrorPassword(true);
             setErrorRepeatPassword(true);
-            showAlert("error", "Verifique as regras de senha");
+            showAlert("error", t("messages.passwordRules"));
             return false;
         }
 
         if (password !== repeatPassword) {
             setErrorPassword(true);
             setErrorRepeatPassword(true);
-            showAlert("error", "As senhas devem ser iguais");
+            showAlert("error", t("messages.passwordMismatch"));
             return false;
         }
 
@@ -142,14 +159,10 @@ export default function Register() {
             isUnder18(birthDate)
         ) {
             setErrorBirthDate(true);
-            showAlert(
-                "error",
-                `"${userType?.label}" precisa ser maior de idade`
-            );
+            showAlert("error", `"${userType?.label}" ${t("messages.adultRequired")}`);
             return false;
         }
 
-        // resetando erros
         setErrorName(false);
         setErrorCPF(false);
         setErrorEmail(false);
@@ -165,9 +178,7 @@ export default function Register() {
         return true;
     };
 
-
     async function handleRegister() {
-
         if (loading) return;
         setLoading(true);
 
@@ -194,32 +205,22 @@ export default function Register() {
         };
 
         try {
-
             const response = await createUser(data);
 
             console.log("Usuário criado:", response);
-
-            showAlert("success", "Cadastro realizado com sucesso");
-
+            showAlert("success", t("messages.registerSuccess"));
             navigate("/login");
-
-            setLoading(false);
-
         } catch (error) {
-
-            console.log("Erro que retorna do backend: ", error.response.data.value);
-            if (error.response.data.value === "duplicateEmail") {
-                showAlert("error", "CPF ou Email já cadastrados");
+            console.log("Erro que retorna do backend: ", error.response?.data?.value);
+            if (error.response?.data?.value === "duplicateEmail") {
+                showAlert("error", t("messages.duplicatedUser"));
                 setErrorEmail(true);
                 setErrorCPF(true);
                 return;
             }
-            showAlert("error", "Erro ao cadastrar usuário");
-            setLoading(false);
+            showAlert("error", t("messages.registerError"));
         } finally {
-
             setLoading(false);
-
         }
     }
 
@@ -233,69 +234,110 @@ export default function Register() {
         if (token && !isTokenExpired(token)) {
             navigate("/dashboard");
         }
-    }, []);
+    }, [navigate]);
 
     return (
-        <Box>
-            <Grid
-                container
-                justifyContent="center"
-                alignItems="center"
+        <Container maxWidth="lg">
+            <Box
+                sx={{
+                    minHeight: "calc(100vh - 150px)",
+                    display: "grid",
+                    gridTemplateColumns: { xs: "1fr", md: "0.9fr 1.1fr" },
+                    alignItems: "center",
+                    gap: { xs: 4, md: 7 },
+                    py: { xs: 4, md: 6 }
+                }}
             >
-                <Grid
-                    item
-                    xs={12}
-                    display="flex"
-                    justifyContent="center"
-                >
-                    <Paper
-                        elevation={5}
+                <Box sx={{ display: { xs: "none", md: "block" } }}>
+                    <Box
                         sx={{
-                            width: {
-                                xs: "95%",
-                                sm: 420
-                            },
-                            maxWidth: 520,
-                            mx: "auto",
+                            width: 64,
+                            height: 64,
                             borderRadius: 3,
-                            p: { xs: 2, sm: 3, md: 4 }
+                            display: "grid",
+                            placeItems: "center",
+                            color: "#ffffff",
+                            background: "linear-gradient(135deg, #16a34a 0%, #0f766e 72%, #0ea5e9 100%)",
+                            mb: 3
                         }}
                     >
+                        <MonitorHeartOutlinedIcon sx={{ fontSize: 34 }} />
+                    </Box>
+                    <Typography sx={{ fontSize: { md: 44, lg: 54 }, lineHeight: 1.05, fontWeight: 800, mb: 2 }}>
+                        {t("auth.registerTitle")}
+                    </Typography>
+                    <Typography sx={{ color: "text.secondary", fontSize: 18, lineHeight: 1.7, maxWidth: 460 }}>
+                        {t("auth.registerSubtitle")}
+                    </Typography>
+                </Box>
+
+                <Paper
+                    elevation={0}
+                    sx={{
+                        width: "100%",
+                        maxWidth: 560,
+                        justifySelf: "center",
+                        borderRadius: 3,
+                        p: { xs: 2.5, sm: 4 },
+                        border: "1px solid",
+                        borderColor: vitta.border,
+                        bgcolor: "background.paper",
+                        boxShadow: vitta.shadow
+                    }}
+                >
+                    <IconButton
+                        aria-label="Voltar para início"
+                        onClick={() => navigate("/")}
+                        sx={{
+                            mb: 1,
+                            color: "primary.main",
+                            bgcolor: isDark ? "rgba(34, 197, 94, 0.12)" : "rgba(22, 163, 74, 0.08)",
+                            "&:hover": {
+                                bgcolor: isDark ? "rgba(34, 197, 94, 0.18)" : "rgba(22, 163, 74, 0.14)"
+                            }
+                        }}
+                    >
+                        <ArrowBackIcon />
+                    </IconButton>
+
+                    <Stack alignItems="center" spacing={1} sx={{ mb: 2 }}>
                         <Box
-                            display="flex"
-                            flexDirection="column"
-                            alignItems="center"
-                            gap={1}
+                            sx={{
+                                width: 48,
+                                height: 48,
+                                borderRadius: 2,
+                                display: "grid",
+                                placeItems: "center",
+                                color: "primary.main",
+                                bgcolor: isDark ? "rgba(34, 197, 94, 0.14)" : "rgba(22, 163, 74, 0.12)"
+                            }}
                         >
-                            <Box textAlign="center" mb={2} >
-                                <Typography
-                                    sx={{
-                                        fontFamily: 'Inter, sans-serif',
-                                        fontWeight: 600,
-                                        fontSize: { xs: '22px', sm: '28px' },
-                                        color: '#1a1a1a',
-                                        letterSpacing: '0.5px',
-                                    }}
-                                >
-                                    Vitta<span style={{ fontWeight: 400 }}>Sync</span>
-                                </Typography>
+                            <PersonAddAltOutlinedIcon />
+                        </Box>
+                        <Typography sx={{ fontWeight: 800, fontSize: 26 }}>
+                            {t("brand")}
+                        </Typography>
+                        <Typography sx={{ color: "text.secondary", textAlign: "center" }}>
+                            {t("auth.registerSubtitle")}
+                        </Typography>
+                    </Stack>
 
-                                <Typography
-                                    sx={{
-                                        fontFamily: 'Inter, sans-serif',
-                                        fontWeight: 500,
-                                        fontSize: { xs: '18px', sm: '20px' },
-                                        color: '#4a4a4a',
-                                        mt: 0.5,
-                                    }}
-                                >
-                                    Cadastro
-                                </Typography>
-                            </Box>
-
+                    <Box
+                        sx={{
+                            display: "grid",
+                            gridTemplateColumns: { xs: "1fr", sm: "repeat(2, minmax(0, 1fr))" },
+                            columnGap: 1.5,
+                            rowGap: 0.25,
+                            alignItems: "start",
+                            "& > *": {
+                                minWidth: 0
+                            }
+                        }}
+                    >
+                        <Box sx={{ gridColumn: "1 / -1", ...fieldSx }}>
                             <InputUI
-                                label="Nome"
-                                placeholder="Ex: João Silva"
+                                label={t("auth.name")}
+                                placeholder={t("auth.placeholders.name")}
                                 type="string"
                                 error={errorName}
                                 value={name}
@@ -304,40 +346,27 @@ export default function Register() {
                                     setName(onlyLetters);
                                     setErrorName(false);
                                 }}
-                            >
-                            </InputUI>
+                            />
+                        </Box>
 
-
+                        <Box sx={fieldSx}>
                             <InputUI
-                                label="CPF"
-                                placeholder="999.999.999-99"
+                                label={t("auth.cpf")}
+                                placeholder={t("auth.placeholders.cpf")}
                                 limit={14}
                                 error={errorCPF}
                                 value={formatCPF(CPF)}
                                 onChange={(e) => {
                                     setCPF(e.target.value.replace(/\D/g, ""));
                                     setErrorCPF(false);
-                                }
-                                }
-                            >
-                            </InputUI>
+                                }}
+                            />
+                        </Box>
 
+                        <Box sx={fieldSx}>
                             <InputUI
-                                label="Email"
-                                placeholder="exemplo@gmail.com"
-                                type="email"
-                                error={errorEmail}
-                                value={email}
-                                onChange={(e) => (
-                                    setEmail(e.target.value),
-                                    setErrorEmail(false)
-                                )}
-                            >
-                            </InputUI>
-
-                            <InputUI
-                                label="Telefone"
-                                placeholder="(11) 99999-9999"
+                                label={t("auth.phone")}
+                                placeholder={t("auth.placeholders.phone")}
                                 limit={15}
                                 error={errorPhone}
                                 value={formatPhone(phone)}
@@ -345,29 +374,50 @@ export default function Register() {
                                     setPhone(e.target.value.replace(/\D/g, ""));
                                     setErrorPhone(false);
                                 }}
-                            >
-                            </InputUI>
+                            />
+                        </Box>
 
+                        <Box sx={{ gridColumn: "1 / -1", ...fieldSx }}>
+                            <InputUI
+                                label={t("auth.email")}
+                                placeholder={t("auth.placeholders.email")}
+                                type="email"
+                                error={errorEmail}
+                                value={email}
+                                onChange={(e) => (
+                                    setEmail(e.target.value),
+                                    setErrorEmail(false)
+                                )}
+                            />
+                        </Box>
+
+                        <Box sx={fieldSx}>
                             <AutocompleteUI
-                                label="Tipo de usuário"
+                                label={t("auth.userType")}
                                 error={errorUserType && userType == null}
                                 value={userType}
                                 onChange={(newValue) => setUserType(newValue)}
-                                options={[
-                                    { value: "paciente", label: "Paciente" },
-                                    { value: "responsavel", label: "Responsável" },
-                                    { value: "saude", label: "Profissional da Saúde" }
-                                ]}
+                                options={userTypeOptions}
                                 fullWidth
-                                sx={{ width: "100%" }}
                             />
+                        </Box>
 
+                        <Box sx={fieldSx}>
+                            <DatePickerUI
+                                label={t("auth.birthDate")}
+                                dateLimit={dateLimit}
+                                error={errorBirthDate && birthDate == null}
+                                value={birthDate}
+                                onChange={setBirthDate}
+                            />
+                        </Box>
 
-                            {userType?.value === "paciente" && (
-                                <>
+                        {userType?.value === "paciente" && (
+                            <>
+                                <Box sx={fieldSx}>
                                     <InputUI
-                                        label="Peso Inicial"
-                                        placeholder="Ex: 70.5"
+                                        label={t("auth.initialWeight")}
+                                        placeholder={t("auth.placeholders.weight")}
                                         error={errorWeight}
                                         value={initialWeight}
                                         onChange={(e) => {
@@ -378,14 +428,12 @@ export default function Register() {
                                             setErrorWeight(false);
                                         }}
                                     />
+                                </Box>
 
-
-
-
-
+                                <Box sx={fieldSx}>
                                     <InputUI
-                                        label="Altura"
-                                        placeholder="Ex: 1.75"
+                                        label={t("auth.height")}
+                                        placeholder={t("auth.placeholders.height")}
                                         error={errorHeight}
                                         value={height}
                                         onChange={(e) => {
@@ -401,14 +449,15 @@ export default function Register() {
                                             }
                                         }}
                                     />
+                                </Box>
+                            </>
+                        )}
 
-                                </>
-                            )}
-
-                            {userType?.value === "saude" && (
+                        {userType?.value === "saude" && (
+                            <Box sx={{ gridColumn: "1 / -1", ...fieldSx }}>
                                 <InputUI
-                                    label="Conselho"
-                                    placeholder="CRM, etc"
+                                    label={t("auth.advice")}
+                                    placeholder={t("auth.placeholders.advice")}
                                     error={errorAdvice}
                                     value={advice}
                                     onChange={(e) => {
@@ -416,66 +465,56 @@ export default function Register() {
                                         setErrorAdvice(false);
                                     }}
                                 />
-                            )}
+                            </Box>
+                        )}
 
-                            <DatePickerUI
-                                label="Data de nascimento"
-                                dateLimit={dateLimit}
-                                error={errorBirthDate && birthDate == null}
-                                value={birthDate}
-                                onChange={setBirthDate}
-                            />
+                        <Tooltip title={<PasswordTooltip rules={rulesPassword} />} placement="right" arrow>
+                            <Box sx={fieldSx}>
+                                    <InputUI
+                                        label={t("auth.password")}
+                                        placeholder={t("auth.placeholders.password")}
+                                        type="password"
+                                        showPasswordToggle={true}
+                                        error={errorPassword}
+                                        value={password}
+                                        onChange={(e) => (
+                                            setPassword(e.target.value),
+                                            setErrorPassword(false)
+                                        )}
+                                    />
+                            </Box>
+                        </Tooltip>
 
+                        <Tooltip title={<PasswordTooltip rules={repeatRulesPassword} />} placement="right" arrow>
+                            <Box sx={fieldSx}>
+                                    <InputUI
+                                        label={t("auth.repeatPassword")}
+                                        placeholder={t("auth.repeatPassword")}
+                                        type="password"
+                                        showPasswordToggle={true}
+                                        error={errorRepeatPassword}
+                                        value={repeatPassword}
+                                        onChange={(e) => (
+                                            setRepeatPassword(e.target.value),
+                                            setErrorRepeatPassword(false)
+                                        )}
+                                    />
+                            </Box>
+                        </Tooltip>
+                    </Box>
 
-                            <Tooltip
-                                title={<PasswordTooltip rules={rulesPassword} />}
-                                placement="right"
-                                arrow
-                            >
-                                <InputUI
-                                    label="Senha"
-                                    placeholder="Digite sua senha"
-                                    type="password"
-                                    showPasswordToggle={true}
-                                    error={errorPassword}
-                                    value={password}
-                                    onChange={(e) => (
-                                        setPassword(e.target.value),
-                                        setErrorPassword(false)
-                                    )}
-                                />
-                            </Tooltip>
+                    <ButtonUI onClick={handleRegister} disabled={loading} sx={{ width: "100%", mt: 2 }}>
+                        {loading ? t("auth.registering") : t("auth.registerAction")}
+                    </ButtonUI>
 
-                            <Tooltip
-                                title={<PasswordTooltip rules={repeatRulesPassword} />}
-                                placement="right"
-                                arrow
-                            >
-                                <InputUI
-                                    label="Repetir senha"
-                                    placeholder="Repita sua senha"
-                                    type="password"
-                                    showPasswordToggle={true}
-                                    error={errorRepeatPassword}
-                                    value={repeatPassword}
-                                    onChange={(e) => (
-                                        setRepeatPassword(e.target.value),
-                                        setErrorRepeatPassword(false)
-                                    )}
-                                >
-                                </InputUI>
-                            </Tooltip>
-
-                            <ButtonUI
-                                onClick={handleRegister}
-                                disabled={loading}
-                            >
-                                {loading ? "Cadastrando..." : "Cadastrar"}
-                            </ButtonUI>
-                        </Box>
-                    </Paper>
-                </Grid>
-            </Grid>
-        </Box>
+                    <Typography sx={{ mt: 2, textAlign: "center", fontSize: 14, color: "text.secondary" }}>
+                        {t("auth.alreadyAccount")}
+                        <LinkUI to="/login" variant="action">
+                            {t("auth.loginAction")}
+                        </LinkUI>
+                    </Typography>
+                </Paper>
+            </Box>
+        </Container>
     )
 }

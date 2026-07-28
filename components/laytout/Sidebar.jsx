@@ -1,48 +1,55 @@
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 
-import Drawer from "@mui/material/Drawer";
+import Avatar from "@mui/material/Avatar";
 import Box from "@mui/material/Box";
-import Typography from "@mui/material/Typography";
+import Button from "@mui/material/Button";
+import Drawer from "@mui/material/Drawer";
+import IconButton from "@mui/material/IconButton";
 import List from "@mui/material/List";
 import ListItemButton from "@mui/material/ListItemButton";
 import ListItemIcon from "@mui/material/ListItemIcon";
 import ListItemText from "@mui/material/ListItemText";
-import Divider from "@mui/material/Divider";
-import Avatar from "@mui/material/Avatar";
-import ChevronRightIcon from "@mui/icons-material/ChevronRight";
-import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
 import Tooltip from "@mui/material/Tooltip";
+import Typography from "@mui/material/Typography";
+import useMediaQuery from "@mui/material/useMediaQuery";
+import { useTheme } from "@mui/material/styles";
+
+import ActivityIcon from "@mui/icons-material/NotificationsActiveOutlined";
 import DashboardIcon from "@mui/icons-material/Dashboard";
-import DescriptionIcon from "@mui/icons-material/Description";
-import LinkIcon from "@mui/icons-material/Link";
-import ShowChartIcon from "@mui/icons-material/ShowChart";
-import IconButton from "@mui/material/IconButton";
+import FolderOutlinedIcon from "@mui/icons-material/FolderOutlined";
 import LogoutIcon from "@mui/icons-material/Logout";
-import { getUserByCpf } from "../../services/userService";
-import { useEffect, useState } from "react";
-import { logout } from "../../services/authService";
-import { Button } from "@mui/material";
-import ButtonUI from "../ui/Button";
+import MonitorHeartOutlinedIcon from "@mui/icons-material/MonitorHeartOutlined";
+import ShowChartIcon from "@mui/icons-material/ShowChart";
 
 import { usePatient } from "../../context/PatientContext";
-import { Refresh } from "@mui/icons-material";
-
+import { logout } from "../../services/authService";
 import { getUnreadEventsCount } from "../../services/eventService";
-
-import { useRef } from "react";
-
+import { getUserByCpf } from "../../services/userService";
+import { useI18n } from "../../src/i18n";
 
 const menuItems = [
-    { label: "Grupo", icon: <DashboardIcon />, path: "/dashboard" },
-    // { label: "Registros", icon: <DescriptionIcon />, path: "/health-tracker" },
-    // { label: "Vínculos", icon: <LinkIcon />, path: "/links" },
-    // { label: "Relatórios", icon: <ShowChartIcon />, path: "/reports" },
+    { labelKey: "nav.group", icon: <DashboardIcon />, path: "/dashboard" },
+    { labelKey: "nav.records", icon: <MonitorHeartOutlinedIcon />, path: "/health-tracker" },
+    { labelKey: "nav.information", icon: <ShowChartIcon />, path: "/reports" },
+    { labelKey: "nav.documents", icon: <FolderOutlinedIcon />, path: "/documents" },
+    { labelKey: "nav.activity", icon: <ActivityIcon />, path: "/activity" },
 ];
+
+const drawerSizes = {
+    open: 280,
+    closed: 84
+};
 
 export default function Sidebar({ open, setOpen }) {
     const sidebarRef = useRef(null);
-
+    const theme = useTheme();
+    const isDark = theme.palette.mode === "dark";
+    const vitta = theme.vitta;
+    const isMobile = useMediaQuery(theme.breakpoints.down("md"));
+    const { t } = useI18n();
     const [notificationCounts, setNotificationCounts] = useState({});
+    const [userResponse, setUserResponse] = useState("");
 
     const {
         patients,
@@ -52,13 +59,21 @@ export default function Sidebar({ open, setOpen }) {
 
     const location = useLocation();
     const navigate = useNavigate();
-
-    const [userResponse, setUserResponse] = useState("");
+    const userType = localStorage.getItem("tipo")?.toLowerCase();
 
     const filteredMenu = menuItems.filter((item) => {
-        if (item.path === "/health-tracker" && localStorage.getItem("tipo") !== "paciente") {
+        if (item.path === "/health-tracker" && userType !== "paciente") {
             return false;
         }
+
+        if (
+            ["/reports", "/documents", "/activity"].includes(item.path) &&
+            userType !== "paciente" &&
+            !selectedPatient?.cpf
+        ) {
+            return false;
+        }
+
         return true;
     });
 
@@ -77,43 +92,40 @@ export default function Sidebar({ open, setOpen }) {
         return (primeira + ultima).toUpperCase();
     };
 
-    const isPersonalContext =
-        selectedPatient?.cpf
-        === userResponse.cpf;
+    const formatUserType = (type) => ({
+        paciente: t("userTypes.paciente"),
+        responsavel: t("userTypes.responsavel"),
+        saude: t("userTypes.saude")
+    }[type?.toLowerCase()] || type || t("nav.userType"));
 
-    const userType =
-        localStorage
-            .getItem("tipo")
-            ?.toLowerCase();
+    const drawerWidth = isMobile
+        ? drawerSizes.open
+        : open
+            ? drawerSizes.open
+            : drawerSizes.closed;
 
-    const sidebarColor = {
-        paciente: "#4F8FCF",
-        responsavel: "#2C7A4B",
-        saude: "#7A5DC7"
-    }[userType] || "#4F8FCF";
+    const isExpanded = isMobile || open;
 
-    const drawerWidth =
-        open ? 280 : 84;
+    function closeMobileSidebar() {
+        if (isMobile) {
+            setOpen(false);
+        }
+    }
 
     function handleNavigate(path) {
-        if (userResponse !== "paciente" && isPersonalContext) {
-
-            setSelectedPatient(
-                patients[0]
-            );
-
-            navigate("/dashboard");
-
+        if (path === "/reports") {
+            navigate("/reports?view=patient");
+            closeMobileSidebar();
             return;
         }
+
         navigate(path);
+        closeMobileSidebar();
     }
 
     function handleOpenProfile() {
-
-        setSelectedPatient(userResponse);
-
-        navigate("/reports");
+        navigate("/reports?view=profile");
+        closeMobileSidebar();
     }
 
     async function handleLogout() {
@@ -121,44 +133,36 @@ export default function Sidebar({ open, setOpen }) {
             await logout();
             localStorage.removeItem("token");
             navigate("/login");
+            closeMobileSidebar();
         } catch (e) {
             console.error("Erro ao fazer logout:", e);
         }
     }
 
-    async function loadNotificationCounts() {
-
+    const loadNotificationCounts = useCallback(async () => {
         try {
-
             const counts = {};
 
             for (const patient of patients) {
-
-                const total =
-                    await getUnreadEventsCount(
-                        patient.id
-                    );
-
+                const total = await getUnreadEventsCount(patient.id);
                 counts[patient.id] = total;
             }
 
             setNotificationCounts(counts);
-
         } catch (error) {
-
             console.error(error);
         }
-    }
+    }, [patients]);
 
     useEffect(() => {
-
         if (patients.length === 0) {
             return;
         }
 
-        loadNotificationCounts();
+        const timer = setTimeout(loadNotificationCounts, 0);
 
-    }, [patients.length]);
+        return () => clearTimeout(timer);
+    }, [patients.length, loadNotificationCounts]);
 
     useEffect(() => {
         async function fetchUsers() {
@@ -183,64 +187,62 @@ export default function Sidebar({ open, setOpen }) {
         }
 
         fetchUsers();
-
     }, []);
 
     useEffect(() => {
-
         function handleClickOutside(event) {
-
-            if (
-                sidebarRef.current &&
-                !sidebarRef.current.contains(event.target)
-            ) {
+            if (sidebarRef.current && !sidebarRef.current.contains(event.target)) {
                 setOpen(false);
             }
         }
 
-        document.addEventListener(
-            "mousedown",
-            handleClickOutside
-        );
+        document.addEventListener("mousedown", handleClickOutside);
 
         return () => {
-
-            document.removeEventListener(
-                "mousedown",
-                handleClickOutside
-            );
+            document.removeEventListener("mousedown", handleClickOutside);
         };
-
-    }, []);
+    }, [setOpen]);
 
     useEffect(() => {
-
         function handleNotificationsUpdated() {
-
             loadNotificationCounts();
         }
 
-        window.addEventListener(
-            "notificationsUpdated",
-            handleNotificationsUpdated
-        );
+        window.addEventListener("notificationsUpdated", handleNotificationsUpdated);
 
         return () => {
-
-            window.removeEventListener(
-                "notificationsUpdated",
-                handleNotificationsUpdated
-            );
+            window.removeEventListener("notificationsUpdated", handleNotificationsUpdated);
         };
+    }, [patients.length, loadNotificationCounts]);
 
-    }, [patients.length]);
+    const collapsedTextSx = {
+        opacity: isExpanded ? 1 : 0,
+        maxWidth: isExpanded ? 180 : 0,
+        transition: "opacity .18s ease, max-width .24s ease",
+        overflow: "hidden",
+        whiteSpace: "nowrap"
+    };
+
+    const activeItemSx = {
+        color: isDark ? "#ecfdf3" : "#102014",
+        background: isDark
+            ? "linear-gradient(135deg, rgba(34, 197, 94, 0.22) 0%, rgba(14, 165, 233, 0.16) 100%)"
+            : "linear-gradient(135deg, #dcfce7 0%, #f0fdf4 100%)",
+        borderColor: isDark ? "rgba(220, 252, 231, 0.22)" : "rgba(220, 252, 231, 0.88)",
+        boxShadow: isDark ? "0 12px 24px rgba(0, 0, 0, 0.24)" : "0 12px 24px rgba(20, 83, 45, 0.18)"
+    };
 
     return (
         <Drawer
             ref={sidebarRef}
-            variant="permanent"
-            open={open}
+            variant={isMobile ? "temporary" : "permanent"}
+            open={isMobile ? open : true}
+            onClose={() => setOpen(false)}
             onClick={(event) => {
+                if (isMobile) {
+                    return;
+                }
+
                 if (
                     event.target.closest("button") ||
                     event.target.closest("li") ||
@@ -252,11 +254,13 @@ export default function Sidebar({ open, setOpen }) {
                 }
                 setOpen(prev => !prev);
             }}
-
             sx={{
                 zIndex: (theme) => theme.zIndex.drawer + 1,
                 position: "fixed",
-                width: drawerWidth,
+                width: {
+                    xs: 0,
+                    md: drawerWidth
+                },
                 transition: "width .28s cubic-bezier(0.4, 0, 0.2, 1)",
                 overflowX: "hidden",
                 flexShrink: 0,
@@ -268,347 +272,291 @@ export default function Sidebar({ open, setOpen }) {
                     transition: "width .28s cubic-bezier(0.4, 0, 0.2, 1)",
                     overflowX: "hidden",
                     boxSizing: "border-box",
-                    borderRight: "1px solid #eee",
-                    backgroundColor: sidebarColor,
+                    borderRight: "1px solid",
+                    borderColor: isDark ? vitta.border : "rgba(220, 252, 231, 0.18)",
+                    background: isDark
+                        ? "linear-gradient(180deg, #071a12 0%, #0f2418 54%, #081f23 100%)"
+                        : "linear-gradient(180deg, #14532d 0%, #166534 52%, #0f3f2a 100%)",
+                    color: "#ffffff",
                 },
             }}
         >
-            {/* Pacientes */}
             <Box
                 sx={{
                     px: 2,
-                    py: 0,
-                    mt: 8
+                    pt: 9,
+                    pb: 2,
+                    minHeight: 0,
+                    flex: 1,
+                    overflowY: "auto"
                 }}
             >
                 {patients.length > 0 && userResponse.tipo !== "paciente" && (
-                    <Box mt={2}>
-
-                        {open && <Typography
-
+                    <Box>
+                        <Typography
                             sx={{
-                                opacity: open ? 1 : 2,
-                                width: open ? "auto" : 0,
-                                transition: "opacity .18s ease, transform .28s ease",
-                                transform:
-                                    open
-                                        ? "translateX(0)"
-                                        : "translateX(-8px)",
-                                overflow: "hidden",
-                                whiteSpace: "nowrap"
+                                ...collapsedTextSx,
+                                mb: 1,
+                                px: 1,
+                                color: "rgba(255,255,255,0.72)",
+                                fontSize: 12,
+                                fontWeight: 800,
+                                letterSpacing: "0.08em",
+                                textTransform: "uppercase"
                             }}
                         >
-                            Pacientes
-                        </Typography>}
+                            {t("nav.patients")}
+                        </Typography>
 
+                        {patients.map((patient) => {
+                            const isSelected = selectedPatient?.id === patient.id;
 
-                        <Box mt={1}>
+                            return (
+                                <Tooltip key={patient.id} title={!isExpanded ? patient.nome : ""} placement="right">
+                                    <Button
+                                        onClick={() => {
+                                            setSelectedPatient(patient);
+                                            closeMobileSidebar();
+                                        }}
+                                        fullWidth
+                                        sx={{
+                                            display: "flex",
+                                            justifyContent: isExpanded ? "flex-start" : "center",
+                                            alignItems: "center",
+                                            overflow: "hidden",
+                                            borderRadius: 2,
+                                            mb: 1,
+                                            textTransform: "none",
+                                            minHeight: 52,
+                                            px: isExpanded ? 1.5 : 0,
+                                            py: 0,
+                                            width: isExpanded ? "100%" : 48,
+                                            minWidth: isExpanded ? "100%" : 48,
+                                            maxWidth: isExpanded ? "100%" : 48,
+                                            height: 52,
+                                            color: isSelected ? activeItemSx.color : "rgba(255,255,255,0.82)",
+                                            background: isSelected ? activeItemSx.background : "rgba(255,255,255,0.06)",
+                                            border: "1px solid rgba(255,255,255,0.12)",
+                                            boxShadow: isSelected ? activeItemSx.boxShadow : "none",
+                                            fontWeight: 700,
+                                            transition: "all .2s ease",
+                                            "&:hover": {
+                                                background: isSelected
+                                                    ? activeItemSx.background
+                                                    : "rgba(255,255,255,0.12)",
+                                                transform: "translateX(2px)",
+                                            },
+                                        }}
+                                    >
+                                        <Avatar
+                                            sx={{
+                                                width: isExpanded ? 32 : 34,
+                                                height: isExpanded ? 32 : 34,
+                                                mr: isExpanded ? 1.25 : 0,
+                                                flexShrink: 0,
+                                                bgcolor: isSelected ? "primary.main" : "rgba(255,255,255,0.14)",
+                                                color: "#ffffff",
+                                                fontSize: 13,
+                                                fontWeight: 800
+                                            }}
+                                        >
+                                            {getIniciais(patient.nome)}
+                                        </Avatar>
 
-                            {patients.map((patient) => (
-                                <Button
+                                        <Typography
+                                            sx={{
+                                                display: "block",
+                                                opacity: isExpanded ? 1 : 0,
+                                                maxWidth: isExpanded ? 180 : 0,
+                                                transition: "opacity .18s ease, max-width .24s ease",
+                                                overflow: "hidden",
+                                                lineHeight: 1.2,
+                                                fontSize: patient.nome.length > 25 ? "0.85rem" : "0.95rem",
+                                                fontWeight: 700,
+                                                textAlign: "left",
+                                                whiteSpace: "nowrap",
+                                                textOverflow: "ellipsis",
+                                                wordBreak: "normal"
+                                            }}
+                                        >
+                                            {patient.nome}
+                                        </Typography>
 
-                                    key={patient.id}
-                                    onClick={() =>
-                                        setSelectedPatient(patient)
-                                    }
-                                    fullWidth
+                                        {notificationCounts[patient.id] > 0 && (
+                                            <Box
+                                                onClick={(event) => {
+                                                    event.stopPropagation();
+                                                    setSelectedPatient(patient);
+                                                    closeMobileSidebar();
+                                                    setNotificationCounts((prev) => ({
+                                                        ...prev,
+                                                        [patient.id]: 0
+                                                    }));
+                                                    navigate("/activity");
+                                                }}
+                                                sx={{
+                                                    minWidth: isExpanded ? 22 : 20,
+                                                    height: isExpanded ? 22 : 20,
+                                                    borderRadius: "999px",
+                                                    backgroundColor: "#dc2626",
+                                                    color: "#fff",
+                                                    fontSize: "0.75rem",
+                                                    fontWeight: 800,
+                                                    display: "flex",
+                                                    alignItems: "center",
+                                                    justifyContent: "center",
+                                                    px: isExpanded ? 0.8 : 0,
+                                                    ml: isExpanded ? "auto" : 0,
+                                                    position: isExpanded ? "static" : "absolute",
+                                                    top: isExpanded ? "auto" : 4,
+                                                    right: isExpanded ? "auto" : 4,
+                                                    boxShadow: "0 8px 18px rgba(220,38,38,0.28)"
+                                                }}
+                                            >
+                                                {notificationCounts[patient.id]}
+                                            </Box>
+                                        )}
+                                    </Button>
+                                </Tooltip>
+                            );
+                        })}
+                    </Box>
+                )}
+            </Box>
+
+            <Box sx={{ p: 2 }}>
+                <List sx={{ p: 0, mb: 2 }}>
+                    {filteredMenu.map((item) => {
+                        const isActive = location.pathname === item.path;
+                        const label = t(item.labelKey);
+
+                        return (
+                            <Tooltip key={item.path} title={!isExpanded ? label : ""} placement="right">
+                                <ListItemButton
+                                    onClick={() => handleNavigate(item.path)}
                                     sx={{
-                                        display: "flex",
-                                        justifyContent: open ? "flex-start" : "center",
-                                        alignItems: "center",
-                                        overflow: "hidden",
-                                        borderRadius: "16px",
+                                        borderRadius: 2,
                                         mb: 1,
-                                        textTransform: "none",
-                                        minHeight: 52,
-                                        px: open ? 2 : 0,
-                                        width: open ? "100%" : "52px",
-                                        minWidth: open ? "100%" : "52px",
-                                        height: "52px",
-                                        color:
-                                            selectedPatient?.id === patient.id
-                                                ? "#1B1B1B"
-                                                : "rgba(255,255,255,0.82)",
-
-                                        background:
-                                            selectedPatient?.id === patient.id
-                                                ? "linear-gradient(90deg, #69f08a, #F3FFE8)"
-                                                : "transparent",
-
-                                        border:
-                                            selectedPatient?.id === patient.id
-                                                ? "1px solid rgba(255,255,255,0.7)"
-                                                : "1px solid rgba(255,255,255,0.7)",
-
-                                        boxShadow:
-                                            selectedPatient?.id === patient.id
-                                                ? "0 4px 10px rgba(0,0,0,0.12)"
-                                                : "none",
-
-                                        fontWeight:
-                                            selectedPatient?.id === patient.id
-                                                ? 700
-                                                : 500,
-
+                                        minHeight: 50,
+                                        justifyContent: isExpanded ? "initial" : "center",
+                                        px: isExpanded ? 1.5 : 1.25,
+                                        color: isActive ? activeItemSx.color : "rgba(255,255,255,0.82)",
+                                        background: isActive ? activeItemSx.background : "rgba(255,255,255,0.06)",
+                                        border: "1px solid",
+                                        borderColor: isActive ? activeItemSx.borderColor : "rgba(255,255,255,0.12)",
+                                        boxShadow: isActive ? activeItemSx.boxShadow : "none",
                                         transition: "all .2s ease",
-
                                         "&:hover": {
-                                            background:
-                                                selectedPatient?.id === patient.id
-                                                    ? "linear-gradient(90deg, #69f08a, #F3FFE8)"
-                                                    : "rgba(255,255,255,0.10)",
-
+                                            background: isActive ? activeItemSx.background : "rgba(255,255,255,0.12)",
                                             transform: "translateX(2px)",
                                         },
                                     }}
                                 >
-                                    <>
-                                        {!open && (
-                                            <Typography
-                                                sx={{
-                                                    fontWeight: 700,
-                                                    fontSize: "1rem",
-                                                    color:
-                                                        selectedPatient?.id === patient.id
-                                                            ? "#1B1B1B"
-                                                            : "#FFFFFF",
-                                                }}
-                                            >
-                                                {getIniciais(patient.nome)}
-                                            </Typography>
-                                        )}
+                                    <ListItemIcon
+                                        sx={{
+                                            color: "inherit",
+                                            minWidth: 0,
+                                            mr: isExpanded ? 1.5 : 0,
+                                            justifyContent: "center",
+                                        }}
+                                    >
+                                        {item.icon}
+                                    </ListItemIcon>
 
-                                        <Tooltip title={patient.nome}>
-                                            <Typography
-                                                sx={{
-                                                    opacity: open ? 1 : 0,
-                                                    maxWidth: open ? "180px" : 0,
-                                                    transition: "all .2s ease",
-                                                    overflow: "hidden",
-                                                    whiteSpace: "normal",
-                                                    wordBreak: "break-word",
-                                                    lineHeight: 1.2,
-                                                    fontSize: patient.nome.length > 25 ? "0.85rem" : "1rem",
-                                                    fontWeight: 600,
-                                                    textAlign: "left"
-                                                }}
-                                            >
-                                                {patient.nome}
-                                            </Typography>
-                                        </Tooltip>
-
-                                    </>
-                                    {notificationCounts[patient.id] > 0 && (
-
-                                        <Box
-                                            onClick={(event) => {
-                                                event.stopPropagation();
-                                                setSelectedPatient(patient);
-                                                setNotificationCounts((prev) => ({
-                                                    ...prev,
-                                                    [patient.id]: 0
-                                                }));
-                                                navigate("/activity");
-                                            }}
-                                            sx={{
-                                                minWidth: open ? 22 : 20,
-                                                height: open ? 22 : 20,
-                                                borderRadius: "999px",
-                                                backgroundColor: "#ff3b30",
-                                                color: "#fff",
-                                                fontSize: "0.75rem",
-                                                fontWeight: 700,
-                                                display: "flex",
-                                                alignItems: "center",
-                                                justifyContent: "center",
-                                                px: open ? 0.8 : 0,
-                                                ml: open ? "auto" : 0,
-                                                boxShadow: "0 2px 8px rgba(0,0,0,0.25)",
-                                                transition: "all .22s ease"
-                                            }}
-                                        >
-                                            {
-                                                notificationCounts[patient.id]
-                                            }
-                                        </Box>
-                                    )}
-
-                                </Button>
-
-
-                            ))}
-
-                        </Box>
-
-                    </Box>
-                )}
-
-            </Box>
-
-
-
-            {/* FOOTER (user) */}
-            <Box sx={{ mt: "auto", p: 2 }}>
-
-                {/* MENU */}
-                <List sx={{}}>
-                    {filteredMenu.map((item) => {
-                        const isActive = location.pathname === item.path;
-
-                        return (
-                            <ListItemButton
-                                key={item.label}
-                                onClick={() => handleNavigate(item.path)}
-                                sx={{
-                                    borderRadius: "16px",
-                                    mb: 1,
-                                    minHeight: 52,
-                                    justifyContent: open ? "initial" : "center",
-                                    px: open ? 2 : 1.5,
-                                    color: isActive
-                                        ? "#1B1B1B"
-                                        : "rgba(255,255,255,0.82)",
-                                    background: isActive
-                                        ? "linear-gradient(90deg, #69f08a, #F3FFE8)"
-                                        : "transparent",
-                                    border: isActive
-                                        ? "1px solid rgba(255,255,255,0.7)"
-                                        : "1px solid rgba(255,255,255,0.7)",
-                                    boxShadow: isActive
-                                        ? "0 4px 10px rgba(0,0,0,0.12)"
-                                        : "none",
-                                    transition: "all .2s ease",
-                                    "&:hover": {
-                                        background: isActive
-                                            ? "linear-gradient(90deg, #69f08a, #F3FFE8)"
-                                            : "rgba(255,255,255,0.10)",
-                                        transform: "translateX(2px)",
-                                    },
-                                }}
-                            >
-                                <ListItemIcon
-                                    sx={{
-                                        color: "inherit",
-                                        minWidth: 0,
-                                        mr: open ? 2 : 0,
-                                        justifyContent: "center",
-                                    }}
-                                >
-                                    {item.icon}
-                                </ListItemIcon>
-
-                                <ListItemText
-                                    primary={item.label}
-                                    sx={{
-                                        opacity: open ? 1 : 0,
-                                        transition: "opacity .18s ease, transform .28s ease",
-                                        transform:
-                                            open
-                                                ? "translateX(0)"
-                                                : "translateX(-8px)",
-                                        whiteSpace: "nowrap",
-                                    }}
-                                />
-                            </ListItemButton>
+                                    <ListItemText
+                                        primary={label}
+                                        primaryTypographyProps={{
+                                            fontWeight: 800,
+                                            fontSize: 14
+                                        }}
+                                        sx={collapsedTextSx}
+                                    />
+                                </ListItemButton>
+                            </Tooltip>
                         );
                     })}
                 </List>
-
 
                 <Box
                     sx={{
                         display: "flex",
                         alignItems: "center",
-                        justifyContent: open ? "space-between" : "center",
-                        cursor: "pointer",
-                        borderRadius: "12px",
-                        p: 1,
-                        transition: "opacity .18s ease, transform .28s ease",
+                        justifyContent: isExpanded ? "space-between" : "center",
+                        borderRadius: 2,
+                        p: isExpanded ? 1 : 0,
+                        bgcolor: isExpanded ? "rgba(255,255,255,0.08)" : "transparent",
+                        border: isExpanded ? "1px solid rgba(255,255,255,0.12)" : "none",
                     }}
                 >
-                    <Avatar
-                        onClick={handleOpenProfile}
-                        sx={{
-                            display: "flex",
-                            alignItems: "center",
-                            justifyContent: "center",
-                            bgcolor: "rgba(255,255,255,0.14)",
-                            color: "#FFFFFF",
-                            width: open ? 52 : 42,
-                            height: open ? 52 : 42,
-                            fontWeight: 700,
-                            fontSize: open ? "1rem" : "0.9rem",
-                            border: "1px solid rgba(255,255,255,0.18)",
-                            boxShadow: "0 4px 10px rgba(0,0,0,0.12)",
-                            backdropFilter: "blur(6px)",
-                            transition: "all .2s ease",
-                            "&:hover": {
-                                transform: "scale(1.04)",
-                                bgcolor: "rgba(255,255,255,0.20)",
-                            },
-                        }}
-                    >
-                        {getIniciais(userResponse.nome)}
-                    </Avatar>
-
-                    {open && <Box
-                        sx={{
-                            flex: 1,
-                            ml: 1.5,
-                            overflow: "hidden",
-                        }}
-                    >
-
-                        {open && <Typography
+                    <Tooltip title={t("nav.openProfile")}>
+                        <Avatar
+                            onClick={handleOpenProfile}
                             sx={{
-                                opacity: open ? 1 : 0,
-                                width: open ? "auto" : 0,
-                                transition: "opacity .18s ease, transform .28s ease",
-                                transform:
-                                    open
-                                        ? "translateX(0)"
-                                        : "translateX(-8px)",
-                                overflow: "hidden",
-                                whiteSpace: "nowrap"
-                            }}
-                        >
-                            {userResponse.nome || "Usuário"}
-                        </Typography>}
-
-                        {open && <Typography
-                            sx={{
-                                opacity: open ? 1 : 0,
-                                width: open ? "auto" : 0,
-                                transition: "opacity .18s ease, transform .28s ease",
-                                transform:
-                                    open
-                                        ? "translateX(0)"
-                                        : "translateX(-8px)",
-                                overflow: "hidden",
-                                whiteSpace: "nowrap"
-                            }}
-                        >
-                            {userResponse.tipo || "Tipo de usuário"}
-                        </Typography>}
-                    </Box>
-                    }
-
-                    {
-                        open && <IconButton
-                            onClick={handleLogout}
-                            sx={{
-                                backgroundColor: "#ffe5e5",
+                                bgcolor: "rgba(255,255,255,0.16)",
+                                color: "#FFFFFF",
+                                width: isExpanded ? 44 : 42,
+                                height: isExpanded ? 44 : 42,
+                                fontWeight: 800,
+                                fontSize: isExpanded ? "0.95rem" : "0.9rem",
+                                border: "1px solid rgba(255,255,255,0.18)",
+                                boxShadow: "0 10px 20px rgba(0,0,0,0.16)",
+                                cursor: "pointer",
+                                transition: "all .2s ease",
                                 "&:hover": {
-                                    backgroundColor: "#ffd6d6",
+                                    transform: "scale(1.04)",
+                                    bgcolor: "rgba(255,255,255,0.22)",
                                 },
                             }}
                         >
-                            <LogoutIcon color="error" />
-                        </IconButton>
-                    }
+                            {getIniciais(userResponse.nome)}
+                        </Avatar>
+                    </Tooltip>
 
-                </Box >
-            </Box >
-        </Drawer >
+                    {isExpanded && (
+                        <Box sx={{ flex: 1, ml: 1.5, overflow: "hidden" }}>
+                            <Typography
+                                sx={{
+                                    fontWeight: 800,
+                                    overflow: "hidden",
+                                    whiteSpace: "nowrap",
+                                    textOverflow: "ellipsis"
+                                }}
+                            >
+                                {userResponse.nome || t("userTypes.user")}
+                            </Typography>
+
+                            <Typography
+                                sx={{
+                                    color: "rgba(255,255,255,0.68)",
+                                    fontSize: 12,
+                                    overflow: "hidden",
+                                    whiteSpace: "nowrap",
+                                    textOverflow: "ellipsis"
+                                }}
+                            >
+                                {formatUserType(userResponse.tipo)}
+                            </Typography>
+                        </Box>
+                    )}
+
+                    {isExpanded && (
+                        <Tooltip title={t("nav.logout")}>
+                            <IconButton
+                                onClick={handleLogout}
+                                sx={{
+                                    backgroundColor: "rgba(220,38,38,0.12)",
+                                    color: "#fecaca",
+                                    "&:hover": {
+                                        backgroundColor: "rgba(220,38,38,0.2)",
+                                    },
+                                }}
+                            >
+                                <LogoutIcon />
+                            </IconButton>
+                        </Tooltip>
+                    )}
+                </Box>
+            </Box>
+        </Drawer>
     );
 }

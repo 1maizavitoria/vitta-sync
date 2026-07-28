@@ -1,5 +1,6 @@
-import React, { useEffect, useState } from "react";
-import { Box, Button, Card, CardContent, Dialog, DialogTitle, DialogContent, DialogActions, Stack, Typography, ToggleButton, ToggleButtonGroup } from "@mui/material";
+import { useEffect, useState } from "react";
+import { Box, Card, CardContent, Stack, Typography, ToggleButton, ToggleButtonGroup } from "@mui/material";
+import { useTheme } from "@mui/material/styles";
 import { LocalizationProvider, TimePicker } from "@mui/x-date-pickers";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { activateReminder, deactivateReminder, getReminder, registerReminder } from "../../../services/reminderService";
@@ -8,10 +9,12 @@ import ButtonUI from "../Button";
 import DialogUI from "../Dialog";
 import { useAlert } from "../../../hooks/useAlert";
 import { usePatient } from "../../../context/PatientContext";
+import AddIcon from "@mui/icons-material/Add";
 import {
     Checkbox,
     FormControlLabel
 } from "@mui/material";
+import { useI18n } from "../../../src/i18n";
 
 const weekDays = [
     { label: "Dom", value: "Sunday" },
@@ -24,7 +27,11 @@ const weekDays = [
 ];
 
 export default function ReminderCard() {
+    const theme = useTheme();
+    const vitta = theme.vitta;
+    const isDark = theme.palette.mode === "dark";
     const { selectedPatient } = usePatient();
+    const { t } = useI18n();
 
     const { showAlert } = useAlert();
 
@@ -81,7 +88,7 @@ export default function ReminderCard() {
             selectedDay.length === 0 ||
             !time
         ) {
-            showAlert("error", "Escolha um dia e horário para o lembrete.");
+            showAlert("error", t("healthTracker.reminders.chooseDayAndTime"));
             setError(true);
             return false;
         }
@@ -93,7 +100,7 @@ export default function ReminderCard() {
 
             showAlert(
                 "error",
-                "Escolha um dia e horário para o lembrete."
+                t("healthTracker.reminders.chooseDayAndTime")
             );
 
             setError(true);
@@ -116,12 +123,11 @@ export default function ReminderCard() {
         };
 
         try {
-            const response = await registerReminder(selectedPatient.cpf, data);
+            await registerReminder(selectedPatient.cpf, data);
             const dataReminder = await getReminder(selectedPatient.cpf);
             setReminder(dataReminder);
-            console.log(response);
         } catch (error) {
-            console.log(error);
+            console.error("Erro ao salvar lembrete:", error);
         }
 
         setOpen(false);
@@ -141,11 +147,6 @@ export default function ReminderCard() {
                     );
 
                 setReminder(data);
-
-                console.log(
-                    "Lembrete obtido:",
-                    data
-                );
 
             } catch (error) {
 
@@ -207,15 +208,27 @@ export default function ReminderCard() {
         <LocalizationProvider dateAdapter={AdapterDayjs}>
             <Card
                 sx={{
-                    width: 280,
-                    borderRadius: 4,
-                    p: 1
+                    width: "100%",
+                    maxWidth: { xs: "100%", lg: 340 },
+                    borderRadius: 3,
+                    border: "1px solid",
+                    borderColor: vitta.border,
+                    boxShadow: vitta.shadow,
+                    bgcolor: "background.paper",
+                    p: 1,
+                    minWidth: 0
                 }}>
 
                 <CardContent>
 
-                    <Typography variant="h6" fontWeight="bold">
-                        Lembretes
+                    <Typography
+                        variant="h6"
+                        sx={{
+                            fontWeight: 800,
+                            color: "text.primary"
+                        }}
+                    >
+                        {t("healthTracker.reminders.title")}
                     </Typography>
 
                     <ReminderList reminder={reminder} handleToggleReminder={handleToggleReminder} />
@@ -225,9 +238,12 @@ export default function ReminderCard() {
                         onClick={() => setOpen(true)}
                         sx={{
                             mt: 2,
+                            width: "100%",
+                            justifyContent: "center"
                         }}
+                        startIcon={<AddIcon />}
                     >
-                        + Novo Lembrete
+                        {t("healthTracker.reminders.new")}
                     </ButtonUI>}
 
                 </CardContent>
@@ -236,16 +252,16 @@ export default function ReminderCard() {
             <DialogUI
                 open={open}
                 onClose={() => setOpen(false)}
-                title="Adicionar Lembrete"
+                title={t("healthTracker.reminders.addTitle")}
                 onConfirm={handleSave}
-                confirmText="Salvar"
-                cancelText="Cancelar"
+                confirmText={t("healthTracker.common.save")}
+                cancelText={t("healthTracker.common.cancel")}
             >
                 <Stack spacing={4} mt={1}>
 
                     <Box>
                         <Typography mb={2} fontWeight="bold">
-                            Dias da semana
+                            {t("healthTracker.reminders.weekDays")}
                         </Typography>
 
                         <ToggleButtonGroup
@@ -270,19 +286,21 @@ export default function ReminderCard() {
                                         textTransform: "none",
 
                                         "&.Mui-selected": {
-                                            background:
-                                                "linear-gradient(90deg, #c6eee6 0%, #b6d98e 100%)",
-                                            color: "#2b2b2b",
-                                            borderColor: "#8fcf7a",
+                                            background: isDark
+                                                ? "linear-gradient(90deg, rgba(34, 197, 94, 0.18) 0%, rgba(14, 165, 233, 0.14) 100%)"
+                                                : "linear-gradient(90deg, #c6eee6 0%, #b6d98e 100%)",
+                                            color: "text.primary",
+                                            borderColor: "primary.main",
                                         },
 
                                         "&.Mui-selected:hover": {
-                                            background:
-                                                "linear-gradient(90deg, #d4f5ee 0%, #c6e7a7 100%)",
+                                            background: isDark
+                                                ? "linear-gradient(90deg, rgba(34, 197, 94, 0.24) 0%, rgba(14, 165, 233, 0.2) 100%)"
+                                                : "linear-gradient(90deg, #d4f5ee 0%, #c6e7a7 100%)",
                                         },
                                     }}
                                 >
-                                    {day.label}
+                                    {t(`healthTracker.reminders.days.${day.value}`)}
                                 </ToggleButton>
                             ))}
                         </ToggleButtonGroup>
@@ -290,11 +308,11 @@ export default function ReminderCard() {
 
                     <Box>
                         <Typography mb={2} fontWeight="bold">
-                            Horário
+                            {t("healthTracker.reminders.time")}
                         </Typography>
 
                         <TimePicker
-                            label="Escolha o horário"
+                            label={t("healthTracker.reminders.chooseTime")}
                             value={time}
                             onChange={(newValue) => {
                                 setTime(newValue);
@@ -318,7 +336,7 @@ export default function ReminderCard() {
                             mb={2}
                             fontWeight="bold"
                         >
-                            Canal de envio
+                            {t("healthTracker.reminders.channel")}
                         </Typography>
 
                         <ToggleButtonGroup
@@ -345,7 +363,7 @@ export default function ReminderCard() {
                             </ToggleButton>
 
                             <ToggleButton value="AMBOS">
-                                Ambos
+                                {t("healthTracker.reminders.both")}
                             </ToggleButton>
 
                         </ToggleButtonGroup>

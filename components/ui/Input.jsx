@@ -1,6 +1,7 @@
 import { Visibility, VisibilityOff } from '@mui/icons-material';
 import { IconButton, InputAdornment } from '@mui/material';
 import TextField from '@mui/material/TextField';
+import { useTheme } from '@mui/material/styles';
 import { useState } from 'react';
 
 export default function InputUI({
@@ -13,6 +14,8 @@ export default function InputUI({
     showPasswordToggle = false,
     ...props
 }) {
+    const theme = useTheme();
+    const isDark = theme.palette.mode === "dark";
     const [showPassword, setShowPassword] = useState(false);
 
     const isPassword = type === "password";
@@ -20,6 +23,7 @@ export default function InputUI({
         showPasswordToggle && isPassword
             ? (showPassword ? "text" : "password")
             : type;
+
     return (
         <TextField
             label={label}
@@ -32,22 +36,26 @@ export default function InputUI({
             size="small"
             placeholder={placeholder}
             {...props}
-
             sx={{
                 ...props.sx,
 
                 '& .MuiInputLabel-root': {
+                    color: 'text.secondary',
                     transform: 'translate(14px, 9px) scale(1)',
-                    // posição inicial
                 },
 
                 '& .MuiInputLabel-root.Mui-focused, & .MuiInputLabel-root.MuiFormLabel-filled': {
-                    transform: 'translate(10px, -20px) scale(0.85)', // quando sobe
-                    // backgroundColor: '#fff', // evita sobrepor a borda
+                    color: 'primary.main',
+                    transform: 'translate(10px, -18px) scale(0.85)',
+                    backgroundColor: 'background.paper',
                     padding: '0 4px',
                 },
 
                 '& .MuiOutlinedInput-root': {
+                    position: 'relative',
+                    borderRadius: 2,
+                    backgroundColor: isDark ? 'rgba(220, 252, 231, 0.06)' : 'rgba(22, 163, 74, 0.06)',
+                    transition: 'all 0.2s ease',
 
                     '& .MuiOutlinedInput-input': {
                         whiteSpace: 'nowrap',
@@ -55,56 +63,28 @@ export default function InputUI({
                         textOverflow: 'ellipsis',
                     },
 
-                    position: 'relative',
-                    borderRadius: '30px',
-                    backgroundColor: '#e0e0e0', // cinza padrão
-
-                    transition: 'all 0.5s ease',
-
                     '& fieldset': {
-                        border: '1px solid transparent',
+                        borderColor: theme.vitta.border,
                     },
 
-                    // 🔵 borda gradiente (hover + focus)
-                    '&:hover::before, &.Mui-focused::before': {
-                        content: '""',
-                        position: 'absolute',
-                        inset: 0,
-                        borderRadius: '30px',
-                        padding: '1.5px',
-
-                        background: 'linear-gradient(to right, #00b7ff, #00ff55)',
-
-                        WebkitMask:
-                            'linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)',
-                        WebkitMaskComposite: 'xor',
-                        maskComposite: 'exclude',
-
-                        pointerEvents: 'none',
-                    },
-
-                    // 🟢 foco / interação
                     '&.Mui-focused': {
-                        backgroundColor: '#ffffff',
-
-                        // 🔽 sombra interna (afundado)
-                        boxShadow: 'inset 0px 2px 10px rgba(0,0,0,0.2)',
+                        backgroundColor: 'background.paper',
+                        boxShadow: isDark ? '0 0 0 4px rgba(34, 197, 94, 0.12)' : '0 0 0 4px rgba(22, 163, 74, 0.12)',
 
                         '& fieldset': {
-                            border: '1px solid #bdbdbd',
+                            borderColor: 'primary.main',
                         }
                     },
 
-                    // hover (opcional)
                     '&:hover': {
-                        backgroundColor: '#eeeeee',
-                        // 🔽 sombra interna (afundado)
-                        boxShadow: '0px 5px 15px -2px #4e4e4e',
-                    }
+                        backgroundColor: 'background.paper',
 
+                        '& fieldset': {
+                            borderColor: 'primary.main',
+                        }
+                    }
                 },
             }}
-
             slotProps={{
                 htmlInput: { maxLength: limit },
                 input: {
@@ -125,7 +105,6 @@ export default function InputUI({
                                 </IconButton>
                             </InputAdornment>
                         ) : props.slotProps?.input?.endAdornment || null
-
                 }
             }}
         />

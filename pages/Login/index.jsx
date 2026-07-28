@@ -1,27 +1,32 @@
-import { Container, Box, Button, Grid, Paper, Tooltip, Typography, Radio, RadioGroup, FormControlLabel, FormLabel } from "@mui/material";
-import ButtonUI from "../../components/ui/Button";
+import { Box, Container, FormControlLabel, FormLabel, IconButton, Paper, Radio, RadioGroup, Stack, Tooltip, Typography } from "@mui/material";
+import ArrowBackIcon from "@mui/icons-material/ArrowBack";
+import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
+import MonitorHeartOutlinedIcon from "@mui/icons-material/MonitorHeartOutlined";
+import { useTheme } from "@mui/material/styles";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import InputUI from "../../components/ui/Input";
+
+import ButtonUI from "../../components/ui/Button";
 import DialogUI from "../../components/ui/Dialog";
+import InputUI from "../../components/ui/Input";
 import LinkUI from "../../components/ui/Link";
-import { login, validadeCode, validadeCodePassword, changePassword } from "../../services/userService"
+import PasswordTooltip from "../../components/ui/Tooltip";
+import { useAlert } from "../../hooks/useAlert";
+import { useI18n } from "../../src/i18n";
+import { changePassword, login, validadeCode, validadeCodePassword } from "../../services/userService"
 import { formatCPF, isValidCpf } from "../../utils/formatters/formatCPF";
 import { isValidEmail } from "../../utils/formatters/formatEmail";
-import { useAlert } from "../../hooks/useAlert";
-
-// import { usePatient } from "../../context/PatientContext";
-
-import { validatePassword } from "../../utils/validators/passwordValidator";
-import PasswordTooltip from "../../components/ui/Tooltip";
-
 import { isTokenExpired } from "../../utils/auth/auth";
+import { validatePassword } from "../../utils/validators/passwordValidator";
 
 export default function Login() {
     const { showAlert } = useAlert();
+    const { t } = useI18n();
+    const theme = useTheme();
+    const vitta = theme.vitta;
+    const isDark = theme.palette.mode === "dark";
 
     const [channel, setChannel] = useState("email");
-
     const [openForgotDialog, setOpenForgotDialog] = useState(false);
     const [openLoginDialog, setOpenLoginDialog] = useState(false);
 
@@ -39,7 +44,6 @@ export default function Login() {
     const [loadingForgotPassword, setLoadingForgotPassword] = useState(false);
     const [loadingChangePassword, setLoadingChangePassword] = useState(false);
 
-    // estado exclusivo do dialog de troca de senha
     const [forgotError, setForgotError] = useState(false);
     const [forgotErrorCode, setForgotErrorCode] = useState(false);
     const [forgotEmailError, setForgotEmailError] = useState(false);
@@ -48,48 +52,39 @@ export default function Login() {
     const [forgotCode, setForgotCode] = useState("");
     const [forgotNewPassword, setForgotNewPassword] = useState("");
 
-    // Estado para controlar o tempo de reenvio do código
     const [seconds, setSeconds] = useState(0);
     const disabled = seconds > 0;
 
-    // Regras de validação da senha para o tooltip
     const rulesPassword = validatePassword(forgotNewPassword);
-
     const navigate = useNavigate();
 
     const canLogin = () => {
         if (CPF === "" || password === "") {
             setErrorCPF(CPF === "");
             setErrorPassword(password === "");
-            showAlert("error", "Preencha todos os campos");
+            showAlert("error", t("messages.fillAll"));
             return false;
         }
 
         if (!isValidCpf(CPF)) {
             setErrorCPF(true);
-            showAlert("error", "CPF incorreto");
+            showAlert("error", t("messages.wrongCpf"));
             return false;
         }
 
         setErrorCPF(false);
         setErrorPassword(false);
-        // showAlert("success", "Sucesso");
         return true;
-
     };
 
-    function getChannelMessage(channel) {
-
-        switch (channel) {
-
+    function getChannelMessage(selectedChannel) {
+        switch (selectedChannel) {
             case "sms":
-                return "Um código foi enviado por SMS";
-
+                return t("messages.codeBySms");
             case "ambos":
-                return "Um código foi enviado por email e SMS";
-
+                return t("messages.codeByBoth");
             default:
-                return "Um código foi enviado para seu email";
+                return t("messages.codeByEmail");
         }
     }
 
@@ -103,13 +98,11 @@ export default function Login() {
 
         login(data)
             .then(() => {
-                // sucesso → abre popup e mostra aviso
                 setOpenLoginDialog(true);
                 showAlert("success", getChannelMessage(channel));
             })
             .catch((error) => {
-                // erro → não abre popup, mostra alerta
-                showAlert("error", "CPF ou senha inválidos");
+                showAlert("error", t("messages.invalidLogin"));
                 console.error(error);
             })
             .finally(() => {
@@ -122,46 +115,33 @@ export default function Login() {
 
         if (code === "") {
             setErrorLoginCode(true);
-            showAlert("error", "Coloque o código enviado por email");
+            showAlert("error", t("messages.typeSentCode"));
             return;
         }
 
         setLoadingValidateCode(true);
 
-        const data = {
-            codigo: code,
-        };
-
         try {
-            const response = await validadeCode(data);
+            const response = await validadeCode({ codigo: code });
             const token = response;
 
             localStorage.setItem("token", token);
             localStorage.setItem("CPF", CPF);
             setOpenLoginDialog(false);
-            const redirect =
-                new URLSearchParams(
-                    location.search
-                ).get("redirect");
+            const redirect = new URLSearchParams(location.search).get("redirect");
 
-            navigate(
-                redirect || "/dashboard"
-            );
-
+            navigate(redirect || "/dashboard");
         } catch (error) {
             console.log(error);
             setErrorCode(true);
             setErrorLoginCode(true);
-            showAlert("error", "Código inválido");
-
+            showAlert("error", t("messages.invalidCode"));
         } finally {
             setLoadingValidateCode(false);
-
         }
     }
 
     async function handleResendCode() {
-
         if (!canLogin()) return;
 
         const data = {
@@ -174,26 +154,24 @@ export default function Login() {
             showAlert("success", getChannelMessage(channel));
             setSeconds(10);
             await login(data);
-
         } catch (error) {
             setErrorCPF(true);
             setErrorPassword(true);
-            showAlert("error", "CPF ou senha inválidos");
+            showAlert("error", t("messages.invalidLogin"));
             console.error(error);
         }
-
     }
 
     const sendEmail = (email) => {
         if (!email) {
             setForgotEmailError(true);
-            showAlert("error", "Preencha o email");
-            return;
+            showAlert("error", t("messages.fillEmail"));
+            return false;
         }
 
         if (!isValidEmail(email)) {
             setForgotEmailError(true);
-            showAlert("error", "Email incorreto");
+            showAlert("error", t("messages.invalidEmail"));
             return false;
         }
 
@@ -201,9 +179,7 @@ export default function Login() {
     };
 
     async function handleValidateCodePassword(emailParam) {
-
         if (loadingForgotPassword) return;
-
         if (!sendEmail(emailParam)) return;
 
         setLoadingForgotPassword(true);
@@ -212,48 +188,44 @@ export default function Login() {
 
         try {
             await validadeCodePassword(data);
-            showAlert("success", "Um código foi enviado para seu email");
-            setForgotEmailError(true);
+            showAlert("success", t("messages.codeByEmail"));
+            setForgotEmailError(false);
             setForgotEmailConfirm(true);
-
         } catch (error) {
             console.log(error);
             setForgotEmailError(true);
-            showAlert("error", "Erro ao Enviar o código");
+            showAlert("error", t("messages.codeSendError"));
             setForgotEmailConfirm(false);
         } finally {
             setLoadingForgotPassword(false);
         }
     }
 
-    const canChangePassword = (code, newPassword) => {
-
-        if (!code || !newPassword) {
+    const canChangePassword = (nextCode, newPassword) => {
+        if (!nextCode || !newPassword) {
             setForgotError(true);
-            showAlert("error", "Preencha todos os campos");
-            return;
+            showAlert("error", t("messages.fillAll"));
+            return false;
         }
 
         if (!rulesPassword.isValid) {
             setForgotError(true);
-            showAlert("error", "Verifique as regras de senha");
+            showAlert("error", t("messages.passwordRules"));
             return false;
         }
 
         setForgotError(false);
         return true;
-
     };
 
-    async function handleChangeCodePassword({ code, newPassword }) {
+    async function handleChangeCodePassword({ code: nextCode, newPassword }) {
         if (loadingChangePassword) return;
-
-        if (!canChangePassword(code, newPassword)) return;
+        if (!canChangePassword(nextCode, newPassword)) return;
 
         setLoadingChangePassword(true);
 
         const data = {
-            codigo: code,
+            codigo: nextCode,
             novaSenha: newPassword
         };
 
@@ -261,25 +233,19 @@ export default function Login() {
             await changePassword(data);
 
             setOpenForgotDialog(false);
-            setForgotError(true);
-            setForgotEmailConfirm(false);
-
-            showAlert("success", "Senha alterada com sucesso");
-
-            setOpenForgotDialog(false);
             setForgotError(false);
             setForgotErrorCode(false);
-            setForgotError(false);
             setForgotEmailError(false);
             setForgotEmailConfirm(false);
             setForgotCode("");
             setForgotEmail("");
             setForgotNewPassword("");
 
+            showAlert("success", t("messages.passwordChanged"));
         } catch (error) {
             console.log(error)
             setForgotError(true);
-            showAlert("error", "Erro ao trocar senha");
+            showAlert("error", t("messages.passwordChangeError"));
         } finally {
             setLoadingChangePassword(false);
         }
@@ -293,7 +259,6 @@ export default function Login() {
         }, 1000);
 
         return () => clearTimeout(timer);
-
     }, [seconds]);
 
     useEffect(() => {
@@ -302,306 +267,257 @@ export default function Login() {
         if (token && !isTokenExpired(token)) {
             navigate("/dashboard");
         }
-    }, []);
+    }, [navigate]);
 
     return (
-        <Box
-            sx={{
-                minHeight: "50vh",
-                display: "flex",
-                justifyContent: "center",
-                alignItems: "center"
-            }}
-        >
-            <Container maxWidth="sm">
+        <Container maxWidth="lg">
+            <Box
+                sx={{
+                    minHeight: "calc(100vh - 150px)",
+                    display: "grid",
+                    gridTemplateColumns: { xs: "1fr", md: "0.9fr 1.1fr" },
+                    alignItems: "center",
+                    gap: { xs: 4, md: 7 },
+                    py: { xs: 4, md: 6 }
+                }}
+            >
+                <Box sx={{ display: { xs: "none", md: "block" } }}>
+                    <Box
+                        sx={{
+                            width: 64,
+                            height: 64,
+                            borderRadius: 3,
+                            display: "grid",
+                            placeItems: "center",
+                            color: "#ffffff",
+                            background: "linear-gradient(135deg, #16a34a 0%, #0f766e 72%, #0ea5e9 100%)",
+                            mb: 3
+                        }}
+                    >
+                        <MonitorHeartOutlinedIcon sx={{ fontSize: 34 }} />
+                    </Box>
+                    <Typography sx={{ fontSize: { md: 44, lg: 54 }, lineHeight: 1.05, fontWeight: 800, mb: 2 }}>
+                        {t("auth.loginTitle")}
+                    </Typography>
+                    <Typography sx={{ color: "text.secondary", fontSize: 18, lineHeight: 1.7, maxWidth: 460 }}>
+                        {t("auth.loginSubtitle")}
+                    </Typography>
+                </Box>
+
                 <Paper
-                    elevation={5}
+                    elevation={0}
                     sx={{
                         width: "100%",
-                        maxWidth: 420,
-                        mx: "auto",
+                        maxWidth: 460,
+                        justifySelf: "center",
                         borderRadius: 3,
-                        p: { xs: 2, sm: 3, md: 4 }
+                        p: { xs: 2.5, sm: 4 },
+                        border: "1px solid",
+                        borderColor: vitta.border,
+                        bgcolor: "background.paper",
+                        boxShadow: vitta.shadow
                     }}
                 >
-
-                    <Box
-                        display="flex"
-                        flexDirection="column"
-                        alignItems="center"
-                        gap={2}
-
+                    <IconButton
+                        aria-label="Voltar para início"
+                        onClick={() => navigate("/")}
+                        sx={{
+                            mb: 1,
+                            color: "primary.main",
+                            bgcolor: isDark ? "rgba(34, 197, 94, 0.12)" : "rgba(22, 163, 74, 0.08)",
+                            "&:hover": {
+                                bgcolor: isDark ? "rgba(34, 197, 94, 0.18)" : "rgba(22, 163, 74, 0.14)"
+                            }
+                        }}
                     >
-                        <Box textAlign="center" mb={2}>
-                            <Typography
-                                sx={{
-                                    fontFamily: 'Inter, sans-serif',
-                                    fontWeight: 600,
-                                    fontSize: '28px',
-                                    color: '#1a1a1a',
-                                    letterSpacing: '0.5px',
-                                }}
-                            >
-                                Vitta<span style={{ fontWeight: 400 }}>Sync</span>
-                            </Typography>
+                        <ArrowBackIcon />
+                    </IconButton>
 
-                            <Typography
-                                sx={{
-                                    fontFamily: 'Inter, sans-serif',
-                                    fontWeight: 500,
-                                    fontSize: '20px',
-                                    color: '#4a4a4a',
-                                    mt: 0.5,
-                                }}
-                            >
-                                Login
-                            </Typography>
-                        </Box>
-
-                        <InputUI
-                            label="CPF"
-                            placeholder="999.999.999-99"
-                            limit={14}
-                            error={errorCPF}
-                            value={formatCPF(CPF)}
-                            onChange={(e) => (
-                                setCPF(e.target.value.replace(/\D/g, "")),
-                                setErrorCPF(false),
-                                setOpenForgotDialog(false)
-                            )}
-                        />
-
-                        <InputUI
-                            label="Senha"
-                            placeholder="Digite sua senha"
-                            type="password"
-                            error={errorPassword}
-                            showPasswordToggle={true}
-                            value={password}
-                            onChange={(e) => (
-                                setPassword(e.target.value),
-                                setErrorPassword(false)
-                            )}
-                        />
-
-                        <Box width="100%">
-                            <FormLabel
-                                sx={{
-                                    fontSize: "14px",
-                                    color: "#4a4a4a",
-                                    fontFamily: "Inter, sans-serif",
-                                }}
-                            >
-                                Receber código por
-                            </FormLabel>
-
-                            <RadioGroup
-                                row
-                                value={channel}
-                                onChange={(e) => setChannel(e.target.value)}
-                            >
-                                <FormControlLabel
-                                    value="email"
-                                    control={<Radio size="small" />}
-                                    label="Email"
-                                />
-
-                                <FormControlLabel
-                                    value="sms"
-                                    control={<Radio size="small" />}
-                                    label="SMS"
-                                />
-
-                                {/* <FormControlLabel
-                                        value="ambos"
-                                        control={<Radio size="small" />}
-                                        label="Ambos"
-                                    /> */}
-                            </RadioGroup>
-                        </Box>
-
-                        <ButtonUI
-                            onClick={handleLogin}
-                            disabled={loadingLogin}
-                        >
-                            {loadingLogin ? "Entrando..." : "Entrar"}
-                        </ButtonUI>
-
-                        <LinkUI onClick={() => (
-                            setOpenForgotDialog(true)
-                        )}
-                            variant="action"
-                        >
-                            Esqueceu a senha ?
-                        </LinkUI>
-
-                        <p style={{ fontFamily: 'Inter, sans-serif', fontSize: '14px' }}>
-                            Não tem conta?
-                            <LinkUI to="/register" variant="action">
-                                Cadastrar
-                            </LinkUI>
-                        </p>
-
-                        {/* Diálogo pra varificação de 2 fatores na trocar de senha */}
-                        <DialogUI
-                            title={"Trocar de senha"}
-                            disabledConfirm={
-                                loadingChangePassword || !forgotEmailConfirm
-                            }
-                            disabledClose={
-                                loadingForgotPassword || loadingChangePassword
-                            }
-                            open={openForgotDialog}
-                            confirmText={
-                                loadingChangePassword
-                                    ? "Alterando..."
-                                    : "Confirmar"
-                            }
-                            onClose={() => (
-                                setOpenForgotDialog(false),
-                                setForgotError(false),
-                                setForgotErrorCode(false),
-                                setForgotError(false),
-                                setForgotEmailError(false),
-                                setForgotEmailConfirm(false),
-                                setForgotCode(""),
-                                setForgotEmail(""),
-                                setForgotNewPassword("")
-                            )}
-                            disabledConfirm={!forgotEmailConfirm}
-                            onConfirm={() => {
-                                handleChangeCodePassword({
-                                    code: forgotCode,
-                                    newPassword: forgotNewPassword,
-                                });
+                    <Stack alignItems="center" spacing={1} sx={{ mb: 2 }}>
+                        <Box
+                            sx={{
+                                width: 48,
+                                height: 48,
+                                borderRadius: 2,
+                                display: "grid",
+                                placeItems: "center",
+                                color: "primary.main",
+                                bgcolor: isDark ? "rgba(34, 197, 94, 0.14)" : "rgba(22, 163, 74, 0.12)"
                             }}
                         >
-                            {!forgotEmailConfirm && <Box
-                                sx={{
-                                    display: "flex",
-                                    flexDirection: { xs: "column", sm: "row" },
-                                    gap: 2,
-                                    alignItems: "center"
-                                }}
-                            >
+                            <LockOutlinedIcon />
+                        </Box>
+                        <Typography sx={{ fontWeight: 800, fontSize: 26 }}>
+                            {t("brand")}
+                        </Typography>
+                        <Typography sx={{ color: "text.secondary", textAlign: "center" }}>
+                            {t("auth.loginSubtitle")}
+                        </Typography>
+                    </Stack>
+
+                    <InputUI
+                        label={t("auth.cpf")}
+                        placeholder={t("auth.placeholders.cpf")}
+                        limit={14}
+                        error={errorCPF}
+                        value={formatCPF(CPF)}
+                        onChange={(e) => (
+                            setCPF(e.target.value.replace(/\D/g, "")),
+                            setErrorCPF(false),
+                            setOpenForgotDialog(false)
+                        )}
+                    />
+
+                    <InputUI
+                        label={t("auth.password")}
+                        placeholder={t("auth.placeholders.password")}
+                        type="password"
+                        error={errorPassword}
+                        showPasswordToggle={true}
+                        value={password}
+                        onChange={(e) => (
+                            setPassword(e.target.value),
+                            setErrorPassword(false)
+                        )}
+                    />
+
+                    <Box width="100%" sx={{ mt: 1 }}>
+                        <FormLabel sx={{ fontSize: 14, color: "text.secondary", fontWeight: 600 }}>
+                            {t("auth.receiveCodeBy")}
+                        </FormLabel>
+
+                        <RadioGroup row value={channel} onChange={(e) => setChannel(e.target.value)}>
+                            <FormControlLabel value="email" control={<Radio size="small" />} label="Email" />
+                            <FormControlLabel value="sms" control={<Radio size="small" />} label="SMS" />
+                        </RadioGroup>
+                    </Box>
+
+                    <ButtonUI onClick={handleLogin} disabled={loadingLogin} sx={{ width: "100%", mt: 2 }}>
+                        {loadingLogin ? t("auth.loggingIn") : t("auth.loginAction")}
+                    </ButtonUI>
+
+                    <Stack spacing={1.5} alignItems="center" sx={{ mt: 2 }}>
+                        <LinkUI onClick={() => setOpenForgotDialog(true)} variant="action">
+                            {t("auth.forgotPassword")}
+                        </LinkUI>
+
+                        <Typography sx={{ fontSize: 14, color: "text.secondary" }}>
+                            {t("auth.noAccount")}
+                            <LinkUI to="/register" variant="action">
+                                {t("auth.registerAction")}
+                            </LinkUI>
+                        </Typography>
+                    </Stack>
+
+                    <DialogUI
+                        title={t("auth.changePassword")}
+                        disabledClose={loadingForgotPassword || loadingChangePassword}
+                        disabledConfirm={loadingChangePassword || !forgotEmailConfirm}
+                        open={openForgotDialog}
+                        confirmText={loadingChangePassword ? t("auth.changing") : t("auth.confirm")}
+                        onClose={() => (
+                            setOpenForgotDialog(false),
+                            setForgotError(false),
+                            setForgotErrorCode(false),
+                            setForgotEmailError(false),
+                            setForgotEmailConfirm(false),
+                            setForgotCode(""),
+                            setForgotEmail(""),
+                            setForgotNewPassword("")
+                        )}
+                        onConfirm={() => {
+                            handleChangeCodePassword({
+                                code: forgotCode,
+                                newPassword: forgotNewPassword,
+                            });
+                        }}
+                    >
+                        {!forgotEmailConfirm && (
+                            <Box sx={{ display: "flex", flexDirection: { xs: "column", sm: "row" }, gap: 2, alignItems: "center" }}>
                                 <InputUI
-                                    label="Email"
+                                    label={t("auth.email")}
                                     style={{ flex: 1 }}
                                     error={forgotEmailError && (forgotEmail === "" || !isValidEmail(forgotEmail))}
                                     type="text"
-                                    placeholder="Digite seu email"
+                                    placeholder={t("auth.placeholders.email")}
                                     value={forgotEmail}
                                     onChange={(e) => setForgotEmail(e.target.value)}
                                 />
 
-                                <ButtonUI
-                                    disabled={loadingForgotPassword}
-                                    onClick={() => handleValidateCodePassword(forgotEmail)}
-                                >
-                                    {
-                                        loadingForgotPassword
-                                            ? "Enviando..."
-                                            : "Enviar Código"
-                                    }
+                                <ButtonUI disabled={loadingForgotPassword} onClick={() => handleValidateCodePassword(forgotEmail)}>
+                                    {loadingForgotPassword ? t("auth.sending") : t("auth.sendCode")}
                                 </ButtonUI>
-                            </Box>}
+                            </Box>
+                        )}
 
-                            {forgotEmailConfirm && <InputUI
-                                label="Código"
+                        {forgotEmailConfirm && (
+                            <InputUI
+                                label={t("auth.code")}
                                 error={forgotError && (forgotCode === "" || forgotErrorCode)}
                                 type="text"
-                                placeholder="Digite o código"
+                                placeholder={t("auth.placeholders.code")}
                                 value={forgotCode}
                                 onChange={(e) => setForgotCode(e.target.value)}
-                            />}
+                            />
+                        )}
 
-                            {forgotEmailConfirm && <Tooltip
-                                title={<PasswordTooltip rules={rulesPassword} />}
-                                placement="right"
-                                arrow
-                            >
+                        {forgotEmailConfirm && (
+                            <Tooltip title={<PasswordTooltip rules={rulesPassword} />} placement="right" arrow>
                                 <InputUI
-                                    label="Nova senha"
+                                    label={t("auth.newPassword")}
                                     error={forgotError && (forgotNewPassword === "" || !rulesPassword.isValid)}
                                     type="password"
-                                    placeholder="Digite sua nova senha"
+                                    placeholder={t("auth.placeholders.newPassword")}
                                     showPasswordToggle={true}
                                     value={forgotNewPassword}
-                                    onChange={(e) => {
-                                        setForgotNewPassword(e.target.value)
-                                    }}
+                                    onChange={(e) => setForgotNewPassword(e.target.value)}
                                 />
-                            </Tooltip>}
+                            </Tooltip>
+                        )}
+                    </DialogUI>
 
-                        </DialogUI>
-
-                        {/* Diálogo para de verificação de 2 fatores no login */}
-                        <DialogUI
-                            disabledClose={loadingValidateCode}
-                            disabledConfirm={loadingValidateCode}
-                            confirmText={
-                                loadingValidateCode
-                                    ? "Validando..."
-                                    : "Confirmar"
+                    <DialogUI
+                        disabledClose={loadingValidateCode}
+                        disabledConfirm={loadingValidateCode}
+                        confirmText={loadingValidateCode ? t("auth.validating") : t("auth.confirm")}
+                        open={openLoginDialog}
+                        onClose={() => (
+                            setOpenLoginDialog(false),
+                            setErrorLoginCode(false),
+                            setErrorCode(false),
+                            setCode("")
+                        )}
+                        title={t("auth.typeCode")}
+                        onConfirm={() => {
+                            if (!code) {
+                                setErrorLoginCode(true);
+                                showAlert("error", t("messages.typeSentCode"));
+                                return;
                             }
-                            open={openLoginDialog}
-                            onClose={() => (
-                                setOpenLoginDialog(false),
-                                setErrorLoginCode(false),
-                                setErrorCode(false),
-                                setCode("")
-                            )}
-                            title={"Digite seu código"}
-                            onConfirm={() => {
 
-                                if (!code) {
-
-                                    setErrorLoginCode(true);
-                                    showAlert("error", "Digite o código enviado");
-                                    return;
-                                }
-
-                                handleValidateCode();
-                            }}
-                        >
-
-                            <Box
-                                sx={{
-                                    display: "flex",
-                                    flexDirection: { xs: "column", sm: "row" },
-                                    gap: 2,
-                                    alignItems: "center"
+                            handleValidateCode();
+                        }}
+                    >
+                        <Box sx={{ display: "flex", flexDirection: { xs: "column", sm: "row" }, gap: 2, alignItems: "center" }}>
+                            <InputUI
+                                type="text"
+                                error={errorLoginCode || errorCode}
+                                placeholder={t("auth.placeholders.code")}
+                                value={code}
+                                onChange={(e) => {
+                                    setCode(e.target.value);
+                                    setErrorLoginCode(false);
+                                    setErrorCode(false);
                                 }}
-                            >
-                                <InputUI
-                                    type="text"
-                                    error={errorLoginCode || errorCode}
-                                    placeholder="Digite o código"
-                                    value={code}
-                                    onChange={(e) => {
-                                        setCode(e.target.value);
-                                        setErrorLoginCode(false);
-                                        setErrorCode(false);
-                                    }}
+                            />
 
-                                />
-
-                                <ButtonUI
-                                    minWidth="180px"
-                                    disabled={disabled}
-                                    onClick={handleResendCode}
-
-                                >
-                                    {disabled ? `Aguarde ${seconds}s` : "Reenviar Código"}
-                                </ButtonUI>
-
-                            </Box>
-                        </DialogUI>
-
-                    </Box>
-                </Paper >
-            </Container>
-        </Box >
+                            <ButtonUI minWidth="180px" disabled={disabled} onClick={handleResendCode}>
+                                {disabled ? `${t("auth.wait")} ${seconds}s` : t("auth.resendCode")}
+                            </ButtonUI>
+                        </Box>
+                    </DialogUI>
+                </Paper>
+            </Box>
+        </Container>
     )
-
 }

@@ -1,6 +1,7 @@
 import { Box, Typography, IconButton, Button, TextField, Stack, Chip, Skeleton, Tabs, Tab } from "@mui/material";
+import { useTheme } from "@mui/material/styles";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 import { useAlert } from "../../hooks/useAlert";
 import { getLinksByPatientId, removeLink, generateLinkCode, joinWithCode, sendInviteEmail } from "../../services/linkService";
@@ -23,14 +24,19 @@ import { usePatient } from "../../context/PatientContext";
 import AutocompleteUI from "../../components/ui/Autocomplete";
 
 import {
-    funcoesGrupo, funcoesMedico, getResponsavelStyle,
+    funcoesGrupo, funcoesMedico, getResponsavelStyle, translateFunctionOptions,
     getMedicoStyle
 } from "../../utils/validators/userFunction";
+import { useI18n } from "../../src/i18n";
 
 export default function PatientHub() {
 
     const navigate = useNavigate();
     const { showAlert } = useAlert();
+    const theme = useTheme();
+    const vitta = theme.vitta;
+    const isDark = theme.palette.mode === "dark";
+    const { t } = useI18n();
 
     const {
         selectedPatient,
@@ -72,12 +78,14 @@ export default function PatientHub() {
                 userType?.toLowerCase()
             );
 
-    const opcoesFuncao =
+    const baseOpcoesFuncao =
         userType?.toLowerCase() === "saude"
             ? funcoesMedico
             : funcoesGrupo;
 
-    async function loadLinks() {
+    const opcoesFuncao = translateFunctionOptions(baseOpcoesFuncao, t);
+
+    const loadLinks = useCallback(async () => {
         if (!selectedPatient?.id) {
             return;
         }
@@ -97,14 +105,14 @@ export default function PatientHub() {
 
             showAlert(
                 "error",
-                "Erro ao carregar vínculos"
+                t("patientHub.alerts.loadLinksError")
             );
 
         } finally {
 
             setLoading(false);
         }
-    }
+    }, [selectedPatient?.id, showAlert, t]);
 
     async function handleRemoveLink(id) {
         try {
@@ -126,7 +134,7 @@ export default function PatientHub() {
 
             showAlert(
                 "success",
-                "Vínculo removido com sucesso"
+                t("patientHub.alerts.linkRemovedSuccess")
             );
 
         } catch (error) {
@@ -135,7 +143,7 @@ export default function PatientHub() {
 
             showAlert(
                 "error",
-                "Erro ao remover vínculo"
+                t("patientHub.alerts.removeLinkError")
             );
         }
     }
@@ -160,7 +168,7 @@ export default function PatientHub() {
 
             showAlert(
                 "warning",
-                "Selecione um paciente"
+                t("patientHub.alerts.selectPatient")
             );
 
             return;
@@ -180,7 +188,7 @@ export default function PatientHub() {
 
             showAlert(
                 "error",
-                "Erro ao gerar código"
+                t("patientHub.alerts.generateCodeError")
             );
         }
     }
@@ -193,7 +201,7 @@ export default function PatientHub() {
 
             showAlert(
                 "success",
-                "Copiado com sucesso"
+                t("patientHub.alerts.copiedSuccess")
             );
 
         } catch (error) {
@@ -202,7 +210,7 @@ export default function PatientHub() {
 
             showAlert(
                 "error",
-                "Erro ao copiar"
+                t("patientHub.alerts.copyError")
             );
         }
     }
@@ -219,7 +227,7 @@ export default function PatientHub() {
 
             showAlert(
                 "warning",
-                "Selecione uma função no grupo"
+                t("patientHub.alerts.selectRole")
             );
 
             return;
@@ -239,7 +247,7 @@ export default function PatientHub() {
 
             showAlert(
                 "success",
-                "Vínculo criado com sucesso"
+                t("patientHub.alerts.linkCreatedSuccess")
             );
 
             setOpenJoinModal(false);
@@ -254,7 +262,7 @@ export default function PatientHub() {
 
             showAlert(
                 "error",
-                "Código inválido"
+                t("patientHub.alerts.invalidCode")
             );
         }
     }
@@ -275,7 +283,7 @@ export default function PatientHub() {
 
             showAlert(
                 "warning",
-                "Email já adicionado"
+                t("patientHub.alerts.emailAlreadyAdded")
             );
 
             return;
@@ -304,7 +312,7 @@ export default function PatientHub() {
 
             showAlert(
                 "warning",
-                "Adicione pelo menos um email"
+                t("patientHub.alerts.addAtLeastOneEmail")
             );
 
             return;
@@ -327,7 +335,7 @@ export default function PatientHub() {
 
             showAlert(
                 "success",
-                "Convites enviados com sucesso"
+                t("patientHub.alerts.invitesSentSuccess")
             );
 
             setEmails([]);
@@ -340,7 +348,7 @@ export default function PatientHub() {
 
             showAlert(
                 "error",
-                "Erro ao enviar convites"
+                t("patientHub.alerts.sendInvitesError")
             );
 
         } finally {
@@ -364,24 +372,24 @@ export default function PatientHub() {
 
             case "paciente":
                 return {
-                    background: "#e3f2fd",
-                    color: "#c6d219",
-                    label: "Saúde"
+                    background: isDark ? "rgba(14, 165, 233, 0.14)" : "#e3f2fd",
+                    color: isDark ? "#7dd3fc" : "#0369a1",
+                    label: t("userTypes.saude")
                 };
 
             case "saude":
-                return getMedicoStyle(funcao);
+                return getMedicoStyle(funcao, t);
 
             case "responsavel":
 
-                return getResponsavelStyle(funcao);
+                return getResponsavelStyle(funcao, t);
 
 
 
             default:
                 return {
-                    background: "#eeeeee",
-                    color: "#616161",
+                    background: isDark ? "rgba(220, 252, 231, 0.1)" : "#eeeeee",
+                    color: isDark ? "text.secondary" : "#616161",
                     label: type
                 };
         }
@@ -410,6 +418,41 @@ export default function PatientHub() {
             === userType?.toLowerCase()
         );
     });
+
+    const panelSx = {
+        backgroundColor: "background.paper",
+        borderRadius: 3,
+        minWidth: 0,
+        overflow: "hidden",
+        border: "1px solid",
+        borderColor: vitta.border,
+        boxShadow: vitta.shadow
+    };
+
+    const textWrapSx = {
+        minWidth: 0,
+        overflowWrap: "anywhere",
+        wordBreak: "break-word"
+    };
+
+    const supportingTextSx = {
+        ...textWrapSx,
+        color: "text.secondary"
+    };
+
+    const moduleCardSx = {
+        ...panelSx,
+        padding: 3,
+        cursor: "pointer",
+        minWidth: 0,
+        minHeight: 160,
+        transition: "transform .2s ease, box-shadow .2s ease, border-color .2s ease",
+        "&:hover": {
+            transform: "translateY(-4px)",
+            borderColor: vitta.borderStrong,
+            boxShadow: vitta.shadow
+        }
+    };
 
     function canRemove(targetType) {
 
@@ -444,26 +487,19 @@ export default function PatientHub() {
 
         loadLinks();
 
-    }, [selectedPatient]);
-
-    useEffect(() => {
-
-        if (!selectedPatient?.id) {
-            return;
-        }
-
-        loadLinks();
-
-    }, [selectedPatient]);
+    }, [selectedPatient, loadLinks]);
 
     return (
 
         <Box
-            p={4}
             sx={{
                 minHeight: "100vh",
-                backgroundColor: "#f8fafc",
-                ml: 8
+                bgcolor: "background.default",
+                background: vitta.pageBackground,
+                color: "text.primary",
+                px: { xs: 2, md: 4 },
+                py: { xs: 3, md: 4 },
+                overflowX: "hidden"
             }}
         >
 
@@ -488,55 +524,64 @@ export default function PatientHub() {
             >
 
                 {selectedPatient &&
-                    <Box>
+                    <Box
+                        sx={{
+                            minWidth: 0,
+                            width: { xs: "100%", md: "auto" }
+                        }}
+                    >
 
                         <Typography
                             variant="h4"
                             sx={{
-                                fontWeight: 700
+                                fontWeight: 800,
+                                color: "text.primary",
+                                letterSpacing: 0,
+                                ...textWrapSx
                             }}
                         >
-                            Grupo de {selectedPatient?.nome || "Paciente"}
+                            {t("patientHub.groupTitle")} {selectedPatient?.nome || t("userTypes.paciente")}
                         </Typography>
 
                         <Typography
                             sx={{
-                                color: "#777"
+                                color: "text.secondary",
+                                mt: 0.5,
+                                ...textWrapSx
                             }}
                         >
-                            Pessoas que acompanham o paciente
+                            {t("patientHub.groupSubtitle")}
                         </Typography>
 
                     </Box>}
 
                 <Box
                     sx={{
-                        backgroundColor: "#fff",
-                        borderRadius: "24px",
-                        padding: 4,
-                        mb: 5,
-                        boxShadow:
-                            "0px 4px 20px rgba(0,0,0,0.06)"
+                        ...panelSx,
+                        width: { xs: "100%", md: 420 },
+                        maxWidth: "100%",
+                        padding: 3
                     }}
                 >
 
                     <Typography
                         variant="h6"
                         sx={{
-                            fontWeight: 700,
+                            fontWeight: 800,
                             mb: 1
                         }}
                     >
-                        Ações do grupo
+                        {t("patientHub.groupActions")}
                     </Typography>
 
                     <Typography
                         sx={{
-                            color: "#777",
-                            mb: 3
+                            color: "text.secondary",
+                            mb: 3,
+                            ...textWrapSx
                         }}
                     >
-                        Gerencie convites e participação no grupo.
+                        {t("patientHub.groupActionsDescription")}
                     </Typography>
 
                     <Box
@@ -551,12 +596,16 @@ export default function PatientHub() {
                                 variant="contained"
                                 onClick={handleGenerateCode}
                                 sx={{
-                                    borderRadius: "14px",
+                                    borderRadius: 2,
                                     textTransform: "none",
-                                    fontWeight: 600
+                                    fontWeight: 800,
+                                    minWidth: 0,
+                                    whiteSpace: "normal",
+                                    width: { xs: "100%", sm: "auto" },
+                                    background: "linear-gradient(135deg, #16a34a 0%, #0f766e 72%, #0ea5e9 100%)"
                                 }}
                             >
-                                Convidar participante
+                                {t("patientHub.inviteParticipant")}
                             </Button>
                         )}
 
@@ -569,13 +618,18 @@ export default function PatientHub() {
                                         setOpenJoinModal(true)
                                     }
                                     sx={{
-                                        borderRadius: "14px",
+                                        borderRadius: 2,
                                         textTransform: "none",
-                                        fontWeight: 600,
-                                        zIndex: 0
+                                        fontWeight: 800,
+                                        minWidth: 0,
+                                        whiteSpace: "normal",
+                                        width: { xs: "100%", sm: "auto" },
+                                        zIndex: 0,
+                                        borderColor: vitta.borderStrong,
+                                        color: "primary.dark"
                                     }}
                                 >
-                                    Entrar com código
+                                    {t("patientHub.joinWithCode")}
                                 </Button>
                             )}
 
@@ -597,12 +651,15 @@ export default function PatientHub() {
                                     );
                                 }}
                                 sx={{
-                                    borderRadius: "14px",
+                                    borderRadius: 2,
                                     textTransform: "none",
-                                    fontWeight: 600
+                                    fontWeight: 800,
+                                    minWidth: 0,
+                                    whiteSpace: "normal",
+                                    width: { xs: "100%", sm: "auto" }
                                 }}
                             >
-                                Sair do grupo
+                                {t("patientHub.leaveGroup")}
                             </Button>
                         )}
 
@@ -617,6 +674,9 @@ export default function PatientHub() {
                 display="flex"
                 flexDirection="column"
                 gap={2}
+                sx={{
+                    minWidth: 0
+                }}
             >
                 {loading ? (
                     <Box
@@ -630,14 +690,8 @@ export default function PatientHub() {
                             <Box
                                 key={item}
                                 sx={{
-                                    backgroundColor: "#fff",
-
-                                    borderRadius: "24px",
-
+                                    ...panelSx,
                                     padding: 3,
-
-                                    boxShadow:
-                                        "0px 4px 15px rgba(0,0,0,0.08)"
                                 }}
                             >
 
@@ -656,7 +710,12 @@ export default function PatientHub() {
                                         }}
                                     />
 
-                                    <Box width="100%">
+                                    <Box
+                                        width="100%"
+                                        sx={{
+                                            minWidth: 0
+                                        }}
+                                    >
 
                                         <Skeleton
                                             width="40%"
@@ -686,16 +745,9 @@ export default function PatientHub() {
 
                     <Box
                         sx={{
-                            backgroundColor: "#fff",
-
-                            borderRadius: "24px",
-
-                            padding: 6,
-
+                            ...panelSx,
+                            padding: { xs: 3, sm: 4, md: 6 },
                             textAlign: "center",
-
-                            boxShadow:
-                                "0px 4px 15px rgba(0,0,0,0.08)"
                         }}
                     >
 
@@ -703,20 +755,21 @@ export default function PatientHub() {
                             variant="h6"
                             sx={{
                                 fontWeight: 600,
-                                mb: 1
+                                mb: 1,
+                                ...textWrapSx
                             }}
                         >
-                            Nenhum vínculo encontrado
+                            {t("patientHub.noLinksTitle")}
                         </Typography>
 
                         <Typography
                             sx={{
-                                color: "#777",
-                                mb: 3
+                                color: "text.secondary",
+                                mb: 3,
+                                ...textWrapSx
                             }}
                         >
-                            Gere um código ou entre com um
-                            código para criar vínculos.
+                            {t("patientHub.noLinksDescription")}
                         </Typography>
 
                     </Box>
@@ -725,14 +778,11 @@ export default function PatientHub() {
 
                     <>
                         <Box
-                            sx={{
-                                backgroundColor: "#ffffff",
-                                borderRadius: "28px",
-                                padding: 4,
-                                boxShadow:
-                                    "0px 4px 20px rgba(0,0,0,0.06)",
-                                mb: 5
-                            }}
+                        sx={{
+                            ...panelSx,
+                            padding: { xs: 2, sm: 3, md: 4 },
+                            mb: 5
+                        }}
                         >
                             {pacientes.length > 0 && (
 
@@ -743,10 +793,11 @@ export default function PatientHub() {
                                         sx={{
                                             fontWeight: 700,
                                             mb: 2,
-                                            color: "#444"
+                                            color: "text.primary",
+                                            ...textWrapSx
                                         }}
                                     >
-                                        Paciente
+                                        {t("patientHub.patientSection")}
                                     </Typography>
 
                                     <Box
@@ -785,10 +836,11 @@ export default function PatientHub() {
                                         sx={{
                                             fontWeight: 700,
                                             mb: 2,
-                                            color: "#444"
+                                            color: "text.primary",
+                                            ...textWrapSx
                                         }}
                                     >
-                                        Responsáveis
+                                        {t("patientHub.guardiansSection")}
                                     </Typography>
 
                                     <Box
@@ -835,10 +887,11 @@ export default function PatientHub() {
                                         sx={{
                                             fontWeight: 700,
                                             mb: 2,
-                                            color: "#444"
+                                            color: "text.primary",
+                                            ...textWrapSx
                                         }}
                                     >
-                                        Médicos
+                                        {t("patientHub.doctorsSection")}
                                     </Typography>
 
                                     <Box
@@ -884,146 +937,117 @@ export default function PatientHub() {
                 )}
 
                 {selectedPatient &&
-                    <Box mt={6}>
+                    <Box
+                        mt={6}
+                        sx={{
+                            minWidth: 0
+                        }}
+                    >
 
                         <Typography
                             variant="h5"
                             sx={{
-                                fontWeight: 700,
-                                mb: 3
+                                fontWeight: 800,
+                                color: "text.primary",
+                                mb: 3,
+                                ...textWrapSx
                             }}
                         >
-                            Módulos
+                            {t("patientHub.modules")}
                         </Typography>
 
                         <Box
                             display="grid"
                             gridTemplateColumns={{
-                                xs: "1fr",
-                                md: "repeat(3, 1fr)"
+                                xs: "minmax(0, 1fr)",
+                                sm: "repeat(2, minmax(0, 1fr))",
+                                lg: "repeat(3, minmax(0, 1fr))"
                             }}
                             gap={3}
+                            sx={{
+                                minWidth: 0
+                            }}
                         >
 
                             <Box
                                 onClick={() => navigate("/health-tracker")}
-                                sx={{
-                                    backgroundColor: "#fff",
-                                    borderRadius: "24px",
-                                    padding: 4,
-                                    cursor: "pointer",
-                                    transition: ".2s",
-                                    boxShadow:
-                                        "0px 4px 15px rgba(0,0,0,0.08)",
-
-                                    "&:hover": {
-                                        transform: "translateY(-4px)"
-                                    }
-                                }}
+                                sx={moduleCardSx}
                             >
 
                                 <Typography
                                     variant="h6"
                                     sx={{
                                         fontWeight: 700,
-                                        mb: 1
+                                        mb: 1,
+                                        ...textWrapSx
                                     }}
                                 >
-                                    Registros
+                                    {t("nav.records")}
                                 </Typography>
 
                                 <Typography
-                                    sx={{
-                                        color: "#777"
-                                    }}
+                                    sx={supportingTextSx}
                                 >
-                                    Hábitos, sintomas, sinais vitais e lembretes.
+                                    {t("patientHub.recordsDescription")}
                                 </Typography>
 
                             </Box>
 
                             <Box
                                 onClick={() => handleOpenPerfil()}
-                                sx={{
-                                    backgroundColor: "#fff",
-                                    borderRadius: "24px",
-                                    padding: 4,
-                                    cursor: "pointer",
-                                    transition: ".2s",
-                                    boxShadow:
-                                        "0px 4px 15px rgba(0,0,0,0.08)",
-
-                                    "&:hover": {
-                                        transform: "translateY(-4px)"
-                                    }
-                                }}
+                                sx={moduleCardSx}
                             >
 
                                 <Typography
                                     variant="h6"
                                     sx={{
                                         fontWeight: 700,
-                                        mb: 1
+                                        mb: 1,
+                                        ...textWrapSx
                                     }}
                                 >
-                                    Informações
+                                    {t("nav.information")}
                                 </Typography>
 
                                 <Typography
-                                    sx={{
-                                        color: "#777"
-                                    }}
+                                    sx={supportingTextSx}
                                 >
-                                    Dados gerais e informações do paciente.
+                                    {t("patientHub.informationDescription")}
                                 </Typography>
 
                             </Box>
 
                             <Box
                                 onClick={() => navigate("/documents")}
-                                sx={{
-                                    backgroundColor: "#fff",
-                                    borderRadius: "24px",
-                                    padding: 4,
-                                    cursor: "pointer",
-                                    transition: ".2s",
-                                    boxShadow:
-                                        "0px 4px 15px rgba(0,0,0,0.08)",
-
-                                    "&:hover": {
-                                        transform: "translateY(-4px)"
-                                    }
-                                }}
+                                sx={moduleCardSx}
                             >
 
                                 <Typography
                                     variant="h6"
                                     sx={{
                                         fontWeight: 700,
-                                        mb: 1
+                                        mb: 1,
+                                        ...textWrapSx
                                     }}
                                 >
-                                    Documentos
+                                    {t("nav.documents")}
                                 </Typography>
 
                                 <Typography
-                                    sx={{
-                                        color: "#777"
-                                    }}
+                                    sx={supportingTextSx}
                                 >
-                                    Documentação médica e arquivos relacionados.
+                                    {t("patientHub.documentsDescription")}
                                 </Typography>
 
                             </Box>
 
                             <Box
                                 sx={{
-                                    backgroundColor: "#fff",
-                                    borderRadius: "24px",
-                                    padding: 4,
+                                    ...panelSx,
+                                    padding: 3,
+                                    minWidth: 0,
+                                    minHeight: 160,
                                     opacity: .6,
-                                    boxShadow:
-                                        "0px 4px 15px rgba(0,0,0,0.08)"
                                 }}
                             >
 
@@ -1031,55 +1055,41 @@ export default function PatientHub() {
                                     variant="h6"
                                     sx={{
                                         fontWeight: 700,
-                                        mb: 1
+                                        mb: 1,
+                                        ...textWrapSx
                                     }}
                                 >
-                                    Dashboard
+                                    {t("patientHub.dashboard")}
                                 </Typography>
 
                                 <Typography
-                                    sx={{
-                                        color: "#777"
-                                    }}
+                                    sx={supportingTextSx}
                                 >
-                                    Visualizações e métricas futuras.
+                                    {t("patientHub.dashboardDescription")}
                                 </Typography>
 
                             </Box>
 
                             <Box
                                 onClick={() => navigate("/activity")}
-                                sx={{
-                                    backgroundColor: "#fff",
-                                    borderRadius: "24px",
-                                    padding: 4,
-                                    cursor: "pointer",
-                                    transition: ".2s",
-                                    boxShadow:
-                                        "0px 4px 15px rgba(0,0,0,0.08)",
-
-                                    "&:hover": {
-                                        transform: "translateY(-4px)"
-                                    }
-                                }}
+                                sx={moduleCardSx}
                             >
 
                                 <Typography
                                     variant="h6"
                                     sx={{
                                         fontWeight: 700,
-                                        mb: 1
+                                        mb: 1,
+                                        ...textWrapSx
                                     }}
                                 >
-                                    Atividade
+                                    {t("nav.activity")}
                                 </Typography>
 
                                 <Typography
-                                    sx={{
-                                        color: "#777"
-                                    }}
+                                    sx={supportingTextSx}
                                 >
-                                    Histórico de atividades e notificações do grupo.
+                                    {t("patientHub.activityDescription")}
                                 </Typography>
 
                             </Box>
@@ -1093,7 +1103,7 @@ export default function PatientHub() {
             <DialogUI
                 open={openModal}
                 onClose={() => setOpenModal(false)}
-                title="Link e Código Gerados"
+                title={t("patientHub.generatedTitle")}
                 disabledConfirm
             >
                 <Tabs
@@ -1106,9 +1116,9 @@ export default function PatientHub() {
                     }}
                 >
 
-                    <Tab label="Código" />
+                    <Tab label={t("patientHub.codeTab")} />
 
-                    <Tab label="Enviar por Email" />
+                    <Tab label={t("patientHub.emailTab")} />
 
                 </Tabs>
 
@@ -1122,10 +1132,10 @@ export default function PatientHub() {
                                     variant="body2"
                                     sx={{
                                         mb: 1,
-                                        color: "#666"
+                                        color: "text.secondary"
                                     }}
                                 >
-                                    Código
+                                    {t("patientHub.codeTab")}
                                 </Typography>
 
                                 <Box
@@ -1133,8 +1143,12 @@ export default function PatientHub() {
                                         display: "flex",
                                         alignItems: "center",
                                         justifyContent: "space-between",
+                                        gap: 1,
+                                        minWidth: 0,
 
-                                        backgroundColor: "#f1f1f1",
+                                        backgroundColor: isDark ? "rgba(220, 252, 231, 0.08)" : "#f1f1f1",
+                                        border: "1px solid",
+                                        borderColor: vitta.border,
 
                                         borderRadius: "16px",
 
@@ -1145,7 +1159,8 @@ export default function PatientHub() {
                                     <Typography
                                         sx={{
                                             fontWeight: 600,
-                                            letterSpacing: 1
+                                            letterSpacing: 1,
+                                            ...textWrapSx
                                         }}
                                     >
                                         {generatedCode}
@@ -1170,7 +1185,7 @@ export default function PatientHub() {
                                     variant="body2"
                                     sx={{
                                         mb: 1,
-                                        color: "#666"
+                                        color: "text.secondary"
                                     }}
                                 >
                                     Link
@@ -1181,8 +1196,12 @@ export default function PatientHub() {
                                         display: "flex",
                                         alignItems: "center",
                                         justifyContent: "space-between",
+                                        gap: 1,
+                                        minWidth: 0,
 
-                                        backgroundColor: "#f1f1f1",
+                                        backgroundColor: isDark ? "rgba(220, 252, 231, 0.08)" : "#f1f1f1",
+                                        border: "1px solid",
+                                        borderColor: vitta.border,
 
                                         borderRadius: "16px",
 
@@ -1195,7 +1214,8 @@ export default function PatientHub() {
                                             overflow: "hidden",
                                             textOverflow: "ellipsis",
                                             whiteSpace: "nowrap",
-                                            maxWidth: "90%"
+                                            minWidth: 0,
+                                            flex: 1
                                         }}
                                     >
                                         {generatedLink}
@@ -1225,17 +1245,18 @@ export default function PatientHub() {
                                     mb: 2
                                 }}
                             >
-                                Enviar convite por email
+                                {t("patientHub.sendInviteByEmail")}
                             </Typography>
 
                             <Box
                                 display="flex"
+                                flexDirection={{ xs: "column", sm: "row" }}
                                 gap={2}
                                 mb={2}
                             >
 
                                 <TextField
-                                    label="Email"
+                                    label={t("patientHub.email")}
                                     value={emailInput}
                                     onChange={(e) =>
                                         setEmailInput(e.target.value)
@@ -1249,6 +1270,7 @@ export default function PatientHub() {
                                     onClick={handleAddEmail}
                                     sx={{
                                         minWidth: "56px",
+                                        width: { xs: "100%", sm: "auto" },
                                         borderRadius: "14px"
                                     }}
                                 >
@@ -1272,7 +1294,12 @@ export default function PatientHub() {
                                         }
                                         deleteIcon={<CloseIcon />}
                                         sx={{
-                                            borderRadius: "10px"
+                                            borderRadius: "10px",
+                                            maxWidth: "100%",
+                                            "& .MuiChip-label": {
+                                                overflow: "hidden",
+                                                textOverflow: "ellipsis"
+                                            }
                                         }}
                                     />
                                 ))}
@@ -1289,14 +1316,15 @@ export default function PatientHub() {
                                         mt: 3,
                                         borderRadius: "14px",
                                         textTransform: "none",
-                                        fontWeight: 600
+                                        fontWeight: 600,
+                                        width: { xs: "100%", sm: "auto" }
                                     }}
                                 >
 
                                     {
                                         sendingEmails
-                                            ? "Enviando convites..."
-                                            : "Enviar Convites"
+                                            ? t("patientHub.sendingInvites")
+                                            : t("patientHub.sendInvites")
                                     }
 
                                 </ButtonUI>
@@ -1312,13 +1340,13 @@ export default function PatientHub() {
             <DialogUI
                 open={openJoinModal}
                 onClose={() => setOpenJoinModal(false)}
-                title="Entrar com código"
+                title={t("patientHub.joinWithCode")}
                 onConfirm={handleJoinWithCode}
-                confirmText="Entrar"
+                confirmText={t("nav.enter")}
             >
 
                 {precisaEscolherFuncao && (<AutocompleteUI
-                    label="Função no grupo"
+                    label={t("patientHub.roleInGroup")}
                     options={opcoesFuncao}
                     error={errorFuncao}
                     value={
@@ -1337,7 +1365,8 @@ export default function PatientHub() {
                             <Box>
                                 <Typography
                                     sx={{
-                                        fontWeight: 600
+                                        fontWeight: 600,
+                                        ...textWrapSx
                                     }}
                                 >
                                     {option.label}
@@ -1346,7 +1375,8 @@ export default function PatientHub() {
                                 <Typography
                                     variant="body2"
                                     sx={{
-                                        color: "#777"
+                                        color: "text.secondary",
+                                        ...textWrapSx
                                     }}
                                 >
                                     {option.descricao}
@@ -1357,7 +1387,7 @@ export default function PatientHub() {
                 />)}
 
                 <InputUI
-                    label="Código de convite"
+                    label={t("patientHub.invitationCode")}
                     value={joinCode}
                     onChange={(e) =>
                         setJoinCode(e.target.value)
@@ -1379,27 +1409,27 @@ export default function PatientHub() {
 
                 title={
                     isLeavingGroup
-                        ? "Sair do grupo"
-                        : "Remover vínculo"
+                        ? t("patientHub.leaveGroup")
+                        : t("patientHub.removeLink")
                 }
 
                 onConfirm={confirmRemoveLink}
 
                 confirmText={
                     isLeavingGroup
-                        ? "Sair do grupo"
-                        : "Remover"
+                        ? t("patientHub.leaveGroup")
+                        : t("common.remove")
                 }
 
-                cancelText="Cancelar"
+                cancelText={t("common.cancel")}
             >
 
                 <Typography>
 
                     {
                         isLeavingGroup
-                            ? "Deseja sair deste grupo?"
-                            : "Deseja remover este participante?"
+                            ? t("patientHub.leaveQuestion")
+                            : t("patientHub.removeQuestion")
                     }
 
                 </Typography>

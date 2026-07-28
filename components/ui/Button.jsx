@@ -1,4 +1,5 @@
 import Button from '@mui/material/Button';
+import { useTheme } from '@mui/material/styles';
 
 export default function ButtonUI({
     children,
@@ -6,44 +7,41 @@ export default function ButtonUI({
     sx,
     ...props
 }) {
+    const theme = useTheme();
+    const isDark = theme.palette.mode === "dark";
+
     return (
         <Button
             variant="contained"
-            size="small"
+            size="medium"
             {...props}
             sx={{
                 minWidth,
-
-                borderRadius: '30px',
-                padding: '5px 16px',
-
-                fontWeight: 'bold',
+                borderRadius: 2,
+                padding: '9px 18px',
+                fontWeight: 700,
                 textTransform: 'uppercase',
                 fontSize: '12px',
-
-                background:
-                    'linear-gradient(90deg, #c6eee6 0%, #b6d98e 100%)',
-
-                border: '2px solid #bdbdbd',
-
-                color: '#2b2b2b',
-
-                boxShadow:
-                    '0px 4px 8px rgba(0,0,0,0.15)',
-
+                letterSpacing: '0.04em',
+                background: 'linear-gradient(135deg, #16a34a 0%, #0f766e 72%, #0ea5e9 100%)',
+                border: `1px solid ${theme.vitta.borderStrong}`,
+                color: '#ffffff',
+                boxShadow: isDark ? '0 12px 24px rgba(0, 0, 0, 0.24)' : '0 12px 24px rgba(22, 163, 74, 0.2)',
                 transition: '0.2s ease',
 
                 '&:hover': {
-                    background:
-                        'linear-gradient(90deg, #d4f5ee 0%, #c6e7a7 100%)',
-
-                    boxShadow:
-                        '0px 6px 12px rgba(0,0,0,0.2)',
+                    background: 'linear-gradient(135deg, #15803d 0%, #115e59 72%, #0369a1 100%)',
+                    boxShadow: isDark ? '0 14px 28px rgba(0, 0, 0, 0.32)' : '0 14px 28px rgba(22, 163, 74, 0.28)',
                 },
 
                 '&:active': {
-                    boxShadow:
-                        '0px 2px 4px rgba(0,0,0,0.2)',
+                    boxShadow: isDark ? '0 8px 18px rgba(0, 0, 0, 0.28)' : '0 8px 18px rgba(22, 163, 74, 0.22)',
+                },
+
+                '&.Mui-disabled': {
+                    background: isDark ? 'rgba(220, 252, 231, 0.08)' : '#d7e4e1',
+                    color: 'text.secondary',
+                    boxShadow: 'none'
                 },
 
                 ...sx,

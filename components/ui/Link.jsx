@@ -3,17 +3,17 @@ import { Link as RouterLink } from "react-router-dom";
 const baseStyle = {
     fontFamily: 'Inter, sans-serif',
     fontSize: '14px',
-    color: '#6b6b6b',
+    color: '#50635f',
 };
 
 const actionStyle = {
-    color: '#1a1a1a',
-    fontWeight: 600,
+    color: '#16a34a',
+    fontWeight: 700,
     cursor: 'pointer',
     marginLeft: '4px',
-    transition: 'all 0.2s ease'
+    transition: 'all 0.2s ease',
+    textDecoration: 'none'
 };
-
 
 export default function LinkUI({ to, href, onClick, children, variant = "default", ...props }) {
     const style = {
@@ -41,19 +41,17 @@ export default function LinkUI({ to, href, onClick, children, variant = "default
         return (
             <button
                 onClick={onClick}
-
                 style={{
                     background: "none",
                     border: "none",
                     padding: 0,
-                    color: "blue",
+                    color: "#16a34a",
                     cursor: "pointer",
-                    textDecoration: "underline",
+                    textDecoration: "none",
                     ...style,
                 }}
                 {...props}
             >
-
                 {children}
             </button>
         )

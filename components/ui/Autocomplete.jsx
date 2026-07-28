@@ -1,34 +1,23 @@
 import { Autocomplete, TextField } from "@mui/material";
+import { useTheme } from "@mui/material/styles";
 
 export default function AutocompleteUI({
     label,
     value,
     onChange,
-    error = "false",
-    //helperText,
+    error = false,
     options = [],
     placeholder = "Selecione...",
     getOptionLabel = (option) => option.label || "",
     isOptionEqualToValue = (option, value) => option.value === value.value,
     ...props
 }) {
+    const theme = useTheme();
+    const isDark = theme.palette.mode === "dark";
+
     return (
         <Autocomplete
-            size="small"
-            sx={{
-                width: "100%",
 
-                '& .MuiOutlinedInput-root': {
-                    height: '40px',
-                    width: '225px',
-                    borderRadius: '30px',
-                    backgroundColor: '#e0e0e0',
-
-                    '& input': {
-                        padding: '10px 14px !important',
-                    }
-                }
-            }}
             options={options}
             value={value}
             onChange={(event, newValue) => onChange(newValue)}
@@ -47,58 +36,50 @@ export default function AutocompleteUI({
                     sx={{
                         '& .MuiInputLabel-root': {
                             transform: 'translate(14px, 9px) scale(1)',
+                            color: 'text.secondary',
                         },
 
                         '& .MuiInputLabel-root.Mui-focused, & .MuiInputLabel-root.MuiFormLabel-filled': {
-                            transform: 'translate(10px, -20px) scale(0.85)',
+                            transform: 'translate(10px, -18px) scale(0.85)',
+                            backgroundColor: 'background.paper',
+                            color: 'primary.main',
                             padding: '0 4px',
                         },
 
                         '& .MuiOutlinedInput-root': {
                             position: 'relative',
-                            borderRadius: '30px',
-                            backgroundColor: '#e0e0e0',
-                            transition: 'all 0.5s ease',
+                            borderRadius: 2,
+                            backgroundColor: isDark ? 'rgba(220, 252, 231, 0.06)' : 'rgba(22, 163, 74, 0.06)',
+                            transition: 'all 0.2s ease',
 
                             '& input': {
                                 padding: '10px 14px',
                             },
 
                             '& fieldset': {
-                                border: '1px solid transparent',
-                            },
-
-                            '&:hover::before, &.Mui-focused::before': {
-                                content: '""',
-                                position: 'absolute',
-                                inset: 0,
-                                borderRadius: '30px',
-                                padding: '1.5px',
-                                background: 'linear-gradient(to right, #00b7ff, #00ff55)',
-
-                                WebkitMask:
-                                    'linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)',
-                                WebkitMaskComposite: 'xor',
-                                maskComposite: 'exclude',
-
-                                pointerEvents: 'none',
+                                borderColor: theme.vitta.border,
                             },
 
                             '&.Mui-focused': {
-                                backgroundColor: '#ffffff',
-                                boxShadow: 'inset 0px 2px 10px rgba(0,0,0,0.2)',
+                                backgroundColor: 'background.paper',
+                                boxShadow: isDark ? '0 0 0 4px rgba(34, 197, 94, 0.12)' : '0 0 0 4px rgba(22, 163, 74, 0.12)',
+
+                                '& fieldset': {
+                                    borderColor: 'primary.main',
+                                }
                             },
 
                             '&:hover': {
-                                backgroundColor: '#eeeeee',
-                                boxShadow: '0px 5px 15px -2px #4e4e4e',
+                                backgroundColor: 'background.paper',
+
+                                '& fieldset': {
+                                    borderColor: 'primary.main',
+                                }
                             }
                         }
-                    }
-                    }
+                    }}
                 />
-            )
-            }
+            )}
             {...props}
         />
     );

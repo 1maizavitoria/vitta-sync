@@ -1,728 +1,489 @@
 import {
     Box,
     Button,
-    Typography,
+    Chip,
+    Container,
+    Grid,
     Paper,
-    Grid
+    Stack,
+    Typography
 } from "@mui/material";
+import { useTheme } from "@mui/material/styles";
+import { useNavigate } from "react-router-dom";
 
+import AccessTimeOutlinedIcon from "@mui/icons-material/AccessTimeOutlined";
+import AirOutlinedIcon from "@mui/icons-material/AirOutlined";
+import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
+import DescriptionOutlinedIcon from "@mui/icons-material/DescriptionOutlined";
+import DeviceThermostatOutlinedIcon from "@mui/icons-material/DeviceThermostatOutlined";
 import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
+import GroupOutlinedIcon from "@mui/icons-material/GroupOutlined";
 import MonitorHeartOutlinedIcon from "@mui/icons-material/MonitorHeartOutlined";
 import OpacityOutlinedIcon from "@mui/icons-material/OpacityOutlined";
-import DeviceThermostatOutlinedIcon from "@mui/icons-material/DeviceThermostatOutlined";
-import AirOutlinedIcon from "@mui/icons-material/AirOutlined";
-import DescriptionOutlinedIcon from "@mui/icons-material/DescriptionOutlined";
-
+import PlayCircleOutlineIcon from "@mui/icons-material/PlayCircleOutline";
 import ShieldOutlinedIcon from "@mui/icons-material/ShieldOutlined";
-import GroupOutlinedIcon from "@mui/icons-material/GroupOutlined";
-import AccessTimeOutlinedIcon from "@mui/icons-material/AccessTimeOutlined";
 
-import FacebookOutlinedIcon from "@mui/icons-material/FacebookOutlined";
-import TwitterIcon from "@mui/icons-material/Twitter";
-import InstagramIcon from "@mui/icons-material/Instagram";
-import LinkedInIcon from "@mui/icons-material/LinkedIn";
-
-import EmailOutlinedIcon from "@mui/icons-material/EmailOutlined";
-import PhoneOutlinedIcon from "@mui/icons-material/PhoneOutlined";
-import LocationOnOutlinedIcon from "@mui/icons-material/LocationOnOutlined";
+import ButtonUI from "../../components/ui/Button";
+import { useI18n } from "../../src/i18n";
 
 export default function Landing() {
+    const navigate = useNavigate();
+    const theme = useTheme();
+    const { t } = useI18n();
+    const vitta = theme.vitta;
+    const isDark = theme.palette.mode === "dark";
 
-    const cards = [
-        {
-            icon: <MonitorHeartOutlinedIcon />,
-            title: "Pressão Arterial",
-            description:
-                "Monitore sua pressão sistólica e diastólica com registros precisos e histórico completo."
-        },
-        {
-            icon: <FavoriteBorderIcon />,
-            title: "Frequência Cardíaca",
-            description:
-                "Acompanhe seus batimentos cardíacos em repouso e durante atividades físicas."
-        },
-        {
-            icon: <OpacityOutlinedIcon />,
-            title: "Saturação de Oxigênio (SpO2)",
-            description:
-                "Registre os níveis de oxigênio no sangue para um acompanhamento respiratório completo."
-        },
-        {
-            icon: <DeviceThermostatOutlinedIcon />,
-            title: "Temperatura Corporal",
-            description:
-                "Mantenha um histórico preciso da sua temperatura para identificar padrões e variações."
-        },
-        {
-            icon: <AirOutlinedIcon />,
-            title: "Frequência Respiratória",
-            description:
-                "Monitore sua respiração por minuto com dados estatísticos e análises de tendências."
-        },
-        {
-            icon: <DescriptionOutlinedIcon />,
-            title: "Relatórios Clínicos",
-            description:
-                "Exporte relatórios profissionais em PDF para compartilhar com seus médicos e especialistas."
-        }
+    const vitalIcons = [
+        <MonitorHeartOutlinedIcon />,
+        <FavoriteBorderIcon />,
+        <OpacityOutlinedIcon />,
+        <DeviceThermostatOutlinedIcon />,
+        <AirOutlinedIcon />,
+        <DescriptionOutlinedIcon />
     ];
 
-    const benefits = [
-        {
-            icon: <ShieldOutlinedIcon />,
-            title: "Privacidade e Segurança",
-            description:
-                "Seus dados são criptografados e você controla quem tem acesso."
-        },
-        {
-            icon: <GroupOutlinedIcon />,
-            title: "Vínculo com Médicos",
-            description:
-                "Conecte-se diretamente com profissionais de saúde."
-        },
-        {
-            icon: <AccessTimeOutlinedIcon />,
-            title: "Monitoramento Contínuo",
-            description:
-                "Acompanhamento 24/7 com alertas personalizados."
-        }
+    const benefitIcons = [
+        <ShieldOutlinedIcon />,
+        <GroupOutlinedIcon />,
+        <AccessTimeOutlinedIcon />
     ];
+
+    const cards = t("landing.cards");
+    const benefits = t("landing.benefits");
 
     return (
-        <Box>
-            {/* hero section */}
-            <Box
-                sx={{
-                    display: "grid",
-                    gridTemplateColumns: {
-                        xs: "1fr",
-                        lg: "1.2fr 0.8fr"
-                    },
-                    gap: { xs: 5, md: 8 },
-                    alignItems: "center",
-                }}
-            >
-                {/* LEFT */}
-                <Box>
-                    {/* Badge */}
-                    <Box
-                        sx={{
-                            display: "inline-flex",
-                            alignItems: "center",
-                            bgcolor: "#d8efc7",
-                            px: 2,
-                            py: 1,
-                            borderRadius: "999px",
-                            mb: { xs: 3, md: 5 }
-                        }}
-                    >
-                        <Typography
+        <Box
+            sx={{
+                minHeight: "100vh",
+                bgcolor: "background.default",
+                background: vitta.pageBackground,
+                color: "text.primary"
+            }}
+        >
+            <Container maxWidth="xl">
+                <Box
+                    sx={{
+                        display: "grid",
+                        gridTemplateColumns: { xs: "1fr", lg: "1.05fr 0.95fr" },
+                        gap: { xs: 6, lg: 8 },
+                        alignItems: "center",
+                        minHeight: { xs: "auto", lg: "calc(100vh - 120px)" },
+                        py: { xs: 4, md: 7 }
+                    }}
+                >
+                    <Box>
+                        <Chip
+                            icon={<MonitorHeartOutlinedIcon />}
+                            label={t("landing.badge")}
                             sx={{
-                                fontSize: { xs: 12, md: 14 },
-                                fontWeight: 600,
-                                color: "#4c8c42"
-                            }}
-                        >
-                            ✨ Monitoramento Preciso de Saúde
-                        </Typography>
-                    </Box>
-
-                    {/* Title */}
-                    <Typography
-                        sx={{
-                            fontSize: { xs: 34, sm: 48, md: 72 },
-                            lineHeight: 1.05,
-                            fontWeight: 800,
-                            color: "#08142b",
-                            maxWidth: "620px",
-                            mb: { xs: 3, md: 4 }
-                        }}
-                    >
-                        Sua saúde em{" "}
-                        <Box component="span" sx={{ color: "#4c9a45" }}>
-                            sincronia
-                        </Box>{" "}
-                        com você
-                    </Typography>
-
-                    {/* Description */}
-                    <Typography
-                        sx={{
-                            fontSize: { xs: 16, md: 22 },
-                            color: "#5f6b7a",
-                            lineHeight: 1.7,
-                            maxWidth: "700px",
-                            mb: { xs: 4, md: 5 }
-                        }}
-                    >
-                        Monitore seus sinais vitais em tempo real,
-                        receba alertas personalizados e compartilhe
-                        dados com seus médicos de forma segura e sincronizada.
-                    </Typography>
-
-                    {/* Buttons */}
-                    <Box
-                        sx={{
-                            display: "flex",
-                            flexDirection: { xs: "column", sm: "row" },
-                            gap: 2,
-                            mb: { xs: 5, md: 7 }
-                        }}
-                    >
-                        <Button
-                            variant="contained"
-                            fullWidth={{ xs: true, sm: false }}
-                            sx={{
-                                bgcolor: "#b7d995",
-                                color: "#08142b",
-                                px: { xs: 3, md: 4 },
-                                py: { xs: 1.5, md: 2 },
-                                borderRadius: "16px",
-                                textTransform: "none",
+                                mb: 3,
+                                px: 1,
+                                bgcolor: isDark ? "rgba(34, 197, 94, 0.16)" : "rgba(22, 163, 74, 0.12)",
+                                color: "primary.dark",
                                 fontWeight: 700,
-                                fontSize: { xs: 16, md: 18 },
-                                boxShadow: "none",
-                                "&:hover": {
-                                    bgcolor: "#a7ca84",
-                                    boxShadow: "none"
-                                }
+                                border: "1px solid",
+                                borderColor: vitta.borderStrong
                             }}
-                        >
-                            Começar Agora →
-                        </Button>
+                        />
 
-                        <Button
-                            variant="outlined"
+                        <Typography
+                            component="h1"
                             sx={{
-                                borderColor: "#d6d6d6",
-                                color: "#08142b",
-                                px: { xs: 3, md: 4 },
-                                py: { xs: 1.5, md: 2 },
-                                borderRadius: "16px",
-                                textTransform: "none",
-                                fontWeight: 600,
-                                fontSize: { xs: 16, md: 18 }
+                                maxWidth: 760,
+                                fontSize: { xs: 42, sm: 56, md: 72 },
+                                lineHeight: 1.02,
+                                fontWeight: 800,
+                                color: "text.primary",
+                                mb: 3
                             }}
                         >
-                            ▶ Ver Demonstração
-                        </Button>
-                    </Box>
+                            {t("landing.titleStart")}{" "}
+                            <Box component="span" sx={{ color: "primary.main" }}>
+                                {t("landing.titleHighlight")}
+                            </Box>{" "}
+                            {t("landing.titleEnd")}
+                        </Typography>
 
-                    {/* Stats */}
-                    <Box
-                        sx={{
-                            display: "flex",
-                            gap: { xs: 4, md: 8 },
-                            pt: 4,
-                            borderTop: "1px solid #dddddd",
-                            flexWrap: "wrap"
-                        }}
-                    >
-                        {[
-                            ["10K+", "Usuários Ativos"],
-                            ["500+", "Médicos Parceiros"],
-                            ["99.9%", "Uptime"]
-                        ].map(([value, label]) => (
-                            <Box key={label}>
-                                <Typography
-                                    sx={{
-                                        fontSize: { xs: 28, md: 42 },
-                                        fontWeight: 800,
-                                        color: "#08142b"
-                                    }}
-                                >
-                                    {value}
-                                </Typography>
-                                <Typography sx={{ color: "#6f7785", fontSize: { xs: 13, md: 15 } }}>
-                                    {label}
-                                </Typography>
-                            </Box>
-                        ))}
-                    </Box>
-                </Box>
-
-                {/* RIGHT — card de frequência cardíaca */}
-                <Paper
-                    elevation={0}
-                    sx={{
-                        width: "100%",       // ← era 520px fixo
-                        maxWidth: 520,
-                        borderRadius: "28px",
-                        p: { xs: 3, md: 4 },
-                        bgcolor: "white",
-                        boxShadow: "0 20px 50px rgba(0,0,0,0.10)"
-                    }}
-                >
-                    <Typography
-                        sx={{
-                            fontSize: { xs: 20, md: 28 },
-                            fontWeight: 700,
-                            color: "#08142b",
-                            mb: 1
-                        }}
-                    >
-                        Frequência Cardíaca
-                    </Typography>
-
-                    <Typography sx={{ color: "#6c7480", mb: 3, fontSize: { xs: 13, md: 15 } }}>
-                        Últimos 7 dias - Tendência Semanal
-                    </Typography>
-
-                    {/* KPI */}
-                    <Box
-                        sx={{
-                            background: "linear-gradient(90deg, #c6eee6 0%, #b6d98e 100%)",
-                            borderRadius: "20px",
-                            p: { xs: 2.5, md: 3 },
-                            mb: 3
-                        }}
-                    >
                         <Typography
                             sx={{
-                                fontSize: { xs: 42, md: 56 },
-                                fontWeight: 800,
-                                color: "#08142b"
+                                maxWidth: 660,
+                                color: "text.secondary",
+                                fontSize: { xs: 17, md: 20 },
+                                lineHeight: 1.7,
+                                mb: 4
                             }}
                         >
-                            72
-                            <Box component="span" sx={{ fontSize: { xs: 18, md: 24 }, ml: 1, fontWeight: 500 }}>
-                                bpm
-                            </Box>
+                            {t("landing.description")}
                         </Typography>
-                        <Typography sx={{ color: "#42505e", fontSize: { xs: 13, md: 15 } }}>
-                            Valor atual - Normal
-                        </Typography>
-                    </Box>
 
-                    {/* Fake Chart */}
-                    <Box
-                        sx={{
-                            height: { xs: 160, md: 240 },
-                            borderRadius: "20px",
-                            bgcolor: "#fafafa",
-                            mb: 3,
-                            position: "relative",
-                            overflow: "hidden"
-                        }}
-                    >
-                        {[1, 2, 3, 4].map((i) => (
-                            <Box
-                                key={i}
-                                sx={{
-                                    position: "absolute",
-                                    left: 0,
-                                    right: 0,
-                                    top: `${i * 20}%`,
-                                    borderTop: "1px dashed #d8d8d8"
-                                }}
-                            />
-                        ))}
-                        <svg
-                            width="100%"
-                            height="100%"
-                            viewBox="0 0 500 240"
-                            style={{ position: "absolute", inset: 0 }}
+                        <Stack
+                            direction={{ xs: "column", sm: "row" }}
+                            spacing={2}
+                            sx={{ mb: 5 }}
                         >
-                            <path
-                                d="M20 140 C 80 110, 120 160, 180 135 S 280 90, 340 130 S 430 145, 480 110"
-                                fill="none"
-                                stroke="#a6d38c"
-                                strokeWidth="4"
-                                strokeLinecap="round"
-                            />
-                        </svg>
-                    </Box>
-
-                    {/* Bottom stats */}
-                    <Box sx={{ display: "flex", gap: { xs: 1.5, md: 2 } }}>
-                        {[
-                            ["Mínimo", "65"],
-                            ["Média", "72"],
-                            ["Máximo", "81"]
-                        ].map(([label, value]) => (
-                            <Box
-                                key={label}
-                                sx={{
-                                    flex: 1,
-                                    bgcolor: "#f8f8f8",
-                                    borderRadius: "18px",
-                                    py: { xs: 2, md: 3 },
-                                    textAlign: "center"
-                                }}
+                            <ButtonUI
+                                onClick={() => navigate("/register")}
+                                sx={{ minHeight: 48 }}
                             >
-                                <Typography sx={{ color: "#7b8592", mb: 0.5, fontSize: { xs: 12, md: 14 } }}>
-                                    {label}
-                                </Typography>
-                                <Typography
-                                    sx={{
-                                        fontSize: { xs: 24, md: 34 },
-                                        fontWeight: 800,
-                                        color: "#08142b"
-                                    }}
-                                >
-                                    {value}
-                                </Typography>
-                            </Box>
-                        ))}
-                    </Box>
-                </Paper>
-            </Box>
+                                {t("landing.start")} <ArrowForwardIcon sx={{ ml: 1, fontSize: 18 }} />
+                            </ButtonUI>
 
-            {/* 5 vital signs */}
-            <Box sx={{ pt: { xs: 8, md: 12 } }}>
-                {/* Header */}
-                <Box sx={{ textAlign: "center", mb: { xs: 5, md: 8 } }}>
-                    <Typography
-                        sx={{
-                            fontSize: { xs: 28, sm: 40, md: 58 },
-                            fontWeight: 800,
-                            color: "#08142b",
-                            lineHeight: 1.1,
-                            mb: 2
-                        }}
-                    >
-                        Monitoramento Completo dos{" "}
-                        <Box component="span" sx={{ color: "#5da14f" }}>
-                            5 Sinais Vitais
-                        </Box>
-                    </Typography>
-                    <Typography sx={{ fontSize: { xs: 15, md: 22 }, color: "#5f6b7a", px: { xs: 1, md: 0 } }}>
-                        Registre, analise e compartilhe seus dados de saúde com precisão médica
-                    </Typography>
-                </Box>
-
-                <Box
-                    sx={{
-                        width: "100%",
-                        maxWidth: "1400px",
-                        mx: "auto",
-                        display: "grid",
-                        gridTemplateColumns: {
-                            xs: "1fr",           // 1 coluna em mobile
-                            sm: "repeat(2, 1fr)", // 2 colunas em sm
-                            md: "repeat(3, 1fr)", // 3 colunas em md  ← era repeat(5,1fr) que ficava muito apertado
-                            lg: "repeat(5, 1fr)"  // 5 colunas só em telas grandes
-                        },
-                        gap: 3,
-                    }}
-                >
-                    {cards.map((card) => (
-                        <Paper
-                            elevation={0}
-                            key={card.title}
-                            sx={{
-                                p: 3,
-                                borderRadius: "24px",
-                                border: "1px solid #e7e7e7",
-                                transition: "0.25s ease",
-                                cursor: "pointer",
-                                minHeight: { xs: "auto", md: 260 },
-                                "&:hover": {
-                                    transform: "translateY(-4px)",
-                                    boxShadow: "0 10px 25px rgba(0,0,0,0.06)"
-                                }
-                            }}
-                        >
-                            <Box
+                            <Button
+                                variant="outlined"
+                                startIcon={<PlayCircleOutlineIcon />}
                                 sx={{
-                                    width: 56,
-                                    height: 56,
-                                    borderRadius: "16px",
-                                    background: "linear-gradient(135deg, #c7ebd8 0%, #b4d89d 100%)",
-                                    display: "flex",
-                                    alignItems: "center",
-                                    justifyContent: "center",
-                                    color: "white",
-                                    mb: 3,
-                                    "& svg": { fontSize: 28 }
-                                }}
-                            >
-                                {card.icon}
-                            </Box>
-                            <Typography
-                                sx={{
-                                    fontSize: 18,
+                                    minHeight: 48,
+                                    borderRadius: 2,
+                                    borderColor: "rgba(22, 163, 74, 0.24)",
+                                    color: "primary.dark",
                                     fontWeight: 700,
-                                    color: "#08142b",
-                                    mb: 2,
-                                    lineHeight: 1.3
+                                    px: 3,
+                                    bgcolor: isDark ? "rgba(16, 38, 23, 0.72)" : "rgba(255,255,255,0.62)",
+                                    "&:hover": {
+                                        bgcolor: isDark ? "rgba(22, 62, 35, 0.9)" : "rgba(240,253,244,0.86)",
+                                        borderColor: "primary.main"
+                                    }
                                 }}
                             >
-                                {card.title}
-                            </Typography>
-                            <Typography sx={{ color: "#5f6b7a", lineHeight: 1.7, fontSize: 15 }}>
-                                {card.description}
-                            </Typography>
-                        </Paper>
-                    ))}
-                </Box>
-            </Box>
+                                {t("landing.demo")}
+                            </Button>
+                        </Stack>
 
-            {/* BENEFITS */}
-            <Box sx={{ width: "100%", py: { xs: 5, md: 8 } }}>
-                <Box
-                    sx={{
-                        width: "100%",
-                        maxWidth: "1200px",
-                        mx: "auto",
-                        display: "grid",
-                        gridTemplateColumns: {
-                            xs: "1fr",
-                            sm: "repeat(2, 1fr)",
-                            md: "repeat(3, 1fr)"
-                        },
-                        gap: 3
-                    }}
-                >
-                    {benefits.map((item) => (
-                        <Paper
-                            key={item.title}
-                            elevation={0}
+                        <Box
                             sx={{
-                                p: 3,
-                                borderRadius: "20px",
-                                border: "1px solid #dce7dc",
-                                display: "flex",
-                                alignItems: "flex-start",
-                                gap: 2
+                                display: "grid",
+                                gridTemplateColumns: { xs: "repeat(3, 1fr)", sm: "repeat(3, auto)" },
+                                gap: { xs: 2, md: 5 },
+                                maxWidth: 640
                             }}
                         >
-                            <Box
-                                sx={{
-                                    minWidth: 48,
-                                    width: 48,
-                                    height: 48,
-                                    borderRadius: "14px",
-                                    background: "linear-gradient(135deg, #c7ebd8 0%, #b4d89d 100%)",
-                                    display: "flex",
-                                    alignItems: "center",
-                                    justifyContent: "center",
-                                    color: "white",
-                                    "& svg": { fontSize: 24 }
-                                }}
-                            >
-                                {item.icon}
-                            </Box>
-                            <Box>
-                                <Typography sx={{ fontWeight: 700, fontSize: 18, color: "#08142b", mb: 1 }}>
-                                    {item.title}
-                                </Typography>
-                                <Typography sx={{ color: "#5f6b7a", lineHeight: 1.6, fontSize: 15 }}>
-                                    {item.description}
-                                </Typography>
-                            </Box>
-                        </Paper>
-                    ))}
-                </Box>
-            </Box>
-
-            {/* FOOTER */}
-            <Box component="footer">
-                <Box
-                    sx={{
-                        width: "100%",
-                        maxWidth: "1250px",
-                        mx: "auto",
-                        borderRadius: { xs: "24px", md: "36px" },
-                        bgcolor: "#f3fff7",
-                        boxShadow: `
-                            0 10px 30px rgba(134, 239, 172, 0.18),
-                            0 0 80px rgba(134, 239, 172, 0.12)
-                        `,
-                        border: "1px solid rgba(134,239,172,0.25)",
-                        p: { xs: 3, sm: 4, md: 6 },
-                        overflow: "hidden",
-                        transition: "0.3s ease"
-                    }}
-                >
-                    {/* TOP */}
-                    <Box
-                        sx={{
-                            display: "grid",
-                            gridTemplateColumns: {
-                                xs: "1fr",
-                                sm: "repeat(2, 1fr)",
-                                md: "2fr 1fr 1fr 1.3fr"
-                            },
-                            gap: { xs: 4, md: 6 },
-                            mb: 5
-                        }}
-                    >
-                        {/* BRAND */}
-                        <Box>
-                            <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, mb: 3 }}>
-                                <Box
-                                    sx={{
-                                        width: 44,
-                                        height: 44,
-                                        borderRadius: "16px",
-                                        background: "linear-gradient(135deg, #7dd3fc 0%, #86efac 100%)",
-                                        display: "flex",
-                                        alignItems: "center",
-                                        justifyContent: "center",
-                                        boxShadow: "0 8px 20px rgba(125,211,252,0.35)"
-                                    }}
-                                >
-                                    <MonitorHeartOutlinedIcon sx={{ color: "#0f172a" }} />
-                                </Box>
-                                <Typography
-                                    sx={{
-                                        fontSize: { xs: 26, md: 34 },
-                                        fontWeight: 800,
-                                        color: "#0f172a"
-                                    }}
-                                >
-                                    VittaSync
-                                </Typography>
-                            </Box>
-
-                            <Typography
-                                sx={{
-                                    color: "#475569",
-                                    lineHeight: 1.8,
-                                    maxWidth: 320,
-                                    mb: 4,
-                                    fontSize: 15
-                                }}
-                            >
-                                Monitoramento inteligente de saúde conectado ao seu estilo de vida.
-                            </Typography>
-
-                            <Box sx={{ display: "flex", gap: 1.5, flexWrap: "wrap" }}>
-                                {[
-                                    <FacebookOutlinedIcon />,
-                                    <TwitterIcon />,
-                                    <InstagramIcon />,
-                                    <LinkedInIcon />
-                                ].map((icon, index) => (
-                                    <Box
-                                        key={index}
-                                        sx={{
-                                            width: 46,
-                                            height: 46,
-                                            borderRadius: "16px",
-                                            background: "white",
-                                            border: "1px solid rgba(15,23,42,0.06)",
-                                            display: "flex",
-                                            alignItems: "center",
-                                            justifyContent: "center",
-                                            cursor: "pointer",
-                                            transition: "0.25s",
-                                            "&:hover": {
-                                                transform: "translateY(-3px)",
-                                                boxShadow: "0 10px 20px rgba(15,23,42,0.08)"
-                                            }
-                                        }}
-                                    >
-                                        {icon}
-                                    </Box>
-                                ))}
-                            </Box>
-                        </Box>
-
-                        {/* LINKS */}
-                        <Box>
-                            <Typography sx={{ fontWeight: 700, mb: 3, fontSize: 18, color: "#0f172a" }}>
-                                Links Rápidos
-                            </Typography>
-                            {["Funcionalidades", "Monitoramento", "Análise", "Relatórios", "Sobre Nós"].map((item) => (
-                                <Typography
-                                    key={item}
-                                    sx={{
-                                        color: "#475569",
-                                        mb: 2,
-                                        cursor: "pointer",
-                                        transition: "0.2s",
-                                        "&:hover": { color: "#2563eb", pl: 0.5 }
-                                    }}
-                                >
-                                    {item}
-                                </Typography>
-                            ))}
-                        </Box>
-
-                        {/* SUPORTE */}
-                        <Box>
-                            <Typography sx={{ fontWeight: 700, mb: 3, fontSize: 18, color: "#0f172a" }}>
-                                Suporte
-                            </Typography>
-                            {["Central de Ajuda", "Documentação", "FAQ", "Privacidade", "Termos de Uso"].map((item) => (
-                                <Typography
-                                    key={item}
-                                    sx={{
-                                        color: "#475569",
-                                        mb: 2,
-                                        cursor: "pointer",
-                                        transition: "0.2s",
-                                        "&:hover": { color: "#2563eb", pl: 0.5 }
-                                    }}
-                                >
-                                    {item}
-                                </Typography>
-                            ))}
-                        </Box>
-
-                        {/* CONTACT */}
-                        <Box>
-                            <Typography sx={{ fontWeight: 700, mb: 3, fontSize: 18, color: "#0f172a" }}>
-                                Contato
-                            </Typography>
                             {[
-                                { icon: <EmailOutlinedIcon />, text: "contato@vittasync.com.br" },
-                                { icon: <PhoneOutlinedIcon />, text: "(11) 4000-0000" },
-                                { icon: <LocationOnOutlinedIcon />, text: "São Paulo, SP - Brasil" }
-                            ].map((item) => (
-                                <Box
-                                    key={item.text}
-                                    sx={{
-                                        display: "flex",
-                                        alignItems: "center",
-                                        gap: 1.5,
-                                        mb: 3,
-                                        color: "#475569"
-                                    }}
-                                >
-                                    {item.icon}
-                                    <Typography sx={{ fontSize: { xs: 14, md: 16 }, wordBreak: "break-word" }}>
-                                        {item.text}
+                                ["10K+", t("landing.stats.activeUsers")],
+                                ["500+", t("landing.stats.doctors")],
+                                ["99.9%", t("landing.stats.uptime")]
+                            ].map(([value, label]) => (
+                                <Box key={label}>
+                                    <Typography sx={{ fontSize: { xs: 26, md: 36 }, fontWeight: 800 }}>
+                                        {value}
+                                    </Typography>
+                                    <Typography sx={{ color: "text.secondary", fontSize: 14 }}>
+                                        {label}
                                     </Typography>
                                 </Box>
                             ))}
                         </Box>
                     </Box>
 
-                    {/* BOTTOM */}
-                    <Box
+                    <Paper
+                        elevation={0}
                         sx={{
-                            borderTop: "1px solid rgba(15,23,42,0.08)",
-                            pt: 3,
-                            display: "flex",
-                            flexDirection: { xs: "column", sm: "row" },
-                            justifyContent: "space-between",
-                            alignItems: { xs: "flex-start", sm: "center" },
-                            gap: 2
+                            p: { xs: 2.5, md: 4 },
+                            borderRadius: 3,
+                            border: "1px solid",
+                            borderColor: vitta.border,
+                            bgcolor: isDark ? "rgba(16, 38, 23, 0.84)" : "rgba(255,255,255,0.82)",
+                            boxShadow: vitta.shadow,
+                            backdropFilter: "blur(18px)",
+                            overflow: "hidden"
                         }}
                     >
-                        <Typography sx={{ color: "#64748b", fontSize: 14 }}>
-                            © 2026 VittaSync. Todos os direitos reservados.
-                        </Typography>
-                        <Box sx={{ display: "flex", gap: { xs: 2, md: 3 }, flexWrap: "wrap" }}>
-                            {["Política de Privacidade", "Termos de Serviço", "Cookies"].map((item) => (
-                                <Typography
-                                    key={item}
+                        <Stack direction="row" justifyContent="space-between" alignItems="flex-start" sx={{ mb: 3 }}>
+                            <Box>
+                                <Typography sx={{ fontSize: { xs: 22, md: 28 }, fontWeight: 800 }}>
+                                    {t("landing.cardTitle")}
+                                </Typography>
+                                <Typography sx={{ color: "text.secondary" }}>
+                                    {t("landing.cardSubtitle")}
+                                </Typography>
+                            </Box>
+                            <Chip label={t("landing.normal")} color="success" variant="outlined" />
+                        </Stack>
+
+                        <Box
+                            sx={{
+                                borderRadius: 3,
+                                p: 3,
+                                mb: 3,
+                                color: "#ffffff",
+                                background: "linear-gradient(135deg, #16a34a 0%, #0f766e 72%, #0ea5e9 100%)"
+                            }}
+                        >
+                            <Typography sx={{ fontSize: { xs: 48, md: 64 }, fontWeight: 800, lineHeight: 1 }}>
+                                72
+                                <Box component="span" sx={{ fontSize: 22, ml: 1, fontWeight: 600 }}>
+                                    bpm
+                                </Box>
+                            </Typography>
+                            <Typography sx={{ mt: 1, color: "rgba(255,255,255,0.82)" }}>
+                                {t("landing.current")} - {t("landing.normal")}
+                            </Typography>
+                        </Box>
+
+                        <Box
+                            sx={{
+                                height: { xs: 190, md: 260 },
+                                borderRadius: 3,
+                                bgcolor: isDark ? "rgba(7, 26, 18, 0.72)" : "#f3faf8",
+                                position: "relative",
+                                overflow: "hidden",
+                                mb: 3,
+                                border: "1px solid",
+                                borderColor: vitta.border
+                            }}
+                        >
+                            {[1, 2, 3, 4].map((i) => (
+                                <Box
+                                    key={i}
                                     sx={{
-                                        color: "#475569",
-                                        cursor: "pointer",
-                                        fontSize: { xs: 13, md: 15 },
-                                        "&:hover": { color: "#2563eb" }
+                                        position: "absolute",
+                                        left: 0,
+                                        right: 0,
+                                        top: `${i * 20}%`,
+                                        borderTop: `1px dashed ${isDark ? "rgba(220, 252, 231, 0.14)" : "rgba(22, 163, 74, 0.18)"}`
+                                    }}
+                                />
+                            ))}
+                            <svg
+                                width="100%"
+                                height="100%"
+                                viewBox="0 0 500 260"
+                                style={{ position: "absolute", inset: 0 }}
+                            >
+                                <path
+                                    d="M20 160 C 80 118, 125 182, 184 142 S 275 92, 342 134 S 430 156, 480 102"
+                                    fill="none"
+                                    stroke="#16a34a"
+                                    strokeWidth="5"
+                                    strokeLinecap="round"
+                                />
+                                <path
+                                    d="M20 160 C 80 118, 125 182, 184 142 S 275 92, 342 134 S 430 156, 480 102"
+                                    fill="none"
+                                    stroke="#0ea5e9"
+                                    strokeOpacity="0.22"
+                                    strokeWidth="18"
+                                    strokeLinecap="round"
+                                />
+                            </svg>
+                        </Box>
+
+                        <Grid container spacing={2}>
+                            {[
+                                [t("landing.min"), "65"],
+                                [t("landing.avg"), "72"],
+                                [t("landing.max"), "81"]
+                            ].map(([label, value]) => (
+                                <Grid item xs={4} key={label}>
+                                    <Box
+                                        sx={{
+                                            borderRadius: 2,
+                                            bgcolor: isDark ? "rgba(34, 197, 94, 0.12)" : "rgba(22, 163, 74, 0.08)",
+                                            py: 2,
+                                            textAlign: "center"
+                                        }}
+                                    >
+                                        <Typography sx={{ color: "text.secondary", fontSize: 13 }}>
+                                            {label}
+                                        </Typography>
+                                        <Typography sx={{ fontSize: 28, fontWeight: 800 }}>
+                                            {value}
+                                        </Typography>
+                                    </Box>
+                                </Grid>
+                            ))}
+                        </Grid>
+                    </Paper>
+                </Box>
+            </Container>
+
+            <Box
+                sx={{
+                    bgcolor: isDark ? "rgba(7, 26, 18, 0.62)" : "rgba(255,255,255,0.58)",
+                    borderTop: "1px solid",
+                    borderColor: "divider"
+                }}
+            >
+                <Container maxWidth="xl" sx={{ py: { xs: 7, md: 10 } }}>
+                    <Box sx={{ maxWidth: 760, mb: 5 }}>
+                        <Typography sx={{ fontSize: { xs: 30, md: 46 }, fontWeight: 800, mb: 2 }}>
+                            {t("landing.vitalTitle")}
+                        </Typography>
+                        <Typography sx={{ color: "text.secondary", fontSize: { xs: 16, md: 18 }, lineHeight: 1.7 }}>
+                            {t("landing.vitalDescription")}
+                        </Typography>
+                    </Box>
+
+                    <Grid container spacing={2.5}>
+                        {cards.map(([title, description], index) => (
+                            <Grid item xs={12} sm={6} lg={4} key={title}>
+                                <Paper
+                                    elevation={0}
+                                    sx={{
+                                        height: "100%",
+                                        p: 3,
+                                        borderRadius: 2,
+                                        border: "1px solid",
+                                        borderColor: vitta.border,
+                                        bgcolor: "background.paper",
+                                        transition: "0.2s ease",
+                                        "&:hover": {
+                                            transform: "translateY(-3px)",
+                                            boxShadow: vitta.shadow,
+                                            borderColor: vitta.borderStrong
+                                        }
                                     }}
                                 >
-                                    {item}
+                                    <Box
+                                        sx={{
+                                            width: 48,
+                                            height: 48,
+                                            borderRadius: 2,
+                                            display: "grid",
+                                            placeItems: "center",
+                                            color: "primary.contrastText",
+                                            bgcolor: "primary.main",
+                                            mb: 2,
+                                            "& svg": { fontSize: 25 }
+                                        }}
+                                    >
+                                        {vitalIcons[index]}
+                                    </Box>
+                                    <Typography sx={{ fontSize: 19, fontWeight: 800, mb: 1 }}>
+                                        {title}
+                                    </Typography>
+                                    <Typography sx={{ color: "text.secondary", lineHeight: 1.65 }}>
+                                        {description}
+                                    </Typography>
+                                </Paper>
+                            </Grid>
+                        ))}
+                    </Grid>
+                </Container>
+            </Box>
+
+            <Container maxWidth="xl" sx={{ py: { xs: 7, md: 10 } }}>
+                <Typography sx={{ fontSize: { xs: 30, md: 44 }, fontWeight: 800, mb: 4 }}>
+                    {t("landing.benefitsTitle")}
+                </Typography>
+
+                <Grid container spacing={2.5}>
+                    {benefits.map(([title, description], index) => (
+                        <Grid item xs={12} md={4} key={title}>
+                            <Paper
+                                elevation={0}
+                                sx={{
+                                    height: "100%",
+                                    p: 3,
+                                    borderRadius: 2,
+                                    border: "1px solid",
+                                    borderColor: vitta.border,
+                                    bgcolor: "background.paper",
+                                    display: "flex",
+                                    gap: 2
+                                }}
+                            >
+                                <Box
+                                    sx={{
+                                        minWidth: 44,
+                                        width: 44,
+                                        height: 44,
+                                        borderRadius: 2,
+                                        display: "grid",
+                                        placeItems: "center",
+                                        color: "primary.main",
+                                        bgcolor: isDark ? "rgba(34, 197, 94, 0.14)" : "rgba(22, 163, 74, 0.1)"
+                                    }}
+                                >
+                                    {benefitIcons[index]}
+                                </Box>
+                                <Box>
+                                    <Typography sx={{ fontWeight: 800, mb: 0.75 }}>
+                                        {title}
+                                    </Typography>
+                                    <Typography sx={{ color: "text.secondary", lineHeight: 1.6 }}>
+                                        {description}
+                                    </Typography>
+                                </Box>
+                            </Paper>
+                        </Grid>
+                    ))}
+                </Grid>
+            </Container>
+
+            <Box component="footer" sx={{ pb: 4 }}>
+                <Container maxWidth="xl">
+                    <Paper
+                        elevation={0}
+                        sx={{
+                            p: { xs: 3, md: 5 },
+                            borderRadius: 3,
+                            color: "#e8f7f4",
+                            background: isDark
+                                ? "linear-gradient(135deg, #0b1f12 0%, #0f3f3b 64%, #083f61 100%)"
+                                : "linear-gradient(135deg, #14532d 0%, #0f766e 72%, #0369a1 100%)",
+                            border: "1px solid",
+                            borderColor: isDark ? "rgba(220, 252, 231, 0.12)" : "transparent",
+                            boxShadow: vitta.shadow
+                        }}
+                    >
+                        <Grid container spacing={4}>
+                            <Grid item xs={12} md={5}>
+                                <Stack direction="row" alignItems="center" spacing={1.5} sx={{ mb: 2 }}>
+                                    <Box
+                                        sx={{
+                                            width: 42,
+                                            height: 42,
+                                            borderRadius: 2,
+                                            display: "grid",
+                                            placeItems: "center",
+                                            bgcolor: "rgba(255,255,255,0.12)"
+                                        }}
+                                    >
+                                        <MonitorHeartOutlinedIcon />
+                                    </Box>
+                                    <Typography sx={{ fontSize: 28, fontWeight: 800 }}>
+                                        {t("brand")}
+                                    </Typography>
+                                </Stack>
+                                <Typography sx={{ maxWidth: 360, color: "rgba(232,247,244,0.78)", lineHeight: 1.7 }}>
+                                    {t("landing.footerText")}
                                 </Typography>
-                            ))}
+                            </Grid>
+
+                            <Grid item xs={6} md={3}>
+                                <Stack spacing={1.4}>
+                                    {t("landing.footerLinks").map((item) => (
+                                        <Typography key={item} sx={{ color: "rgba(232,247,244,0.78)" }}>
+                                            {item}
+                                        </Typography>
+                                    ))}
+                                </Stack>
+                            </Grid>
+
+                            <Grid item xs={6} md={4}>
+                                <Stack spacing={1.4}>
+                                    {t("landing.supportLinks").map((item) => (
+                                        <Typography key={item} sx={{ color: "rgba(232,247,244,0.78)" }}>
+                                            {item}
+                                        </Typography>
+                                    ))}
+                                </Stack>
+                            </Grid>
+                        </Grid>
+
+                        <Box
+                            sx={{
+                                mt: 4,
+                                pt: 3,
+                                borderTop: "1px solid rgba(232,247,244,0.16)",
+                                color: "rgba(232,247,244,0.68)",
+                                fontSize: 14
+                            }}
+                        >
+                            © 2026 {t("brand")}. {t("landing.rights")}
                         </Box>
-                    </Box>
-                </Box>
+                    </Paper>
+                </Container>
             </Box>
         </Box>
     );

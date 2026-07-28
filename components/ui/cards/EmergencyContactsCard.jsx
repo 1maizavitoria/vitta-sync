@@ -1,383 +1,395 @@
-import { Box, Typography, Paper, Button, Grid, TextField } from "@mui/material";
 import { useEffect, useState } from "react";
+
+import {
+    Box,
+    Grid,
+    IconButton,
+    Paper,
+    Tooltip,
+    Typography
+} from "@mui/material";
+import { useTheme } from "@mui/material/styles";
+
 import AddIcon from "@mui/icons-material/Add";
-import { getEmergencyContacts, createEmergencyContact, deleteEmergencyContact, editEmergencyContact } from "../../../services/contactEmergencyService";
+import CheckIcon from "@mui/icons-material/Check";
+import CloseIcon from "@mui/icons-material/Close";
+import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
+import EditOutlinedIcon from "@mui/icons-material/EditOutlined";
+import PersonOutlineIcon from "@mui/icons-material/PersonOutline";
+import PhoneOutlinedIcon from "@mui/icons-material/PhoneOutlined";
+
 import { usePatient } from "../../../context/PatientContext";
-import ButtonUI from "../Button";
-import DeleteIcon from "@mui/icons-material/Delete";
-import InputUI from "../Input";
 import { useAlert } from "../../../hooks/useAlert";
+import {
+    createEmergencyContact,
+    deleteEmergencyContact,
+    editEmergencyContact,
+    getEmergencyContacts
+} from "../../../services/contactEmergencyService";
 import { formatPhone, isValidPhone } from "../../../utils/formatters/formatPhone";
 import DialogUI from "../Dialog";
-import PersonIcon from "@mui/icons-material/Person";
-import PhoneIcon from "@mui/icons-material/Phone";
-import EditIcon from "@mui/icons-material/Edit";
+import InputUI from "../Input";
+import { useI18n } from "../../../src/i18n";
+
+const emptyContact = {
+    nome: "",
+    telefone: ""
+};
+
+const iconButtonSx = {
+    add: {
+        color: "#ffffff",
+        bgcolor: "#16a34a",
+        border: "1px solid rgba(22, 163, 74, 0.2)",
+        "&:hover": { bgcolor: "#15803d" }
+    },
+    edit: {
+        color: "#0f766e",
+        bgcolor: "rgba(15, 118, 110, 0.08)",
+        border: "1px solid rgba(15, 118, 110, 0.16)"
+    },
+    cancel: {
+        color: "#dc2626",
+        bgcolor: "rgba(220, 38, 38, 0.08)",
+        border: "1px solid rgba(220, 38, 38, 0.14)"
+    },
+    delete: {
+        color: "#dc2626",
+        bgcolor: "rgba(220, 38, 38, 0.08)",
+        border: "1px solid rgba(220, 38, 38, 0.14)"
+    },
+    save: {
+        color: "#ffffff",
+        bgcolor: "#16a34a",
+        border: "1px solid rgba(22, 163, 74, 0.2)",
+        "&:hover": { bgcolor: "#15803d" }
+    }
+};
 
 export default function EmergencyContacts() {
     const { showAlert } = useAlert();
     const { selectedPatient } = usePatient();
+    const theme = useTheme();
+    const vitta = theme.vitta;
+    const isDark = theme.palette.mode === "dark";
+    const { t } = useI18n();
+
     const [contacts, setContacts] = useState([]);
     const [loading, setLoading] = useState(false);
     const [adding, setAdding] = useState(false);
-    const [formData, setFormData] = useState({
-        nome: "",
-        telefone: ""
-    });
-    const userType = localStorage.getItem("tipo")?.toLowerCase();
-    const loggedCpf = localStorage.getItem("CPF");
+    const [formData, setFormData] = useState(emptyContact);
     const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
     const [selectedContactId, setSelectedContactId] = useState(null);
     const [editingId, setEditingId] = useState(null);
-
+    const [editData, setEditData] = useState(emptyContact);
     const [hasError, setHasError] = useState({
         nome: false,
         telefone: false
     });
 
-    const [editData, setEditData] = useState({
-        nome: "",
-        telefone: ""
-    });
+    const userType = localStorage.getItem("tipo")?.toLowerCase();
+    const loggedCpf = localStorage.getItem("CPF");
+    const isPersonalContext = selectedPatient?.cpf === loggedCpf;
+    const canEdit =
+        (userType === "paciente" && isPersonalContext) ||
+        (userType === "responsavel" && !isPersonalContext);
+    const shouldShowContacts =
+        userType === "paciente" ||
+        (userType !== "paciente" && !isPersonalContext);
+    const actionButtonSx = {
+        add: {
+            color: "#ffffff",
+            bgcolor: "primary.main",
+            border: "1px solid",
+            borderColor: vitta.borderStrong,
+            "&:hover": { bgcolor: "primary.dark" }
+        },
+        edit: {
+            color: "secondary.main",
+            bgcolor: isDark ? "rgba(14, 165, 233, 0.12)" : "rgba(15, 118, 110, 0.08)",
+            border: "1px solid",
+            borderColor: isDark ? "rgba(14, 165, 233, 0.22)" : "rgba(15, 118, 110, 0.16)"
+        },
+        cancel: iconButtonSx.cancel,
+        delete: iconButtonSx.delete,
+        save: {
+            color: "#ffffff",
+            bgcolor: "primary.main",
+            border: "1px solid",
+            borderColor: vitta.borderStrong,
+            "&:hover": { bgcolor: "primary.dark" }
+        }
+    };
+
+    function resetErrors() {
+        setHasError({
+            nome: false,
+            telefone: false
+        });
+    }
+
+    function resetForm() {
+        setFormData(emptyContact);
+        resetErrors();
+    }
 
     function validateContact(data) {
-
         const newErrors = {
             nome: false,
             telefone: false
         };
 
         if (data.nome.trim().length < 5) {
-
             newErrors.nome = true;
-
-            showAlert(
-                "warning",
-                "Nome deve ter no mínimo 5 caracteres"
-            );
+            showAlert("warning", t("reports.emergencyContacts.shortName"));
         }
 
         if (!isValidPhone(data.telefone)) {
-
             newErrors.telefone = true;
-
-            showAlert(
-                "warning",
-                "Telefone inválido"
-            );
+            showAlert("warning", t("reports.emergencyContacts.invalidPhone"));
         }
 
         setHasError(newErrors);
 
-        return !(
-            newErrors.nome ||
-            newErrors.telefone
-        );
-    }
-
-    function validateForm() {
-        return validateContact(formData);
+        return !(newErrors.nome || newErrors.telefone);
     }
 
     function startEdit(contact) {
-
+        setAdding(false);
         setEditingId(contact.id);
-
         setEditData({
             nome: contact.nome,
             telefone: contact.telefone
         });
+        resetErrors();
     }
 
     async function handleSaveContact() {
-        if (!validateForm()) {
-            return;
-        }
+        if (!validateContact(formData)) return;
 
         try {
-            const created =
-                await createEmergencyContact(
-                    selectedPatient.cpf,
-                    formData
-                );
+            const created = await createEmergencyContact(
+                selectedPatient.cpf,
+                formData
+            );
 
-            setContacts((prev) => [
-                ...prev,
-                created
-            ]);
-
-            setFormData({
-                nome: "",
-                telefone: ""
-            });
-
+            setContacts((prev) => [...prev, created]);
             setAdding(false);
-
-            setHasError({
-                nome: false,
-                telefone: false
-            });
-
-            showAlert(
-                "success",
-                "Contato salvo com sucesso"
-            );
-
+            resetForm();
+            showAlert("success", t("reports.emergencyContacts.saved"));
         } catch (error) {
-            console.log(error);
-            showAlert(
-                "error",
-                "Erro ao salvar contato"
-            );
+            console.error(error);
+            showAlert("error", t("reports.emergencyContacts.saveError"));
         }
     }
 
     async function confirmDeleteContact() {
-
         try {
-
             await deleteEmergencyContact(
                 selectedContactId,
                 selectedPatient.cpf
             );
 
             setContacts((prev) =>
-                prev.filter(
-                    contact =>
-                        contact.id !==
-                        selectedContactId
-                )
+                prev.filter((contact) => contact.id !== selectedContactId)
             );
 
-            showAlert(
-                "success",
-                "Contato removido"
-            );
-
+            showAlert("success", t("reports.emergencyContacts.removed"));
         } catch (error) {
-
             console.error(error);
-
-            showAlert(
-                "error",
-                "Erro ao remover contato"
-            );
-
+            showAlert("error", t("reports.emergencyContacts.removeError"));
         } finally {
-
             setOpenDeleteDialog(false);
-
             setSelectedContactId(null);
         }
     }
 
     async function saveEdit(id) {
-
-        if (!validateContact(editData)) {
-            return;
-        }
+        if (!validateContact(editData)) return;
 
         try {
-
-            const updated =
-                await editEmergencyContact(
-                    id,
-                    selectedPatient.cpf,
-                    editData
-                );
+            const updated = await editEmergencyContact(
+                id,
+                selectedPatient.cpf,
+                editData
+            );
 
             setContacts((prev) =>
-
                 prev.map((contact) =>
-
                     contact.id === id
                         ? updated
                         : contact
                 )
             );
 
-            showAlert(
-                "success",
-                "Contato atualizado"
-            );
-
             setEditingId(null);
-
+            showAlert("success", t("reports.emergencyContacts.updated"));
         } catch (error) {
-
             console.error(error);
-
-            showAlert(
-                "error",
-                "Erro ao editar contato"
-            );
+            showAlert("error", t("reports.emergencyContacts.editError"));
         }
     }
-    const isPersonalContext =
-        selectedPatient?.cpf
-        === loggedCpf;
-
-    const canEdit = (userType === "paciente" && isPersonalContext)
-        || (userType === "responsavel" && !isPersonalContext);
-
-    const shouldShowContacts = userType === "paciente" || (userType !== "paciente" && !isPersonalContext);
 
     useEffect(() => {
-
-        if (!selectedPatient?.cpf) {
-            return;
-        }
+        if (!selectedPatient?.cpf) return;
 
         async function fetchContacts() {
-
             try {
                 setLoading(true);
                 const data = await getEmergencyContacts(selectedPatient.cpf);
                 setContacts(data);
-
             } catch (error) {
                 console.error(error);
-
             } finally {
                 setLoading(false);
-
             }
         }
+
         setAdding(false);
-
-        setFormData({
-            nome: "",
-            telefone: ""
+        setEditingId(null);
+        setFormData(emptyContact);
+        setHasError({
+            nome: false,
+            telefone: false
         });
-
         fetchContacts();
-
     }, [selectedPatient?.cpf]);
-
 
     if (!shouldShowContacts) {
         return null;
     }
 
     return (
-
         <Paper
-            elevation={3}
+            elevation={0}
             sx={{
-                p: 3,
+                p: { xs: 2, md: 3 },
                 borderRadius: 3,
-                mt: 3,
-                display: "flex",
-                flexDirection: "column",
-                gap: 2
+                border: "1px solid",
+                borderColor: vitta.border,
+                boxShadow: vitta.shadow,
+                bgcolor: "background.paper",
+                minWidth: 0,
+                overflow: "hidden"
             }}
         >
-
-            <Typography
-                variant="h5"
-                fontWeight={700}
+            <Box
+                display="flex"
+                alignItems="center"
+                justifyContent="space-between"
+                gap={2}
+                mb={2.5}
+                sx={{ minWidth: 0 }}
             >
-                Contatos de Emergência
-            </Typography>
-
-            <Typography
-                variant="body2"
-                color="text.secondary"
-                mb={3}
-            >
-                Pessoas para contato rápido
-                em situações importantes.
-            </Typography>
-
-
-            {loading && <Typography
-                color="text.secondary"
-            >
-                Carregando contatos...
-            </Typography>
-            }
-
-            {contacts.map((contact) => (
-
-                <Grid
-                    item
-                    xs={12}
-                    md={6}
-                    key={contact.id}
-                >
-
-                    <Paper
-                        elevation={1}
+                <Box sx={{ minWidth: 0 }}>
+                    <Typography
                         sx={{
-                            p: 2,
-                            borderRadius: 3,
-                            display: "flex",
-                            flexDirection: "column",
-                            justifyContent: "space-between"
+                            fontWeight: 800,
+                            color: "text.primary",
+                            fontSize: "1.2rem",
+                            overflowWrap: "anywhere"
                         }}
                     >
-                        <Box
-                            display="flex"
-                            justifyContent="space-between"
-                            alignItems="center"
-                            gap={2}
+                        {t("reports.emergencyContacts.title")}
+                    </Typography>
+
+                    <Typography
+                        sx={{
+                            color: "text.secondary",
+                            fontSize: "0.9rem",
+                            mt: 0.25,
+                            overflowWrap: "anywhere"
+                        }}
+                    >
+                        {t("reports.emergencyContacts.description")}
+                    </Typography>
+                </Box>
+
+                {canEdit && !adding && contacts.length < 3 && (
+                    <Tooltip title={t("reports.emergencyContacts.add")}>
+                        <IconButton
+                            onClick={() => {
+                                setAdding(true);
+                                setEditingId(null);
+                                resetForm();
+                            }}
+                            sx={actionButtonSx.add}
                         >
-                            <Box
-                                display="flex"
+                            <AddIcon />
+                        </IconButton>
+                    </Tooltip>
+                )}
+            </Box>
 
-                                flexDirection="column"
-                                gap={1.5}
-                            >
-                                {editingId === contact.id ? (
+            {loading && (
+                <Typography color="text.secondary">
+                    {t("reports.emergencyContacts.loading")}
+                </Typography>
+            )}
 
-                                    <Box
-                                        display="flex"
-                                        justifyContent="space-between"
-                                        gap={2}
-                                    >
-                                        <Box
-                                            display="flex"
-                                            flexDirection="row"
-                                            gap={2}
-                                        >
+            <Box
+                sx={{
+                    display: "grid",
+                    gridTemplateColumns: {
+                        xs: "minmax(0, 1fr)",
+                        md: "repeat(2, minmax(0, 1fr))",
+                        lg: "minmax(0, 1fr)"
+                    },
+                    gap: 2,
+                    minWidth: 0
+                }}
+            >
+                {contacts.map((contact) => {
+                    const isEditing = editingId === contact.id;
+
+                    return (
+                        <Paper
+                            key={contact.id}
+                            elevation={0}
+                            sx={{
+                                p: 2,
+                                borderRadius: 3,
+                                border: "1px solid",
+                                borderColor: vitta.border,
+                                background: "background.paper",
+                                minWidth: 0
+                            }}
+                        >
+                            {isEditing ? (
+                                <Box sx={{ minWidth: 0 }}>
+                                    <Grid container spacing={1.5}>
+                                        <Grid item xs={12}>
                                             <InputUI
-                                                label="Nome"
+                                                label={t("reports.profile.name")}
                                                 value={editData.nome}
                                                 error={hasError.nome}
-                                                onChange={(e) => {
+                                                onChange={(event) => {
                                                     setEditData({
                                                         ...editData,
-                                                        nome:
-                                                            e.target.value
+                                                        nome: event.target.value
                                                     });
                                                     setHasError({
                                                         ...hasError,
                                                         nome: false
                                                     });
-                                                }
-
-                                                }
-
+                                                }}
                                             />
+                                        </Grid>
 
+                                        <Grid item xs={12}>
                                             <InputUI
-                                                label="Telefone"
+                                                label={t("reports.profile.phone")}
                                                 error={hasError.telefone}
                                                 placeholder="(11) 99999-9999"
                                                 limit={15}
-                                                value={formatPhone(
-                                                    editData.telefone
-                                                )}
-                                                error={hasError.telefone}
-                                                onChange={(e) => {
-
+                                                value={formatPhone(editData.telefone)}
+                                                onChange={(event) => {
                                                     const rawValue =
-                                                        e.target.value
-                                                            .replace(/\D/g, "");
+                                                        event.target.value.replace(/\D/g, "");
 
                                                     setEditData({
                                                         ...editData,
-                                                        telefone:
-                                                            rawValue
+                                                        telefone: rawValue
                                                     });
 
                                                     setHasError({
@@ -386,137 +398,130 @@ export default function EmergencyContacts() {
                                                     });
                                                 }}
                                             />
-                                        </Box>
+                                        </Grid>
+                                    </Grid>
 
-                                        <Box
-                                            display="flex"
-                                            alignItems="center"
-                                            gap={2}
-                                        >
-
-                                            <ButtonUI
-                                                onClick={() =>
-                                                    saveEdit(
-                                                        contact.id
-                                                    )
-                                                }
+                                    <Box display="flex" justifyContent="flex-end" gap={1} mt={1}>
+                                        <Tooltip title={t("reports.profile.cancel")}>
+                                            <IconButton
+                                                onClick={() => {
+                                                    setEditingId(null);
+                                                    resetErrors();
+                                                }}
+                                                sx={actionButtonSx.cancel}
                                             >
-                                                Salvar
-                                            </ButtonUI>
+                                                <CloseIcon />
+                                            </IconButton>
+                                        </Tooltip>
 
-                                            <ButtonUI
-                                                variant="outlined"
-                                                onClick={() =>
-                                                    setEditingId(null)
-                                                }
+                                        <Tooltip title={t("reports.profile.save")}>
+                                            <IconButton
+                                                onClick={() => saveEdit(contact.id)}
+                                                sx={actionButtonSx.save}
                                             >
-                                                Cancelar
-                                            </ButtonUI>
-
-                                        </Box>
-
+                                                <CheckIcon />
+                                            </IconButton>
+                                        </Tooltip>
                                     </Box>
-
-                                ) : (
-
-                                    <Box>
+                                </Box>
+                            ) : (
+                                <Box
+                                    display="flex"
+                                    justifyContent="space-between"
+                                    alignItems="flex-start"
+                                    gap={2}
+                                    sx={{ minWidth: 0 }}
+                                >
+                                    <Box sx={{ minWidth: 0 }}>
                                         <Box
                                             display="flex"
                                             alignItems="center"
                                             gap={1}
+                                            sx={{ minWidth: 0 }}
                                         >
-
-                                            <PersonIcon
+                                            <PersonOutlineIcon
                                                 sx={{
                                                     fontSize: 20,
-                                                    color: "#666"
+                                                    color: "primary.main",
+                                                    flex: "0 0 auto"
                                                 }}
                                             />
 
                                             <Typography
-                                                fontWeight={700}
+                                                sx={{
+                                                    fontWeight: 800,
+                                                    color: "text.primary",
+                                                    overflow: "hidden",
+                                                    textOverflow: "ellipsis",
+                                                    whiteSpace: "nowrap"
+                                                }}
                                             >
                                                 {contact.nome}
-
                                             </Typography>
-
-
                                         </Box>
 
                                         <Box
                                             display="flex"
                                             alignItems="center"
                                             gap={1}
+                                            mt={0.75}
+                                            sx={{ minWidth: 0 }}
                                         >
-
-                                            <PhoneIcon
+                                            <PhoneOutlinedIcon
                                                 sx={{
                                                     fontSize: 20,
-                                                    color: "#666"
+                                                    color: "secondary.main",
+                                                    flex: "0 0 auto"
                                                 }}
                                             />
 
                                             <Typography
-                                                color="text.secondary"
+                                                sx={{
+                                                    color: "text.secondary",
+                                                    overflow: "hidden",
+                                                    textOverflow: "ellipsis",
+                                                    whiteSpace: "nowrap"
+                                                }}
                                             >
-                                                {formatPhone(
-                                                    contact.telefone
-                                                )}
+                                                {formatPhone(contact.telefone)}
                                             </Typography>
-
                                         </Box>
                                     </Box>
-                                )}
-                            </Box>
 
-                            <Box
-                                gap={5}
-                            >
-                                {canEdit && <EditIcon
-                                    onClick={() =>
-                                        startEdit(contact)
-                                    }
-                                    sx={{
-                                        color: "#555",
-                                        cursor: "pointer",
+                                    {canEdit && (
+                                        <Box display="flex" gap={1} flexShrink={0}>
+                                            <Tooltip title={t("reports.profile.edit")}>
+                                                <IconButton
+                                                    onClick={() => startEdit(contact)}
+                                                    size="small"
+                                                    sx={actionButtonSx.edit}
+                                                >
+                                                    <EditOutlinedIcon fontSize="small" />
+                                                </IconButton>
+                                            </Tooltip>
 
-                                        "&:hover": {
-                                            opacity: 0.7
-                                        }
-                                    }}
-                                />}
+                                            <Tooltip title={t("reports.emergencyContacts.remove")}>
+                                                <IconButton
+                                                    onClick={() => {
+                                                        setSelectedContactId(contact.id);
+                                                        setOpenDeleteDialog(true);
+                                                    }}
+                                                    size="small"
+                                                    sx={actionButtonSx.delete}
+                                                >
+                                                    <DeleteOutlineIcon fontSize="small" />
+                                                </IconButton>
+                                            </Tooltip>
+                                        </Box>
+                                    )}
+                                </Box>
+                            )}
+                        </Paper>
+                    );
+                })}
+            </Box>
 
-                                {canEdit &&
-                                    <DeleteIcon
-                                        onClick={() => {
-
-                                            setSelectedContactId(
-                                                contact.id
-                                            );
-
-                                            setOpenDeleteDialog(true);
-                                        }}
-                                        sx={{
-                                            color: "#d32f2f",
-                                            cursor: "pointer",
-
-                                            "&:hover": {
-                                                opacity: 0.7
-                                            }
-                                        }}
-                                    />
-                                }
-
-                            </Box>
-
-                        </Box>
-                    </Paper>
-
-                </Grid>
-            ))}
-
-            {!loading && contacts.length === 0 && (
-
+            {!loading && contacts.length === 0 && !adding && (
                 <Box
                     sx={{
                         width: "100%",
@@ -524,164 +529,93 @@ export default function EmergencyContacts() {
                         textAlign: "center"
                     }}
                 >
-
-                    <Typography
-                        color="text.secondary"
-                    >
-                        Nenhum contato cadastrado
+                    <Typography color="text.secondary">
+                        {t("reports.emergencyContacts.noContacts")}
                     </Typography>
-
-                </Box>
-
-            )}
-
-            {canEdit && !adding && contacts.length < 3 && (
-
-                <Box
-                    sx={{
-                        border:
-                            "2px dashed #ddd",
-                        borderRadius: "16px",
-                        height: "100%",
-                        width: "100%",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        cursor: "pointer",
-                        transition: "0.2s",
-                        "&:hover": {
-                            backgroundColor:
-                                "#fafafa"
-                        }
-                    }}
-                >
-
-                    <Button
-                        onClick={() =>
-                            setAdding(true)
-                        }
-                        sx={{
-                            fontSize: 32, height: 120,
-                            width: "100%",
-
-                        }}
-                    >
-                        +
-                    </Button>
                 </Box>
             )}
 
             {adding && (
-
                 <Paper
                     elevation={0}
                     sx={{
                         mt: 2,
                         p: 2,
                         borderRadius: 3,
-                        border: "1px solid #eee",
+                        border: "1px solid",
+                        borderColor: vitta.border,
+                        background: isDark ? "rgba(220, 252, 231, 0.06)" : "rgba(240, 253, 244, 0.42)",
+                        minWidth: 0
                     }}
                 >
-                    <Box
-                        display="flex"
-                        justifyContent="space-between"
-                        alignItems="center"
-                    >
-                        <Grid
-                            container
-                            spacing={2}
-                        >
-
-                            <Grid item xs={12} md={6}>
-
-                                <InputUI
-                                    label="Nome"
-                                    error={hasError.nome}
-                                    fullWidth
-                                    value={formData.nome}
-                                    onChange={(e) => {
-
-                                        setHasError({
-                                            ...hasError,
-                                            nome: false
-                                        });
-
-                                        setFormData({
-                                            ...formData,
-                                            nome: e.target.value
-                                        });
-                                    }}
-                                />
-
-                            </Grid>
-
-                            <Grid item xs={12} md={6}>
-
-                                <InputUI
-                                    label="Telefone"
-                                    error={hasError.telefone}
-                                    fullWidth
-                                    placeholder="(11) 99999-9999"
-                                    limit={15}
-                                    value={formatPhone(
-                                        formData.telefone
-                                    )}
-                                    onChange={(e) => {
-
-                                        const rawValue =
-                                            e.target.value
-                                                .replace(/\D/g, "");
-
-                                        setHasError({
-                                            ...hasError,
-                                            telefone: false
-                                        });
-
-                                        setFormData({
-                                            ...formData,
-                                            telefone: rawValue
-                                        });
-
-                                    }}
-                                />
-
-                            </Grid>
-                        </Grid>
-
-                        <Box
-                            display="flex"
-                            gap={1}
-                            mt={2}
-                        >
-
-                            <ButtonUI
-                                variant="outlined"
-                                onClick={() => {
-
-                                    setAdding(false);
+                    <Grid container spacing={1.5}>
+                        <Grid item xs={12} md={6} lg={12}>
+                            <InputUI
+                                label={t("reports.profile.name")}
+                                error={hasError.nome}
+                                fullWidth
+                                value={formData.nome}
+                                onChange={(event) => {
+                                    setHasError({
+                                        ...hasError,
+                                        nome: false
+                                    });
 
                                     setFormData({
-                                        nome: "",
-                                        telefone: ""
-                                    });
-
-                                    setHasError({
-                                        nome: false,
-                                        telefone: false
+                                        ...formData,
+                                        nome: event.target.value
                                     });
                                 }}
-                            >
-                                Cancelar
-                            </ButtonUI>
+                            />
+                        </Grid>
 
-                            <ButtonUI
-                                variant="contained"
+                        <Grid item xs={12} md={6} lg={12}>
+                            <InputUI
+                                label={t("reports.profile.phone")}
+                                error={hasError.telefone}
+                                fullWidth
+                                placeholder="(11) 99999-9999"
+                                limit={15}
+                                value={formatPhone(formData.telefone)}
+                                onChange={(event) => {
+                                    const rawValue =
+                                        event.target.value.replace(/\D/g, "");
+
+                                    setHasError({
+                                        ...hasError,
+                                        telefone: false
+                                    });
+
+                                    setFormData({
+                                        ...formData,
+                                        telefone: rawValue
+                                    });
+                                }}
+                            />
+                        </Grid>
+                    </Grid>
+
+                    <Box display="flex" justifyContent="flex-end" gap={1} mt={1}>
+                        <Tooltip title={t("reports.profile.cancel")}>
+                            <IconButton
+                                onClick={() => {
+                                    setAdding(false);
+                                    resetForm();
+                                }}
+                                sx={actionButtonSx.cancel}
+                            >
+                                <CloseIcon />
+                            </IconButton>
+                        </Tooltip>
+
+                        <Tooltip title={t("reports.emergencyContacts.saveContact")}>
+                            <IconButton
                                 onClick={handleSaveContact}
+                                sx={actionButtonSx.save}
                             >
-                                Salvar contato
-                            </ButtonUI>
-
-                        </Box>
+                                <CheckIcon />
+                            </IconButton>
+                        </Tooltip>
                     </Box>
                 </Paper>
             )}
@@ -692,14 +626,15 @@ export default function EmergencyContacts() {
                     setOpenDeleteDialog(false);
                     setSelectedContactId(null);
                 }}
-                title="Remover contato"
-                description="Deseja realmente remover este contato de emergência?"
+                title={t("reports.emergencyContacts.removeContact")}
                 onConfirm={confirmDeleteContact}
-                confirmText="Remover"
-                cancelText="Cancelar"
-            />
-
+                confirmText={t("reports.emergencyContacts.remove")}
+                cancelText={t("reports.profile.cancel")}
+            >
+                <Typography>
+                    {t("reports.emergencyContacts.removeQuestion")}
+                </Typography>
+            </DialogUI>
         </Paper>
-
     );
 }

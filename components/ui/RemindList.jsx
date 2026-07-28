@@ -6,24 +6,21 @@ import {
     Switch,
     Box,
 } from "@mui/material";
+import { useTheme } from "@mui/material/styles";
 
 import NotificationsNoneIcon from "@mui/icons-material/NotificationsNone";
 import AccessTimeIcon from "@mui/icons-material/AccessTime";
 
-const daysMap = {
-    MONDAY: "Seg",
-    TUESDAY: "Ter",
-    WEDNESDAY: "Qua",
-    THURSDAY: "Qui",
-    FRIDAY: "Sex",
-    SATURDAY: "Sáb",
-    SUNDAY: "Dom",
-};
+import { useI18n } from "../../src/i18n";
 
 export default function ReminderList({
     reminder,
     handleToggleReminder,
 }) {
+    const theme = useTheme();
+    const vitta = theme.vitta;
+    const isDark = theme.palette.mode === "dark";
+    const { t } = useI18n();
 
     if (
         !reminder?.diasSemana ||
@@ -37,7 +34,7 @@ export default function ReminderList({
     const translatedDays =
         item.diasSemana
             .split(",")
-            .map(day => daysMap[day])
+            .map(day => t(`healthTracker.reminders.days.${day}`))
             .join(", ");
 
     return (
@@ -47,11 +44,12 @@ export default function ReminderList({
                 mt: 1.5,
                 width: "100%",
                 borderRadius: "20px",
-                backgroundColor: "#F3F5F4",
+                backgroundColor: isDark ? "rgba(220, 252, 231, 0.08)" : "#F3F5F4",
 
                 border: item.ativo
-                    ? "1.5px solid #7BE0A7"
-                    : "1px solid #D9D9D9",
+                    ? "1.5px solid"
+                    : "1px solid",
+                borderColor: item.ativo ? "primary.main" : vitta.border,
 
                 boxShadow: "none",
                 p: 0.5,
@@ -76,13 +74,13 @@ export default function ReminderList({
                     <NotificationsNoneIcon
                         sx={{
                             color: item.ativo
-                                ? "#00B26F"
-                                : "#9CA3AF"
+                                ? "primary.main"
+                                : "text.secondary"
                         }}
                     />
 
                     <Typography fontWeight="bold">
-                        Fazer medição
+                        {t("healthTracker.reminders.measurement")}
                     </Typography>
 
                     <Switch
@@ -103,7 +101,7 @@ export default function ReminderList({
                     <AccessTimeIcon
                         sx={{
                             fontSize: 18,
-                            color: "#6B7280",
+                            color: "text.secondary",
                         }}
                     />
 
@@ -122,5 +120,4 @@ export default function ReminderList({
             </CardContent>
         </Card>
     );
-
 }

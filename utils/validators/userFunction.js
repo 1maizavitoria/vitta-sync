@@ -54,10 +54,25 @@ export const funcoesGrupo = [
     }
 ];
 
-export function getNomeFuncao(funcao) {
+function translateFunctionLabel(value, fallback, t) {
+    return t ? t(`groupFunctions.labels.${value}`) : fallback;
+}
 
+function translateFunctionDescription(value, fallback, t) {
+    return t ? t(`groupFunctions.descriptions.${value}`) : fallback;
+}
+
+export function translateFunctionOptions(options, t) {
+    return options.map((option) => ({
+        ...option,
+        label: translateFunctionLabel(option.value, option.label, t),
+        descricao: translateFunctionDescription(option.value, option.descricao, t)
+    }));
+}
+
+export function getNomeFuncao(funcao, t) {
     if (funcao === "paciente") {
-        return "Paciente";
+        return t ? t("userTypes.paciente") : "Paciente";
     }
 
     const todasFuncoes = [
@@ -70,101 +85,99 @@ export function getNomeFuncao(funcao) {
             item => item.value === funcao
         );
 
-    return encontrada?.label || funcao;
+    return encontrada
+        ? translateFunctionLabel(encontrada.value, encontrada.label, t)
+        : funcao;
 }
 
-export function getResponsavelStyle(funcao) {
-
+export function getResponsavelStyle(funcao, t) {
     switch (funcao?.toLowerCase()) {
-
         case "cuidador":
             return {
                 background: "#fff3e0",
                 color: "#e65100",
-                label: "Cuidador"
+                label: translateFunctionLabel("cuidador", "Cuidador", t)
             };
 
         case "responsavel_legal":
             return {
                 background: "#fce4ec",
                 color: "#c2185b",
-                label: "Responsável Legal"
+                label: translateFunctionLabel("responsavel_legal", "Responsável Legal", t)
             };
 
         case "acompanhante":
             return {
                 background: "#ede7f6",
                 color: "#5e35b1",
-                label: "Acompanhante"
+                label: translateFunctionLabel("acompanhante", "Acompanhante", t)
             };
 
         case "contato_emergencia":
             return {
                 background: "#ffebee",
                 color: "#c62828",
-                label: "Contato de Emergência"
+                label: translateFunctionLabel("contato_emergencia", "Contato de Emergência", t)
             };
 
         case "tutor":
             return {
                 background: "#e0f7fa",
                 color: "#00838f",
-                label: "Tutor"
+                label: translateFunctionLabel("tutor", "Tutor", t)
             };
 
         default:
             return {
                 background: "#eeeeee",
                 color: "#616161",
-                label: "Responsável"
+                label: translateFunctionLabel("responsavel", "Responsável", t)
             };
     }
 }
 
-export function getMedicoStyle(funcao) {
-
+export function getMedicoStyle(funcao, t) {
     switch (funcao?.toLowerCase()) {
-
         case "medico_principal":
             return {
                 background: "#e3f2fd",
                 color: "#1565c0",
-                label: "Médico Principal"
+                label: translateFunctionLabel("medico_principal", "Médico Principal", t)
             };
 
         case "especialista":
             return {
                 background: "#e8f5e9",
                 color: "#2e7d32",
-                label: "Especialista"
+                label: translateFunctionLabel("especialista", "Especialista", t)
             };
 
         case "consultor":
             return {
                 background: "#fff8e1",
                 color: "#f9a825",
-                label: "Consultor"
+                label: translateFunctionLabel("consultor", "Consultor", t)
             };
 
         case "acompanhamento_clinico":
             return {
                 background: "#e0f2f1",
                 color: "#00695c",
-                label: "Acompanhamento Clínico"
+                label: translateFunctionLabel("acompanhamento_clinico", "Acompanhamento Clínico", t)
             };
 
         case "equipe_assistencial":
             return {
                 background: "#ede7f6",
                 color: "#4527a0",
-                label: "Equipe Assistencial"
+                label: translateFunctionLabel("equipe_assistencial", "Equipe Assistencial", t)
             };
 
         default:
             return {
                 background: "#eeeeee",
                 color: "#616161",
-                label: "Profissional de Saúde"
+                label: translateFunctionLabel("profissional_saude", "Profissional de Saúde", t)
             };
     }
 }

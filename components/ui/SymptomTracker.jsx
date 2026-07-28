@@ -1,42 +1,99 @@
-import Grid from "@mui/material/Grid";
-import FavoriteIcon from "@mui/icons-material/Favorite";
-import MonitorHeartIcon from "@mui/icons-material/MonitorHeart";
-import AirIcon from '@mui/icons-material/Air';
-import DeviceThermostatIcon from '@mui/icons-material/DeviceThermostat';
-import { Box, Paper, Typography } from "@mui/material";
 import { useEffect, useState } from "react";
-import { useAlert } from "../../hooks/useAlert";
-import { editSymptom, getSymptom, registerSymptom } from "../../services/symptomService";
-import ButtonUI from "./Button";
-import HabitCard from "../ui/cards/HabitCard";
 
-import BedtimeIcon from "@mui/icons-material/Bedtime";
-import FitnessCenterIcon from "@mui/icons-material/FitnessCenter";
+import { Box, Grid, IconButton, Paper, Tooltip, Typography } from "@mui/material";
+import { useTheme } from "@mui/material/styles";
+
+import AddIcon from "@mui/icons-material/Add";
+import AssignmentOutlinedIcon from "@mui/icons-material/AssignmentOutlined";
+import CheckIcon from "@mui/icons-material/Check";
+import CloseIcon from "@mui/icons-material/Close";
+import EditOutlinedIcon from "@mui/icons-material/EditOutlined";
+import SpeedIcon from "@mui/icons-material/Speed";
 import { CalendarIcon } from "@mui/x-date-pickers";
-import SymptomCard from "../ui/cards/SymptomCard";
-import { getNomeFuncao, getResponsavelStyle, getMedicoStyle } from "../../utils/validators/userFunction";
 
 import { usePatient } from "../../context/PatientContext";
+import { useAlert } from "../../hooks/useAlert";
+import { editSymptom, getSymptom, registerSymptom } from "../../services/symptomService";
+import { getMedicoStyle, getNomeFuncao, getResponsavelStyle } from "../../utils/validators/userFunction";
+import SymptomCard from "../ui/cards/SymptomCard";
+import { useI18n } from "../../src/i18n";
+
+const emptyInputs = {
+    symptom: "",
+    intencity: "",
+    date: null,
+};
+
+const iconButtonSx = {
+    add: {
+        color: "#ffffff",
+        bgcolor: "#16a34a",
+        border: "1px solid rgba(22, 163, 74, 0.2)",
+        "&:hover": { bgcolor: "#15803d" }
+    },
+    edit: {
+        color: "#0f766e",
+        bgcolor: "rgba(15, 118, 110, 0.08)",
+        border: "1px solid rgba(15, 118, 110, 0.16)"
+    },
+    cancel: {
+        color: "#dc2626",
+        bgcolor: "rgba(220, 38, 38, 0.08)",
+        border: "1px solid rgba(220, 38, 38, 0.14)"
+    },
+    save: {
+        color: "#ffffff",
+        bgcolor: "#16a34a",
+        border: "1px solid rgba(22, 163, 74, 0.2)",
+        "&:hover": { bgcolor: "#15803d" }
+    }
+};
 
 export function SymptomTracker() {
     const { selectedPatient } = usePatient();
     const { showAlert } = useAlert();
+    const theme = useTheme();
+    const isDark = theme.palette.mode === "dark";
+    const { t } = useI18n();
 
     const [editing, setEditing] = useState(false);
     const [addSymptom, setAddSymptom] = useState(false);
-
     const [error, setError] = useState(false);
     const [errorSymptom, setErrorSymptom] = useState(false);
     const [errorIntensity, setErrorIntensity] = useState(false);
     const [errorDate, setErrorDate] = useState(false);
+    const [symptoms, setSymptoms] = useState([]);
+    const [symptomInputs, setSymptomInputs] = useState(emptyInputs);
 
-    const [Symptom, setSymptom] = useState([]);
+    const userType = localStorage.getItem("tipo");
+    const canEdit = userType !== "saude";
+    const isFormOpen = addSymptom || editing;
+    const CPF = selectedPatient?.cpf;
+    const actionButtonSx = {
+        add: {
+            color: "#ffffff",
+            bgcolor: "primary.main",
+            border: "1px solid",
+            borderColor: theme.vitta.borderStrong,
+            "&:hover": { bgcolor: "primary.dark" }
+        },
+        edit: {
+            color: "secondary.main",
+            bgcolor: isDark ? "rgba(14, 165, 233, 0.12)" : "rgba(15, 118, 110, 0.08)",
+            border: "1px solid",
+            borderColor: isDark ? "rgba(14, 165, 233, 0.22)" : "rgba(15, 118, 110, 0.16)"
+        },
+        cancel: iconButtonSx.cancel,
+        save: {
+            color: "#ffffff",
+            bgcolor: "primary.main",
+            border: "1px solid",
+            borderColor: theme.vitta.borderStrong,
+            "&:hover": { bgcolor: "primary.dark" }
+        }
+    };
 
-    const [closeMeditionInput, setCloseMeditionInput] = useState(false);
-
-    const [resetKey, setResetKey] = useState(0);
-
-    const lastSymptom = Symptom.reduce((latest, current) => {
+    const lastSymptom = symptoms.reduce((latest, current) => {
         if (!latest) return current;
 
         return new Date(current.dataRegistro) > new Date(latest.dataRegistro)
@@ -46,137 +103,39 @@ export function SymptomTracker() {
 
     let style = null;
 
-    if (
-        lastSymptom?.usuarioTipo ===
-        "responsavel"
-    ) {
-
-        style =
-            getResponsavelStyle(
-                lastSymptom.usuarioFuncao
-            );
-    }
-    else if (
-        lastSymptom?.usuarioTipo ===
-        "saude"
-    ) {
-
-        style =
-            getMedicoStyle(
-                lastSymptom.usuarioFuncao
-            );
+    if (lastSymptom?.usuarioTipo === "responsavel") {
+        style = getResponsavelStyle(lastSymptom.usuarioFuncao, t);
+    } else if (lastSymptom?.usuarioTipo === "saude") {
+        style = getMedicoStyle(lastSymptom.usuarioFuncao, t);
     }
 
-    const [SymptomInputs, setSymptomInputs] = useState({
-        symptom: "",
-        intencity: "",
-        date: null,
-    });
-
-    const userType =
-        localStorage.getItem("tipo");
-
-    const canEdit =
-        userType !== "saude";
-
-    function isValidIntencity(value) {
-        const num = Number(value);
-        return !isNaN(num) && num >= 1 && num <= 10;
+    function updateInput(field, value) {
+        setSymptomInputs((prev) => ({
+            ...prev,
+            [field]: value
+        }));
     }
 
-    const formatDateString = (dateString) => {
-        if (!dateString) return "N/A";
-        const [year, month, day] = dateString.split("-");
-        return `${day}/${month}/${year}`;
-    };
-
-
-    function canRegister() {
-        // Verifica se todos os campos estão preenchidos
-        if (!SymptomInputs.symptom || !SymptomInputs.intencity || !SymptomInputs.date) {
-            showAlert("error", "Preencha todos os campos");
-            setError(true);
-            return false;
-        }
-
-        if (!isValidIntencity(SymptomInputs.intencity)) {
-            showAlert("error", "Intensidade deve estar em um valor válido (1–10)");
-            setErrorSymptom(true);
-            return false;
-        }
-
+    function clearErrors() {
+        setError(false);
         setErrorIntensity(false);
         setErrorSymptom(false);
         setErrorDate(false);
-
-        setError(false);
-        return true;
-
     }
 
-    async function handleRegister() {
+    function closeForm() {
+        setEditing(false);
+        setAddSymptom(false);
+        clearErrors();
+    }
 
-        if (!canRegister()) return;
-
-        const data = {
-            sintoma: SymptomInputs.symptom,
-            intensidadeDor: parseInt(SymptomInputs.intencity, 10),
-            dataReferencia: SymptomInputs.date,
-        }
-
-        const CPF = selectedPatient?.cpf;
-
-        if (addSymptom) {
-
-            try {
-
-                await registerSymptom(CPF, data);
-                const updatedSymptom = await getSymptom(CPF);
-                setSymptom(updatedSymptom);
-                showAlert("success", "Sintomas registrados com sucesso");
-
-                handleClearInputs();
-
-                setCloseMeditionInput(true);
-
-                //serve parar resetar o estado dos componentes sem o useeffect.
-                setResetKey(prev => prev + 1);
-                setAddSymptom(false);
-
-
-            } catch (error) {
-                console.error("Erro ao registrar Sintomas:", error);
-                showAlert("error", "Erro ao registrar Sintomas");
-            }
-        }
-
-        if (editing) {
-
-            try {
-
-                await editSymptom(lastSymptom.id, CPF, data);
-                const updatedSymptom = await getSymptom(CPF);
-                setSymptom(updatedSymptom);
-                showAlert("success", "Sintomas editados com sucesso");
-
-                handleClearInputs();
-
-                setCloseMeditionInput(true);
-
-                //serve parar resetar o estado dos componentes sem o useeffect.
-                setResetKey(prev => prev + 1);
-                setEditing(false);
-
-
-            } catch (error) {
-                console.error("Erro ao editar Sintomas:", error);
-                showAlert("error", "Erro ao editar Sintomas");
-            }
-        }
-
+    function handleClearInputs() {
+        setSymptomInputs(emptyInputs);
     }
 
     function handleDataEditing() {
+        if (!lastSymptom) return;
+
         setSymptomInputs({
             symptom: lastSymptom.sintoma,
             intencity: lastSymptom.intensidadeDor,
@@ -184,60 +143,95 @@ export function SymptomTracker() {
         });
     }
 
-    function handleClearInputs() {
-        setSymptomInputs({
-            symptom: "",
-            intencity: "",
-            date: "",
-        });
+    function isValidIntencity(value) {
+        const num = Number(value);
+        return !isNaN(num) && num >= 1 && num <= 10;
+    }
+
+    function formatDateString(dateString) {
+        if (!dateString) return "N/A";
+
+        const [year, month, day] = dateString.split("-");
+        return `${day}/${month}/${year}`;
+    }
+
+    function canRegister() {
+        if (!symptomInputs.symptom || !symptomInputs.intencity || !symptomInputs.date) {
+            showAlert("error", t("healthTracker.habits.fillAll"));
+            setError(true);
+            return false;
+        }
+
+        if (!isValidIntencity(symptomInputs.intencity)) {
+            showAlert("error", t("healthTracker.symptoms.invalidIntensity"));
+            setErrorSymptom(true);
+            return false;
+        }
+
+        clearErrors();
+        return true;
+    }
+
+    async function refreshSymptoms() {
+        if (!CPF) return;
+
+        const updatedSymptom = await getSymptom(CPF);
+        setSymptoms(updatedSymptom);
+    }
+
+    async function handleRegister() {
+        if (!canRegister()) return;
+
+        const data = {
+            sintoma: symptomInputs.symptom,
+            intensidadeDor: parseInt(symptomInputs.intencity, 10),
+            dataReferencia: symptomInputs.date,
+        };
+
+        try {
+            if (addSymptom) {
+                await registerSymptom(CPF, data);
+                showAlert("success", t("healthTracker.symptoms.registered"));
+            }
+
+            if (editing) {
+                await editSymptom(lastSymptom.id, CPF, data);
+                showAlert("success", t("healthTracker.symptoms.edited"));
+            }
+
+            await refreshSymptoms();
+            handleClearInputs();
+            closeForm();
+        } catch (registerError) {
+            console.error("Erro ao salvar sintomas:", registerError);
+            showAlert("error", t("healthTracker.symptoms.saveError"));
+        }
     }
 
     useEffect(() => {
-
         if (!selectedPatient) return;
 
         async function fetchSymptoms() {
-
             try {
-
-                const data =
-                    await getSymptom(
-                        selectedPatient.cpf
-                    );
-
-                setSymptom(data);
-
-                console.log(
-                    "Sintomas obtidos:",
-                    data
-                );
-
-            } catch (error) {
-
-                console.error(
-                    "Erro ao buscar sintomas:",
-                    error
-                );
-
-                setSymptom([]);
+                const data = await getSymptom(selectedPatient.cpf);
+                setSymptoms(data);
+            } catch (fetchError) {
+                console.error("Erro ao buscar sintomas:", fetchError);
+                setSymptoms([]);
             }
         }
 
         fetchSymptoms();
-
     }, [selectedPatient]);
 
-    const hasUnsavedChanges =
-        SymptomInputs.intencity ||
-        SymptomInputs.symptom ||
-        SymptomInputs.date;
-
     useEffect(() => {
-        const handleBeforeUnload = (e) => {
+        const hasUnsavedChanges = Object.values(symptomInputs).some(Boolean);
+
+        const handleBeforeUnload = (event) => {
             if (!hasUnsavedChanges) return;
 
-            e.preventDefault();
-            e.returnValue = ""; // necessário pro Chrome
+            event.preventDefault();
+            event.returnValue = "";
         };
 
         window.addEventListener("beforeunload", handleBeforeUnload);
@@ -245,135 +239,161 @@ export function SymptomTracker() {
         return () => {
             window.removeEventListener("beforeunload", handleBeforeUnload);
         };
-    }, [hasUnsavedChanges]);
+    }, [symptomInputs]);
 
     return (
+        <Paper
+            elevation={0}
+            sx={{
+                p: 0,
+                background: "transparent",
+                boxShadow: "none",
+                minWidth: 0
+            }}
+        >
+            <Box
+                display="flex"
+                alignItems="center"
+                justifyContent="space-between"
+                gap={2}
+                mb={2.5}
+                sx={{ minWidth: 0 }}
+            >
+                <Box sx={{ minWidth: 0 }}>
+                    <Typography
+                        sx={{
+                            fontWeight: 800,
+                            color: "text.primary",
+                            fontSize: "1.05rem",
+                            overflowWrap: "anywhere"
+                        }}
+                    >
+                        {t("healthTracker.symptoms.title")}
+                    </Typography>
 
-        <Paper elevation={3} sx={{ p: 3 }}>
+                    <Typography
+                        sx={{
+                            color: "text.secondary",
+                            fontSize: "0.88rem",
+                            mt: 0.25,
+                            overflowWrap: "anywhere"
+                        }}
+                    >
+                        {t("healthTracker.symptoms.description")}
+                    </Typography>
+                </Box>
 
-            <Box display="flex" alignItems="center" mb={2}>
+                {isFormOpen ? (
+                    <Box display="flex" gap={1} flexShrink={0}>
+                        <Tooltip title={t("healthTracker.common.cancel")}>
+                            <IconButton onClick={closeForm} sx={actionButtonSx.cancel}>
+                                <CloseIcon />
+                            </IconButton>
+                        </Tooltip>
 
-                {(addSymptom || editing) ? (
-                    <Box display="flex" gap={1}>
-
-                        <ButtonUI onClick={() => {
-                            setEditing(false);
-                            setAddSymptom(false);
-                            setErrorIntensity(false);
-                            setErrorSymptom(false);
-                            setErrorDate(false);
-                            setError(false);
-                        }}>
-                            Cancelar
-                        </ButtonUI>
-
-                        <ButtonUI
-                            onClick={() => {
-                                handleRegister();
-                            }}
-                        >
-                            Salvar
-                        </ButtonUI>
-
+                        <Tooltip title={t("healthTracker.common.save")}>
+                            <IconButton onClick={handleRegister} sx={actionButtonSx.save}>
+                                <CheckIcon />
+                            </IconButton>
+                        </Tooltip>
                     </Box>
                 ) : (
-                    <Box display="flex" alignItems="center" gap={1}>
-                        {canEdit && <ButtonUI onClick={() => {
-                            setAddSymptom(true);
-                            handleClearInputs();
-                        }}>
-                            + Adicionar Sintomas
-                        </ButtonUI>}
+                    <Box display="flex" alignItems="center" gap={1} flexShrink={0}>
+                        {canEdit && (
+                            <Tooltip title={t("healthTracker.symptoms.add")}>
+                                <IconButton
+                                    onClick={() => {
+                                        setAddSymptom(true);
+                                        handleClearInputs();
+                                    }}
+                                    sx={actionButtonSx.add}
+                                >
+                                    <AddIcon />
+                                </IconButton>
+                            </Tooltip>
+                        )}
 
-                        {canEdit && <ButtonUI onClick={() => {
-                            setEditing(true);
-                            handleDataEditing();
-                        }}>
-                            Editar Sintomas
-                        </ButtonUI>}
+                        {canEdit && (
+                            <Tooltip title={t("healthTracker.symptoms.edit")}>
+                                <span>
+                                    <IconButton
+                                        onClick={() => {
+                                            setEditing(true);
+                                            handleDataEditing();
+                                        }}
+                                        disabled={!lastSymptom}
+                                        sx={actionButtonSx.edit}
+                                    >
+                                        <EditOutlinedIcon />
+                                    </IconButton>
+                                </span>
+                            </Tooltip>
+                        )}
                     </Box>
                 )}
             </Box>
 
-            <Grid container spacing={3}>
-
-                <Grid item xs={12} md={4}>
+            <Grid container spacing={2.5}>
+                <Grid item xs={12} sm={6} lg={4}>
                     <SymptomCard
                         userStyle={style}
-                        showInput={editing || addSymptom}
-                        icon={<FitnessCenterIcon />}
-                        title="Sintoma"
-                        error={(error && !SymptomInputs.symptom) || errorIntensity}
+                        showInput={isFormOpen}
+                        icon={<AssignmentOutlinedIcon />}
+                        title={t("healthTracker.symptoms.symptom")}
+                        error={(error && !symptomInputs.symptom) || errorIntensity}
                         type="text"
-                        value={lastSymptom ? lastSymptom.sintoma : "N/A"}
-                        // unit="Minutos"
-                        date={lastSymptom ? new Date(lastSymptom.dataRegistro).toLocaleString() : "N/A"}
-                        inputValue={SymptomInputs.symptom}
-                        closeMeditionInput={closeMeditionInput}
-                        onInputChange={(e) => setSymptomInputs({ ...SymptomInputs, symptom: e.target.value }, setErrorIntensity(false))}
-                        key={resetKey}
+                        value={lastSymptom ? lastSymptom.sintoma : t("healthTracker.common.notAvailable")}
+                        date={lastSymptom ? new Date(lastSymptom.dataRegistro).toLocaleString() : t("healthTracker.common.notAvailable")}
+                        inputValue={symptomInputs.symptom}
+                        onInputChange={(event) => {
+                            updateInput("symptom", event.target.value);
+                            setErrorIntensity(false);
+                        }}
                         userName={lastSymptom?.usuarioNome}
-                        userFunction={getNomeFuncao(
-                            lastSymptom?.usuarioFuncao
-                        )}
+                        userFunction={getNomeFuncao(lastSymptom?.usuarioFuncao, t)}
                     />
                 </Grid>
 
-                <Grid item xs={12} md={4}>
+                <Grid item xs={12} sm={6} lg={4}>
                     <SymptomCard
                         userStyle={style}
-                        showInput={editing || addSymptom}
-                        icon={<BedtimeIcon />}
-                        title="Intensidade"
-                        error={(error && !SymptomInputs.intencity) || errorSymptom}
-                        type="text"
-                        value={lastSymptom ? lastSymptom.intensidadeDor : "N/A"}
-                        // unit="Horas"
-                        date={lastSymptom ? new Date(lastSymptom.dataRegistro).toLocaleString() : "N/A"}
-                        inputValue={SymptomInputs.intencity}
-                        closeMeditionInput={closeMeditionInput}
-                        onInputChange={(e) => setSymptomInputs({ ...SymptomInputs, intencity: e.target.value }, setErrorSymptom(false))}
-                        key={resetKey}
+                        showInput={isFormOpen}
+                        icon={<SpeedIcon />}
+                        title={t("healthTracker.symptoms.intensity")}
+                        error={(error && !symptomInputs.intencity) || errorSymptom}
+                        type="number"
+                        value={lastSymptom ? lastSymptom.intensidadeDor : t("healthTracker.common.notAvailable")}
+                        date={lastSymptom ? new Date(lastSymptom.dataRegistro).toLocaleString() : t("healthTracker.common.notAvailable")}
+                        inputValue={symptomInputs.intencity}
+                        onInputChange={(event) => {
+                            updateInput("intencity", event.target.value);
+                            setErrorSymptom(false);
+                        }}
                         userName={lastSymptom?.usuarioNome}
-                        userFunction={getNomeFuncao(
-                            lastSymptom?.usuarioFuncao
-                        )}
+                        userFunction={getNomeFuncao(lastSymptom?.usuarioFuncao, t)}
                     />
                 </Grid>
 
-                <Grid item xs={12} md={4}>
+                <Grid item xs={12} sm={6} lg={4}>
                     <SymptomCard
                         userStyle={style}
-                        showInput={editing || addSymptom}
+                        showInput={isFormOpen}
                         icon={<CalendarIcon />}
-                        title="Data"
-                        error={(error && !SymptomInputs.date) || errorDate}
-                        // type="number"
-                        value={lastSymptom ? formatDateString(lastSymptom.dataReferencia) : "N/A"}
-                        // unit="yyyy-MM-dd"
-                        date={lastSymptom ? new Date(lastSymptom.dataRegistro).toLocaleString() : "N/A"}
-                        inputValue={SymptomInputs.date}
-                        closeMeditionInput={closeMeditionInput}
-                        // onInputChange={(e) => setSymptomInputs({ ...SymptomInputs, date: e.target.value }, setErrorDate(false))}
+                        title={t("healthTracker.common.date")}
+                        error={(error && !symptomInputs.date) || errorDate}
+                        value={lastSymptom ? formatDateString(lastSymptom.dataReferencia) : t("healthTracker.common.notAvailable")}
+                        date={lastSymptom ? new Date(lastSymptom.dataRegistro).toLocaleString() : t("healthTracker.common.notAvailable")}
+                        inputValue={symptomInputs.date}
                         onInputChange={(newValue) => {
-                            setSymptomInputs({ ...SymptomInputs, date: newValue });
+                            updateInput("date", newValue);
                             setErrorDate(false);
                         }}
-                        key={resetKey}
-                        dataPicker={true}
+                        dataPicker
                         userName={lastSymptom?.usuarioNome}
-                        userFunction={getNomeFuncao(
-                            lastSymptom?.usuarioFuncao
-                        )}
-
-
+                        userFunction={getNomeFuncao(lastSymptom?.usuarioFuncao, t)}
                     />
                 </Grid>
-
             </Grid>
-
         </Paper>
-
-    )
-
+    );
 }

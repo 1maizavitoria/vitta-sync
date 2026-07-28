@@ -1,141 +1,186 @@
 import {
     Box,
-    Typography,
+    Chip,
+    Tab,
     Tabs,
-    Tab
+    Typography
 } from "@mui/material";
+import { useTheme } from "@mui/material/styles";
 
-import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
-import DirectionsWalkIcon from "@mui/icons-material/DirectionsWalk";
 import AssignmentOutlinedIcon from "@mui/icons-material/AssignmentOutlined";
+import DirectionsWalkIcon from "@mui/icons-material/DirectionsWalk";
+import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
 
-import { HabitTracker } from "../../components/ui/HabitTracker";
-import { VitalTracker } from "../../components/ui/VitalTracker";
-
-import ReminderCard from "../../components/ui/cards/RemindCard";
-
-import { SymptomTracker } from "../../components/ui/SymptomTracker";
-import { usePatient } from "../../context/PatientContext";
 import { useState } from "react";
 
+import { HabitTracker } from "../../components/ui/HabitTracker";
+import { SymptomTracker } from "../../components/ui/SymptomTracker";
+import { VitalTracker } from "../../components/ui/VitalTracker";
+import ReminderCard from "../../components/ui/cards/RemindCard";
+import { usePatient } from "../../context/PatientContext";
+import { useI18n } from "../../src/i18n";
+
 export default function HealthTreacker() {
+    const theme = useTheme();
+    const vitta = theme.vitta;
+    const isDark = theme.palette.mode === "dark";
     const { selectedPatient } = usePatient();
+    const { t } = useI18n();
     const userType =
         localStorage
             .getItem("tipo")
             ?.toLowerCase();
 
     const [tab, setTab] = useState(0);
+
     const tabs = [
         {
-            label: "Sinais Vitais",
+            label: t("healthTracker.tabs.vitals"),
             icon: <FavoriteBorderIcon />,
             component: <VitalTracker />
         },
         {
-            label: "Hábitos",
+            label: t("healthTracker.tabs.habits"),
             icon: <DirectionsWalkIcon />,
             component: <HabitTracker />
         },
         {
-            label: "Sintomas",
+            label: t("healthTracker.tabs.symptoms"),
             icon: <AssignmentOutlinedIcon />,
             component: <SymptomTracker />
         }
     ];
-    return (
 
+    return (
         <Box
             sx={{
-                ml: 10,
-                gridTemplateColumns: {
-                    xs: "1fr",
-                    lg: "1fr 340px",
-                },
-                gap: 3,
-                alignItems: "start",
+                minHeight: "100vh",
+                px: { xs: 2, md: 4 },
+                py: { xs: 3, md: 4 },
+                overflowX: "hidden",
+                bgcolor: "background.default",
+                background: vitta.pageBackground,
+                color: "text.primary",
             }}
         >
             <Box
                 sx={{
                     mb: 3,
-                    p: 3,
-                    borderRadius: "20px",
-                    background:
-                        "linear-gradient(135deg, #F4FFF8 0%, #EEF7FF 100%)",
-
-                    border: "1px solid #E3EAF3",
+                    p: { xs: 2.5, md: 3 },
+                    borderRadius: 3,
+                    background: vitta.panelBackground,
+                    border: "1px solid",
+                    borderColor: vitta.border,
+                    boxShadow: vitta.shadow,
+                    display: "flex",
+                    alignItems: { xs: "flex-start", md: "center" },
+                    justifyContent: "space-between",
+                    gap: 2,
+                    flexDirection: { xs: "column", md: "row" },
+                    minWidth: 0
                 }}
             >
+                <Box sx={{ minWidth: 0 }}>
+                    <Typography
+                        variant="h4"
+                        sx={{
+                            fontWeight: 800,
+                            color: "text.primary",
+                            letterSpacing: 0,
+                            overflowWrap: "anywhere",
+                            fontSize: { xs: "1.6rem", md: "2.125rem" }
+                        }}
+                    >
+                        {t("healthTracker.title")}
+                    </Typography>
 
-                <Typography
-                    variant="h4"
-                    fontWeight="bold"
-                >
-                    Acompanhamento de Saúde
-                </Typography>
-
-                {userType !== "paciente" &&
                     <Typography
                         variant="body1"
-                        color="text.secondary"
-                        mt={1}
+                        sx={{
+                            color: "text.secondary",
+                            mt: 1,
+                            maxWidth: 680,
+                            overflowWrap: "anywhere"
+                        }}
                     >
-                        Paciente selecionado:
-                        {" "}
-                        <strong>
-                            {selectedPatient?.nome || "Nenhum paciente"}
-                        </strong>
-                    </Typography>}
+                        {t("healthTracker.description")}
+                    </Typography>
+                </Box>
 
+                {userType !== "paciente" && (
+                    <Chip
+                        label={`${t("healthTracker.selectedPatient")}: ${selectedPatient?.nome || t("healthTracker.noPatient")}`}
+                        sx={{
+                            maxWidth: "100%",
+                            fontWeight: 800,
+                            color: "primary.dark",
+                            bgcolor: isDark ? "rgba(34, 197, 94, 0.14)" : "rgba(22, 163, 74, 0.12)",
+                            border: "1px solid",
+                            borderColor: vitta.borderStrong,
+                            "& .MuiChip-label": {
+                                overflow: "hidden",
+                                textOverflow: "ellipsis"
+                            }
+                        }}
+                    />
+                )}
             </Box>
 
             <Box
                 sx={{
                     display: "grid",
                     gridTemplateColumns: {
-                        xs: "1fr",
-                        lg: "1fr 340px",
+                        xs: "minmax(0, 1fr)",
+                        lg: "minmax(0, 1fr) 340px",
                     },
-                    gap: 3,
+                    gap: { xs: 2, md: 3 },
                     alignItems: "start",
-                }}>
-                <Box>
+                    minWidth: 0
+                }}
+            >
+                <Box sx={{ minWidth: 0 }}>
                     <Tabs
                         value={tab}
-                        onChange={(e, newValue) => setTab(newValue)}
-                        variant="fullWidth"
+                        onChange={(event, newValue) => setTab(newValue)}
+                        variant="scrollable"
+                        scrollButtons="auto"
+                        allowScrollButtonsMobile
                         sx={{
                             mb: 1,
                             p: 0.5,
-                            borderRadius: "20px",
-                            background: "#F7FAF9",
+                            borderRadius: 3,
+                            background: "background.paper",
+                            border: "1px solid",
+                            borderColor: vitta.border,
+                            boxShadow: vitta.shadow,
 
                             "& .MuiTabs-indicator": {
                                 display: "none",
                             },
                         }}
                     >
-                        {tabs.map((item, index) => (
+                        {tabs.map((item) => (
                             <Tab
-                                key={index}
+                                key={item.label}
                                 icon={item.icon}
                                 iconPosition="start"
                                 label={item.label}
                                 sx={{
-                                    borderRadius: "16px",
+                                    borderRadius: 2,
                                     minHeight: 52,
+                                    minWidth: { xs: 132, sm: 170 },
                                     textTransform: "none",
-                                    fontWeight: 700,
+                                    fontWeight: 800,
                                     mx: 0.5,
-                                    color: "#4B5563",
+                                    color: "text.secondary",
+                                    transition: "all .2s ease",
 
                                     "&.Mui-selected": {
-                                        color: "#1F2937",
-                                        background:
-                                            "linear-gradient(90deg, #BEE8D7 0%, #B7D88A 100%)",
-                                        boxShadow:
-                                            "0 4px 10px rgba(0,0,0,0.10)",
+                                        color: "text.primary",
+                                        background: isDark
+                                            ? "linear-gradient(135deg, rgba(34, 197, 94, 0.18) 0%, rgba(14, 165, 233, 0.14) 100%)"
+                                            : "linear-gradient(135deg, #dcfce7 0%, #e0f2fe 100%)",
+                                        boxShadow: vitta.shadow,
                                     },
                                 }}
                             />
@@ -145,28 +190,21 @@ export default function HealthTreacker() {
                     <Box
                         sx={{
                             mt: -1,
-                            p: 3,
-                            border: "1px solid #ECECEC",
-                            borderRadius: "20px",
-                            background: "#FFF",
-                            boxShadow: "0 4px 14px rgba(0,0,0,0.06)",
+                            p: { xs: 2, md: 3 },
+                            border: "1px solid",
+                            borderColor: vitta.border,
+                            borderRadius: 3,
+                            background: "background.paper",
+                            boxShadow: vitta.shadow,
+                            minWidth: 0
                         }}
                     >
                         {tabs[tab].component}
                     </Box>
-
-
                 </Box>
-
 
                 <ReminderCard />
             </Box>
-
-
-
-
-
         </Box>
-
     );
 }

@@ -1,290 +1,418 @@
-import {
-    Avatar, Box, Grid, Paper, Typography, IconButton, Dialog,
-    DialogContent
-} from "@mui/material";
-import PictureAsPdfIcon from "@mui/icons-material/PictureAsPdf";
-import DownloadIcon from "@mui/icons-material/Download";
 import { useEffect, useState } from "react";
-import { getPatientDocuments, downloadDocument } from "../../services/documentService";
-import { usePatient } from "../../context/PatientContext";
-import ImageIcon
-    from "@mui/icons-material/Image";
-
-import DescriptionIcon
-    from "@mui/icons-material/Description";
-
-import CloseIcon
-    from "@mui/icons-material/Close";
 
 import {
+    Avatar,
+    Box,
+    Dialog,
+    DialogContent,
+    Grid,
+    IconButton,
+    Paper,
+    Tooltip,
+    Typography
+} from "@mui/material";
+import { useTheme } from "@mui/material/styles";
+
+import CloseIcon from "@mui/icons-material/Close";
+import DescriptionIcon from "@mui/icons-material/Description";
+import DownloadIcon from "@mui/icons-material/Download";
+import ImageIcon from "@mui/icons-material/Image";
+import OpenInNewIcon from "@mui/icons-material/OpenInNew";
+import PictureAsPdfIcon from "@mui/icons-material/PictureAsPdf";
+
+import { usePatient } from "../../context/PatientContext";
+import { useI18n } from "../../src/i18n";
+import {
+    downloadDocument,
+    getPatientDocuments,
     viewDocument
+} from "../../services/documentService";
+
+function getInitials(name) {
+    if (!name) return "";
+
+    const parts = name.trim().split(" ").filter(Boolean);
+
+    if (parts.length === 1) {
+        return parts[0][0].toUpperCase();
+    }
+
+    return `${parts[0][0]}${parts[parts.length - 1][0]}`.toUpperCase();
 }
-    from "../../services/documentService";
+
+function getFileType(extension) {
+    if (!extension) return "unknown";
+    return extension.replace(".", "").toLowerCase();
+}
+
+function renderFileIcon(extension) {
+    const type = getFileType(extension);
+
+    if (type === "pdf") {
+        return <PictureAsPdfIcon />;
+    }
+
+    if (["png", "jpg", "jpeg"].includes(type)) {
+        return <ImageIcon />;
+    }
+
+    return <DescriptionIcon />;
+}
 
 export default function SharedDocuments() {
+    const theme = useTheme();
+    const vitta = theme.vitta;
+    const isDark = theme.palette.mode === "dark";
+    const { t } = useI18n();
     const [documents, setDocuments] = useState([]);
     const [loading, setLoading] = useState(false);
-
     const [openViewer, setOpenViewer] = useState(false);
     const [selectedDoc, setSelectedDoc] = useState(null);
     const [viewerUrl, setViewerUrl] = useState("");
 
     const { selectedPatient } = usePatient();
+    const userType = localStorage.getItem("tipo")?.toLowerCase();
+    const isPatientUser = userType === "paciente";
 
-    function getFileType(extensao) {
-        if (!extensao) return "unknown";
-        return extensao.replace(".", "").toLowerCase();
-    }
+    const subtitle = isPatientUser
+        ? t("documents.shared.patientDescription")
+        : t("documents.shared.linkedPatientDescription");
 
-    function renderFileIcon(name) {
+    const emptyDescription = isPatientUser
+        ? t("documents.shared.patientEmptyDescription")
+        : t("documents.shared.linkedPatientEmptyDescription");
 
-        const type = getFileType(name);
-
-        if (type === "pdf") {
-            return <PictureAsPdfIcon color="error" />;
+    function handleCloseViewer() {
+        if (viewerUrl) {
+            URL.revokeObjectURL(viewerUrl);
         }
 
-        if (
-            type === "png"
-            || type === "jpg"
-            || type === "jpeg"
-        ) {
-
-            return <ImageIcon color="primary" />;
-        }
-
-        return <DescriptionIcon color="action" />;
+        setViewerUrl("");
+        setSelectedDoc(null);
+        setOpenViewer(false);
     }
 
     async function handleOpen(doc) {
-
         try {
             const url = await viewDocument(doc.id, doc.extensao);
 
             setViewerUrl(url);
             setSelectedDoc(doc);
             setOpenViewer(true);
-
         } catch (error) {
-
-            console.error(error);
-            console.error("Erro completo:", error);
-            console.error("Status:", error?.response?.status);
-            console.error("Data:", error?.response?.data);
-            console.log("Error keys:", Object.keys(error || {}));
+            console.error("Erro ao visualizar documento:", error);
         }
     }
 
     useEffect(() => {
-
-        if (!selectedPatient) {
-            return;
-        }
+        if (!selectedPatient) return;
 
         async function load() {
-
             try {
-
                 setLoading(true);
-
-                const data = await getPatientDocuments(
-                    selectedPatient.cpf
-                );
-
+                const data = await getPatientDocuments(selectedPatient.cpf);
                 setDocuments(data);
-
             } catch (error) {
-
-                console.error(error);
-
+                console.error("Erro ao carregar documentos:", error);
+                setDocuments([]);
             } finally {
-
                 setLoading(false);
             }
         }
 
         load();
-
     }, [selectedPatient]);
 
+    useEffect(() => {
+        return () => {
+            if (viewerUrl) {
+                URL.revokeObjectURL(viewerUrl);
+            }
+        };
+    }, [viewerUrl]);
+
     return (
-        <Box>
+        <Box sx={{ minWidth: 0 }}>
+            <Box
+                display="flex"
+                alignItems="center"
+                justifyContent="space-between"
+                gap={2}
+                mb={2.5}
+                sx={{ minWidth: 0 }}
+            >
+                <Box sx={{ minWidth: 0 }}>
+                    <Typography
+                        sx={{
+                            fontWeight: 800,
+                            color: "text.primary",
+                            fontSize: "1.2rem",
+                            overflowWrap: "anywhere"
+                        }}
+                    >
+                        {t("documents.shared.title")}
+                    </Typography>
 
-            <Box mb={4}>
-                <Typography variant="h4" fontWeight={700}>
-                    Documentos médicos
-                </Typography>
-
-                <Typography color="text.secondary">
-                    Arquivos compartilhados pelos profissionais.
-                </Typography>
+                    <Typography
+                        sx={{
+                            color: "text.secondary",
+                            fontSize: "0.9rem",
+                            mt: 0.25,
+                            overflowWrap: "anywhere"
+                        }}
+                    >
+                        {subtitle}
+                    </Typography>
+                </Box>
             </Box>
 
-            <Grid container spacing={3}>
+            {loading && (
+                <Typography color="text.secondary">
+                    {t("documents.shared.loading")}
+                </Typography>
+            )}
 
-                {documents.length === 0 ? (
+            {!loading && documents.length === 0 && (
+                <Box
+                    sx={{
+                        width: "100%",
+                        py: 5,
+                        px: 2,
+                        textAlign: "center",
+                        borderRadius: 3,
+                        border: "1px dashed",
+                        borderColor: vitta.borderStrong,
+                        bgcolor: isDark ? "rgba(220, 252, 231, 0.06)" : "rgba(240, 253, 244, 0.42)"
+                    }}
+                >
                     <Typography
-                        color="text.secondary"
-                        align="center"
-                        sx={{ mt: 2, width: "100%" }}
+                        sx={{
+                            fontWeight: 800,
+                            color: "text.primary",
+                            mb: 1
+                        }}
                     >
-                        Sem arquivos compartilhados
+                        {t("documents.shared.noFiles")}
                     </Typography>
-                ) : (
-                    documents.map((doc) => (
-                        <Grid item xs={12} md={6} key={doc.id}>
-                            <Paper
-                                elevation={0}
-                                sx={{
-                                    p: 3,
-                                    borderRadius: 4,
-                                    border: "1px solid #eee"
-                                }}
-                            >
-                                <Box display="flex" gap={2}>
-                                    <Avatar
+
+                    <Typography color="text.secondary">
+                        {emptyDescription}
+                    </Typography>
+                </Box>
+            )}
+
+            <Grid container spacing={2.5}>
+                {documents.map((doc) => (
+                    <Grid item xs={12} md={6} key={doc.id}>
+                        <Paper
+                            elevation={0}
+                            sx={{
+                                p: 2.5,
+                                borderRadius: 3,
+                                border: "1px solid",
+                                borderColor: vitta.border,
+                                boxShadow: vitta.shadow,
+                                bgcolor: "background.paper",
+                                height: "100%",
+                                minWidth: 0
+                            }}
+                        >
+                            <Box display="flex" gap={2} sx={{ minWidth: 0 }}>
+                                <Avatar
+                                    sx={{
+                                        bgcolor: "primary.main",
+                                        color: "#ffffff",
+                                        width: 46,
+                                        height: 46,
+                                        fontWeight: 800,
+                                        boxShadow: isDark
+                                            ? "0 10px 20px rgba(0, 0, 0, 0.24)"
+                                            : "0 10px 20px rgba(22, 163, 74, 0.22)",
+                                        flex: "0 0 auto"
+                                    }}
+                                >
+                                    {getInitials(doc.medicoNome)}
+                                </Avatar>
+
+                                <Box flex={1} sx={{ minWidth: 0 }}>
+                                    <Typography
                                         sx={{
-                                            bgcolor: "#e8f5e9",
-                                            color: "#2e7d32"
+                                            fontWeight: 800,
+                                            color: "text.primary",
+                                            overflow: "hidden",
+                                            textOverflow: "ellipsis",
+                                            whiteSpace: "nowrap"
                                         }}
                                     >
-                                        {doc.medicoNome
-                                            ?.split(" ")
-                                            .map((n) => n[0])
-                                            .slice(0, 2)
-                                            .join("")
-                                        }
-                                    </Avatar>
+                                        {doc.nomeArquivo}
+                                    </Typography>
 
-                                    <Box flex={1}>
-                                        <Typography fontWeight={700}>
-                                            {doc.nomeArquivo}
-                                        </Typography>
+                                    <Typography
+                                        sx={{
+                                            color: "text.secondary",
+                                            overflow: "hidden",
+                                            textOverflow: "ellipsis",
+                                            whiteSpace: "nowrap"
+                                        }}
+                                    >
+                                        {doc.medicoNome}
+                                    </Typography>
 
-                                        <Typography color="text.secondary" mb={2}>
-                                            {doc.medicoNome}
-                                        </Typography>
-
-                                        <Box display="flex" alignItems="center" gap={1} mt={2}>
+                                    <Box
+                                        display="flex"
+                                        alignItems="center"
+                                        gap={1}
+                                        mt={2}
+                                        sx={{ minWidth: 0 }}
+                                    >
+                                        <Box
+                                            sx={{
+                                                width: 34,
+                                                height: 34,
+                                                borderRadius: 2,
+                                                bgcolor: isDark ? "rgba(34, 197, 94, 0.12)" : "rgba(22, 163, 74, 0.1)",
+                                                color: "primary.main",
+                                                display: "flex",
+                                                alignItems: "center",
+                                                justifyContent: "center",
+                                                flex: "0 0 auto"
+                                            }}
+                                        >
                                             {renderFileIcon(doc.extensao)}
-
-                                            <Typography
-                                                sx={{
-                                                    cursor: "pointer",
-                                                    "&:hover": { textDecoration: "underline" }
-                                                }}
-                                                onClick={() => handleOpen(doc)}
-                                            >
-                                                {doc.nomeOriginal || "Arquivo antigo"}
-                                            </Typography>
-
-                                            <Box flex={1} />
-
-                                            <IconButton onClick={() => downloadDocument(doc.id, doc.nomeOriginal)}>
-                                                <DownloadIcon color="error" />
-                                            </IconButton>
                                         </Box>
 
-                                        <Typography variant="caption" color="text.secondary">
-                                            {new Date(doc.dataUpload).toLocaleString("pt-BR")}
+                                        <Typography
+                                            sx={{
+                                                minWidth: 0,
+                                                flex: 1,
+                                                overflow: "hidden",
+                                                textOverflow: "ellipsis",
+                                                whiteSpace: "nowrap",
+                                                color: "text.primary",
+                                                fontWeight: 700
+                                            }}
+                                        >
+                                            {doc.nomeOriginal || t("documents.shared.oldFile")}
                                         </Typography>
+
+                                        <Tooltip title={t("documents.shared.view")}>
+                                            <IconButton
+                                                onClick={() => handleOpen(doc)}
+                                                size="small"
+                                                sx={{
+                                                    color: "secondary.main",
+                                                    bgcolor: isDark ? "rgba(14, 165, 233, 0.12)" : "rgba(15, 118, 110, 0.08)",
+                                                    border: "1px solid",
+                                                    borderColor: isDark ? "rgba(14, 165, 233, 0.22)" : "rgba(15, 118, 110, 0.16)"
+                                                }}
+                                            >
+                                                <OpenInNewIcon fontSize="small" />
+                                            </IconButton>
+                                        </Tooltip>
+
+                                        <Tooltip title={t("documents.shared.download")}>
+                                            <IconButton
+                                                onClick={() =>
+                                                    downloadDocument(doc.id, doc.nomeOriginal)
+                                                }
+                                                size="small"
+                                                sx={{
+                                                    color: "primary.main",
+                                                    bgcolor: isDark ? "rgba(34, 197, 94, 0.12)" : "rgba(22, 163, 74, 0.08)",
+                                                    border: "1px solid",
+                                                    borderColor: vitta.borderStrong
+                                                }}
+                                            >
+                                                <DownloadIcon fontSize="small" />
+                                            </IconButton>
+                                        </Tooltip>
                                     </Box>
+
+                                    <Typography
+                                        variant="caption"
+                                        color="text.secondary"
+                                        sx={{
+                                            display: "block",
+                                            mt: 1.25
+                                        }}
+                                    >
+                                        {new Date(doc.dataUpload).toLocaleString("pt-BR")}
+                                    </Typography>
                                 </Box>
-                            </Paper>
-                        </Grid>
-                    ))
-                )}
-
+                            </Box>
+                        </Paper>
+                    </Grid>
+                ))}
             </Grid>
-
 
             <Dialog
                 open={openViewer}
-                onClose={() =>
-                    setOpenViewer(false)
-                }
+                onClose={handleCloseViewer}
                 maxWidth="lg"
                 fullWidth
             >
-
                 <DialogContent
                     sx={{
                         p: 0,
                         height: "90vh",
-                        position: "relative"
+                        position: "relative",
+                        bgcolor: "background.default"
                     }}
                 >
-
                     <IconButton
-                        onClick={() =>
-                            setOpenViewer(false)
-                        }
+                        onClick={handleCloseViewer}
                         sx={{
                             position: "absolute",
                             right: 12,
                             top: 12,
                             zIndex: 10,
-                            bgcolor: "#fff",
+                            bgcolor: "background.paper",
+                            border: "1px solid",
+                            borderColor: "divider",
+                            boxShadow: vitta.shadow,
 
                             "&:hover": {
-                                bgcolor: "#f5f5f5"
+                                bgcolor: isDark ? "rgba(220, 252, 231, 0.08)" : "#f5f5f5"
                             }
                         }}
                     >
-
                         <CloseIcon />
-
                     </IconButton>
 
-                    {selectedDoc && (
-
-                        getFileType(selectedDoc.extensao) === "pdf" ? (
-
-                            <object
-                                data={viewerUrl}
-                                type="application/pdf"
-                                width="100%"
-                                height="100%"
-                            >
-
-                                <Typography
-                                    p={4}
-                                >
-                                    Não foi possível visualizar
-                                    o PDF.
-                                </Typography>
-
-                            </object>
-
-                        ) : (
-
-                            <Box
-                                display="flex"
-                                justifyContent="center"
-                                alignItems="center"
-                                height="100%"
-                            >
-
+                    {selectedDoc && getFileType(selectedDoc.extensao) === "pdf" ? (
+                        <object
+                            data={viewerUrl}
+                            type="application/pdf"
+                            width="100%"
+                            height="100%"
+                        >
+                            <Typography p={4}>
+                                {t("documents.shared.pdfUnavailable")}
+                            </Typography>
+                        </object>
+                    ) : (
+                        <Box
+                            display="flex"
+                            justifyContent="center"
+                            alignItems="center"
+                            height="100%"
+                            p={2}
+                        >
+                            {viewerUrl && (
                                 <img
                                     src={viewerUrl}
-                                    alt="Documento"
+                                    alt={t("documents.shared.imageAlt")}
                                     style={{
                                         maxWidth: "100%",
                                         maxHeight: "100%",
                                         objectFit: "contain"
                                     }}
                                 />
-
-                            </Box>
-
-                        )
-
+                            )}
+                        </Box>
                     )}
-
                 </DialogContent>
-
             </Dialog>
-
         </Box>
     );
 }

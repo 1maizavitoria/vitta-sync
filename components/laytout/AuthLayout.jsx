@@ -5,12 +5,21 @@ import Navbar from "./Navbar";
 
 import Box from "@mui/material/Box";
 import Toolbar from "@mui/material/Toolbar";
+import { useTheme } from "@mui/material/styles";
 
 export default function AuthLayout() {
     const { alert } = useAlert();
+    const theme = useTheme();
 
     return (
-        <Box>
+        <Box
+            sx={{
+                minHeight: "100vh",
+                bgcolor: "background.default",
+                background: theme.vitta.pageBackground,
+                color: "text.primary"
+            }}
+        >
             <Navbar />
 
             <Toolbar />
@@ -22,7 +31,12 @@ export default function AuthLayout() {
                 />
             )}
 
-            <Box sx={{ p: 2 }}>
+            <Box
+                sx={{
+                    px: { xs: 2, md: 4 },
+                    py: { xs: 2, md: 4 }
+                }}
+            >
                 <Outlet />
             </Box>
         </Box>

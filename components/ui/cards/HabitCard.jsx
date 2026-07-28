@@ -1,11 +1,12 @@
+import Box from "@mui/material/Box";
 import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
 import Typography from "@mui/material/Typography";
-import Box from "@mui/material/Box";
-import InputUI from "../Input";
-import { Grid } from "@mui/material";
+import { useTheme } from "@mui/material/styles";
+
 import DatePickerUI from "../DatePicker";
-// import { useState } from "react";
+import InputUI from "../Input";
+import { useI18n } from "../../../src/i18n";
 
 export default function HabitCard({
     icon,
@@ -23,114 +24,171 @@ export default function HabitCard({
     userStyle,
     showInput
 }) {
-
-    // const [showInput, setShowInput] = useState(false);
+    const theme = useTheme();
+    const vitta = theme.vitta;
+    const isDark = theme.palette.mode === "dark";
+    const { t } = useI18n();
 
     return (
-        <Grid item xs={12} md={4} sx={{ display: "flex" }}>
+        <Card
+            sx={{
+                borderRadius: 3,
+                height: "100%",
+                width: "100%",
+                minWidth: 0,
+                boxShadow: vitta.shadow,
+                border: error
+                    ? "1px solid"
+                    : "1px solid",
+                borderColor: error ? "error.main" : vitta.border,
+                backgroundColor: error
+                    ? isDark ? "rgba(220, 38, 38, 0.12)" : "#fef2f2"
+                    : "background.paper",
+                transition: "transform .2s ease, box-shadow .2s ease, border-color .2s ease",
 
-            <Card
+                "&:hover": {
+                    transform: "translateY(-2px)",
+                    boxShadow: vitta.shadow,
+                    borderColor: error ? "error.main" : vitta.borderStrong
+                }
+            }}
+        >
+            <CardContent
                 sx={{
-                    borderRadius: 4,
-                    p: 1,
+                    display: "flex",
+                    flexDirection: "column",
                     height: "100%",
-                    width: "100%",
-                    boxShadow: "0 2px 10px rgba(0,0,0,0.05)",
-
-                    border: error ? "2px solid #d32f2f" : "none", // vermelho MUI
-                    backgroundColor: error ? "#fdecea" : "#fff", // leve fundo vermelho
-                    transition: "all 0.3s ease"
+                    p: 2.5,
+                    minWidth: 0
                 }}
             >
-                <CardContent
+                <Box
                     sx={{
                         display: "flex",
-                        flexDirection: "column",
-                        mt: 2
+                        alignItems: "center",
+                        justifyContent: "space-between",
+                        gap: 1.5,
+                        mb: 2,
+                        minWidth: 0
                     }}
                 >
-                    {/* Ícone */}
                     <Box
                         sx={{
-                            width: 50,
-                            height: 50,
-                            borderRadius: 3,
-                            background: "linear-gradient(135deg, #a8e6cf, #dcedc1)",
+                            width: 46,
+                            height: 46,
+                            borderRadius: 2,
+                            background: isDark
+                                ? "linear-gradient(135deg, rgba(34, 197, 94, 0.18) 0%, rgba(14, 165, 233, 0.14) 100%)"
+                                : "linear-gradient(135deg, #dcfce7 0%, #e0f2fe 100%)",
+                            color: isDark ? "#bbf7d0" : "#166534",
                             display: "flex",
                             alignItems: "center",
                             justifyContent: "center",
-                            mb: 2,
+                            flex: "0 0 auto"
                         }}
                     >
                         {icon}
                     </Box>
 
-                    {/* Título */}
-                    <Typography variant="h6" fontWeight="bold">
-                        {title}
-                    </Typography>
-
-                    {/* Valor */}
-                    <Typography variant="h5" fontWeight="bold" sx={{ mt: 1 }}>
-                        {value} {unit}
-                    </Typography>
-
-                    {/* Sub */}
-                    <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
-                        Último registro
-                    </Typography>
-
-                    {/* Data */}
-                    <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
-                        {date}
-                    </Typography>
-
-                    {/* Registrado por */}
-                    {userName && (
-
+                    <Box sx={{ minWidth: 0, flex: 1 }}>
                         <Typography
-                            variant="body2"
                             sx={{
-                                mt: 1,
-                                fontWeight: 600
+                                fontSize: "0.92rem",
+                                fontWeight: 800,
+                                color: "text.primary",
+                                overflow: "hidden",
+                                textOverflow: "ellipsis",
+                                whiteSpace: "nowrap"
                             }}
                         >
-                            {userName}
-                            {" • "}
-                            <Box
-                                component="span"
-                                sx={{
-                                    color: userStyle?.color,
-                                    backgroundColor:
-                                        userStyle?.background,
-                                    px: 1,
-                                    py: 0.3,
-                                    borderRadius: 2,
-                                    ml: 0.5
-                                }}
-                            >
-                                {userFunction}
-                            </Box>
+                            {title}
                         </Typography>
 
-                    )}
+                        <Typography
+                            sx={{
+                                mt: 0.5,
+                                color: "text.secondary",
+                                fontSize: "0.78rem"
+                            }}
+                        >
+                            {t("healthTracker.common.lastRecord")}
+                        </Typography>
+                    </Box>
+                </Box>
 
-                    {showInput && !dataPicker && <InputUI
-                        value={inputValue}
-                        type={type}
-                        onChange={onInputChange}
-                        error={error}
-                    >
-                    </InputUI>}
+                <Typography
+                    sx={{
+                        fontSize: { xs: "1.55rem", md: "1.75rem" },
+                        lineHeight: 1.1,
+                        fontWeight: 900,
+                        color: "text.primary",
+                        overflowWrap: "anywhere"
+                    }}
+                >
+                    {value} {unit}
+                </Typography>
 
-                    {showInput && dataPicker && <DatePickerUI
-                        value={inputValue}
-                        onChange={onInputChange}
-                        error={error}
+                <Typography
+                    variant="body2"
+                    color="text.secondary"
+                    sx={{
+                        mt: 1,
+                        overflowWrap: "anywhere"
+                    }}
+                >
+                    {date}
+                </Typography>
+
+                {userName && (
+                    <Typography
+                        variant="body2"
+                        sx={{
+                            mt: 1,
+                            fontWeight: 700,
+                            overflowWrap: "anywhere"
+                        }}
                     >
-                    </DatePickerUI>}
-                </CardContent>
-            </Card>
-        </Grid>
+                        {userName}
+                        {" • "}
+                        <Box
+                            component="span"
+                            sx={{
+                                color: userStyle?.color,
+                                backgroundColor:
+                                    userStyle?.background,
+                                px: 1,
+                                py: 0.3,
+                                borderRadius: 2,
+                                ml: 0.5,
+                                display: "inline-block"
+                            }}
+                        >
+                            {userFunction}
+                        </Box>
+                    </Typography>
+                )}
+
+                {showInput && !dataPicker && (
+                    <Box sx={{ mt: 2 }}>
+                        <InputUI
+                            value={inputValue}
+                            type={type}
+                            onChange={onInputChange}
+                            error={error}
+                        />
+                    </Box>
+                )}
+
+                {showInput && dataPicker && (
+                    <Box sx={{ mt: 2 }}>
+                        <DatePickerUI
+                            value={inputValue}
+                            onChange={onInputChange}
+                            error={error}
+                        />
+                    </Box>
+                )}
+            </CardContent>
+        </Card>
     );
 }
