@@ -6,6 +6,7 @@ import br.com.vittasync.vittasync.Model.DiarioSintomas;
 import br.com.vittasync.vittasync.Model.Habitos;
 import br.com.vittasync.vittasync.Repository.HabitosRepository;
 import br.com.vittasync.vittasync.Util.EventoPrioridades;
+import br.com.vittasync.vittasync.Util.EventoTipos;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -38,9 +39,13 @@ public class HabitosService {
         eventoPacienteService.criarEvento(
                 habito.getPaciente().getId(),
                 usuarioLogadoId,
-                "habito_registrado",
+                EventoTipos.HABITOS_CRIADOS,
                 "Hábito registrado",
                 "Um novo hábito foi registrado",
+                EventoPacienteService.metadata(
+                        "patientName",
+                        habito.getPaciente().getNome()
+                ),
                 EventoPrioridades.NORMAL
         );
 
@@ -65,9 +70,13 @@ public class HabitosService {
         eventoPacienteService.criarEvento(
                 existente.getPaciente().getId(),
                 usuarioLogadoId,
-                "habito_editado",
+                EventoTipos.HABITOS_EDITADOS,
                 "Habito atualizado",
                 "Um habito foi atualizado",
+                EventoPacienteService.metadata(
+                        "patientName",
+                        existente.getPaciente().getNome()
+                ),
                 EventoPrioridades.NORMAL
         );
 
@@ -88,9 +97,13 @@ public class HabitosService {
         eventoPacienteService.criarEvento(
                 habitos.getPaciente().getId(),
                 usuarioLogadoId,
-                "habito_removido",
+                EventoTipos.HABITOS_REMOVIDOS,
                 "Hábito removido",
                 "Um registro de hábito foi removido",
+                EventoPacienteService.metadata(
+                        "patientName",
+                        habitos.getPaciente().getNome()
+                ),
                 EventoPrioridades.NORMAL
         );
         repository.deleteById(id);

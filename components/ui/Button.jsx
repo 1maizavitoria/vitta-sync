@@ -27,15 +27,17 @@ export default function ButtonUI({
                 border: `1px solid ${theme.vitta.borderStrong}`,
                 color: '#ffffff',
                 boxShadow: isDark ? '0 12px 24px rgba(0, 0, 0, 0.24)' : '0 12px 24px rgba(22, 163, 74, 0.2)',
-                transition: '0.2s ease',
+                transition: 'background .18s ease, border-color .18s ease, color .18s ease, box-shadow .18s ease, transform .18s ease',
 
                 '&:hover': {
                     background: 'linear-gradient(135deg, #15803d 0%, #115e59 72%, #0369a1 100%)',
                     boxShadow: isDark ? '0 14px 28px rgba(0, 0, 0, 0.32)' : '0 14px 28px rgba(22, 163, 74, 0.28)',
+                    transform: 'translateY(-1px)',
                 },
 
                 '&:active': {
                     boxShadow: isDark ? '0 8px 18px rgba(0, 0, 0, 0.28)' : '0 8px 18px rgba(22, 163, 74, 0.22)',
+                    transform: 'translateY(0)',
                 },
 
                 '&.Mui-disabled': {

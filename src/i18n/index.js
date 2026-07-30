@@ -344,6 +344,116 @@ const dictionaries = {
                 critico: "Crítico",
                 alta: "Alta",
                 normal: "Normal"
+            },
+            events: {
+                DOCUMENT_UPLOADED: {
+                    title: "Documento enviado",
+                    description: "{userName} enviou {documentName} para {patientName}."
+                },
+                DOCUMENT_REMOVED: {
+                    title: "Documento removido",
+                    description: "{userName} removeu {documentName}."
+                },
+                VITAL_SIGNS_CREATED: {
+                    title: "Sinais vitais registrados",
+                    description: "{userName} registrou sinais vitais de {patientName}."
+                },
+                VITAL_SIGNS_UPDATED: {
+                    title: "Sinais vitais atualizados",
+                    description: "{userName} atualizou sinais vitais de {patientName}."
+                },
+                VITAL_SIGNS_REMOVED: {
+                    title: "Sinais vitais removidos",
+                    description: "{userName} removeu um registro de sinais vitais de {patientName}."
+                },
+                HABITS_CREATED: {
+                    title: "Hábitos registrados",
+                    description: "{userName} registrou hábitos de {patientName}."
+                },
+                HABITS_UPDATED: {
+                    title: "Hábitos atualizados",
+                    description: "{userName} atualizou hábitos de {patientName}."
+                },
+                HABITS_REMOVED: {
+                    title: "Hábitos removidos",
+                    description: "{userName} removeu um registro de hábitos de {patientName}."
+                },
+                SYMPTOMS_CREATED: {
+                    title: "Sintomas registrados",
+                    description: "{userName} registrou sintomas de {patientName}."
+                },
+                SYMPTOMS_UPDATED: {
+                    title: "Sintomas atualizados",
+                    description: "{userName} atualizou sintomas de {patientName}."
+                },
+                SYMPTOMS_REMOVED: {
+                    title: "Sintomas removidos",
+                    description: "{userName} removeu um registro de sintomas de {patientName}."
+                },
+                LINK_CREATED: {
+                    title: "Vínculo criado",
+                    description: "{userName} criou um vínculo com {patientName}."
+                },
+                LINK_REMOVED: {
+                    title: "Vínculo removido",
+                    description: "{userName} removeu um vínculo de {patientName}."
+                },
+                REMINDER_CREATED: {
+                    title: "Lembrete criado",
+                    description: "{userName} criou um lembrete para {patientName}."
+                },
+                REMINDER_UPDATED: {
+                    title: "Lembrete atualizado",
+                    description: "{userName} atualizou um lembrete de {patientName}."
+                },
+                HIGH_BLOOD_PRESSURE: {
+                    title: "Pressão arterial elevada",
+                    description: "Foi registrada pressão arterial acima do normal."
+                },
+                FEVER_DETECTED: {
+                    title: "Febre detectada",
+                    description: "Foi registrada temperatura corporal elevada."
+                },
+                LOW_OXYGEN_SATURATION: {
+                    title: "Saturação baixa detectada",
+                    description: "Foi registrada saturação de oxigênio abaixo do normal."
+                },
+                CRITICAL_OXYGEN_SATURATION: {
+                    title: "Saturação crítica detectada",
+                    description: "Foi registrada saturação de oxigênio em nível crítico."
+                },
+                HIGH_HEART_RATE: {
+                    title: "Frequência cardíaca elevada",
+                    description: "Foi registrada frequência cardíaca acima do normal."
+                },
+                LOW_HEART_RATE: {
+                    title: "Frequência cardíaca baixa",
+                    description: "Foi registrada frequência cardíaca abaixo do normal."
+                },
+                HIGH_RESPIRATORY_RATE: {
+                    title: "Frequência respiratória elevada",
+                    description: "Foi registrada frequência respiratória acima do normal."
+                },
+                LOW_RESPIRATORY_RATE: {
+                    title: "Frequência respiratória baixa",
+                    description: "Foi registrada frequência respiratória abaixo do normal."
+                },
+                INTENSE_PAIN_DETECTED: {
+                    title: "Dor intensa registrada",
+                    description: "Foi registrada dor em nível elevado."
+                },
+                CRITICAL_PAIN_DETECTED: {
+                    title: "Dor extrema registrada",
+                    description: "Foi registrada dor em nível crítico."
+                },
+                CRITICAL_SLEEP: {
+                    title: "Poucas horas de sono",
+                    description: "Foi registrado período de sono muito abaixo do ideal."
+                },
+                LOW_PHYSICAL_ACTIVITY: {
+                    title: "Baixo nível de atividade física",
+                    description: "Foi registrado nível muito baixo de exercício físico."
+                }
             }
         },
         documents: {
@@ -820,6 +930,116 @@ const dictionaries = {
                 critico: "Critical",
                 alta: "High",
                 normal: "Normal"
+            },
+            events: {
+                DOCUMENT_UPLOADED: {
+                    title: "Document uploaded",
+                    description: "{userName} uploaded {documentName} for {patientName}."
+                },
+                DOCUMENT_REMOVED: {
+                    title: "Document removed",
+                    description: "{userName} removed {documentName}."
+                },
+                VITAL_SIGNS_CREATED: {
+                    title: "Vital signs recorded",
+                    description: "{userName} recorded vital signs for {patientName}."
+                },
+                VITAL_SIGNS_UPDATED: {
+                    title: "Vital signs updated",
+                    description: "{userName} updated vital signs for {patientName}."
+                },
+                VITAL_SIGNS_REMOVED: {
+                    title: "Vital signs removed",
+                    description: "{userName} removed a vital signs record for {patientName}."
+                },
+                HABITS_CREATED: {
+                    title: "Habits recorded",
+                    description: "{userName} recorded habits for {patientName}."
+                },
+                HABITS_UPDATED: {
+                    title: "Habits updated",
+                    description: "{userName} updated habits for {patientName}."
+                },
+                HABITS_REMOVED: {
+                    title: "Habits removed",
+                    description: "{userName} removed a habits record for {patientName}."
+                },
+                SYMPTOMS_CREATED: {
+                    title: "Symptoms recorded",
+                    description: "{userName} recorded symptoms for {patientName}."
+                },
+                SYMPTOMS_UPDATED: {
+                    title: "Symptoms updated",
+                    description: "{userName} updated symptoms for {patientName}."
+                },
+                SYMPTOMS_REMOVED: {
+                    title: "Symptoms removed",
+                    description: "{userName} removed a symptoms record for {patientName}."
+                },
+                LINK_CREATED: {
+                    title: "Link created",
+                    description: "{userName} created a link with {patientName}."
+                },
+                LINK_REMOVED: {
+                    title: "Link removed",
+                    description: "{userName} removed a link from {patientName}."
+                },
+                REMINDER_CREATED: {
+                    title: "Reminder created",
+                    description: "{userName} created a reminder for {patientName}."
+                },
+                REMINDER_UPDATED: {
+                    title: "Reminder updated",
+                    description: "{userName} updated a reminder for {patientName}."
+                },
+                HIGH_BLOOD_PRESSURE: {
+                    title: "High blood pressure",
+                    description: "Blood pressure above the normal range was recorded."
+                },
+                FEVER_DETECTED: {
+                    title: "Fever detected",
+                    description: "Elevated body temperature was recorded."
+                },
+                LOW_OXYGEN_SATURATION: {
+                    title: "Low oxygen saturation detected",
+                    description: "Oxygen saturation below the normal range was recorded."
+                },
+                CRITICAL_OXYGEN_SATURATION: {
+                    title: "Critical oxygen saturation",
+                    description: "Oxygen saturation at a critical level was recorded."
+                },
+                HIGH_HEART_RATE: {
+                    title: "High heart rate",
+                    description: "Heart rate above the normal range was recorded."
+                },
+                LOW_HEART_RATE: {
+                    title: "Low heart rate",
+                    description: "Heart rate below the normal range was recorded."
+                },
+                HIGH_RESPIRATORY_RATE: {
+                    title: "High respiratory rate",
+                    description: "Respiratory rate above the normal range was recorded."
+                },
+                LOW_RESPIRATORY_RATE: {
+                    title: "Low respiratory rate",
+                    description: "Respiratory rate below the normal range was recorded."
+                },
+                INTENSE_PAIN_DETECTED: {
+                    title: "Intense pain recorded",
+                    description: "Pain at an elevated level was recorded."
+                },
+                CRITICAL_PAIN_DETECTED: {
+                    title: "Extreme pain recorded",
+                    description: "Pain at a critical level was recorded."
+                },
+                CRITICAL_SLEEP: {
+                    title: "Very low sleep duration",
+                    description: "A sleep period far below the ideal range was recorded."
+                },
+                LOW_PHYSICAL_ACTIVITY: {
+                    title: "Low physical activity",
+                    description: "A very low level of physical exercise was recorded."
+                }
             }
         },
         documents: {
@@ -1296,6 +1516,116 @@ const dictionaries = {
                 critico: "Crítico",
                 alta: "Alta",
                 normal: "Normal"
+            },
+            events: {
+                DOCUMENT_UPLOADED: {
+                    title: "Documento enviado",
+                    description: "{userName} envió {documentName} para {patientName}."
+                },
+                DOCUMENT_REMOVED: {
+                    title: "Documento eliminado",
+                    description: "{userName} eliminó {documentName}."
+                },
+                VITAL_SIGNS_CREATED: {
+                    title: "Signos vitales registrados",
+                    description: "{userName} registró signos vitales de {patientName}."
+                },
+                VITAL_SIGNS_UPDATED: {
+                    title: "Signos vitales actualizados",
+                    description: "{userName} actualizó signos vitales de {patientName}."
+                },
+                VITAL_SIGNS_REMOVED: {
+                    title: "Signos vitales eliminados",
+                    description: "{userName} eliminó un registro de signos vitales de {patientName}."
+                },
+                HABITS_CREATED: {
+                    title: "Hábitos registrados",
+                    description: "{userName} registró hábitos de {patientName}."
+                },
+                HABITS_UPDATED: {
+                    title: "Hábitos actualizados",
+                    description: "{userName} actualizó hábitos de {patientName}."
+                },
+                HABITS_REMOVED: {
+                    title: "Hábitos eliminados",
+                    description: "{userName} eliminó un registro de hábitos de {patientName}."
+                },
+                SYMPTOMS_CREATED: {
+                    title: "Síntomas registrados",
+                    description: "{userName} registró síntomas de {patientName}."
+                },
+                SYMPTOMS_UPDATED: {
+                    title: "Síntomas actualizados",
+                    description: "{userName} actualizó síntomas de {patientName}."
+                },
+                SYMPTOMS_REMOVED: {
+                    title: "Síntomas eliminados",
+                    description: "{userName} eliminó un registro de síntomas de {patientName}."
+                },
+                LINK_CREATED: {
+                    title: "Vínculo creado",
+                    description: "{userName} creó un vínculo con {patientName}."
+                },
+                LINK_REMOVED: {
+                    title: "Vínculo eliminado",
+                    description: "{userName} eliminó un vínculo de {patientName}."
+                },
+                REMINDER_CREATED: {
+                    title: "Recordatorio creado",
+                    description: "{userName} creó un recordatorio para {patientName}."
+                },
+                REMINDER_UPDATED: {
+                    title: "Recordatorio actualizado",
+                    description: "{userName} actualizó un recordatorio de {patientName}."
+                },
+                HIGH_BLOOD_PRESSURE: {
+                    title: "Presión arterial elevada",
+                    description: "Se registró presión arterial por encima del rango normal."
+                },
+                FEVER_DETECTED: {
+                    title: "Fiebre detectada",
+                    description: "Se registró temperatura corporal elevada."
+                },
+                LOW_OXYGEN_SATURATION: {
+                    title: "Saturación baja detectada",
+                    description: "Se registró saturación de oxígeno por debajo del rango normal."
+                },
+                CRITICAL_OXYGEN_SATURATION: {
+                    title: "Saturación crítica detectada",
+                    description: "Se registró saturación de oxígeno en un nivel crítico."
+                },
+                HIGH_HEART_RATE: {
+                    title: "Frecuencia cardíaca elevada",
+                    description: "Se registró frecuencia cardíaca por encima del rango normal."
+                },
+                LOW_HEART_RATE: {
+                    title: "Frecuencia cardíaca baja",
+                    description: "Se registró frecuencia cardíaca por debajo del rango normal."
+                },
+                HIGH_RESPIRATORY_RATE: {
+                    title: "Frecuencia respiratoria elevada",
+                    description: "Se registró frecuencia respiratoria por encima del rango normal."
+                },
+                LOW_RESPIRATORY_RATE: {
+                    title: "Frecuencia respiratoria baja",
+                    description: "Se registró frecuencia respiratoria por debajo del rango normal."
+                },
+                INTENSE_PAIN_DETECTED: {
+                    title: "Dolor intenso registrado",
+                    description: "Se registró dolor en un nivel elevado."
+                },
+                CRITICAL_PAIN_DETECTED: {
+                    title: "Dolor extremo registrado",
+                    description: "Se registró dolor en un nivel crítico."
+                },
+                CRITICAL_SLEEP: {
+                    title: "Pocas horas de sueño",
+                    description: "Se registró un período de sueño muy por debajo de lo ideal."
+                },
+                LOW_PHYSICAL_ACTIVITY: {
+                    title: "Bajo nivel de actividad física",
+                    description: "Se registró un nivel muy bajo de ejercicio físico."
+                }
             }
         },
         documents: {

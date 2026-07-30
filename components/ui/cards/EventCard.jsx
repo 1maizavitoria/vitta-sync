@@ -34,6 +34,66 @@ function getPriorityStyle(priority, isDark) {
     }
 }
 
+function parseMetadata(metadata) {
+    if (!metadata) {
+        return {};
+    }
+
+    if (typeof metadata === "string") {
+        try {
+            return JSON.parse(metadata);
+        } catch {
+            return {};
+        }
+    }
+
+    return metadata;
+}
+
+function getTranslation(t, path) {
+    const value = t(path);
+
+    return value === path ? "" : value;
+}
+
+function interpolate(template, values) {
+    return template.replace(/\{(\w+)\}/g, (_, key) => values[key] ?? "");
+}
+
+function formatEventText(event, t) {
+    const eventType = event.tipoEvento || event.eventType || event.tipo;
+
+    if (!eventType) {
+        return {
+            title: event.titulo,
+            description: event.descricao
+        };
+    }
+
+    const metadata = parseMetadata(event.metadata);
+    const values = {
+        userName: event.usuarioNome || metadata.userName || "",
+        patientName:
+            metadata.patientName ||
+            metadata.nomePaciente ||
+            event.pacienteNome ||
+            "",
+        documentName:
+            metadata.documentName ||
+            metadata.nomeArquivo ||
+            metadata.fileName ||
+            "",
+    };
+
+    const titleTemplate = getTranslation(t, `activity.events.${eventType}.title`);
+    const descriptionTemplate = getTranslation(t, `activity.events.${eventType}.description`);
+
+    return {
+        title: titleTemplate ? interpolate(titleTemplate, values) : event.titulo,
+        description: descriptionTemplate ? interpolate(descriptionTemplate, values) : event.descricao
+    };
+}
+
 export default function EventCard({ event }) {
     const theme = useTheme();
     const vitta = theme.vitta;
@@ -46,6 +106,7 @@ export default function EventCard({ event }) {
     const userTypeLabel =
         t(`userTypes.${event.usuarioTipo}`) ||
         event.usuarioTipo;
+    const eventText = formatEventText(event, t);
 
     return (
         <Box
@@ -97,7 +158,7 @@ export default function EventCard({ event }) {
                                 overflowWrap: "anywhere"
                             }}
                         >
-                            {event.titulo}
+                            {eventText.title}
                         </Typography>
 
                         <Typography
@@ -136,7 +197,7 @@ export default function EventCard({ event }) {
                     overflowWrap: "anywhere"
                 }}
             >
-                {event.descricao}
+                {eventText.description}
             </Typography>
 
             <Typography

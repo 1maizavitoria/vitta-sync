@@ -27,6 +27,9 @@ public class EventoPaciente {
     @Column(name = "descricao")
     private String descricao;
 
+    @Column(name = "metadata", columnDefinition = "TEXT")
+    private String metadata;
+
     @Column(name = "visualizado")
     private Boolean visualizado;
 
@@ -81,6 +84,14 @@ public class EventoPaciente {
 
     public void setDescricao(String descricao) {
         this.descricao = descricao;
+    }
+
+    public String getMetadata() {
+        return metadata;
+    }
+
+    public void setMetadata(String metadata) {
+        this.metadata = metadata;
     }
 
     public Boolean getVisualizado() {

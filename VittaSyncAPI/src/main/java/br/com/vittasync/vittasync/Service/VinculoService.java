@@ -16,6 +16,7 @@ import br.com.vittasync.vittasync.Repository.UsuarioRepository;
 import br.com.vittasync.vittasync.Repository.VinculoRepository;
 
 
+import br.com.vittasync.vittasync.Util.EventoTipos;
 import br.com.vittasync.vittasync.Util.FuncoesResponsavel;
 import br.com.vittasync.vittasync.Util.FuncoesSaude;
 import org.springframework.stereotype.Service;
@@ -159,8 +160,23 @@ public class VinculoService {
             descricao += " como " + funcao.replace("_", " ");
         }
 
-        eventoPacienteService.criarEvento(convite.getPacienteId(), usuario.getId(), "vinculo_criado", "Novo participante no grupo", descricao, EventoPrioridades.NORMAL);
         Usuario paciente = usuarioRepository.findById(convite.getPacienteId()).orElseThrow(() -> new RecursoNaoEncontradoException("Paciente não encontrado"));
+        eventoPacienteService.criarEvento(
+                convite.getPacienteId(),
+                usuario.getId(),
+                EventoTipos.VINCULO_CRIADO,
+                "Novo participante no grupo",
+                descricao,
+                EventoPacienteService.metadata(
+                        "userName",
+                        usuario.getNome(),
+                        "patientName",
+                        paciente.getNome(),
+                        "linkedUserName",
+                        usuario.getNome()
+                ),
+                EventoPrioridades.NORMAL
+        );
         return new PacienteResumoDTO(paciente.getId(), paciente.getNome(), paciente.getEmail(), paciente.getCpf());
 
 
@@ -203,8 +219,24 @@ public class VinculoService {
         Vinculo vinculo = vinculoRepository.findById(id).orElseThrow(() -> new RecursoNaoEncontradoException("Vínculo não encontrado"));
         Usuario usuarioLogado = usuarioRepository.findById(usuarioLogadoId).orElseThrow(() -> new RecursoNaoEncontradoException("Usuário não encontrado"));
         Usuario usuarioRemovido = usuarioRepository.findById(vinculo.getUsuarioId()).orElseThrow(() -> new RecursoNaoEncontradoException("Usuário removido não encontrado"));
+        Usuario paciente = usuarioRepository.findById(vinculo.getPacienteId()).orElseThrow(() -> new RecursoNaoEncontradoException("Paciente não encontrado"));
         String descricao = usuarioLogado.getNome() + " removeu " + usuarioRemovido.getNome() + " do grupo";
-        eventoPacienteService.criarEvento(vinculo.getPacienteId(), usuarioLogadoId, "vinculo_removido", "Participante removido", descricao, EventoPrioridades.NORMAL);
+        eventoPacienteService.criarEvento(
+                vinculo.getPacienteId(),
+                usuarioLogadoId,
+                EventoTipos.VINCULO_REMOVIDO,
+                "Participante removido",
+                descricao,
+                EventoPacienteService.metadata(
+                        "userName",
+                        usuarioLogado.getNome(),
+                        "patientName",
+                        paciente.getNome(),
+                        "linkedUserName",
+                        usuarioRemovido.getNome()
+                ),
+                EventoPrioridades.NORMAL
+        );
         vinculoRepository.delete(vinculo);
     }
 

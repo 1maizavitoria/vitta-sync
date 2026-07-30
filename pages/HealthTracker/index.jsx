@@ -173,7 +173,7 @@ export default function HealthTreacker() {
                                     fontWeight: 800,
                                     mx: 0.5,
                                     color: "text.secondary",
-                                    transition: "all .2s ease",
+                                    transition: "background .18s ease, color .18s ease, box-shadow .18s ease",
 
                                     "&.Mui-selected": {
                                         color: "text.primary",

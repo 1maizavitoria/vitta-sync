@@ -5,6 +5,7 @@ import br.com.vittasync.vittasync.Model.DiarioSintomas;
 import br.com.vittasync.vittasync.Model.Usuario;
 import br.com.vittasync.vittasync.Repository.DiarioSintomasRepository;
 import br.com.vittasync.vittasync.Util.EventoPrioridades;
+import br.com.vittasync.vittasync.Util.EventoTipos;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -33,12 +34,14 @@ class DiarioSintomasServiceTest {
 
         paciente = new Usuario();
         paciente.setId(1);
+        paciente.setNome("Paciente Teste");
     }
 
     @Test
     void testCreateSalvaSintomaEDisparaEventos() {
         DiarioSintomas sintoma = new DiarioSintomas();
         sintoma.setPaciente(paciente);
+        sintoma.setSintoma("Dor de cabeça");
 
         DiarioSintomas salvo = new DiarioSintomas();
         salvo.setId(10);
@@ -53,9 +56,10 @@ class DiarioSintomasServiceTest {
         verify(eventoPacienteService, times(1)).criarEvento(
                 eq(paciente.getId()),
                 eq(99),
-                eq("sintoma_registrado"),
+                eq(EventoTipos.SINTOMAS_CRIADOS),
                 eq("Sintoma registrado"),
                 eq("Um novo sintoma foi registrado"),
+                contains("\"patientName\":\"Paciente Teste\""),
                 eq(EventoPrioridades.NORMAL)
         );
         verify(eventoClinicoService, times(1)).analisarSintoma(salvo, 99);
@@ -66,6 +70,7 @@ class DiarioSintomasServiceTest {
         DiarioSintomas existente = new DiarioSintomas();
         existente.setId(5);
         existente.setPaciente(paciente);
+        existente.setSintoma("Dor de cabeça");
 
         DiarioSintomas novosDados = new DiarioSintomas();
         novosDados.setSintoma("Dor de cabeça");
@@ -81,9 +86,10 @@ class DiarioSintomasServiceTest {
         verify(eventoPacienteService, times(1)).criarEvento(
                 eq(paciente.getId()),
                 eq(99),
-                eq("sintoma_editado"),
+                eq(EventoTipos.SINTOMAS_EDITADOS),
                 eq("Sintoma atualizado"),
                 eq("Um sintoma foi atualizado"),
+                contains("\"patientName\":\"Paciente Teste\""),
                 eq(EventoPrioridades.NORMAL)
         );
     }
@@ -101,6 +107,7 @@ class DiarioSintomasServiceTest {
         DiarioSintomas sintoma = new DiarioSintomas();
         sintoma.setId(7);
         sintoma.setPaciente(paciente);
+        sintoma.setSintoma("Náusea");
 
         when(repository.existsById(7)).thenReturn(true);
         when(repository.findById(7)).thenReturn(Optional.of(sintoma));
@@ -110,9 +117,10 @@ class DiarioSintomasServiceTest {
         verify(eventoPacienteService, times(1)).criarEvento(
                 eq(paciente.getId()),
                 eq(99),
-                eq("sintoma_removido"),
+                eq(EventoTipos.SINTOMAS_REMOVIDOS),
                 eq("Sintoma removido"),
                 eq("Um registro de sintoma foi removido"),
+                contains("\"patientName\":\"Paciente Teste\""),
                 eq(EventoPrioridades.NORMAL)
         );
         verify(repository, times(1)).deleteById(7);

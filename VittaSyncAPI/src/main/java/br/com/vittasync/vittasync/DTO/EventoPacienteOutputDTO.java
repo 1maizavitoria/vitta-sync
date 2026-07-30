@@ -10,6 +10,7 @@ public class EventoPacienteOutputDTO {
     private String tipoEvento;
     private String titulo;
     private String descricao;
+    private String metadata;
     private Boolean visualizado;
     private Timestamp criadoEm;
     private String prioridade;
@@ -62,6 +63,14 @@ public class EventoPacienteOutputDTO {
 
     public void setDescricao(String descricao) {
         this.descricao = descricao;
+    }
+
+    public String getMetadata() {
+        return metadata;
+    }
+
+    public void setMetadata(String metadata) {
+        this.metadata = metadata;
     }
 
     public Boolean getVisualizado() {

@@ -45,6 +45,10 @@ public class SinaisVitaisService {
                 EventoTipos.SINAIS_VITAIS_CRIADOS,
                 "Sinais vitais registrados",
                 "Novos sinais vitais foram registrados",
+                EventoPacienteService.metadata(
+                        "patientName",
+                        sinais.getPaciente().getNome()
+                ),
                 EventoPrioridades.NORMAL
         );
 
@@ -74,6 +78,10 @@ public class SinaisVitaisService {
                 EventoTipos.SINAIS_VITAIS_EDITADOS,
                 "Sinais vitais atualizados",
                 "Sinais vitais foram atualizados",
+                EventoPacienteService.metadata(
+                        "patientName",
+                        existente.getPaciente().getNome()
+                ),
                 EventoPrioridades.NORMAL
         );
         return atualizado;
@@ -96,6 +104,10 @@ public class SinaisVitaisService {
                 EventoTipos.SINAIS_VITAIS_REMOVIDOS,
                 "Sinais vitais removidos",
                 "Um registro de sinais vitais foi removido",
+                EventoPacienteService.metadata(
+                        "patientName",
+                        sinais.getPaciente().getNome()
+                ),
                 EventoPrioridades.NORMAL
         );
         repository.deleteById(id);

@@ -339,12 +339,12 @@ export default function Sidebar({ open, setOpen }) {
                                             border: "1px solid rgba(255,255,255,0.12)",
                                             boxShadow: isSelected ? activeItemSx.boxShadow : "none",
                                             fontWeight: 700,
-                                            transition: "all .2s ease",
+                                            transition: "background .18s ease, border-color .18s ease, color .18s ease, box-shadow .18s ease, transform .18s ease",
                                             "&:hover": {
                                                 background: isSelected
                                                     ? activeItemSx.background
                                                     : "rgba(255,255,255,0.12)",
-                                                transform: "translateX(2px)",
+                                                transform: "translateY(-1px)",
                                             },
                                         }}
                                     >
@@ -445,10 +445,10 @@ export default function Sidebar({ open, setOpen }) {
                                         border: "1px solid",
                                         borderColor: isActive ? activeItemSx.borderColor : "rgba(255,255,255,0.12)",
                                         boxShadow: isActive ? activeItemSx.boxShadow : "none",
-                                        transition: "all .2s ease",
+                                        transition: "background .18s ease, border-color .18s ease, color .18s ease, box-shadow .18s ease, transform .18s ease",
                                         "&:hover": {
                                             background: isActive ? activeItemSx.background : "rgba(255,255,255,0.12)",
-                                            transform: "translateX(2px)",
+                                            transform: "translateY(-1px)",
                                         },
                                     }}
                                 >
@@ -501,7 +501,7 @@ export default function Sidebar({ open, setOpen }) {
                                 border: "1px solid rgba(255,255,255,0.18)",
                                 boxShadow: "0 10px 20px rgba(0,0,0,0.16)",
                                 cursor: "pointer",
-                                transition: "all .2s ease",
+                                transition: "background-color .18s ease, border-color .18s ease, box-shadow .18s ease, transform .18s ease",
                                 "&:hover": {
                                     transform: "scale(1.04)",
                                     bgcolor: "rgba(255,255,255,0.22)",

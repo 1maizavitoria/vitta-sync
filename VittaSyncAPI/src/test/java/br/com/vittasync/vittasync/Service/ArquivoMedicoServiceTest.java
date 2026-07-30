@@ -55,6 +55,7 @@ class ArquivoMedicoServiceTest {
                 eq(EventoTipos.DOCUMENTO_ENVIADO),
                 eq("Novo documento enviado"),
                 contains("arquivo.pdf"),
+                contains("\"documentName\":\"arquivo.pdf\""),
                 eq(EventoPrioridades.NORMAL)
         );
     }
@@ -116,6 +117,7 @@ class ArquivoMedicoServiceTest {
                 eq(EventoTipos.DOCUMENTO_REMOVIDO),
                 eq("Documento removido"),
                 contains("teste.pdf"),
+                contains("\"documentName\":\"teste.pdf\""),
                 eq(EventoPrioridades.NORMAL)
         );
     }

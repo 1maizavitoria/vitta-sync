@@ -11,6 +11,7 @@ import br.com.vittasync.vittasync.Repository.ConviteVinculoRepository;
 import br.com.vittasync.vittasync.Repository.UsuarioRepository;
 import br.com.vittasync.vittasync.Repository.VinculoRepository;
 import br.com.vittasync.vittasync.Util.EventoPrioridades;
+import br.com.vittasync.vittasync.Util.EventoTipos;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -95,8 +96,8 @@ class VinculoServiceTest {
         service.removerVinculo(10L, 1);
 
         verify(eventoPacienteService).criarEvento(eq(1), eq(1),
-                eq("vinculo_removido"), eq("Participante removido"),
-                contains("removeu"), eq(EventoPrioridades.NORMAL));
+                eq(EventoTipos.VINCULO_REMOVIDO), eq("Participante removido"),
+                contains("removeu"), contains("\"linkedUserName\":\"Responsável\""), eq(EventoPrioridades.NORMAL));
         verify(vinculoRepository).delete(vinculo);
     }
 

@@ -4,6 +4,7 @@ import br.com.vittasync.vittasync.Exception.RecursoNaoEncontradoException;
 import br.com.vittasync.vittasync.Model.DiarioSintomas;
 import br.com.vittasync.vittasync.Repository.DiarioSintomasRepository;
 import br.com.vittasync.vittasync.Util.EventoPrioridades;
+import br.com.vittasync.vittasync.Util.EventoTipos;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -40,9 +41,15 @@ public class DiarioSintomasService {
         eventoPacienteService.criarEvento(
                 sintoma.getPaciente().getId(),
                 usuarioLogadoId,
-                "sintoma_registrado",
+                EventoTipos.SINTOMAS_CRIADOS,
                 "Sintoma registrado",
                 "Um novo sintoma foi registrado",
+                EventoPacienteService.metadata(
+                        "patientName",
+                        sintoma.getPaciente().getNome(),
+                        "symptomName",
+                        sintoma.getSintoma()
+                ),
                 EventoPrioridades.NORMAL
         );
 
@@ -67,9 +74,15 @@ public class DiarioSintomasService {
         eventoPacienteService.criarEvento(
                 existente.getPaciente().getId(),
                 usuarioLogadoId,
-                "sintoma_editado",
+                EventoTipos.SINTOMAS_EDITADOS,
                 "Sintoma atualizado",
                 "Um sintoma foi atualizado",
+                EventoPacienteService.metadata(
+                        "patientName",
+                        existente.getPaciente().getNome(),
+                        "symptomName",
+                        existente.getSintoma()
+                ),
                 EventoPrioridades.NORMAL
         );
 
@@ -90,9 +103,15 @@ public class DiarioSintomasService {
         eventoPacienteService.criarEvento(
                 sintoma.getPaciente().getId(),
                 usuarioLogadoId,
-                "sintoma_removido",
+                EventoTipos.SINTOMAS_REMOVIDOS,
                 "Sintoma removido",
                 "Um registro de sintoma foi removido",
+                EventoPacienteService.metadata(
+                        "patientName",
+                        sintoma.getPaciente().getNome(),
+                        "symptomName",
+                        sintoma.getSintoma()
+                ),
                 EventoPrioridades.NORMAL
         );
         repository.deleteById(id);

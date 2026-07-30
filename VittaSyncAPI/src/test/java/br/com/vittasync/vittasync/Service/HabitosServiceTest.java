@@ -5,6 +5,7 @@ import br.com.vittasync.vittasync.Model.Habitos;
 import br.com.vittasync.vittasync.Model.Usuario;
 import br.com.vittasync.vittasync.Repository.HabitosRepository;
 import br.com.vittasync.vittasync.Util.EventoPrioridades;
+import br.com.vittasync.vittasync.Util.EventoTipos;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -34,6 +35,7 @@ class HabitosServiceTest {
 
         paciente = new Usuario();
         paciente.setId(1);
+        paciente.setNome("Paciente Teste");
     }
 
     @Test
@@ -52,9 +54,10 @@ class HabitosServiceTest {
         verify(repository).save(habito);
         verify(eventoPacienteService).criarEvento(
                 eq(paciente.getId()), eq(99),
-                eq("habito_registrado"),
+                eq(EventoTipos.HABITOS_CRIADOS),
                 eq("Hábito registrado"),
                 eq("Um novo hábito foi registrado"),
+                contains("\"patientName\":\"Paciente Teste\""),
                 eq(EventoPrioridades.NORMAL)
         );
         verify(eventoClinicoService).analisarHabitos(salvo, 99);
@@ -79,9 +82,10 @@ class HabitosServiceTest {
         assertThat(atualizado.getMinutosExercicio()).isEqualTo(30);
         verify(eventoPacienteService).criarEvento(
                 eq(paciente.getId()), eq(99),
-                eq("habito_editado"),
+                eq(EventoTipos.HABITOS_EDITADOS),
                 eq("Habito atualizado"),
                 eq("Um habito foi atualizado"),
+                contains("\"patientName\":\"Paciente Teste\""),
                 eq(EventoPrioridades.NORMAL)
         );
     }
@@ -108,9 +112,10 @@ class HabitosServiceTest {
 
         verify(eventoPacienteService).criarEvento(
                 eq(paciente.getId()), eq(99),
-                eq("habito_removido"),
+                eq(EventoTipos.HABITOS_REMOVIDOS),
                 eq("Hábito removido"),
                 eq("Um registro de hábito foi removido"),
+                contains("\"patientName\":\"Paciente Teste\""),
                 eq(EventoPrioridades.NORMAL)
         );
         verify(repository).deleteById(7);

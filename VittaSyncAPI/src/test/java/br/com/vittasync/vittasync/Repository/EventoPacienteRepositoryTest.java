@@ -27,10 +27,14 @@ class EventoPacienteRepositoryTest {
     private EventoPacienteRepository eventoPacienteRepository;
 
     @Autowired
+    private EventoVisualizacaoRepository eventoVisualizacaoRepository;
+
+    @Autowired
     private UsuarioRepository usuarioRepository;
 
     @BeforeEach
     void limparBanco() {
+        eventoVisualizacaoRepository.deleteAll();
         eventoPacienteRepository.deleteAll();
     }
 

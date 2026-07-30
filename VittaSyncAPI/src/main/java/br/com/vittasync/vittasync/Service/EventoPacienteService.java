@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.StringJoiner;
 
 @Service
 public class EventoPacienteService {
@@ -42,6 +43,26 @@ public class EventoPacienteService {
             String descricao,
             String prioridade
     ) {
+        criarEvento(
+                pacienteId,
+                usuarioId,
+                tipoEvento,
+                titulo,
+                descricao,
+                null,
+                prioridade
+        );
+    }
+
+    public void criarEvento(
+            Integer pacienteId,
+            Integer usuarioId,
+            String tipoEvento,
+            String titulo,
+            String descricao,
+            String metadata,
+            String prioridade
+    ) {
 
         EventoPaciente evento =
                 new EventoPaciente();
@@ -51,6 +72,7 @@ public class EventoPacienteService {
         evento.setTipoEvento(tipoEvento);
         evento.setTitulo(titulo);
         evento.setDescricao(descricao);
+        evento.setMetadata(metadata);
         evento.setVisualizado(false);
         evento.setPrioridade(prioridade);
 
@@ -103,6 +125,40 @@ public class EventoPacienteService {
             );
         }
 
+    }
+
+    public static String metadata(String... entries) {
+        if (entries == null || entries.length == 0) {
+            return null;
+        }
+
+        StringJoiner joiner = new StringJoiner(",", "{", "}");
+
+        for (int index = 0; index + 1 < entries.length; index += 2) {
+            String key = entries[index];
+            String value = entries[index + 1];
+
+            if (key == null || value == null) {
+                continue;
+            }
+
+            joiner.add(
+                    "\""
+                            + escapeJson(key)
+                            + "\":\""
+                            + escapeJson(value)
+                            + "\""
+            );
+        }
+
+        String result = joiner.toString();
+        return "{}".equals(result) ? null : result;
+    }
+
+    private static String escapeJson(String value) {
+        return value
+                .replace("\\", "\\\\")
+                .replace("\"", "\\\"");
     }
 
     public List<EventoPaciente> listarPorPaciente(Integer pacienteId) {

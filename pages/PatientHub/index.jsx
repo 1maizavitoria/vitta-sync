@@ -592,21 +592,17 @@ export default function PatientHub() {
 
                         {canInvite && (
 
-                            <Button
-                                variant="contained"
+                            <ButtonUI
                                 onClick={handleGenerateCode}
                                 sx={{
-                                    borderRadius: 2,
                                     textTransform: "none",
-                                    fontWeight: 800,
                                     minWidth: 0,
                                     whiteSpace: "normal",
                                     width: { xs: "100%", sm: "auto" },
-                                    background: "linear-gradient(135deg, #16a34a 0%, #0f766e 72%, #0ea5e9 100%)"
                                 }}
                             >
                                 {t("patientHub.inviteParticipant")}
-                            </Button>
+                            </ButtonUI>
                         )}
 
                         {userType?.toLowerCase() !==
@@ -626,7 +622,17 @@ export default function PatientHub() {
                                         width: { xs: "100%", sm: "auto" },
                                         zIndex: 0,
                                         borderColor: vitta.borderStrong,
-                                        color: "primary.dark"
+                                        color: "primary.dark",
+                                        transition: "background-color .18s ease, border-color .18s ease, color .18s ease, box-shadow .18s ease, transform .18s ease",
+                                        "&:hover": {
+                                            borderColor: "primary.main",
+                                            bgcolor: isDark ? "rgba(34, 197, 94, 0.12)" : "rgba(22, 163, 74, 0.08)",
+                                            boxShadow: vitta.shadow,
+                                            transform: "translateY(-1px)"
+                                        },
+                                        "&:active": {
+                                            transform: "translateY(0)"
+                                        }
                                     }}
                                 >
                                     {t("patientHub.joinWithCode")}
@@ -656,7 +662,15 @@ export default function PatientHub() {
                                     fontWeight: 800,
                                     minWidth: 0,
                                     whiteSpace: "normal",
-                                    width: { xs: "100%", sm: "auto" }
+                                    width: { xs: "100%", sm: "auto" },
+                                    transition: "background-color .18s ease, border-color .18s ease, color .18s ease, box-shadow .18s ease, transform .18s ease",
+                                    "&:hover": {
+                                        boxShadow: vitta.shadow,
+                                        transform: "translateY(-1px)"
+                                    },
+                                    "&:active": {
+                                        transform: "translateY(0)"
+                                    }
                                 }}
                             >
                                 {t("patientHub.leaveGroup")}

@@ -325,9 +325,9 @@ export default function Landing() {
                                         border: "1px solid",
                                         borderColor: vitta.border,
                                         bgcolor: "background.paper",
-                                        transition: "0.2s ease",
+                                        transition: "border-color .18s ease, box-shadow .18s ease, transform .18s ease, background-color .18s ease",
                                         "&:hover": {
-                                            transform: "translateY(-3px)",
+                                            transform: "translateY(-1px)",
                                             boxShadow: vitta.shadow,
                                             borderColor: vitta.borderStrong
                                         }

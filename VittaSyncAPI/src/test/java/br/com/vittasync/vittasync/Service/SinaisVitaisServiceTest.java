@@ -35,6 +35,7 @@ class SinaisVitaisServiceTest {
 
         paciente = new Usuario();
         paciente.setId(1);
+        paciente.setNome("Paciente Teste");
     }
 
     @Test
@@ -56,6 +57,7 @@ class SinaisVitaisServiceTest {
                 eq(EventoTipos.SINAIS_VITAIS_CRIADOS),
                 eq("Sinais vitais registrados"),
                 eq("Novos sinais vitais foram registrados"),
+                contains("\"patientName\":\"Paciente Teste\""),
                 eq(EventoPrioridades.NORMAL)
         );
         verify(eventoClinicoService).analisarSinaisVitais(salvo, 99);
@@ -83,6 +85,7 @@ class SinaisVitaisServiceTest {
                 eq(EventoTipos.SINAIS_VITAIS_EDITADOS),
                 eq("Sinais vitais atualizados"),
                 eq("Sinais vitais foram atualizados"),
+                contains("\"patientName\":\"Paciente Teste\""),
                 eq(EventoPrioridades.NORMAL)
         );
     }
@@ -112,6 +115,7 @@ class SinaisVitaisServiceTest {
                 eq(EventoTipos.SINAIS_VITAIS_REMOVIDOS),
                 eq("Sinais vitais removidos"),
                 eq("Um registro de sinais vitais foi removido"),
+                contains("\"patientName\":\"Paciente Teste\""),
                 eq(EventoPrioridades.NORMAL)
         );
         verify(repository).deleteById(7);

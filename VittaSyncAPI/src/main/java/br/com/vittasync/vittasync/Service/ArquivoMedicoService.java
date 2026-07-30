@@ -45,6 +45,14 @@ public class ArquivoMedicoService {
                 medico.getNome()
                         + " enviou o documento "
                         + nomeArquivo,
+                EventoPacienteService.metadata(
+                        "userName",
+                        medico.getNome(),
+                        "patientName",
+                        paciente.getNome(),
+                        "documentName",
+                        nomeArquivo
+                ),
                 EventoPrioridades.NORMAL
         );
 
@@ -76,6 +84,14 @@ public class ArquivoMedicoService {
                 medico.getNome()
                         + " removeu o documento "
                         + doc.getNomeArquivo(),
+                EventoPacienteService.metadata(
+                        "userName",
+                        medico.getNome(),
+                        "patientName",
+                        doc.getPaciente().getNome(),
+                        "documentName",
+                        doc.getNomeArquivo()
+                ),
                 EventoPrioridades.NORMAL
         );
         repository.delete(doc);

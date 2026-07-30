@@ -107,7 +107,10 @@ public class LembreteMedicaoController {
         );
 
         LembreteMedicao salvo =
-                service.salvarSubstituir(lembrete);
+                service.salvarSubstituir(
+                        lembrete,
+                        usuarioLogado.getId()
+                );
 
         return ResponseEntity.ok(
                 toOutputDTO(salvo)
@@ -181,7 +184,10 @@ public class LembreteMedicaoController {
             return ResponseEntity.status(403).build();
         }
 
-        return service.ativar(paciente)
+        return service.ativar(
+                        paciente,
+                        usuarioLogado.getId()
+                )
                 .map(l ->
                         ResponseEntity.ok(
                                 toOutputDTO(l)
@@ -220,7 +226,10 @@ public class LembreteMedicaoController {
             return ResponseEntity.status(403).build();
         }
 
-        return service.desativar(paciente)
+        return service.desativar(
+                        paciente,
+                        usuarioLogado.getId()
+                )
                 .map(l ->
                         ResponseEntity.ok(
                                 toOutputDTO(l)

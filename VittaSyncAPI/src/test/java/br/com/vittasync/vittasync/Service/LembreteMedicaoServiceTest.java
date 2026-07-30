@@ -3,6 +3,8 @@ package br.com.vittasync.vittasync.Service;
 import br.com.vittasync.vittasync.Model.LembreteMedicao;
 import br.com.vittasync.vittasync.Model.Usuario;
 import br.com.vittasync.vittasync.Repository.LembreteMedicaoRepository;
+import br.com.vittasync.vittasync.Util.EventoPrioridades;
+import br.com.vittasync.vittasync.Util.EventoTipos;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -15,16 +17,19 @@ import static org.mockito.Mockito.*;
 class LembreteMedicaoServiceTest {
 
     private LembreteMedicaoRepository repository;
+    private EventoPacienteService eventoPacienteService;
     private LembreteMedicaoService service;
     private Usuario usuario;
 
     @BeforeEach
     void setup() {
         repository = mock(LembreteMedicaoRepository.class);
-        service = new LembreteMedicaoService(repository);
+        eventoPacienteService = mock(EventoPacienteService.class);
+        service = new LembreteMedicaoService(repository, eventoPacienteService);
 
         usuario = new Usuario();
         usuario.setId(1);
+        usuario.setNome("Paciente Teste");
     }
 
     @Test
@@ -43,6 +48,15 @@ class LembreteMedicaoServiceTest {
         assertThat(resultado).isEqualTo(novo);
         verify(repository).delete(antigo);
         verify(repository).save(novo);
+        verify(eventoPacienteService).criarEvento(
+                eq(usuario.getId()),
+                eq(usuario.getId()),
+                eq(EventoTipos.LEMBRETE_ATUALIZADO),
+                eq("Lembrete atualizado"),
+                eq("Um lembrete de medição foi atualizado"),
+                contains("\"patientName\":\"Paciente Teste\""),
+                eq(EventoPrioridades.NORMAL)
+        );
     }
 
     @Test
@@ -82,6 +96,15 @@ class LembreteMedicaoServiceTest {
         assertThat(resultado).isPresent();
         assertThat(resultado.get().isAtivo()).isTrue();
         verify(repository).save(lembrete);
+        verify(eventoPacienteService).criarEvento(
+                eq(usuario.getId()),
+                eq(usuario.getId()),
+                eq(EventoTipos.LEMBRETE_ATUALIZADO),
+                eq("Lembrete ativado"),
+                eq("Um lembrete de medição foi ativado"),
+                contains("\"patientName\":\"Paciente Teste\""),
+                eq(EventoPrioridades.NORMAL)
+        );
     }
 
     @Test
@@ -98,5 +121,14 @@ class LembreteMedicaoServiceTest {
         assertThat(resultado).isPresent();
         assertThat(resultado.get().isAtivo()).isFalse();
         verify(repository).save(lembrete);
+        verify(eventoPacienteService).criarEvento(
+                eq(usuario.getId()),
+                eq(usuario.getId()),
+                eq(EventoTipos.LEMBRETE_ATUALIZADO),
+                eq("Lembrete desativado"),
+                eq("Um lembrete de medição foi desativado"),
+                contains("\"patientName\":\"Paciente Teste\""),
+                eq(EventoPrioridades.NORMAL)
+        );
     }
 }

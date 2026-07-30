@@ -7,6 +7,7 @@ import br.com.vittasync.vittasync.Service.EventoPacienteService;
 import br.com.vittasync.vittasync.Service.JwtService;
 import br.com.vittasync.vittasync.Service.PermissaoService;
 import br.com.vittasync.vittasync.Service.UsuarioService;
+import br.com.vittasync.vittasync.Util.EventoTipos;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -135,9 +136,10 @@ public class EventoPacienteController {
         dto.setId(entity.getId());
         dto.setPacienteId(entity.getPacienteId());
         dto.setUsuarioId(entity.getUsuarioId());
-        dto.setTipoEvento(entity.getTipoEvento());
+        dto.setTipoEvento(EventoTipos.toFrontendCode(entity.getTipoEvento()));
         dto.setTitulo(entity.getTitulo());
         dto.setDescricao(entity.getDescricao());
+        dto.setMetadata(entity.getMetadata());
         dto.setVisualizado(entity.getVisualizado());
         dto.setCriadoEm(entity.getCriadoEm());
         dto.setPrioridade(entity.getPrioridade());
