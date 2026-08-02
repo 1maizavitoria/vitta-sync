@@ -609,7 +609,7 @@ export default function PatientHub() {
                             "paciente" && (
 
                                 <Button
-                                    variant="outlined"
+                                    variant="contained"
                                     onClick={() =>
                                         setOpenJoinModal(true)
                                     }
@@ -617,17 +617,26 @@ export default function PatientHub() {
                                         borderRadius: 2,
                                         textTransform: "none",
                                         fontWeight: 800,
+                                        px: 2.2,
+                                        py: 1.05,
                                         minWidth: 0,
                                         whiteSpace: "normal",
                                         width: { xs: "100%", sm: "auto" },
                                         zIndex: 0,
-                                        borderColor: vitta.borderStrong,
-                                        color: "primary.dark",
-                                        transition: "background-color .18s ease, border-color .18s ease, color .18s ease, box-shadow .18s ease, transform .18s ease",
+                                        color: isDark ? "#dcfce7" : "#064e3b",
+                                        background: isDark
+                                            ? "linear-gradient(135deg, rgba(34, 197, 94, 0.24) 0%, rgba(14, 165, 233, 0.18) 100%)"
+                                            : "linear-gradient(135deg, #dcfce7 0%, #e0f2fe 100%)",
+                                        border: "1px solid",
+                                        borderColor: isDark ? "rgba(134, 239, 172, 0.32)" : "rgba(22, 163, 74, 0.28)",
+                                        boxShadow: isDark ? "0 12px 24px rgba(0, 0, 0, 0.18)" : "0 12px 24px rgba(22, 163, 74, 0.14)",
+                                        transition: "background .18s ease, border-color .18s ease, color .18s ease, box-shadow .18s ease, transform .18s ease",
                                         "&:hover": {
-                                            borderColor: "primary.main",
-                                            bgcolor: isDark ? "rgba(34, 197, 94, 0.12)" : "rgba(22, 163, 74, 0.08)",
-                                            boxShadow: vitta.shadow,
+                                            background: isDark
+                                                ? "linear-gradient(135deg, rgba(34, 197, 94, 0.32) 0%, rgba(14, 165, 233, 0.24) 100%)"
+                                                : "linear-gradient(135deg, #bbf7d0 0%, #bae6fd 100%)",
+                                            borderColor: isDark ? "rgba(134, 239, 172, 0.44)" : "rgba(22, 163, 74, 0.42)",
+                                            boxShadow: isDark ? "0 14px 28px rgba(0, 0, 0, 0.26)" : "0 14px 28px rgba(22, 163, 74, 0.22)",
                                             transform: "translateY(-1px)"
                                         },
                                         "&:active": {
@@ -642,7 +651,7 @@ export default function PatientHub() {
                         {!isPaciente && myLink && (
 
                             <Button
-                                variant="outlined"
+                                variant="contained"
                                 color="error"
                                 onClick={() => {
 
@@ -660,12 +669,25 @@ export default function PatientHub() {
                                     borderRadius: 2,
                                     textTransform: "none",
                                     fontWeight: 800,
+                                    px: 2.2,
+                                    py: 1.05,
                                     minWidth: 0,
                                     whiteSpace: "normal",
                                     width: { xs: "100%", sm: "auto" },
-                                    transition: "background-color .18s ease, border-color .18s ease, color .18s ease, box-shadow .18s ease, transform .18s ease",
+                                    color: isDark ? "#fecaca" : "#7f1d1d",
+                                    background: isDark
+                                        ? "rgba(248, 113, 113, 0.16)"
+                                        : "rgba(254, 226, 226, 0.95)",
+                                    border: "1px solid",
+                                    borderColor: isDark ? "rgba(248, 113, 113, 0.3)" : "rgba(239, 68, 68, 0.28)",
+                                    boxShadow: isDark ? "0 12px 24px rgba(0, 0, 0, 0.16)" : "0 12px 24px rgba(239, 68, 68, 0.12)",
+                                    transition: "background .18s ease, border-color .18s ease, color .18s ease, box-shadow .18s ease, transform .18s ease",
                                     "&:hover": {
-                                        boxShadow: vitta.shadow,
+                                        background: isDark
+                                            ? "rgba(248, 113, 113, 0.24)"
+                                            : "rgba(254, 202, 202, 0.95)",
+                                        borderColor: isDark ? "rgba(248, 113, 113, 0.42)" : "rgba(239, 68, 68, 0.4)",
+                                        boxShadow: isDark ? "0 14px 28px rgba(0, 0, 0, 0.24)" : "0 14px 28px rgba(239, 68, 68, 0.18)",
                                         transform: "translateY(-1px)"
                                     },
                                     "&:active": {

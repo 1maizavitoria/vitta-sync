@@ -62,7 +62,13 @@ export default function Sidebar({ open, setOpen }) {
     const userType = localStorage.getItem("tipo")?.toLowerCase();
 
     const filteredMenu = menuItems.filter((item) => {
-        if (item.path === "/health-tracker" && userType !== "paciente") {
+        const hasPatientContext = selectedPatient?.cpf || patients.length > 0;
+
+        if (
+            item.path === "/health-tracker" &&
+            userType !== "paciente" &&
+            !hasPatientContext
+        ) {
             return false;
         }
 
