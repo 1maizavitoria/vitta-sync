@@ -1,7 +1,25 @@
 import { describe, it, expect, vi, afterEach } from 'vitest';
 import { render, screen, fireEvent, cleanup } from '@testing-library/react';
 import '@testing-library/jest-dom/vitest';
+import { ThemeProvider, createTheme } from '@mui/material/styles';
 import ButtonUI from './Button';
+
+const theme = createTheme({
+    palette: {
+        mode: 'light'
+    },
+    vitta: {
+        borderStrong: '#0f766e'
+    }
+});
+
+function renderWithTheme(component) {
+    return render(
+        <ThemeProvider theme={theme}>
+            {component}
+        </ThemeProvider>
+    );
+}
 
 afterEach(() => {
     cleanup();
@@ -9,7 +27,7 @@ afterEach(() => {
 
 describe('ButtonUI', () => {
     it('deve renderizar o texto do botão', () => {
-        render(<ButtonUI>Salvar</ButtonUI>);
+        renderWithTheme(<ButtonUI>Salvar</ButtonUI>);
 
         expect(screen.getByRole('button', { name: /salvar/i }))
             .toBeInTheDocument();
@@ -18,7 +36,7 @@ describe('ButtonUI', () => {
     it('deve chamar onClick ao clicar', () => {
         const onClick = vi.fn();
 
-        render(<ButtonUI onClick={onClick}>Salvar</ButtonUI>);
+        renderWithTheme(<ButtonUI onClick={onClick}>Salvar</ButtonUI>);
 
         fireEvent.click(screen.getByRole('button', { name: /salvar/i }));
 
@@ -26,7 +44,7 @@ describe('ButtonUI', () => {
     });
 
     it('deve repassar props para o botão', () => {
-        render(<ButtonUI disabled>Salvar</ButtonUI>);
+        renderWithTheme(<ButtonUI disabled>Salvar</ButtonUI>);
 
         expect(screen.getByRole('button', { name: /salvar/i }))
             .toBeDisabled();

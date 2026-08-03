@@ -1,7 +1,27 @@
 import { describe, it, expect, vi, afterEach } from 'vitest';
 import { render, screen, fireEvent, cleanup } from '@testing-library/react';
 import '@testing-library/jest-dom/vitest';
+import { ThemeProvider, createTheme } from '@mui/material/styles';
 import DialogUI from './Dialog';
+
+const theme = createTheme({
+    palette: {
+        mode: 'light'
+    },
+    vitta: {
+        border: '#d1d5db',
+        borderStrong: '#0f766e',
+        shadow: '0 12px 24px rgba(0, 0, 0, 0.12)'
+    }
+});
+
+function renderWithTheme(component) {
+    return render(
+        <ThemeProvider theme={theme}>
+            {component}
+        </ThemeProvider>
+    );
+}
 
 afterEach(() => {
     cleanup();
@@ -9,7 +29,7 @@ afterEach(() => {
 
 describe('DialogUI', () => {
     it('deve renderizar título e conteúdo quando aberto', () => {
-        render(
+        renderWithTheme(
             <DialogUI
                 open
                 title="Confirmar ação"
@@ -24,7 +44,7 @@ describe('DialogUI', () => {
     });
 
     it('não deve renderizar conteúdo quando fechado', () => {
-        render(
+        renderWithTheme(
             <DialogUI
                 open={false}
                 title="Confirmar ação"
@@ -41,7 +61,7 @@ describe('DialogUI', () => {
     it('deve chamar onClose ao clicar em cancelar', () => {
         const onClose = vi.fn();
 
-        render(
+        renderWithTheme(
             <DialogUI
                 open
                 title="Confirmar ação"
@@ -59,7 +79,7 @@ describe('DialogUI', () => {
     it('deve chamar onConfirm ao clicar em confirmar', () => {
         const onConfirm = vi.fn();
 
-        render(
+        renderWithTheme(
             <DialogUI
                 open
                 title="Confirmar ação"
@@ -77,7 +97,7 @@ describe('DialogUI', () => {
     });
 
     it('não deve renderizar cancelar quando disabledClose for true', () => {
-        render(
+        renderWithTheme(
             <DialogUI
                 open
                 title="Confirmar ação"
@@ -93,7 +113,7 @@ describe('DialogUI', () => {
     });
 
     it('não deve renderizar confirmar quando disabledConfirm for true', () => {
-        render(
+        renderWithTheme(
             <DialogUI
                 open
                 title="Confirmar ação"

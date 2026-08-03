@@ -1,7 +1,27 @@
 import { describe, it, expect, vi, afterEach } from 'vitest';
 import { render, screen, fireEvent, cleanup } from '@testing-library/react';
 import '@testing-library/jest-dom/vitest';
+import { ThemeProvider, createTheme } from '@mui/material/styles';
 import InputUI from './Input';
+
+const theme = createTheme({
+    palette: {
+        mode: 'light'
+    },
+    vitta: {
+        border: '#d1d5db',
+        borderStrong: '#0f766e',
+        shadow: '0 12px 24px rgba(0, 0, 0, 0.12)'
+    }
+});
+
+function renderWithTheme(component) {
+    return render(
+        <ThemeProvider theme={theme}>
+            {component}
+        </ThemeProvider>
+    );
+}
 
 afterEach(() => {
     cleanup();
@@ -9,7 +29,7 @@ afterEach(() => {
 
 describe('InputUI', () => {
     it('deve renderizar input com label', () => {
-        render(
+        renderWithTheme(
             <InputUI
                 label="Nome"
                 value=""
@@ -23,7 +43,7 @@ describe('InputUI', () => {
     it('deve chamar onChange ao digitar', () => {
         const onChange = vi.fn();
 
-        render(
+        renderWithTheme(
             <InputUI
                 label="Nome"
                 value=""
@@ -39,7 +59,7 @@ describe('InputUI', () => {
     });
 
     it('deve aplicar limite de caracteres', () => {
-        render(
+        renderWithTheme(
             <InputUI
                 label="CPF"
                 value=""
@@ -53,7 +73,7 @@ describe('InputUI', () => {
     });
 
     it('deve renderizar placeholder', () => {
-        render(
+        renderWithTheme(
             <InputUI
                 label="E-mail"
                 value=""
@@ -67,7 +87,7 @@ describe('InputUI', () => {
     });
 
     it('deve alternar visibilidade da senha', () => {
-        render(
+        renderWithTheme(
             <InputUI
                 label="Senha"
                 type="password"

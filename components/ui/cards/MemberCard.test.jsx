@@ -2,6 +2,29 @@ import { describe, it, expect, vi, afterEach } from 'vitest';
 import { render, screen, fireEvent, cleanup } from '@testing-library/react';
 import '@testing-library/jest-dom/vitest';
 import MemberCard from './MemberCard';
+import { ThemeProvider, createTheme } from '@mui/material/styles';
+import { LanguageProvider } from '../../../src/i18n';
+
+const theme = createTheme({
+    palette: {
+        mode: 'light'
+    },
+    vitta: {
+        border: '#d1d5db',
+        borderStrong: '#0f766e',
+        shadow: '0 12px 24px rgba(0, 0, 0, 0.12)'
+    }
+});
+
+function renderWithProviders(component) {
+    return render(
+        <ThemeProvider theme={theme}>
+            <LanguageProvider>
+                {component}
+            </LanguageProvider>
+        </ThemeProvider>
+    );
+}
 
 afterEach(() => {
     cleanup();
@@ -22,7 +45,7 @@ const typeStyle = {
 
 describe('MemberCard', () => {
     it('deve renderizar informações do membro', () => {
-        render(
+        renderWithProviders(
             <MemberCard
                 link={link}
                 typeStyle={typeStyle}
@@ -37,20 +60,20 @@ describe('MemberCard', () => {
     });
 
     it('deve renderizar iniciais do nome', () => {
-        render(
+        renderWithProviders(
             <MemberCard
                 link={link}
                 typeStyle={typeStyle}
             />
         );
 
-        expect(screen.getByText('LU')).toBeInTheDocument();
+        expect(screen.getByText('LS')).toBeInTheDocument();
     });
 
     it('deve chamar onRemove ao clicar no botão de remover', () => {
         const onRemove = vi.fn();
 
-        render(
+        renderWithProviders(
             <MemberCard
                 link={link}
                 typeStyle={typeStyle}
@@ -64,7 +87,7 @@ describe('MemberCard', () => {
     });
 
     it('não deve renderizar botão de remover quando hideRemove for true', () => {
-        render(
+        renderWithProviders(
             <MemberCard
                 link={link}
                 typeStyle={typeStyle}

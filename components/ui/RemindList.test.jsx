@@ -1,7 +1,16 @@
 import { describe, it, expect, vi, afterEach } from 'vitest';
 import { render, screen, fireEvent, cleanup } from '@testing-library/react';
 import '@testing-library/jest-dom/vitest';
+import { LanguageProvider } from '../../src/i18n';
 import ReminderList from './RemindList';
+
+function renderWithLanguage(component) {
+    return render(
+        <LanguageProvider>
+            {component}
+        </LanguageProvider>
+    );
+}
 
 afterEach(() => {
     cleanup();
@@ -9,7 +18,7 @@ afterEach(() => {
 
 describe('ReminderList', () => {
     it('não deve renderizar quando não houver lembrete', () => {
-        const { container } = render(
+        const { container } = renderWithLanguage(
             <ReminderList
                 reminder={null}
                 handleToggleReminder={() => { }}
@@ -20,7 +29,7 @@ describe('ReminderList', () => {
     });
 
     it('não deve renderizar quando lembrete não tiver dias ou horário', () => {
-        const { container } = render(
+        const { container } = renderWithLanguage(
             <ReminderList
                 reminder={{ diasSemana: '', horario: '' }}
                 handleToggleReminder={() => { }}
@@ -31,7 +40,7 @@ describe('ReminderList', () => {
     });
 
     it('deve renderizar informações do lembrete', () => {
-        render(
+        renderWithLanguage(
             <ReminderList
                 reminder={{
                     id: 1,
@@ -51,7 +60,7 @@ describe('ReminderList', () => {
     it('deve chamar handleToggleReminder ao clicar no switch', () => {
         const handleToggleReminder = vi.fn();
 
-        render(
+        renderWithLanguage(
             <ReminderList
                 reminder={{
                     id: 1,

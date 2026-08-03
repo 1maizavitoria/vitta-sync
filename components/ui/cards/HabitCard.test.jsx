@@ -2,6 +2,29 @@ import { describe, it, expect, vi, afterEach } from 'vitest';
 import { render, screen, fireEvent, cleanup } from '@testing-library/react';
 import '@testing-library/jest-dom/vitest';
 import HabitCard from './HabitCard';
+import { ThemeProvider, createTheme } from '@mui/material/styles';
+import { LanguageProvider } from '../../../src/i18n';
+
+const theme = createTheme({
+    palette: {
+        mode: 'light'
+    },
+    vitta: {
+        border: '#d1d5db',
+        borderStrong: '#0f766e',
+        shadow: '0 12px 24px rgba(0, 0, 0, 0.12)'
+    }
+});
+
+function renderWithProviders(component) {
+    return render(
+        <ThemeProvider theme={theme}>
+            <LanguageProvider>
+                {component}
+            </LanguageProvider>
+        </ThemeProvider>
+    );
+}
 
 afterEach(() => {
     cleanup();
@@ -9,7 +32,7 @@ afterEach(() => {
 
 describe('HabitCard', () => {
     it('deve renderizar informações principais do hábito', () => {
-        render(
+        renderWithProviders(
             <HabitCard
                 icon={<span>icone</span>}
                 title="Água"
@@ -26,7 +49,7 @@ describe('HabitCard', () => {
     });
 
     it('deve renderizar informações de quem registrou', () => {
-        render(
+        renderWithProviders(
             <HabitCard
                 title="Sono"
                 value="8"
@@ -46,7 +69,7 @@ describe('HabitCard', () => {
     });
 
     it('deve renderizar input quando showInput for true', () => {
-        render(
+        renderWithProviders(
             <HabitCard
                 title="Água"
                 value="2"
@@ -64,7 +87,7 @@ describe('HabitCard', () => {
     it('deve chamar onInputChange ao alterar input', () => {
         const onInputChange = vi.fn();
 
-        render(
+        renderWithProviders(
             <HabitCard
                 title="Água"
                 value="2"

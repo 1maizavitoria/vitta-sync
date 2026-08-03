@@ -2,6 +2,29 @@ import { describe, it, expect, vi, afterEach } from 'vitest';
 import { render, screen, fireEvent, cleanup } from '@testing-library/react';
 import '@testing-library/jest-dom/vitest';
 import SymptomCard from './SymptomCard';
+import { ThemeProvider, createTheme } from '@mui/material/styles';
+import { LanguageProvider } from '../../../src/i18n';
+
+const theme = createTheme({
+    palette: {
+        mode: 'light'
+    },
+    vitta: {
+        border: '#d1d5db',
+        borderStrong: '#0f766e',
+        shadow: '0 12px 24px rgba(0, 0, 0, 0.12)'
+    }
+});
+
+function renderWithProviders(component) {
+    return render(
+        <ThemeProvider theme={theme}>
+            <LanguageProvider>
+                {component}
+            </LanguageProvider>
+        </ThemeProvider>
+    );
+}
 
 afterEach(() => {
     cleanup();
@@ -9,7 +32,7 @@ afterEach(() => {
 
 describe('SymptomCard', () => {
     it('deve renderizar informações principais do sintoma', () => {
-        render(
+        renderWithProviders(
             <SymptomCard
                 icon={<span>icone</span>}
                 title="Dor de cabeça"
@@ -26,7 +49,7 @@ describe('SymptomCard', () => {
     });
 
     it('deve renderizar informações de quem registrou', () => {
-        render(
+        renderWithProviders(
             <SymptomCard
                 title="Náusea"
                 value="Moderada"
@@ -46,7 +69,7 @@ describe('SymptomCard', () => {
     });
 
     it('deve renderizar input quando showInput for true', () => {
-        render(
+        renderWithProviders(
             <SymptomCard
                 title="Sintoma"
                 value="Leve"
@@ -64,7 +87,7 @@ describe('SymptomCard', () => {
     it('deve chamar onInputChange ao alterar input', () => {
         const onInputChange = vi.fn();
 
-        render(
+        renderWithProviders(
             <SymptomCard
                 title="Sintoma"
                 value="Leve"
