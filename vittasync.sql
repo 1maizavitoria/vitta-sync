@@ -201,6 +201,25 @@ CREATE TABLE EventoPaciente (
         ON DELETE SET NULL
 );
 
+CREATE TABLE MetaAcompanhamento (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    paciente_id INT NOT NULL,
+    nome VARCHAR(150) NOT NULL,
+    tipo_dado VARCHAR(50) NOT NULL,
+    valor_alvo DOUBLE NOT NULL,
+    data_limite DATE NOT NULL,
+    progresso DOUBLE DEFAULT 0,
+    data_criacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    data_modificacao TIMESTAMP NULL,
+    data_conclusao TIMESTAMP NULL,
+    status VARCHAR(30) DEFAULT 'em_andamento',
+
+    CONSTRAINT fk_meta_paciente
+        FOREIGN KEY (paciente_id)
+        REFERENCES Usuario(id)
+        ON DELETE CASCADE
+);
+
 
 SHOW TABLES;
 

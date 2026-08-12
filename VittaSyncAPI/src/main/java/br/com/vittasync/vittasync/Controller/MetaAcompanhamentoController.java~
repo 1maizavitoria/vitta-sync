@@ -1,0 +1,136 @@
+package br.com.vittasync.vittasync.Controller;
+
+
+import br.com.vittasync.vittasync.DTO.MetaAcompanhamentoInputDTO;
+import br.com.vittasync.vittasync.DTO.MetaAcompanhamentoOutputDTO;
+import br.com.vittasync.vittasync.Model.MetaAcompanhamento;
+import br.com.vittasync.vittasync.Model.Usuario;
+import br.com.vittasync.vittasync.Service.*;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+import java.util.List;
+import java.util.stream.Collectors;
+
+
+@RestController
+@RequestMapping("/metaacompanhamento")
+public class MetaAcompanhamentoController {
+
+    private final MetaAcompanhamentoService service;
+    private final JwtService jwtService;
+    private final UsuarioService usuarioService;
+    private final PermissaoService permissaoService;
+
+    public MetaAcompanhamentoController(
+            MetaAcompanhamentoService service,
+            JwtService jwtService,
+            UsuarioService usuarioService,
+            PermissaoService permissaoService
+    ) {
+        this.service = service;
+        this.jwtService = jwtService;
+        this.usuarioService = usuarioService;
+        this.permissaoService = permissaoService;
+    }
+
+    
+    @PostMapping("/cadastrar/{cpf}")
+    public ResponseEntity<MetaAcompanhamentoOutputDTO> cadastrar(@PathVariable String cpf,
+                                                                 @RequestHeader("Authorization") String authHeader,
+                                                                 @RequestBody MetaAcompanhamentoInputDTO dto) {
+        String token = authHeader.replace("Bearer ", "");
+        String cpfDoToken = jwtService.extrairCpf(token);
+        Usuario usuarioLogado = usuarioService.searchByCpf(cpfDoToken);
+        Usuario paciente = usuarioService.searchByCpf(cpf);
+
+        if (!permissaoService.podeEditarPaciente(usuarioLogado.getId(), paciente.getId())) {
+            return ResponseEntity.status(403).build();
+        }
+
+        MetaAcompanhamento salvo = service.create(dto, paciente, usuarioLogado.getId());
+        return ResponseEntity.ok(toOutputDTO(salvo));
+    }
+
+    @PutMapping("/editar/{id}/{cpf}")
+    public ResponseEntity<MetaAcompanhamentoOutputDTO> editar(@PathVariable Long id,
+                                                              @PathVariable String cpf,
+                                                              @RequestHeader("Authorization") String authHeader,
+                                                              @RequestBody MetaAcompanhamentoInputDTO dto) {
+        String token = authHeader.replace("Bearer ", "");
+        String cpfDoToken = jwtService.extrairCpf(token);
+        Usuario usuarioLogado = usuarioService.searchByCpf(cpfDoToken);
+        Usuario paciente = usuarioService.searchByCpf(cpf);
+
+        if (!permissaoService.podeEditarPaciente(usuarioLogado.getId(), paciente.getId())) {
+            return ResponseEntity.status(403).build();
+        }
+
+        MetaAcompanhamento atualizado = service.update(id, dto, paciente, usuarioLogado.getId());
+        return ResponseEntity.ok(toOutputDTO(atualizado));
+    }
+
+    @DeleteMapping("/deletar/{id}/{cpf}")
+    public ResponseEntity<Void> deletar(@PathVariable Long id,
+                                        @PathVariable String cpf,
+                                        @RequestHeader("Authorization") String authHeader) {
+        String token = authHeader.replace("Bearer ", "");
+        String cpfDoToken = jwtService.extrairCpf(token);
+        Usuario usuarioLogado = usuarioService.searchByCpf(cpfDoToken);
+        Usuario paciente = usuarioService.searchByCpf(cpf);
+
+        if (!permissaoService.podeEditarPaciente(usuarioLogado.getId(), paciente.getId())) {
+            return ResponseEntity.status(403).build();
+        }
+
+        service.delete(id, usuarioLogado.getId());
+        return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/concluir/{id}/{cpf}")
+    public ResponseEntity<MetaAcompanhamentoOutputDTO> concluir(@PathVariable Long id,
+                                                                @PathVariable String cpf,
+                                                                @RequestHeader("Authorization") String authHeader) {
+        String token = authHeader.replace("Bearer ", "");
+        String cpfDoToken = jwtService.extrairCpf(token);
+        Usuario usuarioLogado = usuarioService.searchByCpf(cpfDoToken);
+        Usuario paciente = usuarioService.searchByCpf(cpf);
+
+        if (!permissaoService.podeEditarPaciente(usuarioLogado.getId(), paciente.getId())) {
+            return ResponseEntity.status(403).build();
+        }
+
+        MetaAcompanhamento concluida = service.concluirMeta(id, usuarioLogado.getId());
+        return ResponseEntity.ok(toOutputDTO(concluida));
+    }
+
+    @GetMapping("/getMetas/{cpf}")
+    public ResponseEntity<List<MetaAcompanhamentoOutputDTO>> listar(@PathVariable String cpf,
+                                                                    @RequestHeader("Authorization") String authHeader) {
+        String token = authHeader.replace("Bearer ", "");
+        String cpfDoToken = jwtService.extrairCpf(token);
+        Usuario usuarioLogado = usuarioService.searchByCpf(cpfDoToken);
+        Usuario paciente = usuarioService.searchByCpf(cpf);
+
+        if (!permissaoService.podeVisualizarPaciente(usuarioLogado.getId(), paciente.getId())) {
+            return ResponseEntity.status(403).build();
+        }
+
+        List<MetaAcompanhamento> lista = service.listarPorPaciente(paciente.getId());
+        return ResponseEntity.ok(lista.stream().map(this::toOutputDTO).collect(Collectors.toList()));
+    }
+
+    private MetaAcompanhamentoOutputDTO toOutputDTO(MetaAcompanhamento entity) {
+        MetaAcompanhamentoOutputDTO dto = new MetaAcompanhamentoOutputDTO();
+        dto.setId(entity.getId());
+        dto.setNome(entity.getNome());
+        dto.setTipoDado(entity.getTipoDado());
+        dto.setValorAlvo(entity.getValorAlvo());
+        dto.setProgresso(entity.getProgresso());
+        dto.setStatus(entity.getStatus());
+        dto.setDataCriacao(entity.getDataCriacao());
+        dto.setDataLimite(entity.getDataLimite());
+        dto.setDataConclusao(entity.getDataConclusao());
+        dto.setDataModificacao(entity.getDataModificacao());
+        return dto;
+    }
+}

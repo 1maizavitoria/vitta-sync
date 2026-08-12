@@ -8,4 +8,5 @@ import java.util.List;
 
 public interface HabitosRepository extends JpaRepository<Habitos, Integer> {
     List<Habitos> findByPacienteCpf(String cpf);
+    List<Habitos> findUltimos3ByPacienteId(Integer pacienteId);
 }

@@ -83,10 +83,6 @@ public class EventoTipos {
             case DOR_CRITICA_DETECTADA -> "CRITICAL_PAIN_DETECTED";
             case SONO_CRITICO -> "CRITICAL_SLEEP";
             case SEDENTARISMO_DETECTADO -> "LOW_PHYSICAL_ACTIVITY";
-            case META_CRIADA -> "GOAL_CREATED";
-            case META_ATUALIZADA -> "GOAL_UPDATED";
-            case META_REMOVIDA -> "GOAL_REMOVED";
-            case META_CONCLUIDA -> "GOAL_COMPLETED";
             default -> tipoEvento;
         };
     }

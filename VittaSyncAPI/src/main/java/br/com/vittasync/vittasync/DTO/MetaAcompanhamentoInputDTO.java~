@@ -1,0 +1,26 @@
+package br.com.vittasync.vittasync.DTO;
+
+
+import java.time.LocalDate;
+
+
+public class MetaAcompanhamentoInputDTO {
+
+    private String nome;
+    private String tipoDado;
+    private Double valorAlvo;
+    private LocalDate dataLimite;
+
+    
+    public String getNome() { return nome; }
+    public void setNome(String nome) { this.nome = nome; }
+
+    public String getTipoDado() { return tipoDado; }
+    public void setTipoDado(String tipoDado) { this.tipoDado = tipoDado; }
+
+    public Double getValorAlvo() { return valorAlvo; }
+    public void setValorAlvo(Double valorAlvo) { this.valorAlvo = valorAlvo; }
+
+    public LocalDate getDataLimite() { return dataLimite; }
+    public void setDataLimite(LocalDate dataLimite) { this.dataLimite = dataLimite; }
+}

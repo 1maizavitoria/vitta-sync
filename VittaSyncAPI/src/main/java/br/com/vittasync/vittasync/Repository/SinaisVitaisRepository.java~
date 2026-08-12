@@ -8,5 +8,5 @@ import java.util.List;
 
 public interface SinaisVitaisRepository extends JpaRepository<SinaisVitais, Integer> {
     List<SinaisVitais> findByPacienteCpf(String cpf);
-    List<SinaisVitais> findUltimos3ByPacienteId(Integer pacienteId);
+    List<SinaisVitais> findTop3ByPacienteIdOrderByDataRegistroDesc(Integer pacienteId);
 }
