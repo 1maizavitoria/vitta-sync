@@ -22,12 +22,20 @@ const dictionaries = {
             information: "Informações",
             documents: "Documentos",
             activity: "Atividade",
+            goals: "Metas",
             patients: "Pacientes",
             openProfile: "Abrir perfil",
             logout: "Sair",
             userType: "Tipo de usuário",
             openSidebar: "Abrir menu",
             closeSidebar: "Fechar menu"
+        },
+        goals: {
+            title: "Metas de acompanhamento", description: "Defina objetivos e acompanhe a evolução do paciente.", patient: "Paciente", new: "Nova meta", selectPatient: "Selecione um paciente para visualizar suas metas.", empty: "Nenhuma meta cadastrada", emptyHint: "Crie a primeira meta de acompanhamento.", progress: "Progresso", target: "Valor-alvo", deadline: "Prazo", complete: "Concluir", edit: "Editar", delete: "Excluir", deleteConfirm: "Deseja realmente excluir esta meta?",
+            types: { sinais_vitais: "Sinais vitais", habitos: "Hábitos", personalizado: "Personalizado" },
+            status: { em_andamento: "Em andamento", concluido: "Concluída", concluido_atrasado: "Concluída com atraso" },
+            form: { createTitle: "Nova meta", editTitle: "Editar meta", name: "Nome", type: "Tipo de dado", target: "Valor-alvo", deadline: "Data-limite", cancel: "Cancelar", save: "Salvar", saving: "Salvando..." },
+            alerts: { loadError: "Não foi possível carregar as metas.", createSuccess: "Meta criada com sucesso.", updateSuccess: "Meta atualizada com sucesso.", completeSuccess: "Meta concluída com sucesso.", deleteSuccess: "Meta excluída com sucesso.", saveError: "Não foi possível salvar a meta.", actionError: "Não foi possível realizar esta ação." }
         },
         theme: {
             light: "Modo claro",
@@ -609,12 +617,20 @@ const dictionaries = {
             information: "Information",
             documents: "Documents",
             activity: "Activity",
+            goals: "Goals",
             patients: "Patients",
             openProfile: "Open profile",
             logout: "Sign out",
             userType: "User type",
             openSidebar: "Open menu",
             closeSidebar: "Close menu"
+        },
+        goals: {
+            title: "Tracking goals", description: "Set objectives and track the patient's progress.", patient: "Patient", new: "New goal", selectPatient: "Select a patient to view their goals.", empty: "No goals yet", emptyHint: "Create the first tracking goal.", progress: "Progress", target: "Target value", deadline: "Deadline", complete: "Complete", edit: "Edit", delete: "Delete", deleteConfirm: "Do you really want to delete this goal?",
+            types: { sinais_vitais: "Vital signs", habitos: "Habits", personalizado: "Custom" },
+            status: { em_andamento: "In progress", concluido: "Completed", concluido_atrasado: "Completed late" },
+            form: { createTitle: "New goal", editTitle: "Edit goal", name: "Name", type: "Data type", target: "Target value", deadline: "Deadline", cancel: "Cancel", save: "Save", saving: "Saving..." },
+            alerts: { loadError: "Goals could not be loaded.", createSuccess: "Goal created successfully.", updateSuccess: "Goal updated successfully.", completeSuccess: "Goal completed successfully.", deleteSuccess: "Goal deleted successfully.", saveError: "Goal could not be saved.", actionError: "This action could not be completed." }
         },
         theme: {
             light: "Light mode",
@@ -1195,12 +1211,20 @@ const dictionaries = {
             information: "Información",
             documents: "Documentos",
             activity: "Actividad",
+            goals: "Metas",
             patients: "Pacientes",
             openProfile: "Abrir perfil",
             logout: "Salir",
             userType: "Tipo de usuario",
             openSidebar: "Abrir menú",
             closeSidebar: "Cerrar menú"
+        },
+        goals: {
+            title: "Metas de seguimiento", description: "Define objetivos y acompaña la evolución del paciente.", patient: "Paciente", new: "Nueva meta", selectPatient: "Selecciona un paciente para ver sus metas.", empty: "No hay metas registradas", emptyHint: "Crea la primera meta de seguimiento.", progress: "Progreso", target: "Valor objetivo", deadline: "Fecha límite", complete: "Completar", edit: "Editar", delete: "Eliminar", deleteConfirm: "¿Realmente deseas eliminar esta meta?",
+            types: { sinais_vitais: "Signos vitales", habitos: "Hábitos", personalizado: "Personalizado" },
+            status: { em_andamento: "En progreso", concluido: "Completada", concluido_atrasado: "Completada con retraso" },
+            form: { createTitle: "Nueva meta", editTitle: "Editar meta", name: "Nombre", type: "Tipo de dato", target: "Valor objetivo", deadline: "Fecha límite", cancel: "Cancelar", save: "Guardar", saving: "Guardando..." },
+            alerts: { loadError: "No se pudieron cargar las metas.", createSuccess: "Meta creada correctamente.", updateSuccess: "Meta actualizada correctamente.", completeSuccess: "Meta completada correctamente.", deleteSuccess: "Meta eliminada correctamente.", saveError: "No se pudo guardar la meta.", actionError: "No se pudo realizar esta acción." }
         },
         theme: {
             light: "Modo claro",

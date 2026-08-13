@@ -21,6 +21,7 @@ import FolderOutlinedIcon from "@mui/icons-material/FolderOutlined";
 import LogoutIcon from "@mui/icons-material/Logout";
 import MonitorHeartOutlinedIcon from "@mui/icons-material/MonitorHeartOutlined";
 import ShowChartIcon from "@mui/icons-material/ShowChart";
+import FlagOutlinedIcon from "@mui/icons-material/FlagOutlined";
 
 import { usePatient } from "../../context/PatientContext";
 import { logout } from "../../services/authService";
@@ -33,6 +34,7 @@ const menuItems = [
     { labelKey: "nav.records", icon: <MonitorHeartOutlinedIcon />, path: "/health-tracker" },
     { labelKey: "nav.information", icon: <ShowChartIcon />, path: "/reports" },
     { labelKey: "nav.documents", icon: <FolderOutlinedIcon />, path: "/documents" },
+    { labelKey: "nav.goals", icon: <FlagOutlinedIcon />, path: "/goals" },
     { labelKey: "nav.activity", icon: <ActivityIcon />, path: "/activity" },
 ];
 
@@ -73,7 +75,7 @@ export default function Sidebar({ open, setOpen }) {
         }
 
         if (
-            ["/reports", "/documents", "/activity"].includes(item.path) &&
+            ["/reports", "/documents", "/goals", "/activity"].includes(item.path) &&
             userType !== "paciente" &&
             !selectedPatient?.cpf
         ) {
