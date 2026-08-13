@@ -9,6 +9,7 @@ import br.com.vittasync.vittasync.Service.*;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 
@@ -43,7 +44,7 @@ public class MetaAcompanhamentoController {
         Usuario usuarioLogado = usuarioService.searchByCpf(cpfDoToken);
         Usuario paciente = usuarioService.searchByCpf(cpf);
 
-        if (!permissaoService.podeEditarPaciente(usuarioLogado.getId(), paciente.getId())) {
+        if (!permissaoService.podeCriarEditarMeta(usuarioLogado.getId(), paciente.getId())) {
             return ResponseEntity.status(403).build();
         }
 
@@ -61,7 +62,7 @@ public class MetaAcompanhamentoController {
         Usuario usuarioLogado = usuarioService.searchByCpf(cpfDoToken);
         Usuario paciente = usuarioService.searchByCpf(cpf);
 
-        if (!permissaoService.podeEditarPaciente(usuarioLogado.getId(), paciente.getId())) {
+        if (!permissaoService.podeCriarEditarMeta(usuarioLogado.getId(), paciente.getId())) {
             return ResponseEntity.status(403).build();
         }
 
@@ -82,7 +83,7 @@ public class MetaAcompanhamentoController {
             return ResponseEntity.status(403).build();
         }
 
-        service.delete(id, usuarioLogado.getId());
+        service.delete(id, paciente.getId(), usuarioLogado.getId());
         return ResponseEntity.noContent().build();
     }
 
@@ -95,11 +96,11 @@ public class MetaAcompanhamentoController {
         Usuario usuarioLogado = usuarioService.searchByCpf(cpfDoToken);
         Usuario paciente = usuarioService.searchByCpf(cpf);
 
-        if (!permissaoService.podeEditarPaciente(usuarioLogado.getId(), paciente.getId())) {
+        if (!permissaoService.podeCriarEditarMeta(usuarioLogado.getId(), paciente.getId())) {
             return ResponseEntity.status(403).build();
         }
 
-        MetaAcompanhamento concluida = service.concluirMeta(id, usuarioLogado.getId());
+        MetaAcompanhamento concluida = service.concluirMeta(id, paciente.getId(), usuarioLogado.getId());
         return ResponseEntity.ok(toOutputDTO(concluida));
     }
 
@@ -115,8 +116,29 @@ public class MetaAcompanhamentoController {
             return ResponseEntity.status(403).build();
         }
 
-        List<MetaAcompanhamento> lista = service.listarPorPaciente(paciente.getId());
+        List<MetaAcompanhamento> lista = service.listarPorPaciente(paciente.getId(), usuarioLogado.getId());
         return ResponseEntity.ok(lista.stream().map(this::toOutputDTO).collect(Collectors.toList()));
+    }
+
+    @PutMapping("/atualizar-valor/{id}/{cpf}")
+    public ResponseEntity<MetaAcompanhamentoOutputDTO> atualizarValorManual(
+            @PathVariable Long id,
+            @PathVariable String cpf,
+            @RequestHeader("Authorization") String authHeader,
+            @RequestBody Map<String, Double> body) {
+        String token = authHeader.replace("Bearer ", "");
+        Usuario usuarioLogado = usuarioService.searchByCpf(jwtService.extrairCpf(token));
+        Usuario paciente = usuarioService.searchByCpf(cpf);
+        if (!permissaoService.podeEditarPaciente(usuarioLogado.getId(), paciente.getId())) {
+            return ResponseEntity.status(403).build();
+        }
+        MetaAcompanhamento meta = service.atualizarValorManual(
+                id,
+                paciente.getId(),
+                body.get("valorAtual"),
+                usuarioLogado.getId()
+        );
+        return ResponseEntity.ok(toOutputDTO(meta));
     }
 
     private MetaAcompanhamentoOutputDTO toOutputDTO(MetaAcompanhamento entity) {
@@ -124,6 +146,11 @@ public class MetaAcompanhamentoController {
         dto.setId(entity.getId());
         dto.setNome(entity.getNome());
         dto.setTipoDado(entity.getTipoDado());
+        dto.setIndicador(entity.getIndicador());
+        dto.setDirecao(entity.getDirecao());
+        dto.setValorInicial(entity.getValorInicial());
+        dto.setValorAtual(entity.getValorAtual());
+        dto.setUnidade(entity.getUnidade());
         dto.setValorAlvo(entity.getValorAlvo());
         dto.setProgresso(entity.getProgresso());
         dto.setStatus(entity.getStatus());

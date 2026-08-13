@@ -23,3 +23,8 @@ export async function completeGoal(id, cpf) {
     const response = await api.post(`/metaacompanhamento/concluir/${id}/${cpf}`);
     return response.data;
 }
+
+export async function updateGoalValue(id, cpf, valorAtual) {
+    const response = await api.put(`/metaacompanhamento/atualizar-valor/${id}/${cpf}`, { valorAtual });
+    return response.data;
+}

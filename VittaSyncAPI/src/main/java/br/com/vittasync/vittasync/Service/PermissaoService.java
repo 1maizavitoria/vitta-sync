@@ -37,6 +37,14 @@ public class PermissaoService {
         return vinculoRepository.existsByPacienteIdAndUsuarioIdAndTipo(pacienteId, usuarioId, "responsavel");
     }
 
+    public boolean podeCriarEditarMeta(Integer usuarioId, Integer pacienteId) {
+        if (podeEditarPaciente(usuarioId, pacienteId)) {
+            return true;
+        }
+
+        return medicoVinculadoAoPaciente(usuarioId, pacienteId);
+    }
+
     public boolean podeRemoverVinculo(Integer usuarioLogadoId, Vinculo vinculoAlvo) {
 
         // paciente remove qualquer vínculo dele

@@ -24,6 +24,21 @@ public class MetaAcompanhamento {
     @Column(name = "tipo_dado", nullable = false, length = 50)
     private String tipoDado; // sinais_vitais, habitos, personalizado
 
+    @Column(name = "indicador", length = 50)
+    private String indicador; // peso, horas_sono, minutos_exercicio, personalizado
+
+    @Column(name = "direcao", length = 20)
+    private String direcao; // aumentar, reduzir
+
+    @Column(name = "valor_inicial")
+    private Double valorInicial;
+
+    @Column(name = "valor_atual")
+    private Double valorAtual;
+
+    @Column(name = "unidade", length = 30)
+    private String unidade;
+
     @Column(name = "valor_alvo", nullable = false)
     private Double valorAlvo;
 
@@ -57,6 +72,21 @@ public class MetaAcompanhamento {
 
     public String getTipoDado() { return tipoDado; }
     public void setTipoDado(String tipoDado) { this.tipoDado = tipoDado; }
+
+    public String getIndicador() { return indicador; }
+    public void setIndicador(String indicador) { this.indicador = indicador; }
+
+    public String getDirecao() { return direcao; }
+    public void setDirecao(String direcao) { this.direcao = direcao; }
+
+    public Double getValorInicial() { return valorInicial; }
+    public void setValorInicial(Double valorInicial) { this.valorInicial = valorInicial; }
+
+    public Double getValorAtual() { return valorAtual; }
+    public void setValorAtual(Double valorAtual) { this.valorAtual = valorAtual; }
+
+    public String getUnidade() { return unidade; }
+    public void setUnidade(String unidade) { this.unidade = unidade; }
 
     public Double getValorAlvo() { return valorAlvo; }
     public void setValorAlvo(Double valorAlvo) { this.valorAlvo = valorAlvo; }
