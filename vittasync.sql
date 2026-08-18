@@ -56,6 +56,8 @@ CREATE TABLE SinaisVitais (
     data_registro DATETIME NOT NULL,
     data_modificacao DATETIME,
 
+    INDEX idx_sinais_paciente_data (paciente_id, data_registro),
+
     CONSTRAINT fk_sinais_paciente
         FOREIGN KEY (paciente_id)
         REFERENCES Usuario(id)
@@ -76,6 +78,8 @@ CREATE TABLE Habitos (
     data_referencia DATE NOT NULL,
     data_registro DATETIME NOT NULL,
     data_modificacao DATETIME,
+
+    INDEX idx_habitos_paciente_data (paciente_id, data_referencia),
 
     CONSTRAINT fk_habitos_paciente
         FOREIGN KEY (paciente_id)
