@@ -40,7 +40,7 @@ export default function AppRoutes() {
                             path="/dashboard"
                             element={
                                 <PrivateRoute>
-                                    <PatientHub />
+                                    <Dashboard />
                                 </PrivateRoute>
                             }
                         />

@@ -18,6 +18,7 @@ const dictionaries = {
             language: "Idioma",
             theme: "Tema",
             group: "Grupo",
+            dashboard: "Dashboard",
             records: "Registros",
             information: "Informações",
             documents: "Documentos",
@@ -219,6 +220,7 @@ const dictionaries = {
             documentsDescription: "Documentação médica e arquivos relacionados.",
             dashboard: "Dashboard",
             dashboardDescription: "Visualizações e métricas futuras.",
+            goalsDescription: "Defina metas e acompanhe o progresso do paciente.",
             activityDescription: "Histórico de atividades e notificações do grupo.",
             generatedTitle: "Link e Código Gerados",
             codeTab: "Código",
@@ -233,6 +235,33 @@ const dictionaries = {
             leaveQuestion: "Deseja sair deste grupo?",
             removeQuestion: "Deseja remover este participante?",
             linkedAt: "Vinculado em"
+        },
+        dashboard: {
+            title: "Dashboard de saúde",
+            description: "Acompanhe a evolução dos sinais vitais e hábitos ao longo do tempo.",
+            patient: "Paciente",
+            noPatient: "Nenhum paciente",
+            selectPatient: "Selecione um paciente vinculado para visualizar o dashboard.",
+            category: "Categoria",
+            lastDays: "Últimos {days} dias",
+            latestValue: "Último valor do período",
+            loadError: "Não foi possível carregar os dados do dashboard.",
+            emptyPeriod: "Nenhum registro encontrado neste período.",
+            categories: {
+                todas: "Todas as categorias",
+                pressao: "Pressão arterial",
+                frequencia_cardiaca: "Frequência cardíaca",
+                frequencia_respiratoria: "Frequência respiratória",
+                temperatura: "Temperatura corporal",
+                saturacao: "Saturação de oxigênio",
+                peso: "Peso",
+                sono: "Sono",
+                exercicio: "Atividade física"
+            },
+            series: {
+                sistolica: "Sistólica",
+                diastolica: "Diastólica"
+            }
         },
         healthTracker: {
             title: "Acompanhamento de saúde",
@@ -615,6 +644,7 @@ const dictionaries = {
             language: "Language",
             theme: "Theme",
             group: "Group",
+            dashboard: "Dashboard",
             records: "Records",
             information: "Information",
             documents: "Documents",
@@ -815,6 +845,7 @@ const dictionaries = {
             documentsDescription: "Medical documentation and related files.",
             dashboard: "Dashboard",
             dashboardDescription: "Future visualizations and metrics.",
+            goalsDescription: "Set goals and track the patient's progress.",
             activityDescription: "Group activity history and notifications.",
             generatedTitle: "Generated Link and Code",
             codeTab: "Code",
@@ -829,6 +860,33 @@ const dictionaries = {
             leaveQuestion: "Do you want to leave this group?",
             removeQuestion: "Do you want to remove this participant?",
             linkedAt: "Linked on"
+        },
+        dashboard: {
+            title: "Health dashboard",
+            description: "Track changes in vital signs and habits over time.",
+            patient: "Patient",
+            noPatient: "No patient",
+            selectPatient: "Select a linked patient to view the dashboard.",
+            category: "Category",
+            lastDays: "Last {days} days",
+            latestValue: "Latest value in the period",
+            loadError: "Dashboard data could not be loaded.",
+            emptyPeriod: "No records were found in this period.",
+            categories: {
+                todas: "All categories",
+                pressao: "Blood pressure",
+                frequencia_cardiaca: "Heart rate",
+                frequencia_respiratoria: "Respiratory rate",
+                temperatura: "Body temperature",
+                saturacao: "Oxygen saturation",
+                peso: "Weight",
+                sono: "Sleep",
+                exercicio: "Physical activity"
+            },
+            series: {
+                sistolica: "Systolic",
+                diastolica: "Diastolic"
+            }
         },
         healthTracker: {
             title: "Health tracking",
@@ -1211,6 +1269,7 @@ const dictionaries = {
             language: "Idioma",
             theme: "Tema",
             group: "Grupo",
+            dashboard: "Dashboard",
             records: "Registros",
             information: "Información",
             documents: "Documentos",
@@ -1411,6 +1470,7 @@ const dictionaries = {
             documentsDescription: "Documentación médica y archivos relacionados.",
             dashboard: "Dashboard",
             dashboardDescription: "Visualizaciones y métricas futuras.",
+            goalsDescription: "Define metas y acompaña el progreso del paciente.",
             activityDescription: "Historial de actividades y notificaciones del grupo.",
             generatedTitle: "Link y Código Generados",
             codeTab: "Código",
@@ -1425,6 +1485,33 @@ const dictionaries = {
             leaveQuestion: "¿Deseas salir de este grupo?",
             removeQuestion: "¿Deseas eliminar este participante?",
             linkedAt: "Vinculado el"
+        },
+        dashboard: {
+            title: "Panel de salud",
+            description: "Acompaña la evolución de los signos vitales y hábitos a lo largo del tiempo.",
+            patient: "Paciente",
+            noPatient: "Ningún paciente",
+            selectPatient: "Selecciona un paciente vinculado para visualizar el panel.",
+            category: "Categoría",
+            lastDays: "Últimos {days} días",
+            latestValue: "Último valor del período",
+            loadError: "No fue posible cargar los datos del panel.",
+            emptyPeriod: "No se encontraron registros en este período.",
+            categories: {
+                todas: "Todas las categorías",
+                pressao: "Presión arterial",
+                frequencia_cardiaca: "Frecuencia cardíaca",
+                frequencia_respiratoria: "Frecuencia respiratoria",
+                temperatura: "Temperatura corporal",
+                saturacao: "Saturación de oxígeno",
+                peso: "Peso",
+                sono: "Sueño",
+                exercicio: "Actividad física"
+            },
+            series: {
+                sistolica: "Sistólica",
+                diastolica: "Diastólica"
+            }
         },
         healthTracker: {
             title: "Seguimiento de salud",

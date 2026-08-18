@@ -22,6 +22,7 @@ import LogoutIcon from "@mui/icons-material/Logout";
 import MonitorHeartOutlinedIcon from "@mui/icons-material/MonitorHeartOutlined";
 import ShowChartIcon from "@mui/icons-material/ShowChart";
 import FlagOutlinedIcon from "@mui/icons-material/FlagOutlined";
+import GroupsOutlinedIcon from "@mui/icons-material/GroupsOutlined";
 
 import { usePatient } from "../../context/PatientContext";
 import { logout } from "../../services/authService";
@@ -30,7 +31,8 @@ import { getUserByCpf } from "../../services/userService";
 import { useI18n } from "../../src/i18n";
 
 const menuItems = [
-    { labelKey: "nav.group", icon: <DashboardIcon />, path: "/dashboard" },
+    { labelKey: "nav.group", icon: <GroupsOutlinedIcon />, path: "/links" },
+    { labelKey: "nav.dashboard", icon: <DashboardIcon />, path: "/dashboard" },
     { labelKey: "nav.records", icon: <MonitorHeartOutlinedIcon />, path: "/health-tracker" },
     { labelKey: "nav.information", icon: <ShowChartIcon />, path: "/reports" },
     { labelKey: "nav.documents", icon: <FolderOutlinedIcon />, path: "/documents" },

@@ -1078,13 +1078,8 @@ export default function PatientHub() {
                             </Box>
 
                             <Box
-                                sx={{
-                                    ...panelSx,
-                                    padding: 3,
-                                    minWidth: 0,
-                                    minHeight: 160,
-                                    opacity: .6,
-                                }}
+                                onClick={() => navigate("/dashboard")}
+                                sx={moduleCardSx}
                             >
 
                                 <Typography
@@ -1102,6 +1097,30 @@ export default function PatientHub() {
                                     sx={supportingTextSx}
                                 >
                                     {t("patientHub.dashboardDescription")}
+                                </Typography>
+
+                            </Box>
+
+                            <Box
+                                onClick={() => navigate("/goals")}
+                                sx={moduleCardSx}
+                            >
+
+                                <Typography
+                                    variant="h6"
+                                    sx={{
+                                        fontWeight: 700,
+                                        mb: 1,
+                                        ...textWrapSx
+                                    }}
+                                >
+                                    {t("nav.goals")}
+                                </Typography>
+
+                                <Typography
+                                    sx={supportingTextSx}
+                                >
+                                    {t("patientHub.goalsDescription")}
                                 </Typography>
 
                             </Box>
