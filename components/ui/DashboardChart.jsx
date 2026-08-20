@@ -1,17 +1,17 @@
 import { Box, Paper, Typography } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
 import {
+    Area,
+    AreaChart,
     CartesianGrid,
     Legend,
-    Line,
-    LineChart,
     ResponsiveContainer,
     Tooltip,
     XAxis,
     YAxis
 } from "recharts";
 
-const lineColors = ["#16a34a", "#0ea5e9", "#d97706", "#7c3aed"];
+const chartColors = ["#3b82f6", "#22d3ee", "#8b5cf6", "#f59e0b", "#ec4899", "#6366f1"];
 
 function mergeSeries(series) {
     const pointsByDate = new Map();
@@ -31,6 +31,7 @@ function mergeSeries(series) {
 
 export default function DashboardChart({ category, title, seriesNames, locale, emptyText }) {
     const theme = useTheme();
+    const isDark = theme.palette.mode === "dark";
     const chartData = mergeSeries(category.series);
     const dateFormatter = new Intl.DateTimeFormat(locale, {
         day: "2-digit",
@@ -50,7 +51,8 @@ export default function DashboardChart({ category, title, seriesNames, locale, e
                 border: "1px solid",
                 borderColor: theme.vitta.border,
                 boxShadow: theme.vitta.shadow,
-                minWidth: 0
+                minWidth: 0,
+                backgroundColor: "background.paper"
             }}
         >
             <Box sx={{ mb: 2 }}>
@@ -77,18 +79,46 @@ export default function DashboardChart({ category, title, seriesNames, locale, e
             ) : (
                 <Box sx={{ width: "100%", height: 300, minWidth: 0 }}>
                     <ResponsiveContainer width="100%" height="100%">
-                        <LineChart data={chartData} margin={{ top: 10, right: 12, left: -12, bottom: 4 }}>
-                            <CartesianGrid strokeDasharray="4 4" stroke={theme.palette.divider} />
+                        <AreaChart data={chartData} margin={{ top: 10, right: 12, left: -12, bottom: 4 }}>
+                            <defs>
+                                {category.series.map((serie, index) => {
+                                    const color = chartColors[index % chartColors.length];
+
+                                    return (
+                                        <linearGradient
+                                            key={serie.codigo}
+                                            id={`dashboardGradient-${category.codigo}-${serie.codigo}`}
+                                            x1="0"
+                                            y1="0"
+                                            x2="0"
+                                            y2="1"
+                                        >
+                                            <stop offset="5%" stopColor={color} stopOpacity={isDark ? 0.32 : 0.26} />
+                                            <stop offset="95%" stopColor={color} stopOpacity={0.03} />
+                                        </linearGradient>
+                                    );
+                                })}
+                            </defs>
+
+                            <CartesianGrid
+                                strokeDasharray="2 3"
+                                stroke={isDark ? "rgba(148, 163, 184, 0.16)" : "rgba(15, 23, 42, 0.12)"}
+                                vertical
+                            />
                             <XAxis
                                 dataKey="data"
                                 tickFormatter={(value) => dateFormatter.format(new Date(value))}
-                                stroke={theme.palette.text.secondary}
-                                tick={{ fontSize: 12 }}
+                                stroke={isDark ? "rgba(226, 232, 240, 0.5)" : "rgba(71, 85, 105, 0.68)"}
+                                tick={{ fontSize: 12, fontWeight: 700 }}
+                                axisLine={{ stroke: isDark ? "rgba(148, 163, 184, 0.18)" : "rgba(15, 23, 42, 0.14)" }}
+                                tickLine={false}
                             />
                             <YAxis
-                                stroke={theme.palette.text.secondary}
-                                tick={{ fontSize: 12 }}
+                                stroke={isDark ? "rgba(226, 232, 240, 0.5)" : "rgba(71, 85, 105, 0.68)"}
+                                tick={{ fontSize: 12, fontWeight: 700 }}
                                 domain={["auto", "auto"]}
+                                axisLine={false}
+                                tickLine={false}
                             />
                             <Tooltip
                                 labelFormatter={(value) => fullDateFormatter.format(new Date(value))}
@@ -98,25 +128,48 @@ export default function DashboardChart({ category, title, seriesNames, locale, e
                                 ]}
                                 contentStyle={{
                                     background: theme.palette.background.paper,
-                                    border: `1px solid ${theme.vitta.borderStrong}`,
+                                    border: `1px solid ${isDark ? "rgba(148, 163, 184, 0.22)" : "rgba(15, 23, 42, 0.12)"}`,
                                     borderRadius: 8,
-                                    color: theme.palette.text.primary
+                                    color: theme.palette.text.primary,
+                                    boxShadow: theme.vitta.shadow
+                                }}
+                                labelStyle={{
+                                    color: theme.palette.text.primary,
+                                    fontWeight: 800
                                 }}
                             />
-                            <Legend formatter={(value) => seriesNames[value] || value} />
+                            <Legend
+                                formatter={(value) => seriesNames[value] || value}
+                                iconType="circle"
+                                wrapperStyle={{
+                                    paddingTop: 12,
+                                    fontWeight: 700
+                                }}
+                            />
                             {category.series.map((serie, index) => (
-                                <Line
+                                <Area
                                     key={serie.codigo}
                                     type="monotone"
                                     dataKey={serie.codigo}
-                                    stroke={lineColors[index % lineColors.length]}
+                                    stroke={chartColors[index % chartColors.length]}
+                                    fill={`url(#dashboardGradient-${category.codigo}-${serie.codigo})`}
                                     strokeWidth={3}
-                                    dot={{ r: 3 }}
-                                    activeDot={{ r: 6 }}
+                                    dot={{
+                                        r: 3,
+                                        strokeWidth: 2,
+                                        fill: theme.palette.background.paper,
+                                        stroke: chartColors[index % chartColors.length]
+                                    }}
+                                    activeDot={{
+                                        r: 6,
+                                        strokeWidth: 2,
+                                        fill: theme.palette.background.paper,
+                                        stroke: chartColors[index % chartColors.length]
+                                    }}
                                     connectNulls
                                 />
                             ))}
-                        </LineChart>
+                        </AreaChart>
                     </ResponsiveContainer>
                 </Box>
             )}
