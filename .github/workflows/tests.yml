@@ -1,10 +1,10 @@
-name: Run Unit Tests
+name: Rodar testes unitários back + front
 
 on:
   push:
-    branches: [ pipeline-test ]
+    branches: [ main ]
   pull_request:
-    branches: [ pipeline-test ]
+    branches: [ main ]
 
 jobs:
   test:
@@ -48,6 +48,6 @@ jobs:
       - name: Instalar dependências Node
         run: npm ci
 
-      - name: Rodar testes Maven com profile test
+      - name: Rodar testes (Maven profile test)
         run: mvn test -Dspring.profiles.active=test
-        working-directory: VittaSyncAPI   # ajuste se seu pom.xml estiver em subpasta
+        working-directory: VittaSyncAPI
