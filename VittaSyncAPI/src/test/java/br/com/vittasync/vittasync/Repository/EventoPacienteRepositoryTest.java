@@ -1,5 +1,6 @@
 package br.com.vittasync.vittasync.Repository;
 
+
 import br.com.vittasync.vittasync.Model.EventoPaciente;
 import br.com.vittasync.vittasync.Model.Usuario;
 import org.junit.jupiter.api.BeforeEach;
@@ -8,15 +9,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.transaction.annotation.Transactional;
-
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
-
 import static org.assertj.core.api.Assertions.assertThat;
+
 
 @DataJpaTest
 @Transactional
@@ -36,6 +36,7 @@ class EventoPacienteRepositoryTest {
     void limparBanco() {
         eventoVisualizacaoRepository.deleteAll();
         eventoPacienteRepository.deleteAll();
+        usuarioRepository.deleteAll();
     }
 
     private Usuario criarUsuario(String nome, String tipo) {
@@ -52,9 +53,10 @@ class EventoPacienteRepositoryTest {
         return usuarioRepository.save(u);
     }
 
-    private EventoPaciente criarEvento(Integer pacienteId, Usuario usuario, String tipo, String titulo, boolean visualizado, String prioridade, long offsetSegundos) {
+    private EventoPaciente criarEvento(Usuario paciente, Usuario usuario, String tipo, String titulo,
+                                       boolean visualizado, String prioridade, long offsetSegundos) {
         EventoPaciente e = new EventoPaciente();
-        e.setPacienteId(pacienteId);
+        e.setPacienteId(paciente.getId()); // usa o ID do paciente
         e.setUsuarioId(usuario.getId());
         e.setTipoEvento(tipo);
         e.setTitulo(titulo);
@@ -68,12 +70,12 @@ class EventoPacienteRepositoryTest {
     @Test
     void testFindByPacienteIdOrderByCriadoEmDesc() {
         Usuario usuario = criarUsuario("Usuário Teste", "MEDICO");
-        Integer pacienteId = 1;
+        Usuario paciente = criarUsuario("Paciente Teste", "PACIENTE");
 
-        criarEvento(pacienteId, usuario, "ALERTA", "Evento Antigo", true, "BAIXA", -3600);
-        criarEvento(pacienteId, usuario, "INFO", "Evento Recente", true, "ALTA", 0);
+        criarEvento(paciente, usuario, "ALERTA", "Evento Antigo", true, "BAIXA", -3600);
+        criarEvento(paciente, usuario, "INFO", "Evento Recente", true, "ALTA", 0);
 
-        List<EventoPaciente> eventos = eventoPacienteRepository.findByPacienteIdOrderByCriadoEmDesc(pacienteId);
+        List<EventoPaciente> eventos = eventoPacienteRepository.findByPacienteIdOrderByCriadoEmDesc(paciente.getId());
 
         assertThat(eventos).hasSize(2);
         assertThat(eventos.get(0).getTitulo()).isEqualTo("Evento Recente");
@@ -82,13 +84,13 @@ class EventoPacienteRepositoryTest {
     @Test
     void testCountByPacienteIdAndVisualizadoFalse() {
         Usuario usuario = criarUsuario("Usuário 2", "MEDICO");
-        Integer pacienteId = 2;
+        Usuario paciente = criarUsuario("Paciente 2", "PACIENTE");
 
-        criarEvento(pacienteId, usuario, "ALERTA", "Evento 1", false, "MEDIA", 0);
-        criarEvento(pacienteId, usuario, "INFO", "Evento 2", true, "BAIXA", 0);
-        criarEvento(pacienteId, usuario, "INFO", "Evento 3", false, "ALTA", 0);
+        criarEvento(paciente, usuario, "ALERTA", "Evento 1", false, "MEDIA", 0);
+        criarEvento(paciente, usuario, "INFO", "Evento 2", true, "BAIXA", 0);
+        criarEvento(paciente, usuario, "INFO", "Evento 3", false, "ALTA", 0);
 
-        Long count = eventoPacienteRepository.countByPacienteIdAndVisualizadoFalse(pacienteId);
+        Long count = eventoPacienteRepository.countByPacienteIdAndVisualizadoFalse(paciente.getId());
 
         assertThat(count).isEqualTo(2);
     }
@@ -96,13 +98,14 @@ class EventoPacienteRepositoryTest {
     @Test
     void testFindByPacienteIdAndVisualizadoFalse() {
         Usuario usuario = criarUsuario("Usuário 3", "MEDICO");
-        Integer pacienteId = 3;
+        Usuario paciente = criarUsuario("Paciente 3", "PACIENTE");
 
-        criarEvento(pacienteId, usuario, "ALERTA", "Evento 1", false, "MEDIA", 0);
-        criarEvento(pacienteId, usuario, "INFO", "Evento 2", true, "BAIXA", 0);
-        criarEvento(pacienteId, usuario, "INFO", "Evento 3", false, "ALTA", 0);
+        criarEvento(paciente, usuario, "ALERTA", "Evento 1", false, "MEDIA", 0);
+        criarEvento(paciente, usuario, "INFO", "Evento 2", true, "BAIXA", 0);
+        criarEvento(paciente, usuario, "INFO", "Evento 3", false, "ALTA", 0);
 
-        List<EventoPaciente> eventosNaoVisualizados = eventoPacienteRepository.findByPacienteIdAndVisualizadoFalse(pacienteId);
+        List<EventoPaciente> eventosNaoVisualizados =
+                eventoPacienteRepository.findByPacienteIdAndVisualizadoFalse(paciente.getId());
 
         assertThat(eventosNaoVisualizados).hasSize(2);
         assertThat(eventosNaoVisualizados.get(0).getVisualizado()).isFalse();

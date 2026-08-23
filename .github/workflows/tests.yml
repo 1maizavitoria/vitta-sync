@@ -1,0 +1,32 @@
+name: Rodar testes unitários
+
+on:
+  push:
+    branches: [ pipeline-test ]
+  pull_request:
+    branches: [ pipeline-test ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    env:
+      TWILIO_ACCOUNT_SID: "SK1bd328b84ed4a1fa4acea6c25db355e6X"
+      TWILIO_AUTH_TOKEN: "48P4hgCpbv63Mpmd9Xvb2uDyIRImIeF7X"
+      TWILIO_PHONE_NUMBER: "+15075858369"
+
+    steps:
+      - name: Checkout código
+        uses: actions/checkout@v4
+
+      - name: Configurar Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'npm'
+
+      - name: Instalar dependências
+        run: npm ci
+
+      - name: Rodar testes
+        run: npm run test-all

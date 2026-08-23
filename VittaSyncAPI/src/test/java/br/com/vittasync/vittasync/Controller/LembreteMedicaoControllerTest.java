@@ -19,7 +19,8 @@ import java.time.LocalTime;
 import java.util.Optional;
 
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -43,12 +44,13 @@ class LembreteMedicaoControllerTest {
         lembrete.setDiasSemana("SEGUNDA");
         lembrete.setHorario(LocalTime.of(8,0));
         lembrete.setAtivo(true);
+        lembrete.setEnviarEmail(true);
+        lembrete.setEnviarSms(false);
 
         when(jwtService.extrairCpf("token")).thenReturn("123");
         when(usuarioService.searchByCpf("123")).thenReturn(usuario);
-        when(usuarioService.searchByCpf("123")).thenReturn(usuario);
         when(permissaoService.podeEditarPaciente(anyInt(), anyInt())).thenReturn(true);
-        when(service.salvarSubstituir(any(LembreteMedicao.class))).thenReturn(lembrete);
+        when(service.salvarSubstituir(any(LembreteMedicao.class), anyInt())).thenReturn(lembrete);
 
         mockMvc.perform(post("/lembretes/registrar/123")
                         .header("Authorization","Bearer token")
@@ -86,7 +88,7 @@ class LembreteMedicaoControllerTest {
         when(jwtService.extrairCpf("token")).thenReturn("123");
         when(usuarioService.searchByCpf("123")).thenReturn(usuario);
         when(permissaoService.podeEditarPaciente(anyInt(), anyInt())).thenReturn(true);
-        when(service.ativar(usuario)).thenReturn(Optional.of(lembrete));
+        when(service.ativar(any(Usuario.class), anyInt())).thenReturn(Optional.of(lembrete));
 
         mockMvc.perform(put("/lembretes/ativar/123")
                         .header("Authorization","Bearer token"))
@@ -103,7 +105,7 @@ class LembreteMedicaoControllerTest {
         when(jwtService.extrairCpf("token")).thenReturn("123");
         when(usuarioService.searchByCpf("123")).thenReturn(usuario);
         when(permissaoService.podeEditarPaciente(anyInt(), anyInt())).thenReturn(true);
-        when(service.desativar(usuario)).thenReturn(Optional.of(lembrete));
+        when(service.desativar(any(Usuario.class), anyInt())).thenReturn(Optional.of(lembrete));
 
         mockMvc.perform(put("/lembretes/desativar/123")
                         .header("Authorization","Bearer token"))
