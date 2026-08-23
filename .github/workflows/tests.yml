@@ -10,6 +10,20 @@ jobs:
   test:
     runs-on: ubuntu-latest
 
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: vitta6464
+          MYSQL_DATABASE: vittasync
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping -h localhost"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=3
+
     env:
       TWILIO_ACCOUNT_SID: "SK1bd328b84ed4a1fa4acea6c25db355e6X"
       TWILIO_AUTH_TOKEN: "48P4hgCpbv63Mpmd9Xvb2uDyIRImIeF7X"
@@ -31,8 +45,8 @@ jobs:
           node-version: 24
           cache: 'npm'
 
-      - name: Instalar dependências
+      - name: Instalar dependências Node
         run: npm ci
 
-      - name: Rodar testes
-        run: npm run test-all
+      - name: Rodar testes Maven com profile test
+        run: mvn test -Dspring.profiles.active=test
