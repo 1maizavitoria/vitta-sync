@@ -50,3 +50,4 @@ jobs:
 
       - name: Rodar testes Maven com profile test
         run: mvn test -Dspring.profiles.active=test
+        working-directory: VittaSyncAPI   # ajuste se seu pom.xml estiver em subpasta
