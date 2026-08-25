@@ -108,6 +108,80 @@ export default function Sidebar({ open, setOpen }) {
         saude: t("userTypes.saude")
     }[type?.toLowerCase()] || type || t("nav.userType"));
 
+    const getTypeVisual = (type) => ({
+        paciente: {
+            color: "#34d399",
+            background: "rgba(16, 185, 129, 0.2)",
+            border: "rgba(52, 211, 153, 0.36)",
+            activeText: "#d1fae5",
+            activeBackground: isDark
+                ? "linear-gradient(135deg, rgba(20, 184, 166, 0.22) 0%, rgba(6, 95, 70, 0.42) 100%)"
+                : "linear-gradient(135deg, rgba(20, 184, 166, 0.22) 0%, rgba(6, 95, 70, 0.38) 100%)",
+            activeBorder: "rgba(45, 212, 191, 0.28)",
+            passiveText: "rgba(209,250,229,0.76)",
+            passiveBackground: "rgba(6, 24, 20, 0.42)",
+            passiveBorder: "rgba(45, 212, 191, 0.12)",
+            hoverBackground: "rgba(20, 184, 166, 0.12)",
+            panelBackground: "rgba(6, 24, 20, 0.5)",
+            paperBorder: "rgba(45, 212, 191, 0.14)",
+            sidebarBackground: isDark
+                ? "radial-gradient(circle at 18% 7%, rgba(20, 184, 166, 0.18) 0%, transparent 28%), radial-gradient(circle at 88% 18%, rgba(14, 165, 233, 0.1) 0%, transparent 34%), linear-gradient(180deg, #06130f 0%, #071812 42%, #07111f 100%)"
+                : "radial-gradient(circle at 18% 7%, rgba(20, 184, 166, 0.16) 0%, transparent 28%), radial-gradient(circle at 88% 18%, rgba(14, 165, 233, 0.08) 0%, transparent 34%), linear-gradient(180deg, #071912 0%, #082018 46%, #071426 100%)"
+        },
+        responsavel: {
+            color: "#38bdf8",
+            background: "rgba(14, 165, 233, 0.2)",
+            border: "rgba(56, 189, 248, 0.36)",
+            activeText: "#e0f2fe",
+            activeBackground: isDark
+                ? "linear-gradient(135deg, rgba(14, 165, 233, 0.24) 0%, rgba(30, 64, 175, 0.42) 100%)"
+                : "linear-gradient(135deg, rgba(14, 165, 233, 0.22) 0%, rgba(30, 64, 175, 0.36) 100%)",
+            activeBorder: "rgba(56, 189, 248, 0.3)",
+            passiveText: "rgba(224,242,254,0.76)",
+            passiveBackground: "rgba(8, 20, 36, 0.46)",
+            passiveBorder: "rgba(56, 189, 248, 0.12)",
+            hoverBackground: "rgba(14, 165, 233, 0.13)",
+            panelBackground: "rgba(8, 20, 36, 0.52)",
+            paperBorder: "rgba(56, 189, 248, 0.15)",
+            sidebarBackground: isDark
+                ? "radial-gradient(circle at 18% 7%, rgba(14, 165, 233, 0.2) 0%, transparent 28%), radial-gradient(circle at 88% 18%, rgba(59, 130, 246, 0.13) 0%, transparent 34%), linear-gradient(180deg, #06111f 0%, #071827 45%, #081020 100%)"
+                : "radial-gradient(circle at 18% 7%, rgba(14, 165, 233, 0.18) 0%, transparent 28%), radial-gradient(circle at 88% 18%, rgba(59, 130, 246, 0.11) 0%, transparent 34%), linear-gradient(180deg, #071522 0%, #081b2d 45%, #081122 100%)"
+        },
+        saude: {
+            color: "#c084fc",
+            background: "rgba(168, 85, 247, 0.2)",
+            border: "rgba(192, 132, 252, 0.36)",
+            activeText: "#f3e8ff",
+            activeBackground: isDark
+                ? "linear-gradient(135deg, rgba(168, 85, 247, 0.24) 0%, rgba(88, 28, 135, 0.44) 100%)"
+                : "linear-gradient(135deg, rgba(168, 85, 247, 0.22) 0%, rgba(88, 28, 135, 0.38) 100%)",
+            activeBorder: "rgba(192, 132, 252, 0.3)",
+            passiveText: "rgba(243,232,255,0.76)",
+            passiveBackground: "rgba(24, 12, 36, 0.48)",
+            passiveBorder: "rgba(192, 132, 252, 0.12)",
+            hoverBackground: "rgba(168, 85, 247, 0.13)",
+            panelBackground: "rgba(24, 12, 36, 0.54)",
+            paperBorder: "rgba(192, 132, 252, 0.15)",
+            sidebarBackground: isDark
+                ? "radial-gradient(circle at 18% 7%, rgba(168, 85, 247, 0.2) 0%, transparent 28%), radial-gradient(circle at 88% 18%, rgba(124, 58, 237, 0.14) 0%, transparent 34%), linear-gradient(180deg, #14091f 0%, #190d2a 45%, #0f1024 100%)"
+                : "radial-gradient(circle at 18% 7%, rgba(168, 85, 247, 0.18) 0%, transparent 28%), radial-gradient(circle at 88% 18%, rgba(124, 58, 237, 0.12) 0%, transparent 34%), linear-gradient(180deg, #150b22 0%, #1a0f2c 45%, #101126 100%)"
+        }
+    }[type?.toLowerCase()] || {
+        color: "#a7f3d0",
+        background: "rgba(167, 243, 208, 0.14)",
+        border: "rgba(167, 243, 208, 0.24)",
+        activeText: "#d1fae5",
+        activeBackground: "linear-gradient(135deg, rgba(20, 184, 166, 0.22) 0%, rgba(6, 95, 70, 0.42) 100%)",
+        activeBorder: "rgba(45, 212, 191, 0.28)",
+        passiveText: "rgba(209,250,229,0.76)",
+        passiveBackground: "rgba(6, 24, 20, 0.42)",
+        passiveBorder: "rgba(45, 212, 191, 0.12)",
+        hoverBackground: "rgba(20, 184, 166, 0.12)",
+        panelBackground: "rgba(6, 24, 20, 0.5)",
+        paperBorder: "rgba(45, 212, 191, 0.14)",
+        sidebarBackground: "radial-gradient(circle at 18% 7%, rgba(20, 184, 166, 0.18) 0%, transparent 28%), radial-gradient(circle at 88% 18%, rgba(14, 165, 233, 0.1) 0%, transparent 34%), linear-gradient(180deg, #06130f 0%, #071812 42%, #07111f 100%)"
+    });
+
     const drawerWidth = isMobile
         ? drawerSizes.open
         : open
@@ -233,14 +307,16 @@ export default function Sidebar({ open, setOpen }) {
         whiteSpace: "nowrap"
     };
 
+    const sidebarVisual = getTypeVisual(userResponse.tipo || userType);
+
     const activeItemSx = {
-        color: isDark ? "#ecfdf3" : "#102014",
-        background: isDark
-            ? "linear-gradient(135deg, rgba(34, 197, 94, 0.22) 0%, rgba(14, 165, 233, 0.16) 100%)"
-            : "linear-gradient(135deg, #dcfce7 0%, #f0fdf4 100%)",
-        borderColor: isDark ? "rgba(220, 252, 231, 0.22)" : "rgba(220, 252, 231, 0.88)",
-        boxShadow: isDark ? "0 12px 24px rgba(0, 0, 0, 0.24)" : "0 12px 24px rgba(20, 83, 45, 0.18)"
+        color: sidebarVisual.activeText,
+        background: sidebarVisual.activeBackground,
+        borderColor: sidebarVisual.activeBorder,
+        boxShadow: "0 14px 34px rgba(3, 31, 25, 0.32)"
     };
+
+    const sidebarBackground = sidebarVisual.sidebarBackground;
 
     return (
         <Drawer
@@ -283,10 +359,9 @@ export default function Sidebar({ open, setOpen }) {
                     overflowX: "hidden",
                     boxSizing: "border-box",
                     borderRight: "1px solid",
-                    borderColor: isDark ? vitta.border : "rgba(220, 252, 231, 0.18)",
-                    background: isDark
-                        ? "linear-gradient(180deg, #071a12 0%, #0f2418 54%, #081f23 100%)"
-                        : "linear-gradient(180deg, #14532d 0%, #166534 52%, #0f3f2a 100%)",
+                    borderColor: sidebarVisual.paperBorder,
+                    background: sidebarBackground,
+                    backgroundBlendMode: "screen, normal, normal",
                     color: "#ffffff",
                 },
             }}
@@ -320,6 +395,7 @@ export default function Sidebar({ open, setOpen }) {
 
                         {patients.map((patient) => {
                             const isSelected = selectedPatient?.id === patient.id;
+                            const patientVisual = getTypeVisual("paciente");
 
                             return (
                                 <Tooltip key={patient.id} title={!isExpanded ? patient.nome : ""} placement="right">
@@ -344,16 +420,16 @@ export default function Sidebar({ open, setOpen }) {
                                             minWidth: isExpanded ? "100%" : 48,
                                             maxWidth: isExpanded ? "100%" : 48,
                                             height: 52,
-                                            color: isSelected ? activeItemSx.color : "rgba(255,255,255,0.82)",
-                                            background: isSelected ? activeItemSx.background : "rgba(255,255,255,0.06)",
-                                            border: "1px solid rgba(255,255,255,0.12)",
+                                            color: isSelected ? activeItemSx.color : sidebarVisual.passiveText,
+                                            background: isSelected ? activeItemSx.background : sidebarVisual.passiveBackground,
+                                            border: `1px solid ${sidebarVisual.passiveBorder}`,
                                             boxShadow: isSelected ? activeItemSx.boxShadow : "none",
                                             fontWeight: 700,
                                             transition: "background .18s ease, border-color .18s ease, color .18s ease, box-shadow .18s ease, transform .18s ease",
                                             "&:hover": {
                                                 background: isSelected
                                                     ? activeItemSx.background
-                                                    : "rgba(255,255,255,0.12)",
+                                                    : sidebarVisual.hoverBackground,
                                                 transform: "translateY(-1px)",
                                             },
                                         }}
@@ -364,10 +440,11 @@ export default function Sidebar({ open, setOpen }) {
                                                 height: isExpanded ? 32 : 34,
                                                 mr: isExpanded ? 1.25 : 0,
                                                 flexShrink: 0,
-                                                bgcolor: isSelected ? "primary.main" : "rgba(255,255,255,0.14)",
-                                                color: "#ffffff",
+                                                bgcolor: isSelected ? patientVisual.background : "rgba(6, 24, 20, 0.58)",
+                                                color: patientVisual.color,
                                                 fontSize: 13,
-                                                fontWeight: 800
+                                                fontWeight: 800,
+                                                border: `1px solid ${patientVisual.border}`
                                             }}
                                         >
                                             {getIniciais(patient.nome)}
@@ -450,14 +527,14 @@ export default function Sidebar({ open, setOpen }) {
                                         minHeight: 50,
                                         justifyContent: isExpanded ? "initial" : "center",
                                         px: isExpanded ? 1.5 : 1.25,
-                                        color: isActive ? activeItemSx.color : "rgba(255,255,255,0.82)",
-                                        background: isActive ? activeItemSx.background : "rgba(255,255,255,0.06)",
+                                        color: isActive ? activeItemSx.color : sidebarVisual.passiveText,
+                                        background: isActive ? activeItemSx.background : sidebarVisual.passiveBackground,
                                         border: "1px solid",
-                                        borderColor: isActive ? activeItemSx.borderColor : "rgba(255,255,255,0.12)",
+                                        borderColor: isActive ? activeItemSx.borderColor : sidebarVisual.passiveBorder,
                                         boxShadow: isActive ? activeItemSx.boxShadow : "none",
                                         transition: "background .18s ease, border-color .18s ease, color .18s ease, box-shadow .18s ease, transform .18s ease",
                                         "&:hover": {
-                                            background: isActive ? activeItemSx.background : "rgba(255,255,255,0.12)",
+                                            background: isActive ? activeItemSx.background : sidebarVisual.hoverBackground,
                                             transform: "translateY(-1px)",
                                         },
                                     }}
@@ -494,27 +571,27 @@ export default function Sidebar({ open, setOpen }) {
                         justifyContent: isExpanded ? "space-between" : "center",
                         borderRadius: 2,
                         p: isExpanded ? 1 : 0,
-                        bgcolor: isExpanded ? "rgba(255,255,255,0.08)" : "transparent",
-                        border: isExpanded ? "1px solid rgba(255,255,255,0.12)" : "none",
+                        bgcolor: isExpanded ? sidebarVisual.panelBackground : "transparent",
+                        border: isExpanded ? `1px solid ${sidebarVisual.passiveBorder}` : "none",
                     }}
                 >
                     <Tooltip title={t("nav.openProfile")}>
                         <Avatar
                             onClick={handleOpenProfile}
                             sx={{
-                                bgcolor: "rgba(255,255,255,0.16)",
-                                color: "#FFFFFF",
+                                bgcolor: getTypeVisual(userResponse.tipo).background,
+                                color: getTypeVisual(userResponse.tipo).color,
                                 width: isExpanded ? 44 : 42,
                                 height: isExpanded ? 44 : 42,
                                 fontWeight: 800,
                                 fontSize: isExpanded ? "0.95rem" : "0.9rem",
-                                border: "1px solid rgba(255,255,255,0.18)",
+                                border: `1px solid ${getTypeVisual(userResponse.tipo).border}`,
                                 boxShadow: "0 10px 20px rgba(0,0,0,0.16)",
                                 cursor: "pointer",
                                 transition: "background-color .18s ease, border-color .18s ease, box-shadow .18s ease, transform .18s ease",
                                 "&:hover": {
                                     transform: "scale(1.04)",
-                                    bgcolor: "rgba(255,255,255,0.22)",
+                                    bgcolor: getTypeVisual(userResponse.tipo).background,
                                 },
                             }}
                         >
@@ -537,8 +614,9 @@ export default function Sidebar({ open, setOpen }) {
 
                             <Typography
                                 sx={{
-                                    color: "rgba(255,255,255,0.68)",
+                                    color: getTypeVisual(userResponse.tipo).color,
                                     fontSize: 12,
+                                    fontWeight: 800,
                                     overflow: "hidden",
                                     whiteSpace: "nowrap",
                                     textOverflow: "ellipsis"

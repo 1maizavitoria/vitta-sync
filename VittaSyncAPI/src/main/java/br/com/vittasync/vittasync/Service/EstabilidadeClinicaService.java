@@ -1,0 +1,162 @@
+package br.com.vittasync.vittasync.Service;
+
+
+import br.com.vittasync.vittasync.DTO.EstabilidadeClinicaDTO;
+import br.com.vittasync.vittasync.Model.SinaisVitais;
+import br.com.vittasync.vittasync.Model.Habitos;
+import br.com.vittasync.vittasync.Repository.EstabilidadeClinicaRepository;
+import org.springframework.stereotype.Service;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+
+
+@Service
+public class EstabilidadeClinicaService {
+
+    private final EstabilidadeClinicaRepository estabilidadeClinicaRepository;
+
+    private static final int minimoRegistros = 3;
+    private static final int sonoMinimoSaudavel = 7;
+    private static final int sonoMaximoSaudavel = 9;
+    private static final int exercicioMinimoSaudavel = 60;
+    private static final int semExercicioCriticoDias = 10;
+
+    public EstabilidadeClinicaService(EstabilidadeClinicaRepository estabilidadeClinicaRepository) {
+        this.estabilidadeClinicaRepository = estabilidadeClinicaRepository;
+    }
+
+    public List<EstabilidadeClinicaDTO> calcularIndices(Integer pacienteId, List<SinaisVitais> sinais, List<Habitos> habitos) {
+        List<EstabilidadeClinicaDTO> indices = new ArrayList<>();
+        if (sinais.size() < minimoRegistros && habitos.size() < minimoRegistros) {
+            indices.add(new EstabilidadeClinicaDTO("geral", null, "n/a", 1.0, LocalDateTime.now()));
+            return indices;
+        }
+
+
+        indices.add(calcularIndiceSinal("fc_bpm", sinais.stream().map(SinaisVitais::getFcBpm).toList(), 1.0));
+        indices.add(calcularIndiceSinal("fr_rpm", sinais.stream().map(SinaisVitais::getFrRpm).toList(), 1.0));
+        indices.add(calcularIndiceSinal("pa_sistolica", sinais.stream().map(SinaisVitais::getPaSistolica).toList(), 1.0));
+        indices.add(calcularIndiceSinal("pa_diastolica", sinais.stream().map(SinaisVitais::getPaDiastolica).toList(), 1.0));
+        indices.add(calcularIndiceSinal("temp_celcius", sinais.stream().map(SinaisVitais::getTempCelcius).toList(), 1.0));
+        indices.add(calcularIndiceSinal("spo2", sinais.stream().map(SinaisVitais::getSpo2Porcento).toList(), 1.0));
+        indices.add(calcularIndiceSinal("peso", sinais.stream().map(SinaisVitais::getPeso).toList(), 1.0));
+
+        indices.add(calcularIndiceSono(habitos));
+        indices.add(calcularIndiceExercicio(habitos));
+
+        double somaPesos = indices.stream()
+                .filter(i -> i.getIndice() != null)
+                .mapToDouble(EstabilidadeClinicaDTO::getPeso)
+                .sum();
+
+        double somaValores = indices.stream()
+                .filter(i -> i.getIndice() != null)
+                .mapToDouble(i -> i.getIndice() * i.getPeso())
+                .sum();
+
+        Integer indiceGeral = somaPesos > 0 ? (int) Math.round(somaValores / somaPesos) : null;
+
+        indices.add(new EstabilidadeClinicaDTO(
+                "geral",
+                indiceGeral,
+                classificar(indiceGeral),
+                1.0,
+                LocalDateTime.now()
+        ));
+
+        return indices;
+    }
+
+    private EstabilidadeClinicaDTO calcularIndiceSinal(String tipo, List<? extends Number> valores, double peso) {
+        if (valores.stream().filter(v -> v != null).count() < minimoRegistros) {
+            return new EstabilidadeClinicaDTO(tipo, null, "n/a", peso, LocalDateTime.now());
+        }
+
+        double media = valores.stream()
+                .filter(v -> v != null)
+                .mapToDouble(Number::doubleValue)
+                .average()
+                .orElse(Double.NaN);
+
+        if (Double.isNaN(media)) {
+            return new EstabilidadeClinicaDTO(tipo, null, "n/a", peso, LocalDateTime.now());
+        }
+
+        int indice = normalizar(media, tipo);
+        return new EstabilidadeClinicaDTO(tipo, indice, classificar(indice), peso, LocalDateTime.now());
+    }
+
+    private EstabilidadeClinicaDTO calcularIndiceSono(List<Habitos> habitos) {
+        if (habitos.stream().filter(h -> h.getHorasSono() != null).count() < minimoRegistros) {
+            return new EstabilidadeClinicaDTO("sono", null, "n/a", 1.0, LocalDateTime.now());
+        }
+
+        double mediaSono = habitos.stream()
+                .filter(h -> h.getHorasSono() != null)
+                .mapToDouble(Habitos::getHorasSono)
+                .average()
+                .orElse(Double.NaN);
+
+        if (Double.isNaN(mediaSono)) {
+            return new EstabilidadeClinicaDTO("sono", null, "n/a", 1.0, LocalDateTime.now());
+        }
+
+        int indice = (mediaSono >= sonoMinimoSaudavel && mediaSono <= sonoMaximoSaudavel) ? 9 :
+                (mediaSono < 5 || mediaSono > 11) ? 3 : 6;
+
+        return new EstabilidadeClinicaDTO("sono", indice, classificar(indice), 1.0, LocalDateTime.now());
+    }
+
+    private EstabilidadeClinicaDTO calcularIndiceExercicio(List<Habitos> habitos) {
+        if (habitos.stream().filter(h -> h.getMinutosExercicio() != null).count() < minimoRegistros) {
+            return new EstabilidadeClinicaDTO("exercicio", null, "n/a", 1.0, LocalDateTime.now());
+        }
+
+        long diasSemExercicio = habitos.stream()
+                .filter(h -> h.getMinutosExercicio() != null)
+                .filter(h -> h.getMinutosExercicio() == 0)
+                .count();
+
+        double mediaExercicio = habitos.stream()
+                .filter(h -> h.getMinutosExercicio() != null)
+                .mapToDouble(Habitos::getMinutosExercicio)
+                .average()
+                .orElse(Double.NaN);
+
+        if (Double.isNaN(mediaExercicio)) {
+            return new EstabilidadeClinicaDTO("exercicio", null, "n/a", 1.0, LocalDateTime.now());
+        }
+
+        int indice;
+        if (diasSemExercicio >= semExercicioCriticoDias) {
+            indice = 3; // crítico
+        } else if (mediaExercicio >= exercicioMinimoSaudavel) {
+            indice = 9; // saudável
+        } else {
+            indice = 6; // moderado
+        }
+
+        return new EstabilidadeClinicaDTO("exercicio", indice, classificar(indice), 1.0, LocalDateTime.now());
+    }
+
+    private int normalizar(double valor, String tipo) {
+        return switch (tipo) {
+            case "fc_bpm" -> (valor >= 60 && valor <= 100) ? 9 : (valor < 50 || valor > 120) ? 3 : 6;
+            case "fr_rpm" -> (valor >= 12 && valor <= 20) ? 9 : (valor < 8 || valor > 30) ? 3 : 6;
+            case "pa_sistolica" -> (valor >= 90 && valor <= 120) ? 9 : (valor < 80 || valor > 140) ? 3 : 6;
+            case "pa_diastolica" -> (valor >= 60 && valor <= 80) ? 9 : (valor < 50 || valor > 100) ? 3 : 6;
+            case "temp_celcius" -> (valor >= 36 && valor <= 37.5) ? 9 : (valor < 35 || valor > 39) ? 3 : 6;
+            case "spo2" -> (valor >= 95) ? 10 : (valor < 90) ? 3 : 6;
+            case "peso" -> 7;
+            default -> 5;
+        };
+    }
+
+    private String classificar(Integer indice) {
+        if (indice == null) return "n/a";
+        if (indice >= 8) return "saudavel";
+        if (indice >= 5) return "moderado";
+        return "critico";
+    }
+}

@@ -83,8 +83,8 @@ public class DashboardService {
             }
         }
 
-        List<EstabilidadeClinicaDTO> estabilidadeClinica =
-                estabilidadeClinicaService.calcularIndices(paciente.getId(), sinais, habitos);
+        // Novo: calcular estabilidade clínica
+        List<EstabilidadeClinicaDTO> estabilidadeClinica = estabilidadeClinicaService.calcularIndices(paciente.getId(), sinais);
 
         return new DashboardResponseDTO(
                 paciente.getCpf(),
