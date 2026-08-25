@@ -1,4 +1,4 @@
-DROP DATABASE vittasync;
+DROP DATABASE IF EXISTS vittasync;
 CREATE DATABASE vittasync;
 USE vittasync;
 
@@ -55,18 +55,9 @@ CREATE TABLE SinaisVitais (
     peso DOUBLE,
     data_registro DATETIME NOT NULL,
     data_modificacao DATETIME,
-
     INDEX idx_sinais_paciente_data (paciente_id, data_registro),
-
-    CONSTRAINT fk_sinais_paciente
-        FOREIGN KEY (paciente_id)
-        REFERENCES Usuario(id)
-        ON DELETE CASCADE,
-
-    CONSTRAINT fk_sinais_registrado_por
-        FOREIGN KEY (registrado_por_usuario_id)
-        REFERENCES Usuario(id)
-        ON DELETE SET NULL
+    CONSTRAINT fk_sinais_paciente FOREIGN KEY (paciente_id) REFERENCES Usuario(id) ON DELETE CASCADE,
+    CONSTRAINT fk_sinais_registrado_por FOREIGN KEY (registrado_por_usuario_id) REFERENCES Usuario(id) ON DELETE SET NULL
 );
 
 CREATE TABLE Habitos (
@@ -78,18 +69,9 @@ CREATE TABLE Habitos (
     data_referencia DATE NOT NULL,
     data_registro DATETIME NOT NULL,
     data_modificacao DATETIME,
-
     INDEX idx_habitos_paciente_data (paciente_id, data_referencia),
-
-    CONSTRAINT fk_habitos_paciente
-        FOREIGN KEY (paciente_id)
-        REFERENCES Usuario(id)
-        ON DELETE CASCADE,
-
-    CONSTRAINT fk_habitos_registrado_por
-        FOREIGN KEY (registrado_por_usuario_id)
-        REFERENCES Usuario(id)
-        ON DELETE SET NULL
+    CONSTRAINT fk_habitos_paciente FOREIGN KEY (paciente_id) REFERENCES Usuario(id) ON DELETE CASCADE,
+    CONSTRAINT fk_habitos_registrado_por FOREIGN KEY (registrado_por_usuario_id) REFERENCES Usuario(id) ON DELETE SET NULL
 );
 
 CREATE TABLE LembreteMedicao (
@@ -100,11 +82,7 @@ CREATE TABLE LembreteMedicao (
     enviar_email BOOLEAN DEFAULT TRUE,
     enviar_sms BOOLEAN DEFAULT FALSE,
     ativo BOOLEAN NOT NULL DEFAULT TRUE,
-
-    CONSTRAINT fk_usuario_lembrete
-        FOREIGN KEY (usuario_id)
-        REFERENCES Usuario(id)
-        ON DELETE CASCADE
+    CONSTRAINT fk_usuario_lembrete FOREIGN KEY (usuario_id) REFERENCES Usuario(id) ON DELETE CASCADE
 );
 
 CREATE TABLE DiarioSintomas (
@@ -115,9 +93,7 @@ CREATE TABLE DiarioSintomas (
     data_referencia DATE NOT NULL,
     data_registro TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     data_modificacao TIMESTAMP NULL,
-
-    FOREIGN KEY (paciente_id)
-        REFERENCES Usuario(id)
+    FOREIGN KEY (paciente_id) REFERENCES Usuario(id)
 );
 
 CREATE TABLE Vinculo (
@@ -127,14 +103,9 @@ CREATE TABLE Vinculo (
     tipo VARCHAR(20) NOT NULL,
     funcao VARCHAR(50),
     criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-
     UNIQUE (paciente_id, usuario_id),
-
-    FOREIGN KEY (paciente_id)
-        REFERENCES Usuario(id),
-
-    FOREIGN KEY (usuario_id)
-        REFERENCES Usuario(id)
+    FOREIGN KEY (paciente_id) REFERENCES Usuario(id),
+    FOREIGN KEY (usuario_id) REFERENCES Usuario(id)
 );
 
 CREATE TABLE ConviteVinculo (
@@ -144,10 +115,7 @@ CREATE TABLE ConviteVinculo (
     expira_em TIMESTAMP NOT NULL,
     ativo BOOLEAN DEFAULT TRUE,
     criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-
-    FOREIGN KEY (paciente_id)
-        REFERENCES Usuario(id)
-        ON DELETE CASCADE
+    FOREIGN KEY (paciente_id) REFERENCES Usuario(id) ON DELETE CASCADE
 );
 
 CREATE TABLE ContatoEmergencia (
@@ -157,11 +125,7 @@ CREATE TABLE ContatoEmergencia (
     telefone VARCHAR(15) NOT NULL,
     data_registro DATETIME DEFAULT CURRENT_TIMESTAMP,
     data_modificacao DATETIME NULL,
-
-    CONSTRAINT fk_contato_paciente
-        FOREIGN KEY (paciente_id)
-        REFERENCES Usuario(id)
-        ON DELETE CASCADE
+    CONSTRAINT fk_contato_paciente FOREIGN KEY (paciente_id) REFERENCES Usuario(id) ON DELETE CASCADE
 );
 
 CREATE TABLE ArquivoMedico (
@@ -173,14 +137,8 @@ CREATE TABLE ArquivoMedico (
     extensao VARCHAR(20) NOT NULL,
     arquivo LONGBLOB NOT NULL,
     data_upload DATETIME DEFAULT CURRENT_TIMESTAMP,
-
-    CONSTRAINT fk_medico
-        FOREIGN KEY (medico_id)
-        REFERENCES Usuario(id),
-
-    CONSTRAINT fk_paciente
-        FOREIGN KEY (paciente_id)
-        REFERENCES Usuario(id)
+    CONSTRAINT fk_medico FOREIGN KEY (medico_id) REFERENCES Usuario(id),
+    CONSTRAINT fk_paciente FOREIGN KEY (paciente_id) REFERENCES Usuario(id)
 );
 
 CREATE TABLE EventoPaciente (
@@ -193,16 +151,8 @@ CREATE TABLE EventoPaciente (
     prioridade VARCHAR(20) DEFAULT 'normal',
     visualizado BOOLEAN DEFAULT FALSE,
     criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-
-    CONSTRAINT fk_evento_paciente
-        FOREIGN KEY (paciente_id)
-        REFERENCES Usuario(id)
-        ON DELETE CASCADE,
-
-    CONSTRAINT fk_evento_usuario
-        FOREIGN KEY (usuario_id)
-        REFERENCES Usuario(id)
-        ON DELETE SET NULL
+    CONSTRAINT fk_evento_paciente FOREIGN KEY (paciente_id) REFERENCES Usuario(id) ON DELETE CASCADE,
+    CONSTRAINT fk_evento_usuario FOREIGN KEY (usuario_id) REFERENCES Usuario(id) ON DELETE SET NULL
 );
 
 CREATE TABLE MetaAcompanhamento (
@@ -217,13 +167,19 @@ CREATE TABLE MetaAcompanhamento (
     data_modificacao TIMESTAMP NULL,
     data_conclusao TIMESTAMP NULL,
     status VARCHAR(30) DEFAULT 'em_andamento',
-
-    CONSTRAINT fk_meta_paciente
-        FOREIGN KEY (paciente_id)
-        REFERENCES Usuario(id)
-        ON DELETE CASCADE
+    CONSTRAINT fk_meta_paciente FOREIGN KEY (paciente_id) REFERENCES Usuario(id) ON DELETE CASCADE
 );
 
+CREATE TABLE EstabilidadeClinica (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    paciente_id INT NOT NULL,
+    tipo VARCHAR(50) NOT NULL,     
+    indice INT NOT NULL,          
+    categoria VARCHAR(20) NOT NULL, 
+    peso DOUBLE DEFAULT 1, 
+    data_calculo TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT fk_estabilidade_paciente FOREIGN KEY (paciente_id) REFERENCES Usuario(id) ON DELETE CASCADE
+);
 
 SHOW TABLES;
 
@@ -238,6 +194,7 @@ DESCRIBE Vinculo;
 DESCRIBE ConviteVinculo;
 DESCRIBE ContatoEmergencia;
 DESCRIBE ArquivoMedico;
+DESCRIBE EstabilidadeClinica;
 
 SELECT * FROM Usuario;
 SELECT * FROM CodigoVerificacao;
@@ -250,3 +207,4 @@ SELECT * FROM Vinculo;
 SELECT * FROM ConviteVinculo;
 SELECT * FROM ContatoEmergencia;
 SELECT * FROM ArquivoMedico;
+SELECT * FROM EstabilidadeClinica;

@@ -17,4 +17,5 @@ public interface SinaisVitaisRepository extends JpaRepository<SinaisVitais, Inte
             LocalDateTime inicio,
             LocalDateTime fim
     );
+    List<SinaisVitais> findByPacienteIdOrderByDataRegistroAsc(Integer pacienteId);
 }
