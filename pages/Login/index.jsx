@@ -277,8 +277,7 @@ export default function Login() {
                     display: "grid",
                     gridTemplateColumns: { xs: "1fr", md: "0.9fr 1.1fr" },
                     alignItems: "center",
-                    gap: { xs: 4, md: 7 },
-                    py: { xs: 4, md: 6 }
+                    gap: { xs: 4, md: 7 }
                 }}
             >
                 <Box sx={{ display: { xs: "none", md: "block" } }}>

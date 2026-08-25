@@ -32,11 +32,11 @@ const dictionaries = {
             closeSidebar: "Fechar menu"
         },
         goals: {
-            title: "Metas de acompanhamento", description: "Defina objetivos e acompanhe a evolução do paciente.", patient: "Paciente", new: "Nova meta", selectPatient: "Selecione um paciente para visualizar suas metas.", empty: "Nenhuma meta cadastrada", emptyHint: "Crie a primeira meta de acompanhamento.", progress: "Progresso", current: "Valor atual", target: "Valor-alvo", deadline: "Prazo", complete: "Concluir", updateValue: "Atualizar valor", manualTitle: "Atualizar progresso", edit: "Editar", delete: "Excluir", deleteConfirm: "Deseja realmente excluir esta meta?",
+            title: "Metas de acompanhamento", description: "Defina objetivos e acompanhe a evolução do paciente.", patient: "Paciente", new: "Nova meta", selectPatient: "Selecione um paciente para visualizar suas metas.", empty: "Nenhuma meta cadastrada", emptyHint: "Crie a primeira meta de acompanhamento.", progress: "Progresso", limitUsed: "Limite utilizado", limitExceeded: "Limite ultrapassado em", current: "Valor atual", target: "Valor-alvo", deadline: "Prazo", complete: "Concluir", updateValue: "Registrar avanço", manualTitle: "Registrar avanço", manualAmount: "Valor realizado agora", manualNewValue: "Novo acumulado", edit: "Editar", delete: "Excluir", deleteConfirm: "Deseja realmente excluir esta meta?",
             types: { sinais_vitais: "Sinais vitais", habitos: "Hábitos", personalizado: "Personalizado" },
             indicators: { peso: "Peso", horas_sono: "Horas de sono", minutos_exercicio: "Minutos de exercício", personalizado: "Meta personalizada" },
-            directions: { aumentar: "Aumentar", reduzir: "Reduzir" },
-            status: { em_andamento: "Em andamento", concluido: "Concluída", concluido_atrasado: "Concluída com atraso" },
+            directions: { aumentar: "Aumentar", reduzir: "Reduzir", reachMinimum: "Alcançar pelo menos", doNotExceed: "Não ultrapassar" },
+            status: { em_andamento: "Em andamento", concluido: "Concluída", concluido_atrasado: "Concluída com atraso", nao_atingida: "Não atingida" },
             form: { createTitle: "Nova meta", editTitle: "Editar meta", name: "Nome", type: "Tipo de dado", indicator: "Indicador", direction: "Objetivo", unit: "Unidade", initialValue: "Valor inicial", target: "Valor-alvo", deadline: "Data-limite", cancel: "Cancelar", save: "Salvar", saving: "Salvando..." },
             alerts: { loadError: "Não foi possível carregar as metas.", createSuccess: "Meta criada com sucesso.", updateSuccess: "Meta atualizada com sucesso.", valueSuccess: "Progresso atualizado com sucesso.", completeSuccess: "Meta concluída com sucesso.", deleteSuccess: "Meta excluída com sucesso.", saveError: "Não foi possível salvar a meta.", actionError: "Não foi possível realizar esta ação." }
         },
@@ -658,11 +658,11 @@ const dictionaries = {
             closeSidebar: "Close menu"
         },
         goals: {
-            title: "Tracking goals", description: "Set objectives and track the patient's progress.", patient: "Patient", new: "New goal", selectPatient: "Select a patient to view their goals.", empty: "No goals yet", emptyHint: "Create the first tracking goal.", progress: "Progress", current: "Current value", target: "Target value", deadline: "Deadline", complete: "Complete", updateValue: "Update value", manualTitle: "Update progress", edit: "Edit", delete: "Delete", deleteConfirm: "Do you really want to delete this goal?",
+            title: "Tracking goals", description: "Set objectives and track the patient's progress.", patient: "Patient", new: "New goal", selectPatient: "Select a patient to view their goals.", empty: "No goals yet", emptyHint: "Create the first tracking goal.", progress: "Progress", limitUsed: "Limit used", limitExceeded: "Limit exceeded by", current: "Current value", target: "Target value", deadline: "Deadline", complete: "Complete", updateValue: "Log progress", manualTitle: "Log progress", manualAmount: "Amount completed now", manualNewValue: "New total", edit: "Edit", delete: "Delete", deleteConfirm: "Do you really want to delete this goal?",
             types: { sinais_vitais: "Vital signs", habitos: "Habits", personalizado: "Custom" },
             indicators: { peso: "Weight", horas_sono: "Sleep hours", minutos_exercicio: "Exercise minutes", personalizado: "Custom goal" },
-            directions: { aumentar: "Increase", reduzir: "Reduce" },
-            status: { em_andamento: "In progress", concluido: "Completed", concluido_atrasado: "Completed late" },
+            directions: { aumentar: "Increase", reduzir: "Reduce", reachMinimum: "Reach at least", doNotExceed: "Do not exceed" },
+            status: { em_andamento: "In progress", concluido: "Completed", concluido_atrasado: "Completed late", nao_atingida: "Not achieved" },
             form: { createTitle: "New goal", editTitle: "Edit goal", name: "Name", type: "Data type", indicator: "Indicator", direction: "Objective", unit: "Unit", initialValue: "Initial value", target: "Target value", deadline: "Deadline", cancel: "Cancel", save: "Save", saving: "Saving..." },
             alerts: { loadError: "Goals could not be loaded.", createSuccess: "Goal created successfully.", updateSuccess: "Goal updated successfully.", valueSuccess: "Progress updated successfully.", completeSuccess: "Goal completed successfully.", deleteSuccess: "Goal deleted successfully.", saveError: "Goal could not be saved.", actionError: "This action could not be completed." }
         },
@@ -1283,11 +1283,11 @@ const dictionaries = {
             closeSidebar: "Cerrar menú"
         },
         goals: {
-            title: "Metas de seguimiento", description: "Define objetivos y acompaña la evolución del paciente.", patient: "Paciente", new: "Nueva meta", selectPatient: "Selecciona un paciente para ver sus metas.", empty: "No hay metas registradas", emptyHint: "Crea la primera meta de seguimiento.", progress: "Progreso", current: "Valor actual", target: "Valor objetivo", deadline: "Fecha límite", complete: "Completar", updateValue: "Actualizar valor", manualTitle: "Actualizar progreso", edit: "Editar", delete: "Eliminar", deleteConfirm: "¿Realmente deseas eliminar esta meta?",
+            title: "Metas de seguimiento", description: "Define objetivos y acompaña la evolución del paciente.", patient: "Paciente", new: "Nueva meta", selectPatient: "Selecciona un paciente para ver sus metas.", empty: "No hay metas registradas", emptyHint: "Crea la primera meta de seguimiento.", progress: "Progreso", limitUsed: "Límite utilizado", limitExceeded: "Límite superado por", current: "Valor actual", target: "Valor objetivo", deadline: "Fecha límite", complete: "Completar", updateValue: "Registrar avance", manualTitle: "Registrar avance", manualAmount: "Valor realizado ahora", manualNewValue: "Nuevo acumulado", edit: "Editar", delete: "Eliminar", deleteConfirm: "¿Realmente deseas eliminar esta meta?",
             types: { sinais_vitais: "Signos vitales", habitos: "Hábitos", personalizado: "Personalizado" },
             indicators: { peso: "Peso", horas_sono: "Horas de sueño", minutos_exercicio: "Minutos de ejercicio", personalizado: "Meta personalizada" },
-            directions: { aumentar: "Aumentar", reduzir: "Reducir" },
-            status: { em_andamento: "En progreso", concluido: "Completada", concluido_atrasado: "Completada con retraso" },
+            directions: { aumentar: "Aumentar", reduzir: "Reducir", reachMinimum: "Alcanzar al menos", doNotExceed: "No superar" },
+            status: { em_andamento: "En progreso", concluido: "Completada", concluido_atrasado: "Completada con retraso", nao_atingida: "No alcanzada" },
             form: { createTitle: "Nueva meta", editTitle: "Editar meta", name: "Nombre", type: "Tipo de dato", indicator: "Indicador", direction: "Objetivo", unit: "Unidad", initialValue: "Valor inicial", target: "Valor objetivo", deadline: "Fecha límite", cancel: "Cancelar", save: "Guardar", saving: "Guardando..." },
             alerts: { loadError: "No se pudieron cargar las metas.", createSuccess: "Meta creada correctamente.", updateSuccess: "Meta actualizada correctamente.", valueSuccess: "Progreso actualizado correctamente.", completeSuccess: "Meta completada correctamente.", deleteSuccess: "Meta eliminada correctamente.", saveError: "No se pudo guardar la meta.", actionError: "No se pudo realizar esta acción." }
         },

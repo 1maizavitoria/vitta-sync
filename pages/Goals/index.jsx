@@ -4,9 +4,11 @@ import {
     IconButton, LinearProgress, MenuItem, Stack, Tooltip, Typography
 } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
+import AddRoundedIcon from "@mui/icons-material/AddRounded";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 import EditOutlinedIcon from "@mui/icons-material/EditOutlined";
 import FlagOutlinedIcon from "@mui/icons-material/FlagOutlined";
+import RemoveRoundedIcon from "@mui/icons-material/RemoveRounded";
 import { useTheme } from "@mui/material/styles";
 import dayjs from "dayjs";
 
@@ -122,9 +124,14 @@ export default function Goals() {
 
     async function saveManualValue() {
         if (manualValue === "" || Number.isNaN(Number(manualValue))) return;
+
+        const currentValue = Number(manualGoal.valorAtual) || 0;
+        const informedValue = Math.max(0, Number(manualValue));
+        const newValue = currentValue + informedValue;
+
         try {
             setSaving(true);
-            await updateGoalValue(manualGoal.id, cpf, Number(manualValue));
+            await updateGoalValue(manualGoal.id, cpf, newValue);
             setManualGoal(null);
             showAlert("success", t("goals.alerts.valueSuccess"));
             await loadGoals();
@@ -136,9 +143,17 @@ export default function Goals() {
         }
     }
 
+    function adjustManualValue(amount) {
+        const currentValue = Number(manualValue) || 0;
+        setManualValue(String(Math.max(0, currentValue + amount)));
+    }
+
     const statusLabel = (status) => t(`goals.status.${status || "em_andamento"}`);
     const typeLabel = (type) => t(`goals.types.${type || "personalizado"}`);
     const indicatorLabel = (indicator) => t(`goals.indicators.${indicator || "personalizado"}`);
+    const manualCurrentValue = Number(manualGoal?.valorAtual) || 0;
+    const manualInformedValue = Math.max(0, Number(manualValue) || 0);
+    const manualNewValue = manualCurrentValue + manualInformedValue;
     const actionButtonSx = {
         edit: {
             color: "secondary.main",
@@ -173,23 +188,29 @@ export default function Goals() {
             ) : (
                 <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", md: "repeat(2, minmax(0, 1fr))", xl: "repeat(3, minmax(0, 1fr))" }, gap: 2.5 }}>
                     {goals.map((goal) => {
-                        const progress = Math.max(0, Math.min(Number(goal.progresso) || 0, 100));
+                        const rawProgress = Math.max(0, Number(goal.progresso) || 0);
+                        const progress = Math.min(rawProgress, 100);
                         const done = goal.status?.startsWith("concluido");
+                        const failed = goal.status === "nao_atingida";
+                        const terminal = done || failed;
+                        const limitGoal = goal.indicador === "personalizado" && goal.direcao === "reduzir";
+                        const exceeded = limitGoal && Number(goal.valorAtual) > Number(goal.valorAlvo);
                         return <Card key={goal.id} sx={{ borderRadius: 3, border: "1px solid", borderColor: theme.vitta.border, boxShadow: theme.vitta.shadow }}>
                             <CardContent>
                                 <Stack direction="row" justifyContent="space-between" gap={1} alignItems="flex-start">
                                     <Typography variant="h6" fontWeight={800}>{goal.nome}</Typography>
-                                    <Chip size="small" color={done ? "success" : "primary"} label={statusLabel(goal.status)} />
+                                    <Chip size="small" color={failed ? "error" : done ? "success" : "primary"} label={statusLabel(goal.status)} />
                                 </Stack>
                                 <Typography color="text.secondary" mt={1}>{indicatorLabel(goal.indicador)} · {typeLabel(goal.tipoDado)}</Typography>
-                                <Stack direction="row" justifyContent="space-between" mt={3}><Typography variant="body2">{t("goals.progress")}</Typography><Typography variant="body2" fontWeight={800}>{progress.toFixed(0)}%</Typography></Stack>
-                                <LinearProgress variant="determinate" value={progress} sx={{ mt: 1, height: 9, borderRadius: 9 }} />
+                                <Stack direction="row" justifyContent="space-between" mt={3}><Typography variant="body2">{t(limitGoal ? "goals.limitUsed" : "goals.progress")}</Typography><Typography variant="body2" fontWeight={800}>{rawProgress.toFixed(0)}%</Typography></Stack>
+                                <LinearProgress color={exceeded || failed ? "error" : done ? "success" : "primary"} variant="determinate" value={progress} sx={{ mt: 1, height: 9, borderRadius: 9 }} />
+                                {exceeded && <Typography variant="body2" color="error.main" fontWeight={700} mt={1}>{t("goals.limitExceeded")}: {(Number(goal.valorAtual) - Number(goal.valorAlvo)).toFixed(1)} {goal.unidade}</Typography>}
                                 <Stack direction="row" justifyContent="space-between" mt={2}><Typography color="text.secondary">{t("goals.current")}</Typography><Typography fontWeight={700}>{goal.valorAtual ?? "—"} {goal.unidade}</Typography></Stack>
                                 <Stack direction="row" justifyContent="space-between"><Typography color="text.secondary">{t("goals.target")}</Typography><Typography fontWeight={700}>{goal.valorAlvo} {goal.unidade}</Typography></Stack>
                                 <Stack direction="row" justifyContent="space-between"><Typography color="text.secondary">{t("goals.deadline")}</Typography><Typography>{goal.dataLimite ? new Date(`${goal.dataLimite}T00:00:00`).toLocaleDateString() : "—"}</Typography></Stack>
                             </CardContent>
                             <CardActions sx={{ px: 2, pb: 2, gap: 1, flexWrap: "wrap" }}>
-                                {!isDoctor && !done && goal.indicador === "personalizado" && <ButtonUI sx={{ py: 0.75, px: 1.5 }} onClick={() => { setManualGoal(goal); setManualValue(String(goal.valorAtual ?? "")); }}>{t("goals.updateValue")}</ButtonUI>}
+                                {!isDoctor && !terminal && goal.indicador === "personalizado" && <ButtonUI sx={{ py: 0.75, px: 1.5 }} onClick={() => { setManualGoal(goal); setManualValue("0"); }}>{t("goals.updateValue")}</ButtonUI>}
                                 <Tooltip title={t("goals.edit")}><IconButton aria-label={t("goals.edit")} sx={actionButtonSx.edit} onClick={() => openEdit(goal)}><EditOutlinedIcon fontSize="small" /></IconButton></Tooltip>
                                 {!isDoctor && <Tooltip title={t("goals.delete")}><IconButton aria-label={t("goals.delete")} sx={actionButtonSx.delete} onClick={() => handleDelete(goal)}><DeleteOutlineIcon fontSize="small" /></IconButton></Tooltip>}
                             </CardActions>
@@ -198,21 +219,136 @@ export default function Goals() {
                 </Box>
             )}
 
-            <DialogUI open={open} onClose={() => setOpen(false)} disabledClose={saving} title={t(editing ? "goals.form.editTitle" : "goals.form.createTitle")} onConfirm={saveGoal} disabledConfirm={!canSubmit || saving} confirmText={saving ? t("goals.form.saving") : t("goals.form.save")} cancelText={t("goals.form.cancel")}>
-                    <InputUI label={t("goals.form.name")} value={form.nome} onChange={(e) => setForm({ ...form, nome: e.target.value })} limit={150} />
-                    <InputUI select label={t("goals.form.indicator")} value={form.indicador} onChange={(e) => { const indicador = e.target.value; const config = indicatorConfig[indicador]; setForm({ ...form, indicador, direcao: config.direcao, unidade: config.unidade, valorInicial: "", valorAtual: "" }); }}>
-                        {Object.keys(indicatorConfig).map(indicator => <MenuItem key={indicator} value={indicator}>{indicatorLabel(indicator)}</MenuItem>)}
-                    </InputUI>
-                    <InputUI select label={t("goals.form.direction")} value={form.direcao} onChange={(e) => setForm({ ...form, direcao: e.target.value })}>
-                        <MenuItem value="aumentar">{t("goals.directions.aumentar")}</MenuItem><MenuItem value="reduzir">{t("goals.directions.reduzir")}</MenuItem>
-                    </InputUI>
-                    {form.indicador === "personalizado" && <InputUI label={t("goals.form.unit")} value={form.unidade} onChange={(e) => setForm({ ...form, unidade: e.target.value })} limit={30} />}
-                    {form.indicador === "personalizado" && <InputUI type="number" label={t("goals.form.initialValue")} value={form.valorInicial} onChange={(e) => setForm({ ...form, valorInicial: e.target.value, valorAtual: editing ? form.valorAtual : e.target.value })} />}
-                    <InputUI type="number" label={t("goals.form.target")} value={form.valorAlvo} onChange={(e) => setForm({ ...form, valorAlvo: e.target.value })} slotProps={{ htmlInput: { min: 0, step: "any" } }} />
-                    <DatePickerUI label={t("goals.form.deadline")} value={form.dataLimite} onChange={(value) => setForm({ ...form, dataLimite: value || "" })} minDate={dayjs().startOf("day")} dateLimit={dayjs().add(50, "year")} />
+            <DialogUI
+                open={open}
+                onClose={() => setOpen(false)}
+                disabledClose={saving}
+                title={t(editing ? "goals.form.editTitle" : "goals.form.createTitle")}
+                onConfirm={saveGoal} disabledConfirm={!canSubmit || saving}
+                confirmText={saving ? t("goals.form.saving") : t("goals.form.save")}
+                cancelText={t("goals.form.cancel")}
+            >
+
+                <InputUI
+                    label={t("goals.form.name")}
+                    value={form.nome}
+                    onChange={(e) => setForm({ ...form, nome: e.target.value })}
+                    limit={150}
+                />
+
+                <InputUI
+                    select label={t("goals.form.indicator")}
+                    value={form.indicador}
+                    onChange={(e) => {
+                        const indicador = e.target.value;
+                        const config = indicatorConfig[indicador];
+                        setForm({ ...form, indicador, direcao: config.direcao, unidade: config.unidade, valorInicial: "", valorAtual: "" });
+                    }}
+                >
+                    {Object.keys(indicatorConfig).map(indicator => <MenuItem key={indicator} value={indicator}>{indicatorLabel(indicator)}</MenuItem>)}
+                </InputUI>
+
+                <InputUI
+                    select
+                    label={t("goals.form.direction")}
+                    value={form.direcao} onChange={(e) => setForm({ ...form, direcao: e.target.value })}
+                >
+                    <MenuItem
+                        value="aumentar"
+                    >
+                        {t(form.indicador === "personalizado" ? "goals.directions.reachMinimum" : "goals.directions.aumentar")}
+                    </MenuItem>
+                    <MenuItem
+                        value="reduzir"
+                    >
+                        {t(form.indicador === "personalizado" ? "goals.directions.doNotExceed" : "goals.directions.reduzir")}
+                    </MenuItem>
+                </InputUI>
+
+                {form.indicador === "personalizado" &&
+                    <InputUI
+                        label={t("goals.form.unit")}
+                        value={form.unidade}
+                        onChange={(e) => setForm({ ...form, unidade: e.target.value })}
+                        limit={30} />}
+
+                <InputUI
+                    type="number"
+                    label={t("goals.form.target")}
+                    value={form.valorAlvo}
+                    onChange={(e) => setForm({ ...form, valorAlvo: e.target.value })}
+                    slotProps={{ htmlInput: { min: 0, step: "any" } }}
+                />
+                <DatePickerUI
+                    label={t("goals.form.deadline")}
+                    value={form.dataLimite}
+                    onChange={(value) => setForm({ ...form, dataLimite: value || "" })}
+                    minDate={dayjs().startOf("day")}
+                    dateLimit={dayjs().add(50, "year")}
+                />
             </DialogUI>
-            <DialogUI open={Boolean(manualGoal)} onClose={() => setManualGoal(null)} disabledClose={saving} title={t("goals.manualTitle")} onConfirm={saveManualValue} disabledConfirm={saving || manualValue === ""} confirmText={t("goals.form.save")} cancelText={t("goals.form.cancel")}>
-                <InputUI autoFocus type="number" label={t("goals.current")} value={manualValue} onChange={(e) => setManualValue(e.target.value)} />
+
+            <DialogUI
+                open={Boolean(manualGoal)}
+                onClose={() => setManualGoal(null)}
+                disabledClose={saving}
+                title={t("goals.manualTitle")}
+                onConfirm={saveManualValue}
+                disabledConfirm={saving || manualValue === "" || Number(manualValue) <= 0}
+                confirmText={t("goals.form.save")}
+                cancelText={t("goals.form.cancel")}>
+
+                <Stack spacing={0.75} sx={{ mt: 1, mb: 1.5 }}>
+                    <Stack direction="row" justifyContent="space-between" gap={2}>
+                        <Typography color="text.secondary">{t("goals.current")}</Typography>
+                        <Typography fontWeight={700}>{manualCurrentValue} {manualGoal?.unidade}</Typography>
+                    </Stack>
+                    <Stack direction="row" justifyContent="space-between" gap={2}>
+                        <Typography color="text.secondary">{t("goals.manualNewValue")}</Typography>
+                        <Typography color="primary.main" fontWeight={800}>{manualNewValue} {manualGoal?.unidade}</Typography>
+                    </Stack>
+                </Stack>
+
+                <Stack direction="row" alignItems="center" spacing={1.5} sx={{ mt: 5 }}>
+                    <IconButton
+                        aria-label={t("goals.directions.reduzir")}
+                        onClick={() => adjustManualValue(-1)}
+                        disabled={saving || Number(manualValue) <= 0}
+                        sx={{
+                            color: "error.main",
+                            bgcolor: "rgba(220, 38, 38, 0.08)",
+                            border: "1px solid rgba(220, 38, 38, 0.14)",
+                            "&:hover": { bgcolor: "rgba(220, 38, 38, 0.14)" }
+                        }}
+                    >
+                        <RemoveRoundedIcon />
+                    </IconButton>
+
+                    <InputUI
+                        autoFocus
+                        type="number"
+                        label={t("goals.manualAmount")}
+                        value={manualValue}
+                        onChange={(e) => setManualValue(e.target.value === "" ? "" : String(Math.max(0, Number(e.target.value))))}
+                        slotProps={{ htmlInput: { min: 0, step: 1 } }}
+                        sx={{ flex: 1, mt: 0, mb: 0 }}
+                    />
+
+                    <IconButton
+                        aria-label={t("goals.directions.aumentar")}
+                        onClick={() => adjustManualValue(1)}
+                        disabled={saving}
+                        sx={{
+                            color: "#ffffff",
+                            bgcolor: "primary.main",
+                            border: "1px solid",
+                            borderColor: theme.vitta.borderStrong,
+                            "&:hover": { bgcolor: "primary.dark" }
+                        }}
+                    >
+                        <AddRoundedIcon />
+                    </IconButton>
+                </Stack>
             </DialogUI>
         </Box>
     );

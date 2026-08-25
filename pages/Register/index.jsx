@@ -244,8 +244,7 @@ export default function Register() {
                     display: "grid",
                     gridTemplateColumns: { xs: "1fr", md: "0.9fr 1.1fr" },
                     alignItems: "center",
-                    gap: { xs: 4, md: 7 },
-                    py: { xs: 4, md: 6 }
+                    gap: { xs: 4, md: 7 }
                 }}
             >
                 <Box sx={{ display: { xs: "none", md: "block" } }}>
@@ -470,35 +469,35 @@ export default function Register() {
 
                         <Tooltip title={<PasswordTooltip rules={rulesPassword} />} placement="right" arrow>
                             <Box sx={fieldSx}>
-                                    <InputUI
-                                        label={t("auth.password")}
-                                        placeholder={t("auth.placeholders.password")}
-                                        type="password"
-                                        showPasswordToggle={true}
-                                        error={errorPassword}
-                                        value={password}
-                                        onChange={(e) => (
-                                            setPassword(e.target.value),
-                                            setErrorPassword(false)
-                                        )}
-                                    />
+                                <InputUI
+                                    label={t("auth.password")}
+                                    placeholder={t("auth.placeholders.password")}
+                                    type="password"
+                                    showPasswordToggle={true}
+                                    error={errorPassword}
+                                    value={password}
+                                    onChange={(e) => (
+                                        setPassword(e.target.value),
+                                        setErrorPassword(false)
+                                    )}
+                                />
                             </Box>
                         </Tooltip>
 
                         <Tooltip title={<PasswordTooltip rules={repeatRulesPassword} />} placement="right" arrow>
                             <Box sx={fieldSx}>
-                                    <InputUI
-                                        label={t("auth.repeatPassword")}
-                                        placeholder={t("auth.repeatPassword")}
-                                        type="password"
-                                        showPasswordToggle={true}
-                                        error={errorRepeatPassword}
-                                        value={repeatPassword}
-                                        onChange={(e) => (
-                                            setRepeatPassword(e.target.value),
-                                            setErrorRepeatPassword(false)
-                                        )}
-                                    />
+                                <InputUI
+                                    label={t("auth.repeatPassword")}
+                                    placeholder={t("auth.repeatPassword")}
+                                    type="password"
+                                    showPasswordToggle={true}
+                                    error={errorRepeatPassword}
+                                    value={repeatPassword}
+                                    onChange={(e) => (
+                                        setRepeatPassword(e.target.value),
+                                        setErrorRepeatPassword(false)
+                                    )}
+                                />
                             </Box>
                         </Tooltip>
                     </Box>

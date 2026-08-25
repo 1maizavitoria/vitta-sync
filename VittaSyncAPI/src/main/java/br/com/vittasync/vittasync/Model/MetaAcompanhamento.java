@@ -58,7 +58,7 @@ public class MetaAcompanhamento {
     private LocalDateTime dataConclusao;
 
     @Column(name = "status", length = 30)
-    private String status; // em_andamento, concluido, concluido_atrasado
+    private String status; // em_andamento, concluido, concluido_atrasado, nao_atingida
 
 
     public Long getId() { return id; }

@@ -133,11 +133,24 @@ public class MetaAcompanhamentoService {
     }
 
     private void aplicarConfiguracao(MetaAcompanhamento meta, MetaAcompanhamentoInputDTO dto) {
+        boolean metaPersonalizada = "personalizado".equalsIgnoreCase(dto.getIndicador());
+        boolean mudouParaPersonalizada = metaPersonalizada
+                && !"personalizado".equalsIgnoreCase(meta.getIndicador());
+
         meta.setIndicador(dto.getIndicador());
         meta.setDirecao(dto.getDirecao());
+        meta.setUnidade(dto.getUnidade());
+
+        if (metaPersonalizada) {
+            meta.setValorInicial(0.0);
+            if (meta.getId() == null || mudouParaPersonalizada) {
+                meta.setValorAtual(0.0);
+            }
+            return;
+        }
+
         meta.setValorInicial(dto.getValorInicial());
         meta.setValorAtual(dto.getValorAtual());
-        meta.setUnidade(dto.getUnidade());
     }
 
     private void atualizarValoresEProgresso(MetaAcompanhamento meta, Integer usuarioLogadoId) {
@@ -151,16 +164,46 @@ public class MetaAcompanhamentoService {
     }
 
     private void concluirAutomaticamenteSeAtingida(MetaAcompanhamento meta, Integer usuarioLogadoId) {
-        if (meta.getProgresso() == null
-                || meta.getProgresso() < 100.0
-                || meta.getStatus() == null
-                || meta.getStatus().startsWith("concluido")) {
+        if (!"em_andamento".equalsIgnoreCase(meta.getStatus())) {
             return;
         }
 
-        meta.setStatus(meta.getDataLimite().isBefore(LocalDateTime.now().toLocalDate())
-                ? "concluido_atrasado" : "concluido");
+        boolean prazoEncerrado = meta.getDataLimite().isBefore(LocalDateTime.now().toLocalDate());
+        boolean personalizada = "personalizado".equalsIgnoreCase(meta.getIndicador());
+        boolean limiteMaximo = personalizada && "reduzir".equalsIgnoreCase(meta.getDirecao());
+        String novoStatus = null;
+
+        if (limiteMaximo && meta.getValorAtual() != null && meta.getValorAtual() > meta.getValorAlvo()) {
+            novoStatus = "nao_atingida";
+        } else if (limiteMaximo && prazoEncerrado) {
+            novoStatus = "concluido";
+        } else if (personalizada && prazoEncerrado
+                && (meta.getProgresso() == null || meta.getProgresso() < 100.0)) {
+            novoStatus = "nao_atingida";
+        } else if (meta.getProgresso() != null && meta.getProgresso() >= 100.0) {
+            novoStatus = prazoEncerrado ? "concluido_atrasado" : "concluido";
+        }
+
+        if (novoStatus == null) {
+            return;
+        }
+
+        meta.setStatus(novoStatus);
         meta.setDataConclusao(LocalDateTime.now());
+
+        if ("nao_atingida".equals(novoStatus)) {
+            eventoPacienteService.criarEvento(
+                    meta.getPaciente().getId(), usuarioLogadoId,
+                    "META_NAO_ATINGIDA", "Meta não atingida",
+                    limiteMaximo ? "Limite da meta ultrapassado" : "Prazo encerrado antes de atingir a meta",
+                    EventoPacienteService.metadata(
+                            "patientName", meta.getPaciente().getNome(),
+                            "goalName", meta.getNome()
+                    ),
+                    "alta"
+            );
+            return;
+        }
 
         eventoPacienteService.criarEvento(
                 meta.getPaciente().getId(), usuarioLogadoId, "META_CONCLUIDA", "Meta alcançada",
@@ -195,6 +238,14 @@ public class MetaAcompanhamentoService {
         Double atual = meta.getValorAtual();
         Double alvo = meta.getValorAlvo();
         if (atual == null || alvo == null) return 0.0;
+
+        if ("personalizado".equalsIgnoreCase(meta.getIndicador())) {
+            if (alvo == 0) return 0.0;
+            double percentualAcumulado = (atual / alvo) * 100.0;
+            return "reduzir".equalsIgnoreCase(meta.getDirecao())
+                    ? Math.max(0.0, percentualAcumulado)
+                    : Math.max(0.0, Math.min(percentualAcumulado, 100.0));
+        }
 
         double progresso;
         if ("reduzir".equalsIgnoreCase(meta.getDirecao())) {
