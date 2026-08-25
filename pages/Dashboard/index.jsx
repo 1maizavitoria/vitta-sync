@@ -16,6 +16,7 @@ import { useTheme } from "@mui/material/styles";
 import { useEffect, useMemo, useState } from "react";
 
 import DashboardChart from "../../components/ui/DashboardChart";
+import ClinicalStability from "../../components/ui/ClinicalStability";
 import { usePatient } from "../../context/PatientContext";
 import { getDashboard } from "../../services/dashboardService";
 import { useI18n } from "../../src/i18n";
@@ -138,6 +139,7 @@ export default function Dashboard() {
     }), [t]);
 
     const categories = dashboard?.categorias || [];
+    const clinicalStability = dashboard?.estabilidadeClinica || [];
 
     return (
         <Box
@@ -246,6 +248,12 @@ export default function Dashboard() {
                         </Box>
                     ) : !error && (
                         <>
+                            <ClinicalStability
+                                items={clinicalStability}
+                                period={period}
+                                t={t}
+                            />
+
                             <Box
                                 sx={{
                                     display: "grid",
