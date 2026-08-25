@@ -247,6 +247,34 @@ const dictionaries = {
             latestValue: "Último valor do período",
             loadError: "Não foi possível carregar os dados do dashboard.",
             emptyPeriod: "Nenhum registro encontrado neste período.",
+            stability: {
+                title: "Estabilidade clínica geral",
+                factorsTitle: "Fatores de estabilidade",
+                period: "Calculado com os registros dos últimos {days} dias",
+                weightHelp: "O peso informa a participação de cada fator no cálculo do índice geral.",
+                weight: "Peso {weight} na composição do índice geral",
+                weightShort: "Peso {weight}",
+                noFactors: "Nenhum fator disponível para este período.",
+                disclaimer: "Índice informativo: não substitui avaliação ou diagnóstico de um profissional de saúde.",
+                categories: {
+                    saudavel: "Saudável",
+                    moderado: "Moderada",
+                    critico: "Crítica",
+                    "n/a": "Dados insuficientes"
+                },
+                factors: {
+                    fc_bpm: "Frequência cardíaca",
+                    fr_rpm: "Frequência respiratória",
+                    pressao: "Pressão arterial",
+                    pa_sistolica: "Pressão sistólica",
+                    pa_diastolica: "Pressão diastólica",
+                    temp_celcius: "Temperatura corporal",
+                    spo2: "Saturação de oxigênio",
+                    peso: "Peso",
+                    sono: "Sono",
+                    exercicio: "Atividade física"
+                }
+            },
             categories: {
                 todas: "Todas as categorias",
                 pressao: "Pressão arterial",
@@ -872,6 +900,34 @@ const dictionaries = {
             latestValue: "Latest value in the period",
             loadError: "Dashboard data could not be loaded.",
             emptyPeriod: "No records were found in this period.",
+            stability: {
+                title: "Overall clinical stability",
+                factorsTitle: "Stability factors",
+                period: "Calculated from records in the last {days} days",
+                weightHelp: "The weight indicates each factor's contribution to the overall index.",
+                weight: "Weight {weight} in the overall index",
+                weightShort: "Weight {weight}",
+                noFactors: "No factors are available for this period.",
+                disclaimer: "Informational index: it does not replace assessment or diagnosis by a healthcare professional.",
+                categories: {
+                    saudavel: "Healthy",
+                    moderado: "Moderate",
+                    critico: "Critical",
+                    "n/a": "Insufficient data"
+                },
+                factors: {
+                    fc_bpm: "Heart rate",
+                    fr_rpm: "Respiratory rate",
+                    pressao: "Blood pressure",
+                    pa_sistolica: "Systolic pressure",
+                    pa_diastolica: "Diastolic pressure",
+                    temp_celcius: "Body temperature",
+                    spo2: "Oxygen saturation",
+                    peso: "Weight",
+                    sono: "Sleep",
+                    exercicio: "Physical activity"
+                }
+            },
             categories: {
                 todas: "All categories",
                 pressao: "Blood pressure",
@@ -1497,6 +1553,34 @@ const dictionaries = {
             latestValue: "Último valor del período",
             loadError: "No fue posible cargar los datos del panel.",
             emptyPeriod: "No se encontraron registros en este período.",
+            stability: {
+                title: "Estabilidad clínica general",
+                factorsTitle: "Factores de estabilidad",
+                period: "Calculado con los registros de los últimos {days} días",
+                weightHelp: "El peso indica la participación de cada factor en el índice general.",
+                weight: "Peso {weight} en la composición del índice general",
+                weightShort: "Peso {weight}",
+                noFactors: "No hay factores disponibles para este período.",
+                disclaimer: "Índice informativo: no sustituye la evaluación ni el diagnóstico de un profesional de salud.",
+                categories: {
+                    saudavel: "Saludable",
+                    moderado: "Moderada",
+                    critico: "Crítica",
+                    "n/a": "Datos insuficientes"
+                },
+                factors: {
+                    fc_bpm: "Frecuencia cardíaca",
+                    fr_rpm: "Frecuencia respiratoria",
+                    pressao: "Presión arterial",
+                    pa_sistolica: "Presión sistólica",
+                    pa_diastolica: "Presión diastólica",
+                    temp_celcius: "Temperatura corporal",
+                    spo2: "Saturación de oxígeno",
+                    peso: "Peso",
+                    sono: "Sueño",
+                    exercicio: "Actividad física"
+                }
+            },
             categories: {
                 todas: "Todas las categorías",
                 pressao: "Presión arterial",
