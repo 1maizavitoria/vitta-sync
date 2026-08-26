@@ -17,6 +17,7 @@ public class EstabilidadeClinicaService {
     private final EstabilidadeClinicaRepository estabilidadeClinicaRepository;
 
     private static final int minimoRegistros = 3;
+    private static final int minimoFatoresIndiceGeral = 3;
     private static final int sonoMinimoSaudavel = 7;
     private static final int sonoMaximoSaudavel = 9;
     private static final int exercicioMinimoSaudavel = 60;
@@ -28,22 +29,20 @@ public class EstabilidadeClinicaService {
 
     public List<EstabilidadeClinicaDTO> calcularIndices(Integer pacienteId, List<SinaisVitais> sinais, List<Habitos> habitos) {
         List<EstabilidadeClinicaDTO> indices = new ArrayList<>();
-        if (sinais.size() < minimoRegistros && habitos.size() < minimoRegistros) {
-            indices.add(new EstabilidadeClinicaDTO("geral", null, "n/a", 1.0, LocalDateTime.now()));
-            return indices;
-        }
-
 
         indices.add(calcularIndiceSinal("fc_bpm", sinais.stream().map(SinaisVitais::getFcBpm).toList(), 1.0));
         indices.add(calcularIndiceSinal("fr_rpm", sinais.stream().map(SinaisVitais::getFrRpm).toList(), 1.0));
-        indices.add(calcularIndiceSinal("pa_sistolica", sinais.stream().map(SinaisVitais::getPaSistolica).toList(), 1.0));
-        indices.add(calcularIndiceSinal("pa_diastolica", sinais.stream().map(SinaisVitais::getPaDiastolica).toList(), 1.0));
+        indices.add(calcularIndicePressao(sinais, 1.0));
         indices.add(calcularIndiceSinal("temp_celcius", sinais.stream().map(SinaisVitais::getTempCelcius).toList(), 1.0));
         indices.add(calcularIndiceSinal("spo2", sinais.stream().map(SinaisVitais::getSpo2Porcento).toList(), 1.0));
         indices.add(calcularIndiceSinal("peso", sinais.stream().map(SinaisVitais::getPeso).toList(), 1.0));
 
         indices.add(calcularIndiceSono(habitos));
         indices.add(calcularIndiceExercicio(habitos));
+
+        long quantidadeFatoresValidos = indices.stream()
+                .filter(i -> i.getIndice() != null)
+                .count();
 
         double somaPesos = indices.stream()
                 .filter(i -> i.getIndice() != null)
@@ -55,7 +54,9 @@ public class EstabilidadeClinicaService {
                 .mapToDouble(i -> i.getIndice() * i.getPeso())
                 .sum();
 
-        Integer indiceGeral = somaPesos > 0 ? (int) Math.round(somaValores / somaPesos) : null;
+        Integer indiceGeral = quantidadeFatoresValidos >= minimoFatoresIndiceGeral && somaPesos > 0
+                ? (int) Math.round(somaValores / somaPesos)
+                : null;
 
         indices.add(new EstabilidadeClinicaDTO(
                 "geral",
@@ -66,6 +67,26 @@ public class EstabilidadeClinicaService {
         ));
 
         return indices;
+    }
+
+    private EstabilidadeClinicaDTO calcularIndicePressao(List<SinaisVitais> sinais, double peso) {
+        EstabilidadeClinicaDTO sistolica = calcularIndiceSinal(
+                "pa_sistolica",
+                sinais.stream().map(SinaisVitais::getPaSistolica).toList(),
+                peso
+        );
+        EstabilidadeClinicaDTO diastolica = calcularIndiceSinal(
+                "pa_diastolica",
+                sinais.stream().map(SinaisVitais::getPaDiastolica).toList(),
+                peso
+        );
+
+        if (sistolica.getIndice() == null || diastolica.getIndice() == null) {
+            return new EstabilidadeClinicaDTO("pressao", null, "n/a", peso, LocalDateTime.now());
+        }
+
+        int indice = Math.min(sistolica.getIndice(), diastolica.getIndice());
+        return new EstabilidadeClinicaDTO("pressao", indice, classificar(indice), peso, LocalDateTime.now());
     }
 
     private EstabilidadeClinicaDTO calcularIndiceSinal(String tipo, List<? extends Number> valores, double peso) {
