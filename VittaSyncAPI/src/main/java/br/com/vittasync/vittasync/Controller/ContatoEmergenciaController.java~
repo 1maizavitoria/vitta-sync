@@ -53,15 +53,11 @@ public class ContatoEmergenciaController {
         contato.setNome(dto.getNome());
         contato.setTelefone(dto.getTelefone());
         contato.setEmail(dto.getEmail());
-        contato.setReceberAlertaSinaisVitaisSaudavel(dto.getReceberAlertaSinaisVitaisSaudavel());
-        contato.setReceberAlertaSinaisVitaisModerado(dto.getReceberAlertaSinaisVitaisModerado());
-        contato.setReceberAlertaSinaisVitaisCritico(dto.getReceberAlertaSinaisVitaisCritico());
-        contato.setReceberAlertaHabitosSaudavel(dto.getReceberAlertaHabitosSaudavel());
-        contato.setReceberAlertaHabitosModerado(dto.getReceberAlertaHabitosModerado());
-        contato.setReceberAlertaHabitosCritico(dto.getReceberAlertaHabitosCritico());
-        contato.setReceberAlertaGeralSaudavel(dto.getReceberAlertaGeralSaudavel());
-        contato.setReceberAlertaGeralModerado(dto.getReceberAlertaGeralModerado());
-        contato.setReceberAlertaGeralCritico(dto.getReceberAlertaGeralCritico());
+        contato.setReceberAlertaSinaisVitais(dto.getReceberAlertaSinaisVitais());
+        contato.setReceberAlertaHabitos(dto.getReceberAlertaHabitos());
+        contato.setReceberAlertaEstabilidadeSaudavel(dto.getReceberAlertaEstabilidadeSaudavel());
+        contato.setReceberAlertaEstabilidadeModerado(dto.getReceberAlertaEstabilidadeModerado());
+        contato.setReceberAlertaEstabilidadeCritico(dto.getReceberAlertaEstabilidadeCritico());
         contato.setCanalEmail(dto.getCanalEmail());
         contato.setCanalSms(dto.getCanalSms());
 
@@ -107,15 +103,11 @@ public class ContatoEmergenciaController {
         contato.setTelefone(dto.getTelefone());
         contato.setEmail(dto.getEmail());
         contato.setPaciente(paciente);
-        contato.setReceberAlertaSinaisVitaisSaudavel(dto.getReceberAlertaSinaisVitaisSaudavel());
-        contato.setReceberAlertaSinaisVitaisModerado(dto.getReceberAlertaSinaisVitaisModerado());
-        contato.setReceberAlertaSinaisVitaisCritico(dto.getReceberAlertaSinaisVitaisCritico());
-        contato.setReceberAlertaHabitosSaudavel(dto.getReceberAlertaHabitosSaudavel());
-        contato.setReceberAlertaHabitosModerado(dto.getReceberAlertaHabitosModerado());
-        contato.setReceberAlertaHabitosCritico(dto.getReceberAlertaHabitosCritico());
-        contato.setReceberAlertaGeralSaudavel(dto.getReceberAlertaGeralSaudavel());
-        contato.setReceberAlertaGeralModerado(dto.getReceberAlertaGeralModerado());
-        contato.setReceberAlertaGeralCritico(dto.getReceberAlertaGeralCritico());
+        contato.setReceberAlertaSinaisVitais(dto.getReceberAlertaSinaisVitais());
+        contato.setReceberAlertaHabitos(dto.getReceberAlertaHabitos());
+        contato.setReceberAlertaEstabilidadeSaudavel(dto.getReceberAlertaEstabilidadeSaudavel());
+        contato.setReceberAlertaEstabilidadeModerado(dto.getReceberAlertaEstabilidadeModerado());
+        contato.setReceberAlertaEstabilidadeCritico(dto.getReceberAlertaEstabilidadeCritico());
         contato.setCanalEmail(dto.getCanalEmail());
         contato.setCanalSms(dto.getCanalSms());
 
@@ -149,15 +141,11 @@ public class ContatoEmergenciaController {
         dto.setEmail(entity.getEmail());
         dto.setDataRegistro(entity.getDataRegistro());
         dto.setDataModificacao(entity.getDataModificacao());
-        dto.setReceberAlertaSinaisVitaisSaudavel(entity.getReceberAlertaSinaisVitaisSaudavel());
-        dto.setReceberAlertaSinaisVitaisModerado(entity.getReceberAlertaSinaisVitaisModerado());
-        dto.setReceberAlertaSinaisVitaisCritico(entity.getReceberAlertaSinaisVitaisCritico());
-        dto.setReceberAlertaHabitosSaudavel(entity.getReceberAlertaHabitosSaudavel());
-        dto.setReceberAlertaHabitosModerado(entity.getReceberAlertaHabitosModerado());
-        dto.setReceberAlertaHabitosCritico(entity.getReceberAlertaHabitosCritico());
-        dto.setReceberAlertaGeralSaudavel(entity.getReceberAlertaGeralSaudavel());
-        dto.setReceberAlertaGeralModerado(entity.getReceberAlertaGeralModerado());
-        dto.setReceberAlertaGeralCritico(entity.getReceberAlertaGeralCritico());
+        dto.setReceberAlertaSinaisVitais(entity.getReceberAlertaSinaisVitais());
+        dto.setReceberAlertaHabitos(entity.getReceberAlertaHabitos());
+        dto.setReceberAlertaEstabilidadeSaudavel(entity.getReceberAlertaEstabilidadeSaudavel());
+        dto.setReceberAlertaEstabilidadeModerado(entity.getReceberAlertaEstabilidadeModerado());
+        dto.setReceberAlertaEstabilidadeCritico(entity.getReceberAlertaEstabilidadeCritico());
         dto.setCanalEmail(entity.getCanalEmail());
         dto.setCanalSms(entity.getCanalSms());
 

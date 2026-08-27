@@ -15,4 +15,9 @@ public interface EstabilidadeClinicaRepository extends JpaRepository<Estabilidad
     List<EstabilidadeClinica> findByPacienteIdAndTipoOrderByDataCalculoDesc(Integer pacienteId, String tipo);
 
     EstabilidadeClinica findTopByPacienteIdAndTipoOrderByDataCalculoDesc(Integer pacienteId, String tipo);
+
+    default String findUltimaCategoriaGeral(Integer pacienteId) {
+        EstabilidadeClinica ultima = findTopByPacienteIdAndTipoOrderByDataCalculoDesc(pacienteId, "geral");
+        return ultima != null ? ultima.getCategoria() : null;
+    }
 }

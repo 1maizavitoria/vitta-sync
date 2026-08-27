@@ -116,7 +116,7 @@ public class SinaisVitaisService {
     public List<SinaisVitais> findByPacienteId(Integer pacienteId) {
         return repository.findByPacienteId(pacienteId);
     }
-
+    
     public List<Integer> findTodosPacientesIds() {
         return repository.findTodosPacientesIds();
     }

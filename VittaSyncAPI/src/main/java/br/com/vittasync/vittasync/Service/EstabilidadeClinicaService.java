@@ -2,19 +2,25 @@ package br.com.vittasync.vittasync.Service;
 
 
 import br.com.vittasync.vittasync.DTO.EstabilidadeClinicaDTO;
+import br.com.vittasync.vittasync.Model.ContatoEmergencia;
 import br.com.vittasync.vittasync.Model.SinaisVitais;
 import br.com.vittasync.vittasync.Model.Habitos;
+import br.com.vittasync.vittasync.Model.EstabilidadeClinica;
 import br.com.vittasync.vittasync.Repository.EstabilidadeClinicaRepository;
+import br.com.vittasync.vittasync.Repository.ContatoEmergenciaRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.scheduling.annotation.Async;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
 
 
 @Service
 public class EstabilidadeClinicaService {
 
     private final EstabilidadeClinicaRepository estabilidadeClinicaRepository;
+    private final ContatoEmergenciaRepository contatoEmergenciaRepository;
+    private final NotificacaoService notificacaoService;
 
     private static final int minimoRegistros = 3;
     private static final int minimoFatoresIndiceGeral = 3;
@@ -23,11 +29,56 @@ public class EstabilidadeClinicaService {
     private static final int exercicioMinimoSaudavel = 60;
     private static final int semExercicioCriticoDias = 10;
 
-    public EstabilidadeClinicaService(EstabilidadeClinicaRepository estabilidadeClinicaRepository) {
+    public EstabilidadeClinicaService(
+            EstabilidadeClinicaRepository estabilidadeClinicaRepository,
+            ContatoEmergenciaRepository contatoEmergenciaRepository,
+            NotificacaoService notificacaoService
+    ) {
         this.estabilidadeClinicaRepository = estabilidadeClinicaRepository;
+        this.contatoEmergenciaRepository = contatoEmergenciaRepository;
+        this.notificacaoService = notificacaoService;
     }
 
-    public List<EstabilidadeClinicaDTO> calcularIndices(Integer pacienteId, List<SinaisVitais> sinais, List<Habitos> habitos) {
+    /**
+     * Método chamado após salvar/alterar sinais vitais ou hábitos.
+     * Só dispara alerta se a categoria geral mudar (ex.: saudável → moderado).
+     */
+    public void verificarMudancaEstabilidade(Integer pacienteId,
+                                             List<SinaisVitais> sinais,
+                                             List<Habitos> habitos) {
+        // calcula índices atuais
+        List<EstabilidadeClinicaDTO> indices = calcularIndices(pacienteId, sinais, habitos);
+
+        EstabilidadeClinicaDTO geralNovo = indices.stream()
+                .filter(i -> "geral".equals(i.getTipo()))
+                .findFirst()
+                .orElse(new EstabilidadeClinicaDTO("geral", null, "n/a", 1.0, LocalDateTime.now()));
+
+        // busca última categoria geral salva no banco
+        String categoriaAnterior = estabilidadeClinicaRepository.findUltimaCategoriaGeral(pacienteId);
+        String categoriaNova = geralNovo.getCategoria();
+
+        // ✅ dispara apenas se houve mudança de categoria
+        if (categoriaAnterior == null || !categoriaAnterior.equals(categoriaNova)) {
+            dispararAlertasDetalhados(pacienteId, indices, geralNovo);
+
+            // salva nova categoria geral para futuras comparações
+            EstabilidadeClinica registro = new EstabilidadeClinica();
+            registro.setPacienteId(pacienteId);
+            registro.setTipo("geral");
+            registro.setIndice(geralNovo.getIndice());
+            registro.setCategoria(categoriaNova);
+            registro.setDataCalculo(LocalDateTime.now());
+            estabilidadeClinicaRepository.save(registro);
+        }
+    }
+
+    /**
+     * Calcula todos os índices de estabilidade clínica (sinais vitais + hábitos).
+     */
+    public List<EstabilidadeClinicaDTO> calcularIndices(Integer pacienteId,
+                                                        List<SinaisVitais> sinais,
+                                                        List<Habitos> habitos) {
         List<EstabilidadeClinicaDTO> indices = new ArrayList<>();
 
         indices.add(calcularIndiceSinal("fc_bpm", sinais.stream().map(SinaisVitais::getFcBpm).toList(), 1.0));
@@ -36,37 +87,100 @@ public class EstabilidadeClinicaService {
         indices.add(calcularIndiceSinal("temp_celcius", sinais.stream().map(SinaisVitais::getTempCelcius).toList(), 1.0));
         indices.add(calcularIndiceSinal("spo2", sinais.stream().map(SinaisVitais::getSpo2Porcento).toList(), 1.0));
         indices.add(calcularIndiceSinal("peso", sinais.stream().map(SinaisVitais::getPeso).toList(), 1.0));
-
         indices.add(calcularIndiceSono(habitos));
         indices.add(calcularIndiceExercicio(habitos));
 
-        long quantidadeFatoresValidos = indices.stream()
-                .filter(i -> i.getIndice() != null)
-                .count();
-
-        double somaPesos = indices.stream()
-                .filter(i -> i.getIndice() != null)
-                .mapToDouble(EstabilidadeClinicaDTO::getPeso)
-                .sum();
-
-        double somaValores = indices.stream()
-                .filter(i -> i.getIndice() != null)
-                .mapToDouble(i -> i.getIndice() * i.getPeso())
-                .sum();
-
-        Integer indiceGeral = quantidadeFatoresValidos >= minimoFatoresIndiceGeral && somaPesos > 0
-                ? (int) Math.round(somaValores / somaPesos)
-                : null;
-
-        indices.add(new EstabilidadeClinicaDTO(
+        Integer indiceGeral = calcularIndiceGeral(indices);
+        EstabilidadeClinicaDTO geral = new EstabilidadeClinicaDTO(
                 "geral",
                 indiceGeral,
                 classificar(indiceGeral),
                 1.0,
                 LocalDateTime.now()
-        ));
+        );
+        indices.add(geral);
 
         return indices;
+    }
+
+    private Integer calcularIndiceGeral(List<EstabilidadeClinicaDTO> indices) {
+        long qtdValidos = indices.stream().filter(i -> i.getIndice() != null).count();
+        double somaPesos = indices.stream().filter(i -> i.getIndice() != null).mapToDouble(EstabilidadeClinicaDTO::getPeso).sum();
+        double somaValores = indices.stream().filter(i -> i.getIndice() != null).mapToDouble(i -> i.getIndice() * i.getPeso()).sum();
+
+        return qtdValidos >= minimoFatoresIndiceGeral && somaPesos > 0 ? (int) Math.round(somaValores / somaPesos) : null;
+    }
+
+    @Async
+    private void dispararAlertasDetalhados(Integer pacienteId,
+                                           List<EstabilidadeClinicaDTO> indices,
+                                           EstabilidadeClinicaDTO geral) {
+        List<ContatoEmergencia> contatos = contatoEmergenciaRepository.findByPacienteIdOrderByDataRegistroAsc(pacienteId);
+
+        for (ContatoEmergencia contato : contatos) {
+            Map<String, Map<String, List<EstabilidadeClinicaDTO>>> agrupadosPorCategoria = new HashMap<>();
+
+            for (EstabilidadeClinicaDTO indice : indices) {
+                if (indice.getIndice() == null) continue;
+
+                String tipo = indice.getTipo();
+                String categoria = indice.getCategoria().toLowerCase();
+
+                boolean deveNotificar = verificarFlags(contato, tipo, categoria);
+
+                if (deveNotificar) {
+                    agrupadosPorCategoria
+                            .computeIfAbsent(categoria, k -> new HashMap<>())
+                            .computeIfAbsent(tipo, k -> new ArrayList<>())
+                            .add(indice);
+                }
+            }
+
+            for (var entry : agrupadosPorCategoria.entrySet()) {
+                String categoria = entry.getKey();
+                Map<String, List<EstabilidadeClinicaDTO>> tipos = entry.getValue();
+
+                StringBuilder mensagem = new StringBuilder("Alterações de estabilidade detectadas:\n");
+
+                tipos.forEach((tipo, lista) -> {
+                    mensagem.append("- ").append(tipo).append(": ");
+                    mensagem.append(lista.stream()
+                            .map(i -> i.getIndice() + " (" + i.getCategoria() + ")")
+                            .collect(Collectors.joining(", ")));
+                    mensagem.append("\n");
+                });
+
+                mensagem.append("\nEstabilidade geral: ")
+                        .append(geral.getIndice())
+                        .append(" (").append(geral.getCategoria()).append(")");
+
+                notificacaoService.enviarAlertaEmergencia(contato, mensagem.toString(), categoria);
+            }
+        }
+    }
+
+    private boolean verificarFlags(ContatoEmergencia contato, String tipo, String categoria) {
+        return switch (tipo) {
+            case "fc_bpm", "fr_rpm", "pressao", "temp_celcius", "spo2", "peso" -> switch (categoria) {
+                case "saudavel" -> Boolean.TRUE.equals(contato.getReceberAlertaSinaisVitaisSaudavel());
+                case "moderado" -> Boolean.TRUE.equals(contato.getReceberAlertaSinaisVitaisModerado());
+                case "critico" -> Boolean.TRUE.equals(contato.getReceberAlertaSinaisVitaisCritico());
+                default -> false;
+            };
+            case "sono", "exercicio" -> switch (categoria) {
+                case "saudavel" -> Boolean.TRUE.equals(contato.getReceberAlertaHabitosSaudavel());
+                case "moderado" -> Boolean.TRUE.equals(contato.getReceberAlertaHabitosModerado());
+                case "critico" -> Boolean.TRUE.equals(contato.getReceberAlertaHabitosCritico());
+                default -> false;
+            };
+            case "geral" -> switch (categoria) {
+                case "saudavel" -> Boolean.TRUE.equals(contato.getReceberAlertaGeralSaudavel());
+                case "moderado" -> Boolean.TRUE.equals(contato.getReceberAlertaGeralModerado());
+                case "critico" -> Boolean.TRUE.equals(contato.getReceberAlertaGeralCritico());
+                default -> false;
+            };
+            default -> false;
+        };
     }
 
     private EstabilidadeClinicaDTO calcularIndicePressao(List<SinaisVitais> sinais, double peso) {
@@ -168,9 +282,9 @@ public class EstabilidadeClinicaService {
             case "pa_sistolica" -> (valor >= 90 && valor <= 120) ? 9 : (valor < 80 || valor > 140) ? 3 : 6;
             case "pa_diastolica" -> (valor >= 60 && valor <= 80) ? 9 : (valor < 50 || valor > 100) ? 3 : 6;
             case "temp_celcius" -> (valor >= 36 && valor <= 37.5) ? 9 : (valor < 35 || valor > 39) ? 3 : 6;
-            case "spo2" -> (valor >= 95) ? 10 : (valor < 90) ? 3 : 6;
-            case "peso" -> 7;
-            default -> 5;
+            case "spo2" -> (valor >= 95) ? 9 : (valor < 90) ? 3 : 6;
+            case "peso" -> 6;
+            default -> 6;
         };
     }
 
@@ -179,5 +293,14 @@ public class EstabilidadeClinicaService {
         if (indice >= 8) return "saudavel";
         if (indice >= 5) return "moderado";
         return "critico";
+    }
+
+    public void testarDisparoAlerta(Integer pacienteId, List<EstabilidadeClinicaDTO> indicesTeste) {
+        EstabilidadeClinicaDTO geral = indicesTeste.stream()
+                .filter(i -> "geral".equals(i.getTipo()))
+                .findFirst()
+                .orElse(new EstabilidadeClinicaDTO("geral", null, "n/a", 1.0, LocalDateTime.now()));
+
+        dispararAlertasDetalhados(pacienteId, indicesTeste, geral);
     }
 }

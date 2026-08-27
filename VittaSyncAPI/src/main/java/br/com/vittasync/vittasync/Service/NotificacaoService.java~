@@ -57,9 +57,9 @@ public class NotificacaoService {
 
 
         String tituloEmail = switch (categoria.toLowerCase()) {
-            case "saudavel" -> "🟢 VittaSync - Paciente " + nomePaciente;
-            case "moderado" -> "🟡️ VittaSync - Paciente " + nomePaciente;
-            case "critico" -> "🔴 VittaSync - Paciente " + nomePaciente;
+            case "saudavel" -> "✅ VittaSync - Paciente " + nomePaciente;
+            case "moderado" -> "⚠️ VittaSync - Paciente " + nomePaciente;
+            case "critico" -> "🚨 VittaSync - Paciente " + nomePaciente;
             default -> "ℹ️ VittaSync - Paciente " + nomePaciente;
         };
 

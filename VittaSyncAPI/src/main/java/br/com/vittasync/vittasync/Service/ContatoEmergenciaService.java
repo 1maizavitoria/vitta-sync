@@ -58,6 +58,18 @@ public class ContatoEmergenciaService {
 
         existente.setNome(contato.getNome());
         existente.setTelefone(contato.getTelefone());
+        existente.setEmail(contato.getEmail());
+        existente.setReceberAlertaSinaisVitaisSaudavel(contato.getReceberAlertaSinaisVitaisSaudavel());
+        existente.setReceberAlertaSinaisVitaisModerado(contato.getReceberAlertaSinaisVitaisModerado());
+        existente.setReceberAlertaSinaisVitaisCritico(contato.getReceberAlertaSinaisVitaisCritico());
+        existente.setReceberAlertaHabitosSaudavel(contato.getReceberAlertaHabitosSaudavel());
+        existente.setReceberAlertaHabitosModerado(contato.getReceberAlertaHabitosModerado());
+        existente.setReceberAlertaHabitosCritico(contato.getReceberAlertaHabitosCritico());
+        existente.setReceberAlertaGeralSaudavel(contato.getReceberAlertaGeralSaudavel());
+        existente.setReceberAlertaGeralModerado(contato.getReceberAlertaGeralModerado());
+        existente.setReceberAlertaGeralCritico(contato.getReceberAlertaGeralCritico());
+        existente.setCanalEmail(contato.getCanalEmail());
+        existente.setCanalSms(contato.getCanalSms());
         existente.setDataModificacao(LocalDateTime.now());
 
         return repository.save(existente);
