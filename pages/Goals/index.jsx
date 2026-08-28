@@ -31,7 +31,7 @@ const emptyForm = { nome: "", indicador: "personalizado", direcao: "aumentar", u
 
 export default function Goals() {
     const theme = useTheme();
-    const { t } = useI18n();
+    const { t, formatDate, formatMeasurement, formatPercent } = useI18n();
     const { showAlert } = useAlert();
     const { selectedPatient } = usePatient();
     const isDoctor = localStorage.getItem("tipo")?.toLowerCase() === "saude";
@@ -202,12 +202,12 @@ export default function Goals() {
                                     <Chip size="small" color={failed ? "error" : done ? "success" : "primary"} label={statusLabel(goal.status)} />
                                 </Stack>
                                 <Typography color="text.secondary" mt={1}>{indicatorLabel(goal.indicador)} · {typeLabel(goal.tipoDado)}</Typography>
-                                <Stack direction="row" justifyContent="space-between" mt={3}><Typography variant="body2">{t(limitGoal ? "goals.limitUsed" : "goals.progress")}</Typography><Typography variant="body2" fontWeight={800}>{rawProgress.toFixed(0)}%</Typography></Stack>
+                                <Stack direction="row" justifyContent="space-between" mt={3}><Typography variant="body2">{t(limitGoal ? "goals.limitUsed" : "goals.progress")}</Typography><Typography variant="body2" fontWeight={800}>{formatPercent(rawProgress)}%</Typography></Stack>
                                 <LinearProgress color={exceeded || failed ? "error" : done ? "success" : "primary"} variant="determinate" value={progress} sx={{ mt: 1, height: 9, borderRadius: 9 }} />
-                                {exceeded && <Typography variant="body2" color="error.main" fontWeight={700} mt={1}>{t("goals.limitExceeded")}: {(Number(goal.valorAtual) - Number(goal.valorAlvo)).toFixed(1)} {goal.unidade}</Typography>}
-                                <Stack direction="row" justifyContent="space-between" mt={2}><Typography color="text.secondary">{t("goals.current")}</Typography><Typography fontWeight={700}>{goal.valorAtual ?? "—"} {goal.unidade}</Typography></Stack>
-                                <Stack direction="row" justifyContent="space-between"><Typography color="text.secondary">{t("goals.target")}</Typography><Typography fontWeight={700}>{goal.valorAlvo} {goal.unidade}</Typography></Stack>
-                                <Stack direction="row" justifyContent="space-between"><Typography color="text.secondary">{t("goals.deadline")}</Typography><Typography>{goal.dataLimite ? new Date(`${goal.dataLimite}T00:00:00`).toLocaleDateString() : "—"}</Typography></Stack>
+                                {exceeded && <Typography variant="body2" color="error.main" fontWeight={700} mt={1}>{t("goals.limitExceeded")}: {formatMeasurement(Number(goal.valorAtual) - Number(goal.valorAlvo), goal.unidade, { maximumFractionDigits: 1 })}</Typography>}
+                                <Stack direction="row" justifyContent="space-between" mt={2}><Typography color="text.secondary">{t("goals.current")}</Typography><Typography fontWeight={700}>{goal.valorAtual == null ? "—" : formatMeasurement(goal.valorAtual, goal.unidade)}</Typography></Stack>
+                                <Stack direction="row" justifyContent="space-between"><Typography color="text.secondary">{t("goals.target")}</Typography><Typography fontWeight={700}>{formatMeasurement(goal.valorAlvo, goal.unidade)}</Typography></Stack>
+                                <Stack direction="row" justifyContent="space-between"><Typography color="text.secondary">{t("goals.deadline")}</Typography><Typography>{goal.dataLimite ? formatDate(goal.dataLimite) : "—"}</Typography></Stack>
                             </CardContent>
                             <CardActions sx={{ px: 2, pb: 2, gap: 1, flexWrap: "wrap" }}>
                                 {!isDoctor && !terminal && goal.indicador === "personalizado" && <ButtonUI sx={{ py: 0.75, px: 1.5 }} onClick={() => { setManualGoal(goal); setManualValue("0"); }}>{t("goals.updateValue")}</ButtonUI>}
@@ -301,11 +301,11 @@ export default function Goals() {
                 <Stack spacing={0.75} sx={{ mt: 1, mb: 1.5 }}>
                     <Stack direction="row" justifyContent="space-between" gap={2}>
                         <Typography color="text.secondary">{t("goals.current")}</Typography>
-                        <Typography fontWeight={700}>{manualCurrentValue} {manualGoal?.unidade}</Typography>
+                        <Typography fontWeight={700}>{formatMeasurement(manualCurrentValue, manualGoal?.unidade)}</Typography>
                     </Stack>
                     <Stack direction="row" justifyContent="space-between" gap={2}>
                         <Typography color="text.secondary">{t("goals.manualNewValue")}</Typography>
-                        <Typography color="primary.main" fontWeight={800}>{manualNewValue} {manualGoal?.unidade}</Typography>
+                        <Typography color="primary.main" fontWeight={800}>{formatMeasurement(manualNewValue, manualGoal?.unidade)}</Typography>
                     </Stack>
                 </Stack>
 

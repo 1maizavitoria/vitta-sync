@@ -98,7 +98,7 @@ export default function EventCard({ event }) {
     const theme = useTheme();
     const vitta = theme.vitta;
     const isDark = theme.palette.mode === "dark";
-    const { t } = useI18n();
+    const { t, formatDateTime } = useI18n();
     const priorityStyle = getPriorityStyle(event.prioridade, isDark);
     const priorityLabel =
         t(`activity.priorities.${event.prioridade}`) ||
@@ -207,7 +207,7 @@ export default function EventCard({ event }) {
                     fontWeight: 700
                 }}
             >
-                {new Date(event.criadoEm).toLocaleString("pt-BR")}
+                {formatDateTime(event.criadoEm)}
             </Typography>
         </Box>
     );

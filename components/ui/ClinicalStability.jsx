@@ -17,7 +17,7 @@ const categoryStyles = {
     "n/a": { color: "#64748b", background: "rgba(100, 116, 139, 0.13)", accent: "#94a3b8" }
 };
 
-export default function ClinicalStability({ items = [], period, t }) {
+export default function ClinicalStability({ items = [], period, t, formatNumber }) {
     const theme = useTheme();
     const general = items.find((item) => item.tipo === "geral");
     const factors = useMemo(
@@ -32,7 +32,7 @@ export default function ClinicalStability({ items = [], period, t }) {
 
     const generalCategory = general?.categoria || "n/a";
     const generalStyle = categoryStyles[generalCategory] || categoryStyles["n/a"];
-    const generalValue = general?.indice != null ? `${general.indice}/10` : "—";
+    const generalValue = general?.indice != null ? `${formatNumber(general.indice)}/10` : "—";
 
     return (
         <Paper
@@ -115,7 +115,7 @@ export default function ClinicalStability({ items = [], period, t }) {
                                                 {t(`dashboard.stability.factors.${factor.tipo}`)}
                                             </Typography>
                                             <Typography sx={{ fontWeight: 900, color: factorStyle.color, whiteSpace: "nowrap" }}>
-                                                {factor.indice != null ? `${factor.indice}/10` : "—"}
+                                                {factor.indice != null ? `${formatNumber(factor.indice)}/10` : "—"}
                                             </Typography>
                                         </Box>
                                         <Box sx={{ mt: 1, display: "flex", alignItems: "center", justifyContent: "space-between", gap: 1 }}>
@@ -124,9 +124,9 @@ export default function ClinicalStability({ items = [], period, t }) {
                                                 label={t(`dashboard.stability.categories.${factorCategory}`)}
                                                 sx={{ color: factorStyle.color, bgcolor: factorStyle.background, fontWeight: 800 }}
                                             />
-                                            <Tooltip title={t("dashboard.stability.weight").replace("{weight}", factor.peso ?? 1)} arrow>
+                                            <Tooltip title={t("dashboard.stability.weight").replace("{weight}", formatNumber(factor.peso ?? 1))} arrow>
                                                 <Typography variant="caption" color="text.secondary" sx={{ cursor: "help" }}>
-                                                    {t("dashboard.stability.weightShort").replace("{weight}", factor.peso ?? 1)}
+                                                    {t("dashboard.stability.weightShort").replace("{weight}", formatNumber(factor.peso ?? 1))}
                                                 </Typography>
                                             </Tooltip>
                                         </Box>

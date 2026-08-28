@@ -54,7 +54,7 @@ export function HabitTracker() {
     const { showAlert } = useAlert();
     const theme = useTheme();
     const isDark = theme.palette.mode === "dark";
-    const { t } = useI18n();
+    const { t, formatDate, formatDateTime, formatNumber } = useI18n();
 
     const [editing, setEditing] = useState(false);
     const [addHabit, setAddHabit] = useState(false);
@@ -151,13 +151,6 @@ export function HabitTracker() {
     function isValidHours(value) {
         const num = Number(value);
         return !isNaN(num) && num >= 0 && num <= 24;
-    }
-
-    function formatDateString(dateString) {
-        if (!dateString) return "N/A";
-
-        const [year, month, day] = dateString.split("-");
-        return `${day}/${month}/${year}`;
     }
 
     function canRegister() {
@@ -353,9 +346,9 @@ export function HabitTracker() {
                         title={t("healthTracker.habits.sleepTime")}
                         error={(error && !habitInputs.timeSleep) || errorSl}
                         type="number"
-                        value={lastHabit ? lastHabit.horasSono : t("healthTracker.common.notAvailable")}
+                        value={lastHabit ? formatNumber(lastHabit.horasSono) : t("healthTracker.common.notAvailable")}
                         unit={t("healthTracker.common.hours")}
-                        date={lastHabit ? new Date(lastHabit.dataRegistro).toLocaleString() : t("healthTracker.common.notAvailable")}
+                        date={lastHabit ? formatDateTime(lastHabit.dataRegistro) : t("healthTracker.common.notAvailable")}
                         inputValue={habitInputs.timeSleep}
                         onInputChange={(event) => {
                             updateInput("timeSleep", event.target.value);
@@ -374,9 +367,9 @@ export function HabitTracker() {
                         title={t("healthTracker.habits.exerciseTime")}
                         error={(error && !habitInputs.timeExercise) || errorEx}
                         type="number"
-                        value={lastHabit ? lastHabit.minutosExercicio : t("healthTracker.common.notAvailable")}
+                        value={lastHabit ? formatNumber(lastHabit.minutosExercicio) : t("healthTracker.common.notAvailable")}
                         unit={t("healthTracker.common.minutes")}
-                        date={lastHabit ? new Date(lastHabit.dataRegistro).toLocaleString() : t("healthTracker.common.notAvailable")}
+                        date={lastHabit ? formatDateTime(lastHabit.dataRegistro) : t("healthTracker.common.notAvailable")}
                         inputValue={habitInputs.timeExercise}
                         onInputChange={(event) => {
                             updateInput("timeExercise", event.target.value);
@@ -394,8 +387,8 @@ export function HabitTracker() {
                         icon={<CalendarIcon />}
                         title={t("healthTracker.common.date")}
                         error={(error && !habitInputs.date) || errorDate}
-                        value={lastHabit ? formatDateString(lastHabit.dataReferencia) : t("healthTracker.common.notAvailable")}
-                        date={lastHabit ? new Date(lastHabit.dataRegistro).toLocaleString() : t("healthTracker.common.notAvailable")}
+                        value={lastHabit ? formatDate(lastHabit.dataReferencia) : t("healthTracker.common.notAvailable")}
+                        date={lastHabit ? formatDateTime(lastHabit.dataRegistro) : t("healthTracker.common.notAvailable")}
                         inputValue={habitInputs.date}
                         onInputChange={(newValue) => {
                             updateInput("date", newValue);

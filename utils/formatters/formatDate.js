@@ -10,20 +10,46 @@ export function daysMap() {
     }
 };
 
-// export function formatDate(dateString) {
-//     const [year, month, day] = dateString.split('-');
+function toDate(value) {
+    if (!value) return null;
 
-//     return `${day}/${month}/${year}`;
-// }
-
-export function formatDate(dateString) {
-
-    if (!dateString) {
-        return "";
+    if (value instanceof Date) {
+        return Number.isNaN(value.getTime()) ? null : value;
     }
 
-    const date =
-        new Date(dateString);
+    if (typeof value === "string" && /^\d{4}-\d{2}-\d{2}$/.test(value)) {
+        const [year, month, day] = value.split("-").map(Number);
+        return new Date(year, month - 1, day);
+    }
 
-    return date.toLocaleDateString("pt-BR");
+    const date = new Date(value);
+    return Number.isNaN(date.getTime()) ? null : date;
+}
+
+export function formatDate(value, locale = "pt-BR", options = {}) {
+    const date = toDate(value);
+
+    if (!date) return "";
+
+    return new Intl.DateTimeFormat(locale, {
+        day: "2-digit",
+        month: "2-digit",
+        year: "numeric",
+        ...options
+    }).format(date);
+}
+
+export function formatDateTime(value, locale = "pt-BR", options = {}) {
+    const date = toDate(value);
+
+    if (!date) return "";
+
+    return new Intl.DateTimeFormat(locale, {
+        day: "2-digit",
+        month: "2-digit",
+        year: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+        ...options
+    }).format(date);
 }

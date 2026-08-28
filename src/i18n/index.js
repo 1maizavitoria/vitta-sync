@@ -1,5 +1,13 @@
 import { createContext, createElement, useContext, useMemo, useState } from "react";
 
+import { formatCurrency as formatCurrencyValue } from "../../utils/formatters/formatCurrency";
+import { formatDate as formatDateValue, formatDateTime as formatDateTimeValue } from "../../utils/formatters/formatDate";
+import {
+    formatMeasurement as formatMeasurementValue,
+    formatNumber as formatNumberValue,
+    formatPercent as formatPercentValue
+} from "../../utils/formatters/formatNumber";
+
 export const languages = [
     { code: "pt-BR", label: "PT" },
     { code: "en", label: "EN" },
@@ -1971,8 +1979,32 @@ const dictionaries = {
 
 const I18nContext = createContext(null);
 
+const localeByLanguage = {
+    "pt-BR": "pt-BR",
+    en: "en-US",
+    es: "es-ES"
+};
+
+const dateInputFormatByLanguage = {
+    "pt-BR": "DD/MM/YYYY",
+    en: "MM/DD/YYYY",
+    es: "DD/MM/YYYY"
+};
+
 function readPath(source, path) {
     return path.split(".").reduce((value, key) => value?.[key], source);
+}
+
+function createFormatter(locale) {
+    return {
+        locale,
+        formatNumber: (value, options) => formatNumberValue(value, locale, options),
+        formatDate: (value, options) => formatDateValue(value, locale, options),
+        formatDateTime: (value, options) => formatDateTimeValue(value, locale, options),
+        formatCurrency: (value, currency = "BRL", options) => formatCurrencyValue(value, locale, currency, options),
+        formatPercent: (value, options) => formatPercentValue(value, locale, options),
+        formatMeasurement: (value, unit, options) => formatMeasurementValue(value, unit, locale, options)
+    };
 }
 
 export function LanguageProvider({ children }) {
@@ -1980,15 +2012,20 @@ export function LanguageProvider({ children }) {
 
     const value = useMemo(() => {
         const dictionary = dictionaries[language] || dictionaries["pt-BR"];
+        const locale = localeByLanguage[language] || localeByLanguage["pt-BR"];
+        const formatter = createFormatter(locale);
 
         return {
             language,
             languages,
+            locale,
+            dateInputFormat: dateInputFormatByLanguage[language] || dateInputFormatByLanguage["pt-BR"],
             setLanguage: (nextLanguage) => {
                 localStorage.setItem("vitta-language", nextLanguage);
                 setLanguageState(nextLanguage);
             },
-            t: (path) => readPath(dictionary, path) ?? readPath(dictionaries["pt-BR"], path) ?? path
+            t: (path) => readPath(dictionary, path) ?? readPath(dictionaries["pt-BR"], path) ?? path,
+            ...formatter
         };
     }, [language]);
 

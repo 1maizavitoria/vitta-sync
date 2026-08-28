@@ -44,7 +44,7 @@ export default function HealthHub() {
     const theme = useTheme();
     const vitta = theme.vitta;
     const isDark = theme.palette.mode === "dark";
-    const { t } = useI18n();
+    const { t, formatDateTime } = useI18n();
     const [dragging, setDragging] = useState(false);
     const [documents, setDocuments] = useState([]);
     const [selectedFile, setSelectedFile] = useState(null);
@@ -554,7 +554,7 @@ export default function HealthHub() {
                                             mt: 1.25
                                         }}
                                     >
-                                        {new Date(doc.dataUpload).toLocaleString("pt-BR")}
+                                        {formatDateTime(doc.dataUpload)}
                                     </Typography>
                                 </Box>
                             </Box>

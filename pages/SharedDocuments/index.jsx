@@ -63,7 +63,7 @@ export default function SharedDocuments() {
     const theme = useTheme();
     const vitta = theme.vitta;
     const isDark = theme.palette.mode === "dark";
-    const { t } = useI18n();
+    const { t, formatDateTime } = useI18n();
     const [documents, setDocuments] = useState([]);
     const [loading, setLoading] = useState(false);
     const [openViewer, setOpenViewer] = useState(false);
@@ -336,7 +336,7 @@ export default function SharedDocuments() {
                                             mt: 1.25
                                         }}
                                     >
-                                        {new Date(doc.dataUpload).toLocaleString("pt-BR")}
+                                        {formatDateTime(doc.dataUpload)}
                                     </Typography>
                                 </Box>
                             </Box>

@@ -48,7 +48,7 @@ function getDateRange(days) {
     return { inicio: toApiDate(start), fim: toApiDate(end) };
 }
 
-function getLatestValue(category) {
+function getLatestValue(category, formatMeasurement, formatNumber) {
     if (category.codigo === "pressao") {
         const systolic = category.series
             .find((serie) => serie.codigo === "sistolica")
@@ -58,7 +58,7 @@ function getLatestValue(category) {
             ?.pontos.at(-1)?.valor;
 
         if (systolic != null && diastolic != null) {
-            return `${systolic}/${diastolic} ${category.unidade}`;
+            return `${formatNumber(systolic)}/${formatNumber(diastolic)} ${category.unidade}`;
         }
     }
 
@@ -70,13 +70,13 @@ function getLatestValue(category) {
         (first, second) => new Date(second.data) - new Date(first.data)
     )[0];
 
-    return lastPoint ? `${lastPoint.valor} ${category.unidade}` : null;
+    return lastPoint ? formatMeasurement(lastPoint.valor, category.unidade) : null;
 }
 
 export default function Dashboard() {
     const theme = useTheme();
     const { selectedPatient } = usePatient();
-    const { t, language } = useI18n();
+    const { t, formatDate, formatMeasurement, formatNumber } = useI18n();
     const [period, setPeriod] = useState(7);
     const [categoryFilter, setCategoryFilter] = useState("todas");
     const [dashboard, setDashboard] = useState(null);
@@ -252,6 +252,7 @@ export default function Dashboard() {
                                 items={clinicalStability}
                                 period={period}
                                 t={t}
+                                formatNumber={formatNumber}
                             />
 
                             <Box
@@ -263,7 +264,7 @@ export default function Dashboard() {
                                 }}
                             >
                                 {categories.map((category) => {
-                                    const latestValue = getLatestValue(category);
+                                    const latestValue = getLatestValue(category, formatMeasurement, formatNumber);
                                     return (
                                         <Paper
                                             key={category.codigo}
@@ -296,7 +297,9 @@ export default function Dashboard() {
                                         category={category}
                                         title={t(`dashboard.categories.${category.codigo}`)}
                                         seriesNames={seriesNames}
-                                        locale={language}
+                                        formatDate={formatDate}
+                                        formatMeasurement={formatMeasurement}
+                                        formatNumber={formatNumber}
                                         emptyText={t("dashboard.emptyPeriod")}
                                     />
                                 ))}

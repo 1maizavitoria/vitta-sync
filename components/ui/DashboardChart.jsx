@@ -29,19 +29,18 @@ function mergeSeries(series) {
     );
 }
 
-export default function DashboardChart({ category, title, seriesNames, locale, emptyText }) {
+export default function DashboardChart({
+    category,
+    title,
+    seriesNames,
+    formatDate,
+    formatMeasurement,
+    formatNumber,
+    emptyText
+}) {
     const theme = useTheme();
     const isDark = theme.palette.mode === "dark";
     const chartData = mergeSeries(category.series);
-    const dateFormatter = new Intl.DateTimeFormat(locale, {
-        day: "2-digit",
-        month: "2-digit"
-    });
-    const fullDateFormatter = new Intl.DateTimeFormat(locale, {
-        day: "2-digit",
-        month: "long",
-        year: "numeric"
-    });
 
     return (
         <Paper
@@ -107,7 +106,11 @@ export default function DashboardChart({ category, title, seriesNames, locale, e
                             />
                             <XAxis
                                 dataKey="data"
-                                tickFormatter={(value) => dateFormatter.format(new Date(value))}
+                                tickFormatter={(value) => formatDate(value, {
+                                    day: "2-digit",
+                                    month: "2-digit",
+                                    year: undefined
+                                })}
                                 stroke={isDark ? "rgba(226, 232, 240, 0.5)" : "rgba(71, 85, 105, 0.68)"}
                                 tick={{ fontSize: 12, fontWeight: 700 }}
                                 axisLine={{ stroke: isDark ? "rgba(148, 163, 184, 0.18)" : "rgba(15, 23, 42, 0.14)" }}
@@ -119,11 +122,16 @@ export default function DashboardChart({ category, title, seriesNames, locale, e
                                 domain={["auto", "auto"]}
                                 axisLine={false}
                                 tickLine={false}
+                                tickFormatter={(value) => formatNumber(value)}
                             />
                             <Tooltip
-                                labelFormatter={(value) => fullDateFormatter.format(new Date(value))}
+                                labelFormatter={(value) => formatDate(value, {
+                                    day: "2-digit",
+                                    month: "long",
+                                    year: "numeric"
+                                })}
                                 formatter={(value, name) => [
-                                    `${value} ${category.unidade}`,
+                                    formatMeasurement(value, category.unidade),
                                     seriesNames[name] || name
                                 ]}
                                 contentStyle={{

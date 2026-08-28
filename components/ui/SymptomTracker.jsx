@@ -54,7 +54,7 @@ export function SymptomTracker() {
     const { showAlert } = useAlert();
     const theme = useTheme();
     const isDark = theme.palette.mode === "dark";
-    const { t } = useI18n();
+    const { t, formatDate, formatDateTime, formatNumber } = useI18n();
 
     const [editing, setEditing] = useState(false);
     const [addSymptom, setAddSymptom] = useState(false);
@@ -146,13 +146,6 @@ export function SymptomTracker() {
     function isValidIntencity(value) {
         const num = Number(value);
         return !isNaN(num) && num >= 1 && num <= 10;
-    }
-
-    function formatDateString(dateString) {
-        if (!dateString) return "N/A";
-
-        const [year, month, day] = dateString.split("-");
-        return `${day}/${month}/${year}`;
     }
 
     function canRegister() {
@@ -343,7 +336,7 @@ export function SymptomTracker() {
                         error={(error && !symptomInputs.symptom) || errorIntensity}
                         type="text"
                         value={lastSymptom ? lastSymptom.sintoma : t("healthTracker.common.notAvailable")}
-                        date={lastSymptom ? new Date(lastSymptom.dataRegistro).toLocaleString() : t("healthTracker.common.notAvailable")}
+                        date={lastSymptom ? formatDateTime(lastSymptom.dataRegistro) : t("healthTracker.common.notAvailable")}
                         inputValue={symptomInputs.symptom}
                         onInputChange={(event) => {
                             updateInput("symptom", event.target.value);
@@ -362,8 +355,8 @@ export function SymptomTracker() {
                         title={t("healthTracker.symptoms.intensity")}
                         error={(error && !symptomInputs.intencity) || errorSymptom}
                         type="number"
-                        value={lastSymptom ? lastSymptom.intensidadeDor : t("healthTracker.common.notAvailable")}
-                        date={lastSymptom ? new Date(lastSymptom.dataRegistro).toLocaleString() : t("healthTracker.common.notAvailable")}
+                        value={lastSymptom ? formatNumber(lastSymptom.intensidadeDor) : t("healthTracker.common.notAvailable")}
+                        date={lastSymptom ? formatDateTime(lastSymptom.dataRegistro) : t("healthTracker.common.notAvailable")}
                         inputValue={symptomInputs.intencity}
                         onInputChange={(event) => {
                             updateInput("intencity", event.target.value);
@@ -381,8 +374,8 @@ export function SymptomTracker() {
                         icon={<CalendarIcon />}
                         title={t("healthTracker.common.date")}
                         error={(error && !symptomInputs.date) || errorDate}
-                        value={lastSymptom ? formatDateString(lastSymptom.dataReferencia) : t("healthTracker.common.notAvailable")}
-                        date={lastSymptom ? new Date(lastSymptom.dataRegistro).toLocaleString() : t("healthTracker.common.notAvailable")}
+                        value={lastSymptom ? formatDate(lastSymptom.dataReferencia) : t("healthTracker.common.notAvailable")}
+                        date={lastSymptom ? formatDateTime(lastSymptom.dataRegistro) : t("healthTracker.common.notAvailable")}
                         inputValue={symptomInputs.date}
                         onInputChange={(newValue) => {
                             updateInput("date", newValue);

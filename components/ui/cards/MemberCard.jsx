@@ -8,7 +8,6 @@ import { useTheme } from "@mui/material/styles";
 
 import DeleteIcon from "@mui/icons-material/Delete";
 
-import { formatDate } from "../../../utils/formatters/formatDate";
 import { useI18n } from "../../../src/i18n";
 
 export default function MemberCard({
@@ -21,7 +20,7 @@ export default function MemberCard({
     const theme = useTheme();
     const vitta = theme.vitta;
     const isDark = theme.palette.mode === "dark";
-    const { t } = useI18n();
+    const { t, formatDate } = useI18n();
 
     const getIniciais = (nome) => {
         if (!nome) return "";

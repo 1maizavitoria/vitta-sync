@@ -4,17 +4,20 @@ import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { useTheme } from '@mui/material/styles';
 import dayjs from "dayjs";
 
+import { useI18n } from "../../src/i18n";
+
 export default function DatePickerUI({
     label,
     value,
     onChange,
     error,
     dateLimit,
-    format = "DD/MM/YYYY",
+    format,
     ...props
 }) {
     const theme = useTheme();
     const isDark = theme.palette.mode === "dark";
+    const { dateInputFormat } = useI18n();
     const { sx, ...datePickerProps } = props;
 
     return (
@@ -26,7 +29,7 @@ export default function DatePickerUI({
                 onChange={(newValue) => {
                     onChange(newValue ? newValue.format("YYYY-MM-DD") : null);
                 }}
-                format={format}
+                format={format || dateInputFormat}
                 slotProps={{
                     textField: {
                         variant: "outlined",

@@ -60,7 +60,7 @@ export function VitalTracker() {
     const { selectedPatient } = usePatient();
     const theme = useTheme();
     const isDark = theme.palette.mode === "dark";
-    const { t } = useI18n();
+    const { t, formatDateTime, formatNumber } = useI18n();
 
     const [editing, setEditing] = useState(false);
     const [addVital, setAddVital] = useState(false);
@@ -399,9 +399,9 @@ export function VitalTracker() {
                         icon={<ScaleIcon />}
                         title={t("healthTracker.vitals.weight")}
                         type="number"
-                        value={lastVital ? lastVital.peso : t("healthTracker.common.notAvailable")}
+                        value={lastVital ? formatNumber(lastVital.peso) : t("healthTracker.common.notAvailable")}
                         unit="kg"
-                        date={lastVital ? new Date(lastVital.dataRegistro).toLocaleString() : t("healthTracker.common.notAvailable")}
+                        date={lastVital ? formatDateTime(lastVital.dataRegistro) : t("healthTracker.common.notAvailable")}
                         inputValue={vitalInputs.peso}
                         onInputChange={(event) => updateInput("peso", event.target.value)}
                         userName={lastVital?.usuarioNome}
@@ -417,9 +417,9 @@ export function VitalTracker() {
                         title={t("healthTracker.vitals.heartRate")}
                         error={(error && !vitalInputs.frequenciaCardiaca) || errorFC}
                         type="number"
-                        value={lastVital ? lastVital.fcBpm : t("healthTracker.common.notAvailable")}
+                        value={lastVital ? formatNumber(lastVital.fcBpm) : t("healthTracker.common.notAvailable")}
                         unit="bpm"
-                        date={lastVital ? new Date(lastVital.dataRegistro).toLocaleString() : t("healthTracker.common.notAvailable")}
+                        date={lastVital ? formatDateTime(lastVital.dataRegistro) : t("healthTracker.common.notAvailable")}
                         inputValue={vitalInputs.frequenciaCardiaca}
                         onInputChange={(event) => {
                             updateInput("frequenciaCardiaca", event.target.value);
@@ -438,9 +438,9 @@ export function VitalTracker() {
                         title={t("healthTracker.vitals.respiratoryRate")}
                         error={(error && !vitalInputs.frequenciaRespiratoria) || errorFR}
                         type="number"
-                        value={lastVital ? lastVital.frRpm : t("healthTracker.common.notAvailable")}
+                        value={lastVital ? formatNumber(lastVital.frRpm) : t("healthTracker.common.notAvailable")}
                         unit="rpm"
-                        date={lastVital ? new Date(lastVital.dataRegistro).toLocaleString() : t("healthTracker.common.notAvailable")}
+                        date={lastVital ? formatDateTime(lastVital.dataRegistro) : t("healthTracker.common.notAvailable")}
                         inputValue={vitalInputs.frequenciaRespiratoria}
                         onInputChange={(event) => {
                             updateInput("frequenciaRespiratoria", event.target.value);
@@ -459,9 +459,9 @@ export function VitalTracker() {
                         title={t("healthTracker.vitals.oxygenSaturation")}
                         error={(error && !vitalInputs.saturacao) || errorSPO2}
                         type="number"
-                        value={lastVital ? lastVital.spo2Porcento : t("healthTracker.common.notAvailable")}
+                        value={lastVital ? formatNumber(lastVital.spo2Porcento) : t("healthTracker.common.notAvailable")}
                         unit="%"
-                        date={lastVital ? new Date(lastVital.dataRegistro).toLocaleString() : t("healthTracker.common.notAvailable")}
+                        date={lastVital ? formatDateTime(lastVital.dataRegistro) : t("healthTracker.common.notAvailable")}
                         inputValue={vitalInputs.saturacao}
                         onInputChange={(event) => {
                             updateInput("saturacao", event.target.value);
@@ -480,9 +480,9 @@ export function VitalTracker() {
                         title={t("healthTracker.vitals.bodyTemperature")}
                         error={(error && !vitalInputs.temperatura) || errorTemp}
                         type="number"
-                        value={lastVital ? lastVital.tempCelcius : t("healthTracker.common.notAvailable")}
+                        value={lastVital ? formatNumber(lastVital.tempCelcius) : t("healthTracker.common.notAvailable")}
                         unit="°C"
-                        date={lastVital ? new Date(lastVital.dataRegistro).toLocaleString() : t("healthTracker.common.notAvailable")}
+                        date={lastVital ? formatDateTime(lastVital.dataRegistro) : t("healthTracker.common.notAvailable")}
                         inputValue={vitalInputs.temperatura}
                         onInputChange={(event) => {
                             updateInput("temperatura", event.target.value);
@@ -501,9 +501,9 @@ export function VitalTracker() {
                         title={t("healthTracker.vitals.systolicPressure")}
                         error={(error && !vitalInputs.sistolica) || errorSistolica}
                         type="number"
-                        value={lastVital ? lastVital.paSistolica : t("healthTracker.common.notAvailable")}
+                        value={lastVital ? formatNumber(lastVital.paSistolica) : t("healthTracker.common.notAvailable")}
                         unit="mmHg"
-                        date={lastVital ? new Date(lastVital.dataRegistro).toLocaleString() : t("healthTracker.common.notAvailable")}
+                        date={lastVital ? formatDateTime(lastVital.dataRegistro) : t("healthTracker.common.notAvailable")}
                         inputValue={vitalInputs.sistolica}
                         onInputChange={(event) => {
                             updateInput("sistolica", event.target.value);
@@ -522,9 +522,9 @@ export function VitalTracker() {
                         title={t("healthTracker.vitals.diastolicPressure")}
                         error={(error && !vitalInputs.diastolica) || errorDiastolica}
                         type="number"
-                        value={lastVital ? lastVital.paDiastolica : t("healthTracker.common.notAvailable")}
+                        value={lastVital ? formatNumber(lastVital.paDiastolica) : t("healthTracker.common.notAvailable")}
                         unit="mmHg"
-                        date={lastVital ? new Date(lastVital.dataRegistro).toLocaleString() : t("healthTracker.common.notAvailable")}
+                        date={lastVital ? formatDateTime(lastVital.dataRegistro) : t("healthTracker.common.notAvailable")}
                         inputValue={vitalInputs.diastolica}
                         onInputChange={(event) => {
                             updateInput("diastolica", event.target.value);
