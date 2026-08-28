@@ -12,6 +12,7 @@ import br.com.vittasync.vittasync.Repository.HabitosRepository;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 
@@ -68,5 +69,45 @@ public class EstabilidadeClinicaController {
                 estabilidadeClinicaService.calcularIndices(paciente.getId(), sinais, habitos);
 
         return ResponseEntity.ok(indices);
+    }
+
+    @GetMapping("/teste-alerta/{cpf}/{tipo}/{categoria}")
+    public ResponseEntity<Void> testarAlerta(
+            @PathVariable String cpf,
+            @PathVariable String tipo,
+            @PathVariable String categoria,
+            @RequestHeader("Authorization") String authHeader
+    ) {
+        String token = authHeader.replace("Bearer ", "");
+        String cpfDoToken = jwtService.extrairCpf(token);
+
+        Usuario usuarioLogado = usuarioService.searchByCpf(cpfDoToken);
+        Usuario paciente = usuarioService.searchByCpf(cpf);
+
+        if (!permissaoService.podeVisualizarPaciente(usuarioLogado.getId(), paciente.getId())) {
+            return ResponseEntity.status(403).build();
+        }
+
+        EstabilidadeClinicaDTO indiceTeste = new EstabilidadeClinicaDTO(
+                tipo,
+                7,
+                categoria,
+                1.0,
+                LocalDateTime.now()
+        );
+
+        EstabilidadeClinicaDTO geral = new EstabilidadeClinicaDTO(
+                "geral",
+                6,
+                "moderado",
+                1.0,
+                LocalDateTime.now()
+        );
+
+        List<EstabilidadeClinicaDTO> indicesTeste = List.of(indiceTeste, geral);
+
+        estabilidadeClinicaService.testarDisparoAlerta(paciente.getId(), indicesTeste);
+
+        return ResponseEntity.ok().build();
     }
 }

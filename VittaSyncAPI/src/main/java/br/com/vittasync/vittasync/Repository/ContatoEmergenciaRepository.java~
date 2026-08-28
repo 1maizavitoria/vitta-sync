@@ -1,4 +1,29 @@
 package br.com.vittasync.vittasync.Repository;
 
-public class ContatoEmergenciaRepository {
+
+import br.com.vittasync.vittasync.Model.ContatoEmergencia;
+import br.com.vittasync.vittasync.Model.Usuario;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
+import java.util.List;
+
+
+@Repository
+public interface ContatoEmergenciaRepository extends JpaRepository<ContatoEmergencia, Integer> {
+
+    List<ContatoEmergencia> findByPaciente(Usuario paciente);
+
+    int countByPaciente(Usuario paciente);
+
+    List<ContatoEmergencia> findByPacienteAndReceberAlertaSinaisVitaisTrue(Usuario paciente);
+
+    List<ContatoEmergencia> findByPacienteAndReceberAlertaHabitosTrue(Usuario paciente);
+
+    List<ContatoEmergencia> findByPacienteAndReceberAlertaEstabilidadeSaudavelTrue(Usuario paciente);
+
+    List<ContatoEmergencia> findByPacienteAndReceberAlertaEstabilidadeModeradoTrue(Usuario paciente);
+
+    List<ContatoEmergencia> findByPacienteAndReceberAlertaEstabilidadeCriticoTrue(Usuario paciente);
+
+    List<ContatoEmergencia> findByPacienteIdOrderByDataRegistroAsc(Integer pacienteId);
 }

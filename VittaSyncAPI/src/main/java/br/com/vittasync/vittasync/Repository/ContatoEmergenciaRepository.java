@@ -14,4 +14,6 @@ public interface ContatoEmergenciaRepository extends JpaRepository<ContatoEmerge
     List<ContatoEmergencia> findByPaciente(Usuario paciente);
 
     int countByPaciente(Usuario paciente);
+
+    List<ContatoEmergencia> findByPacienteIdOrderByDataRegistroAsc(Integer pacienteId);
 }

@@ -46,7 +46,7 @@ public class SmsService {
             case "critico" -> "🚨";
             default -> "ℹ️";
         };
-
+        
         String mensagem = emoji + " VittaSync - Paciente " + nomePaciente + ": " + categoria;
 
         enviarSMS(telefone, mensagem);

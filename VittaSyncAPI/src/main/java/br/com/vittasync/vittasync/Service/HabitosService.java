@@ -2,13 +2,11 @@ package br.com.vittasync.vittasync.Service;
 
 
 import br.com.vittasync.vittasync.Exception.RecursoNaoEncontradoException;
-import br.com.vittasync.vittasync.Model.DiarioSintomas;
 import br.com.vittasync.vittasync.Model.Habitos;
 import br.com.vittasync.vittasync.Repository.HabitosRepository;
 import br.com.vittasync.vittasync.Util.EventoPrioridades;
 import br.com.vittasync.vittasync.Util.EventoTipos;
 import org.springframework.stereotype.Service;
-
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -33,8 +31,8 @@ public class HabitosService {
     public Habitos create(Habitos habito, Integer usuarioLogadoId) {
         habito.setDataRegistro(LocalDateTime.now());
         habito.setDataModificacao(null);
-        Habitos salvo =
-                repository.save(habito);
+
+        Habitos salvo = repository.save(habito);
 
         eventoPacienteService.criarEvento(
                 habito.getPaciente().getId(),
@@ -49,10 +47,7 @@ public class HabitosService {
                 EventoPrioridades.NORMAL
         );
 
-        eventoClinicoService.analisarHabitos(
-                salvo,
-                usuarioLogadoId
-        );
+        eventoClinicoService.analisarHabitos(salvo, usuarioLogadoId);
 
         return salvo;
     }
@@ -60,19 +55,20 @@ public class HabitosService {
     public Habitos update(Integer id, Habitos novosDados, Integer usuarioLogadoId) {
         Habitos existente = repository.findById(id)
                 .orElseThrow(() -> new RecursoNaoEncontradoException("Hábito(s) não encontrado(s)"));
+
         existente.setHorasSono(novosDados.getHorasSono());
         existente.setMinutosExercicio(novosDados.getMinutosExercicio());
         existente.setDataReferencia(novosDados.getDataReferencia());
         existente.setDataModificacao(LocalDateTime.now());
-        Habitos atualizado =
-                repository.save(existente);
+
+        Habitos atualizado = repository.save(existente);
 
         eventoPacienteService.criarEvento(
                 existente.getPaciente().getId(),
                 usuarioLogadoId,
                 EventoTipos.HABITOS_EDITADOS,
-                "Habito atualizado",
-                "Um habito foi atualizado",
+                "Hábito atualizado",
+                "Um hábito foi atualizado",
                 EventoPacienteService.metadata(
                         "patientName",
                         existente.getPaciente().getNome()
@@ -87,13 +83,10 @@ public class HabitosService {
         if (!repository.existsById(id)) {
             throw new RecursoNaoEncontradoException("Hábito(s) não encontrado(s)");
         }
-        Habitos habitos =
-                repository.findById(id)
-                        .orElseThrow(() ->
-                                new RecursoNaoEncontradoException(
-                                        "Habitos não encontrado"
-                                )
-                        );
+
+        Habitos habitos = repository.findById(id)
+                .orElseThrow(() -> new RecursoNaoEncontradoException("Hábito(s) não encontrado(s)"));
+
         eventoPacienteService.criarEvento(
                 habitos.getPaciente().getId(),
                 usuarioLogadoId,
@@ -106,10 +99,15 @@ public class HabitosService {
                 ),
                 EventoPrioridades.NORMAL
         );
+
         repository.deleteById(id);
     }
 
     public List<Habitos> findByPacienteCpf(String cpf) {
         return repository.findByPacienteCpf(cpf);
+    }
+
+    public List<Habitos> findByPacienteId(Integer pacienteId) {
+        return repository.findByPacienteId(pacienteId);
     }
 }
