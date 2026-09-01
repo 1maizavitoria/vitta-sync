@@ -24,7 +24,7 @@ public class Habitos {
     @Column(name = "minutos_exercicio")
     private Integer minutosExercicio;
 
-    @Column(name = "indice_repouso", nullable = true)
+    @Column(name = "indice_repouso")
     private Double indiceRepouso;
 
     @Column(name = "repouso")

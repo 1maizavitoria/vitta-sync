@@ -52,6 +52,12 @@ public class SmsService {
         enviarSMS(telefone, mensagem);
     }
 
+    public void enviarAlertaRepouso(String telefone, String nomePaciente) {
+        String mensagem = "🔵 VittaSync - Repouso recomendado para paciente " + nomePaciente
+                + " devido ao desequilíbrio entre sono e exercício.";
+        enviarSMS(telefone, mensagem);
+    }
+
 
     private void enviarSMS(String telefone, String mensagem) {
         try {

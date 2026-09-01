@@ -43,7 +43,6 @@ public class HabitosController {
         this.estabilidadeClinicaService = estabilidadeClinicaService;
     }
 
-
     @PostMapping("/cadastrar/{cpf}")
     public ResponseEntity<HabitosOutputDTO> create(@PathVariable String cpf,
                                                    @RequestHeader("Authorization") String authHeader,
@@ -63,9 +62,9 @@ public class HabitosController {
         entity.setHorasSono(dto.getHorasSono());
         entity.setMinutosExercicio(dto.getMinutosExercicio());
         entity.setDataReferencia(dto.getDataReferencia());
-        entity.setCanal(dto.getCanal());
 
         Habitos salvo = service.create(entity, usuarioLogado.getId());
+
 
         List<SinaisVitais> sinaisPaciente = sinaisVitaisService.findByPacienteCpf(cpf);
         List<Habitos> habitosPaciente = service.findByPacienteCpf(cpf);
@@ -73,7 +72,6 @@ public class HabitosController {
 
         return ResponseEntity.ok(toOutputDTO(salvo));
     }
-
 
     @PutMapping("/editar/{id}/{cpf}")
     public ResponseEntity<HabitosOutputDTO> update(@PathVariable Integer id,
@@ -94,7 +92,6 @@ public class HabitosController {
         entity.setHorasSono(dto.getHorasSono());
         entity.setMinutosExercicio(dto.getMinutosExercicio());
         entity.setDataReferencia(dto.getDataReferencia());
-        entity.setCanal(dto.getCanal());
 
         Habitos atualizado = service.update(id, entity, usuarioLogado.getId());
 
@@ -104,7 +101,6 @@ public class HabitosController {
 
         return ResponseEntity.ok(toOutputDTO(atualizado));
     }
-
 
     @DeleteMapping("/deletar/{id}/{cpf}")
     public ResponseEntity<Void> delete(@PathVariable Integer id,
@@ -123,7 +119,6 @@ public class HabitosController {
         service.delete(id, usuarioLogado.getId());
         return ResponseEntity.noContent().build();
     }
-
 
     @GetMapping("/getHabitos/{cpf}")
     public ResponseEntity<List<HabitosOutputDTO>> list(@PathVariable String cpf,
@@ -147,9 +142,6 @@ public class HabitosController {
         dto.setId(entity.getId());
         dto.setHorasSono(entity.getHorasSono());
         dto.setMinutosExercicio(entity.getMinutosExercicio());
-        dto.setIndiceRepouso(entity.getIndiceRepouso());
-        dto.setRepouso(entity.getRepouso());
-        dto.setCanal(entity.getCanal());
         dto.setDataReferencia(entity.getDataReferencia());
         dto.setDataRegistro(entity.getDataRegistro());
         dto.setDataModificacao(entity.getDataModificacao());

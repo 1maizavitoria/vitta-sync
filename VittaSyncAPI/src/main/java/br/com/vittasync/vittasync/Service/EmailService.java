@@ -57,6 +57,17 @@ public class EmailService {
         enviarEmailPersonalizado(to, titulo, mensagem);
     }
 
+    public void enviarAlertaRepouso(String to, String nomePaciente) {
+        String assunto = "🔵 VittaSync - Repouso recomendado para paciente " + nomePaciente;
+        String corpo = "Olá,\n\n"
+                + "🔵 VittaSync - Paciente " + nomePaciente + "\n\n"
+                + "O paciente " + nomePaciente + " precisa de repouso devido ao desequilíbrio entre sono e exercício.\n\n"
+                + "Este alerta foi enviado pela plataforma VittaSync para auxiliar no acompanhamento contínuo da saúde.\n\n"
+                + "Atenciosamente,\nEquipe VittaSync";
+
+        enviarEmailPersonalizado(to, assunto, corpo);
+    }
+
     public void enviarEmailPersonalizado(String to, String subject, String corpo) {
         SimpleMailMessage message = new SimpleMailMessage();
         message.setFrom("no.reply.vittasync@gmail.com");

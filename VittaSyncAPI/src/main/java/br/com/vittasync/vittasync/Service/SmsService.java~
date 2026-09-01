@@ -46,9 +46,15 @@ public class SmsService {
             case "critico" -> "🚨";
             default -> "ℹ️";
         };
-        
+
         String mensagem = emoji + " VittaSync - Paciente " + nomePaciente + ": " + categoria;
 
+        enviarSMS(telefone, mensagem);
+    }
+
+    public void enviarAlertaRepouso(String telefone, String nomePaciente) {
+        String mensagem = "🔵 VittaSync - Repouso recomendado para paciente" + nomePaciente
+                + " devido ao desequilíbrio entre sono e exercício.";
         enviarSMS(telefone, mensagem);
     }
 
