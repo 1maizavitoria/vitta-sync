@@ -2,6 +2,10 @@ import { useEffect, useState } from "react";
 
 import {
     Box,
+    Checkbox,
+    Chip,
+    Divider,
+    FormControlLabel,
     Grid,
     IconButton,
     Paper,
@@ -15,6 +19,7 @@ import CheckIcon from "@mui/icons-material/Check";
 import CloseIcon from "@mui/icons-material/Close";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 import EditOutlinedIcon from "@mui/icons-material/EditOutlined";
+import EmailOutlinedIcon from "@mui/icons-material/EmailOutlined";
 import PersonOutlineIcon from "@mui/icons-material/PersonOutline";
 import PhoneOutlinedIcon from "@mui/icons-material/PhoneOutlined";
 
@@ -33,8 +38,120 @@ import { useI18n } from "../../../src/i18n";
 
 const emptyContact = {
     nome: "",
-    telefone: ""
+    telefone: "",
+    email: "",
+    receberAlertaSinaisVitaisSaudavel: false,
+    receberAlertaSinaisVitaisModerado: false,
+    receberAlertaSinaisVitaisCritico: true,
+    receberAlertaHabitosSaudavel: false,
+    receberAlertaHabitosModerado: true,
+    receberAlertaHabitosCritico: true,
+    receberAlertaGeralSaudavel: false,
+    receberAlertaGeralModerado: false,
+    receberAlertaGeralCritico: true,
+    canalEmail: true,
+    canalSms: false
 };
+
+const alertGroups = [
+    {
+        labelKey: "vitalSigns",
+        fields: [
+            ["receberAlertaSinaisVitaisSaudavel", "healthy"],
+            ["receberAlertaSinaisVitaisModerado", "moderate"],
+            ["receberAlertaSinaisVitaisCritico", "critical"]
+        ]
+    },
+    {
+        labelKey: "habits",
+        fields: [
+            ["receberAlertaHabitosSaudavel", "healthy"],
+            ["receberAlertaHabitosModerado", "moderate"],
+            ["receberAlertaHabitosCritico", "critical"]
+        ]
+    },
+    {
+        labelKey: "generalStability",
+        fields: [
+            ["receberAlertaGeralSaudavel", "healthy"],
+            ["receberAlertaGeralModerado", "moderate"],
+            ["receberAlertaGeralCritico", "critical"]
+        ]
+    }
+];
+
+function AlertPreferences({ data, onChange, t }) {
+    return (
+        <Box mt={2}>
+            <Divider sx={{ mb: 2 }} />
+
+            <Typography fontWeight={800} mb={0.5}>
+                {t("reports.emergencyContacts.channels")}
+            </Typography>
+            <Typography variant="body2" color="text.secondary" mb={1}>
+                {t("reports.emergencyContacts.channelsDescription")}
+            </Typography>
+
+            <Box display="flex" flexWrap="wrap" gap={1}>
+                <FormControlLabel
+                    control={
+                        <Checkbox
+                            checked={Boolean(data.canalEmail)}
+                            onChange={(event) => onChange("canalEmail", event.target.checked)}
+                        />
+                    }
+                    label={t("reports.emergencyContacts.emailChannel")}
+                />
+                <FormControlLabel
+                    control={
+                        <Checkbox
+                            checked={Boolean(data.canalSms)}
+                            onChange={(event) => onChange("canalSms", event.target.checked)}
+                        />
+                    }
+                    label={t("reports.emergencyContacts.smsChannel")}
+                />
+            </Box>
+
+            <Typography fontWeight={800} mt={2} mb={0.5}>
+                {t("reports.emergencyContacts.alertPreferences")}
+            </Typography>
+
+            {alertGroups.map((group) => (
+                <Box key={group.labelKey} mt={1.5}>
+                    <Typography variant="body2" fontWeight={800} color="text.secondary">
+                        {t(`reports.emergencyContacts.${group.labelKey}`)}
+                    </Typography>
+                    <Box display="flex" flexWrap="wrap" gap={0.5}>
+                        {group.fields.map(([field, label]) => (
+                            <FormControlLabel
+                                key={field}
+                                control={
+                                    <Checkbox
+                                        size="small"
+                                        checked={Boolean(data[field])}
+                                        onChange={(event) => onChange(field, event.target.checked)}
+                                    />
+                                }
+                                label={t(`reports.emergencyContacts.${label}`)}
+                            />
+                        ))}
+                    </Box>
+                </Box>
+            ))}
+        </Box>
+    );
+}
+
+function toEditableContact(contact = {}) {
+    return Object.keys(emptyContact).reduce(
+        (result, field) => ({
+            ...result,
+            [field]: contact[field] ?? emptyContact[field]
+        }),
+        {}
+    );
+}
 
 const iconButtonSx = {
     add: {
@@ -84,7 +201,8 @@ export default function EmergencyContacts() {
     const [editData, setEditData] = useState(emptyContact);
     const [hasError, setHasError] = useState({
         nome: false,
-        telefone: false
+        telefone: false,
+        email: false
     });
 
     const userType = localStorage.getItem("tipo")?.toLowerCase();
@@ -124,7 +242,8 @@ export default function EmergencyContacts() {
     function resetErrors() {
         setHasError({
             nome: false,
-            telefone: false
+            telefone: false,
+            email: false
         });
     }
 
@@ -136,7 +255,8 @@ export default function EmergencyContacts() {
     function validateContact(data) {
         const newErrors = {
             nome: false,
-            telefone: false
+            telefone: false,
+            email: false
         };
 
         if (data.nome.trim().length < 5) {
@@ -149,18 +269,26 @@ export default function EmergencyContacts() {
             showAlert("warning", t("reports.emergencyContacts.invalidPhone"));
         }
 
+        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email.trim())) {
+            newErrors.email = true;
+            showAlert("warning", t("reports.emergencyContacts.invalidEmail"));
+        }
+
+        if (!data.canalEmail && !data.canalSms) {
+            showAlert("warning", t("reports.emergencyContacts.selectChannel"));
+            setHasError(newErrors);
+            return false;
+        }
+
         setHasError(newErrors);
 
-        return !(newErrors.nome || newErrors.telefone);
+        return !(newErrors.nome || newErrors.telefone || newErrors.email);
     }
 
     function startEdit(contact) {
         setAdding(false);
         setEditingId(contact.id);
-        setEditData({
-            nome: contact.nome,
-            telefone: contact.telefone
-        });
+        setEditData(toEditableContact(contact));
         resetErrors();
     }
 
@@ -250,7 +378,8 @@ export default function EmergencyContacts() {
         setFormData(emptyContact);
         setHasError({
             nome: false,
-            telefone: false
+            telefone: false,
+            email: false
         });
         fetchContacts();
     }, [selectedPatient?.cpf]);
@@ -399,7 +528,37 @@ export default function EmergencyContacts() {
                                                 }}
                                             />
                                         </Grid>
+
+                                        <Grid item xs={12}>
+                                            <InputUI
+                                                label={t("reports.emergencyContacts.email")}
+                                                type="email"
+                                                value={editData.email}
+                                                error={hasError.email}
+                                                onChange={(event) => {
+                                                    setEditData({
+                                                        ...editData,
+                                                        email: event.target.value
+                                                    });
+                                                    setHasError({
+                                                        ...hasError,
+                                                        email: false
+                                                    });
+                                                }}
+                                            />
+                                        </Grid>
                                     </Grid>
+
+                                    <AlertPreferences
+                                        data={editData}
+                                        t={t}
+                                        onChange={(field, value) => {
+                                            setEditData((current) => ({
+                                                ...current,
+                                                [field]: value
+                                            }));
+                                        }}
+                                    />
 
                                     <Box display="flex" justifyContent="flex-end" gap={1} mt={1}>
                                         <Tooltip title={t("reports.profile.cancel")}>
@@ -485,6 +644,63 @@ export default function EmergencyContacts() {
                                             >
                                                 {formatPhone(contact.telefone)}
                                             </Typography>
+                                        </Box>
+
+                                        <Box
+                                            display="flex"
+                                            alignItems="center"
+                                            gap={1}
+                                            mt={0.75}
+                                            sx={{ minWidth: 0 }}
+                                        >
+                                            <EmailOutlinedIcon
+                                                sx={{
+                                                    fontSize: 20,
+                                                    color: "secondary.main",
+                                                    flex: "0 0 auto"
+                                                }}
+                                            />
+                                            <Typography
+                                                sx={{
+                                                    color: "text.secondary",
+                                                    overflow: "hidden",
+                                                    textOverflow: "ellipsis",
+                                                    whiteSpace: "nowrap"
+                                                }}
+                                            >
+                                                {contact.email}
+                                            </Typography>
+                                        </Box>
+
+                                        <Box display="flex" flexWrap="wrap" gap={0.75} mt={1.25}>
+                                            {contact.canalEmail && (
+                                                <Chip
+                                                    size="small"
+                                                    label={t("reports.emergencyContacts.emailChannel")}
+                                                    color="primary"
+                                                    variant="outlined"
+                                                />
+                                            )}
+                                            {contact.canalSms && (
+                                                <Chip
+                                                    size="small"
+                                                    label={t("reports.emergencyContacts.smsChannel")}
+                                                    color="secondary"
+                                                    variant="outlined"
+                                                />
+                                            )}
+                                            {contact.receberAlertaSinaisVitaisCritico && (
+                                                <Chip
+                                                    size="small"
+                                                    label={t("reports.emergencyContacts.criticalAlerts")}
+                                                    sx={{
+                                                        color: "#b91c1c",
+                                                        borderColor: "rgba(220, 38, 38, 0.35)",
+                                                        bgcolor: "rgba(220, 38, 38, 0.06)"
+                                                    }}
+                                                    variant="outlined"
+                                                />
+                                            )}
                                         </Box>
                                     </Box>
 
@@ -593,7 +809,39 @@ export default function EmergencyContacts() {
                                 }}
                             />
                         </Grid>
+
+                        <Grid item xs={12}>
+                            <InputUI
+                                label={t("reports.emergencyContacts.email")}
+                                type="email"
+                                error={hasError.email}
+                                fullWidth
+                                value={formData.email}
+                                onChange={(event) => {
+                                    setHasError({
+                                        ...hasError,
+                                        email: false
+                                    });
+
+                                    setFormData({
+                                        ...formData,
+                                        email: event.target.value
+                                    });
+                                }}
+                            />
+                        </Grid>
                     </Grid>
+
+                    <AlertPreferences
+                        data={formData}
+                        t={t}
+                        onChange={(field, value) => {
+                            setFormData((current) => ({
+                                ...current,
+                                [field]: value
+                            }));
+                        }}
+                    />
 
                     <Box display="flex" justifyContent="flex-end" gap={1} mt={1}>
                         <Tooltip title={t("reports.profile.cancel")}>
