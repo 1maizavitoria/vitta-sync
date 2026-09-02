@@ -81,6 +81,8 @@ public class SinaisVitaisService {
                 EventoPrioridades.NORMAL
         );
 
+        eventoClinicoService.analisarSinaisVitais(atualizado, usuarioLogadoId);
+
         return atualizado;
     }
 

@@ -3,6 +3,7 @@ package br.com.vittasync.vittasync.Service;
 
 import br.com.vittasync.vittasync.Model.ContatoEmergencia;
 import br.com.vittasync.vittasync.Model.Usuario;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 
@@ -48,6 +49,7 @@ public class NotificacaoService {
         }
     }
 
+    @Async
     public void enviarAlertaEmergencia(
             ContatoEmergencia contato,
             String mensagemAgrupada,

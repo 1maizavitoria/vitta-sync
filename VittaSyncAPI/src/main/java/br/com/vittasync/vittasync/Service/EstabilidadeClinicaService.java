@@ -9,7 +9,6 @@ import br.com.vittasync.vittasync.Model.EstabilidadeClinica;
 import br.com.vittasync.vittasync.Repository.EstabilidadeClinicaRepository;
 import br.com.vittasync.vittasync.Repository.ContatoEmergenciaRepository;
 import org.springframework.stereotype.Service;
-import org.springframework.scheduling.annotation.Async;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -111,7 +110,6 @@ public class EstabilidadeClinicaService {
         return qtdValidos >= minimoFatoresIndiceGeral && somaPesos > 0 ? (int) Math.round(somaValores / somaPesos) : null;
     }
 
-    @Async
     private void dispararAlertasDetalhados(Integer pacienteId,
                                            List<EstabilidadeClinicaDTO> indices,
                                            EstabilidadeClinicaDTO geral) {
