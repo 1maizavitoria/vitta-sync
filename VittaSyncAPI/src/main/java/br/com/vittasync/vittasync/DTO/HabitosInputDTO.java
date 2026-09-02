@@ -3,7 +3,6 @@ package br.com.vittasync.vittasync.DTO;
 
 import jakarta.validation.constraints.*;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 
 
 public class HabitosInputDTO {
@@ -17,10 +16,10 @@ public class HabitosInputDTO {
     @NotNull(message = "Data de referência é obrigatória")
     private LocalDate dataReferencia;
 
-    private LocalDateTime dataRegistro;
-    private LocalDateTime dataModificacao;
+    private String canal;
 
     public HabitosInputDTO() {}
+
 
     public Integer getHorasSono() { return horasSono; }
     public void setHorasSono(Integer horasSono) { this.horasSono = horasSono; }
@@ -31,9 +30,6 @@ public class HabitosInputDTO {
     public LocalDate getDataReferencia() { return dataReferencia; }
     public void setDataReferencia(LocalDate dataReferencia) { this.dataReferencia = dataReferencia; }
 
-    public LocalDateTime getDataRegistro() { return dataRegistro; }
-    public void setDataRegistro(LocalDateTime dataRegistro) { this.dataRegistro = dataRegistro; }
-
-    public LocalDateTime getDataModificacao() { return dataModificacao; }
-    public void setDataModificacao(LocalDateTime dataModificacao) { this.dataModificacao = dataModificacao; }
+    public String getCanal() { return canal; }
+    public void setCanal(String canal) { this.canal = canal; }
 }

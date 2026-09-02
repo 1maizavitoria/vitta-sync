@@ -59,9 +59,9 @@ public class NotificacaoService {
 
 
         String tituloEmail = switch (categoria.toLowerCase()) {
-            case "saudavel" -> "🟢 VittaSync - Paciente " + nomePaciente;
-            case "moderado" -> "🟡️ VittaSync - Paciente " + nomePaciente;
-            case "critico" -> "🔴 VittaSync - Paciente " + nomePaciente;
+            case "saudavel" -> "🟢 VittaSync - Estabilidade SAUDÁVEL do paciente " + nomePaciente;
+            case "moderado" -> "🟡️ VittaSync - Estabilidade MODERADA do paciente " + nomePaciente;
+            case "critico" -> "🔴 VittaSync - Estabilidade CRÍTICA do paciente " + nomePaciente;
             default -> "ℹ️ VittaSync - Paciente " + nomePaciente;
         };
 
@@ -84,4 +84,19 @@ public class NotificacaoService {
             );
         }
     }
+
+    public void enviarAlertaRepouso(ContatoEmergencia contato, String canal) {
+        String nomePaciente = contato.getPaciente().getNome();
+
+        switch (canal.toLowerCase()) {
+            case "sms" -> smsService.enviarAlertaRepouso(contato.getTelefone(), nomePaciente);
+            case "email" -> emailService.enviarAlertaRepouso(contato.getEmail(), nomePaciente);
+            case "ambos" -> {
+                smsService.enviarAlertaRepouso(contato.getTelefone(), nomePaciente);
+                emailService.enviarAlertaRepouso(contato.getEmail(), nomePaciente);
+            }
+            default -> throw new RuntimeException("Canal inválido");
+        }
+    }
+
 }

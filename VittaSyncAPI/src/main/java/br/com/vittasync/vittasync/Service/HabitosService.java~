@@ -3,7 +3,6 @@ package br.com.vittasync.vittasync.Service;
 import br.com.vittasync.vittasync.Exception.RecursoNaoEncontradoException;
 import br.com.vittasync.vittasync.Model.Habitos;
 import br.com.vittasync.vittasync.Model.ContatoEmergencia;
-import br.com.vittasync.vittasync.Model.Usuario;
 import br.com.vittasync.vittasync.Repository.HabitosRepository;
 import br.com.vittasync.vittasync.Util.EventoPrioridades;
 import br.com.vittasync.vittasync.Util.EventoTipos;
@@ -18,20 +17,17 @@ public class HabitosService {
     private final EventoPacienteService eventoPacienteService;
     private final EventoClinicoService eventoClinicoService;
     private final NotificacaoService notificacaoService;
-    private final ContatoEmergenciaService contatoEmergenciaService;
 
     public HabitosService(
             HabitosRepository repository,
             EventoPacienteService eventoPacienteService,
             EventoClinicoService eventoClinicoService,
-            NotificacaoService notificacaoService,
-            ContatoEmergenciaService contatoEmergenciaService
+            NotificacaoService notificacaoService
     ) {
         this.repository = repository;
         this.eventoPacienteService = eventoPacienteService;
         this.eventoClinicoService = eventoClinicoService;
         this.notificacaoService = notificacaoService;
-        this.contatoEmergenciaService = contatoEmergenciaService;
     }
 
     public Habitos create(Habitos habito, Integer usuarioLogadoId) {
@@ -57,9 +53,8 @@ public class HabitosService {
 
         eventoClinicoService.analisarHabitos(salvo, usuarioLogadoId);
 
-        if (Boolean.TRUE.equals(salvo.getRepouso())) {
-            List<ContatoEmergencia> contatos = contatoEmergenciaService.listar(usuarioLogadoId, habito.getPaciente());
-            for (ContatoEmergencia contato : contatos) {
+        if (Boolean.TRUE.equals(salvo.getRepouso()) && habito.getPaciente().getContatosEmergencia() != null) {
+            for (ContatoEmergencia contato : habito.getPaciente().getContatosEmergencia()) {
                 notificacaoService.enviarAlertaRepouso(
                         contato,
                         salvo.getCanal() != null ? salvo.getCanal() : "email"
@@ -97,9 +92,8 @@ public class HabitosService {
                 EventoPrioridades.NORMAL
         );
 
-        if (Boolean.TRUE.equals(atualizado.getRepouso())) {
-            List<ContatoEmergencia> contatos = contatoEmergenciaService.listar(usuarioLogadoId, existente.getPaciente());
-            for (ContatoEmergencia contato : contatos) {
+        if (Boolean.TRUE.equals(atualizado.getRepouso()) && existente.getPaciente().getContatosEmergencia() != null) {
+            for (ContatoEmergencia contato : existente.getPaciente().getContatosEmergencia()) {
                 notificacaoService.enviarAlertaRepouso(
                         contato,
                         atualizado.getCanal() != null ? atualizado.getCanal() : "email"
@@ -148,6 +142,7 @@ public class HabitosService {
             habito.setRepouso(false);
             return;
         }
+
 
         double indiceSono = habito.getHorasSono() / 8.0; //8h/dia
 

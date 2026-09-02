@@ -38,14 +38,9 @@ public class EstabilidadeClinicaService {
         this.notificacaoService = notificacaoService;
     }
 
-    /**
-     * Método chamado após salvar/alterar sinais vitais ou hábitos.
-     * Só dispara alerta se a categoria geral mudar (ex.: saudável → moderado).
-     */
     public void verificarMudancaEstabilidade(Integer pacienteId,
                                              List<SinaisVitais> sinais,
                                              List<Habitos> habitos) {
-        // calcula índices atuais
         List<EstabilidadeClinicaDTO> indices = calcularIndices(pacienteId, sinais, habitos);
 
         EstabilidadeClinicaDTO geralNovo = indices.stream()
@@ -53,15 +48,12 @@ public class EstabilidadeClinicaService {
                 .findFirst()
                 .orElse(new EstabilidadeClinicaDTO("geral", null, "n/a", 1.0, LocalDateTime.now()));
 
-        // busca última categoria geral salva no banco
         String categoriaAnterior = estabilidadeClinicaRepository.findUltimaCategoriaGeral(pacienteId);
         String categoriaNova = geralNovo.getCategoria();
 
-        // ✅ dispara apenas se houve mudança de categoria
         if (categoriaAnterior == null || !categoriaAnterior.equals(categoriaNova)) {
             dispararAlertasDetalhados(pacienteId, indices, geralNovo);
 
-            // salva nova categoria geral para futuras comparações
             EstabilidadeClinica registro = new EstabilidadeClinica();
             registro.setPacienteId(pacienteId);
             registro.setTipo("geral");

@@ -21,6 +21,8 @@ class HabitosServiceTest {
     private HabitosRepository repository;
     private EventoPacienteService eventoPacienteService;
     private EventoClinicoService eventoClinicoService;
+    private NotificacaoService notificacaoService;
+    private ContatoEmergenciaService contatoEmergenciaService;
     private HabitosService service;
 
     private Usuario paciente;
@@ -30,8 +32,11 @@ class HabitosServiceTest {
         repository = mock(HabitosRepository.class);
         eventoPacienteService = mock(EventoPacienteService.class);
         eventoClinicoService = mock(EventoClinicoService.class);
+        notificacaoService = mock(NotificacaoService.class);
+        contatoEmergenciaService = mock(ContatoEmergenciaService.class);
 
-        service = new HabitosService(repository, eventoPacienteService, eventoClinicoService);
+        service = new HabitosService(repository, eventoPacienteService, eventoClinicoService,
+                notificacaoService, contatoEmergenciaService);
 
         paciente = new Usuario();
         paciente.setId(1);
@@ -83,8 +88,8 @@ class HabitosServiceTest {
         verify(eventoPacienteService).criarEvento(
                 eq(paciente.getId()), eq(99),
                 eq(EventoTipos.HABITOS_EDITADOS),
-                eq("Habito atualizado"),
-                eq("Um habito foi atualizado"),
+                eq("Hábito atualizado"),
+                eq("Um hábito foi atualizado"),
                 contains("\"patientName\":\"Paciente Teste\""),
                 eq(EventoPrioridades.NORMAL)
         );
