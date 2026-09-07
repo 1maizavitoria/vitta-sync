@@ -19,7 +19,7 @@ public class EstabilidadeClinica {
     @Column(nullable = false, length = 50)
     private String tipo;
 
-    @Column(nullable = false)
+    @Column(nullable = true)
     private Integer indice;
 
     @Column(nullable = false, length = 20)

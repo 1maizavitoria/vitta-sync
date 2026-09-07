@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 
-import { Box, Grid, IconButton, Paper, Tooltip, Typography } from "@mui/material";
+import { Box, Chip, FormControl, IconButton, InputLabel, MenuItem, Paper, Select, Tooltip, Typography } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
 
 import AddIcon from "@mui/icons-material/Add";
@@ -22,7 +22,12 @@ const emptyInputs = {
     timeExercise: "",
     timeSleep: "",
     date: null,
+    channel: "email",
 };
+
+function isEmptyInput(value) {
+    return value == null || String(value).trim() === "";
+}
 
 const iconButtonSx = {
     add: {
@@ -64,6 +69,7 @@ export function HabitTracker() {
     const [errorDate, setErrorDate] = useState(false);
     const [habits, setHabit] = useState([]);
     const [habitInputs, setHabitInputs] = useState(emptyInputs);
+    const [initialInputs, setInitialInputs] = useState(emptyInputs);
 
     const userType = localStorage.getItem("tipo");
     const canEdit = userType !== "saude";
@@ -131,16 +137,20 @@ export function HabitTracker() {
 
     function handleClearInputs() {
         setHabitInputs(emptyInputs);
+        setInitialInputs(emptyInputs);
     }
 
     function handleDataEditing() {
         if (!lastHabit) return;
 
-        setHabitInputs({
+        const inputs = {
             timeExercise: lastHabit.minutosExercicio,
             timeSleep: lastHabit.horasSono,
-            date: lastHabit.dataReferencia
-        });
+            date: lastHabit.dataReferencia,
+            channel: lastHabit.canal || "email"
+        };
+        setHabitInputs(inputs);
+        setInitialInputs(inputs);
     }
 
     function isValidMinutes(value) {
@@ -154,7 +164,7 @@ export function HabitTracker() {
     }
 
     function canRegister() {
-        if (!habitInputs.timeExercise || !habitInputs.timeSleep || !habitInputs.date) {
+        if (Object.values(habitInputs).some(isEmptyInput)) {
             showAlert("error", t("healthTracker.habits.fillAll"));
             setError(true);
             return false;
@@ -190,6 +200,7 @@ export function HabitTracker() {
             horasSono: habitInputs.timeSleep,
             minutosExercicio: habitInputs.timeExercise,
             dataReferencia: habitInputs.date,
+            canal: habitInputs.channel,
         };
 
         try {
@@ -229,11 +240,13 @@ export function HabitTracker() {
     }, [selectedPatient]);
 
     useEffect(() => {
-        const hasUnsavedChanges = Object.values(habitInputs).some(Boolean);
+        const hasUnsavedChanges = isFormOpen && Object.keys(emptyInputs).some(
+            (field) => String(habitInputs[field] ?? "") !== String(initialInputs[field] ?? "")
+        );
+
+        if (!hasUnsavedChanges) return;
 
         const handleBeforeUnload = (event) => {
-            if (!hasUnsavedChanges) return;
-
             event.preventDefault();
             event.returnValue = "";
         };
@@ -243,7 +256,7 @@ export function HabitTracker() {
         return () => {
             window.removeEventListener("beforeunload", handleBeforeUnload);
         };
-    }, [habitInputs]);
+    }, [habitInputs, initialInputs, isFormOpen]);
 
     return (
         <Paper
@@ -337,14 +350,14 @@ export function HabitTracker() {
                 )}
             </Box>
 
-            <Grid container spacing={2.5}>
-                <Grid item xs={12} sm={6} lg={4}>
+            <Box sx={{ display: "grid", gridTemplateColumns: { xs: "minmax(0, 1fr)", sm: "repeat(2, minmax(0, 1fr))", lg: "repeat(3, minmax(0, 1fr))" }, gap: 2.5 }}>
+                <Box sx={{ minWidth: 0 }}>
                     <HabitCard
                         userStyle={style}
                         showInput={isFormOpen}
                         icon={<BedtimeIcon />}
                         title={t("healthTracker.habits.sleepTime")}
-                        error={(error && !habitInputs.timeSleep) || errorSl}
+                        error={(error && isEmptyInput(habitInputs.timeSleep)) || errorSl}
                         type="number"
                         value={lastHabit ? formatNumber(lastHabit.horasSono) : t("healthTracker.common.notAvailable")}
                         unit={t("healthTracker.common.hours")}
@@ -357,15 +370,15 @@ export function HabitTracker() {
                         userName={lastHabit?.usuarioNome}
                         userFunction={getNomeFuncao(lastHabit?.usuarioFuncao, t)}
                     />
-                </Grid>
+                </Box>
 
-                <Grid item xs={12} sm={6} lg={4}>
+                <Box sx={{ minWidth: 0 }}>
                     <HabitCard
                         userStyle={style}
                         showInput={isFormOpen}
                         icon={<FitnessCenterIcon />}
                         title={t("healthTracker.habits.exerciseTime")}
-                        error={(error && !habitInputs.timeExercise) || errorEx}
+                        error={(error && isEmptyInput(habitInputs.timeExercise)) || errorEx}
                         type="number"
                         value={lastHabit ? formatNumber(lastHabit.minutosExercicio) : t("healthTracker.common.notAvailable")}
                         unit={t("healthTracker.common.minutes")}
@@ -378,9 +391,9 @@ export function HabitTracker() {
                         userName={lastHabit?.usuarioNome}
                         userFunction={getNomeFuncao(lastHabit?.usuarioFuncao, t)}
                     />
-                </Grid>
+                </Box>
 
-                <Grid item xs={12} sm={6} lg={4}>
+                <Box sx={{ minWidth: 0 }}>
                     <HabitCard
                         userStyle={style}
                         showInput={isFormOpen}
@@ -398,8 +411,77 @@ export function HabitTracker() {
                         userName={lastHabit?.usuarioNome}
                         userFunction={getNomeFuncao(lastHabit?.usuarioFuncao, t)}
                     />
-                </Grid>
-            </Grid>
+                </Box>
+
+            </Box>
+
+            <Paper
+                variant="outlined"
+                sx={{
+                    mt: 2,
+                    px: 2,
+                    py: 1.5,
+                    borderRadius: 3,
+                    borderColor: theme.vitta.borderStrong,
+                    display: "flex",
+                    flexDirection: { xs: "column", sm: "row" },
+                    flexWrap: "wrap",
+                    gap: { xs: 1.5, sm: 3 },
+                    width: { xs: "100%", sm: "fit-content" },
+                    maxWidth: "100%",
+                    boxSizing: "border-box"
+                }}
+            >
+                    <Box sx={{ display: "flex", alignItems: "center", flexWrap: "wrap", gap: 1 }}>
+                        <Typography color="text.secondary" fontSize="0.82rem" fontWeight={700}>
+                            {t("healthTracker.habits.restIndex")}
+                        </Typography>
+                        <Typography fontSize="1rem" fontWeight={800} color="text.primary">
+                            {lastHabit?.indiceRepouso != null
+                                ? formatNumber(lastHabit.indiceRepouso)
+                                : t("healthTracker.common.notAvailable")}
+                        </Typography>
+                    </Box>
+
+                    <Box sx={{ display: "flex", alignItems: "center", flexWrap: "wrap", gap: 1 }}>
+                        <Typography color="text.secondary" fontSize="0.82rem" fontWeight={700}>
+                            {t("healthTracker.habits.restRecommended")}
+                        </Typography>
+                        <Box>
+                            {lastHabit?.repouso == null ? (
+                                <Typography fontWeight={800}>{t("healthTracker.common.notAvailable")}</Typography>
+                            ) : (
+                                <Chip
+                                    size="small"
+                                    color={lastHabit.repouso ? "warning" : "success"}
+                                    label={lastHabit.repouso
+                                        ? t("healthTracker.habits.yes")
+                                        : t("healthTracker.habits.no")}
+                                />
+                            )}
+                        </Box>
+                    </Box>
+            </Paper>
+
+                {isFormOpen && (
+                    <Box sx={{ mt: 2.5, width: "100%", maxWidth: { sm: 360 } }}>
+                        <FormControl fullWidth>
+                            <InputLabel id="habit-notification-channel-label">
+                                {t("healthTracker.habits.notificationChannel")}
+                            </InputLabel>
+                            <Select
+                                labelId="habit-notification-channel-label"
+                                value={habitInputs.channel}
+                                label={t("healthTracker.habits.notificationChannel")}
+                                onChange={(event) => updateInput("channel", event.target.value)}
+                            >
+                                <MenuItem value="email">{t("healthTracker.habits.email")}</MenuItem>
+                                <MenuItem value="sms">{t("healthTracker.habits.sms")}</MenuItem>
+                                <MenuItem value="ambos">{t("healthTracker.habits.both")}</MenuItem>
+                            </Select>
+                        </FormControl>
+                    </Box>
+                )}
         </Paper>
     );
 }
