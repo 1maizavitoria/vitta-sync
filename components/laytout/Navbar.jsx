@@ -25,7 +25,15 @@ export default function Navbar({ open, setOpen, selectedPatient }) {
     const location = useLocation();
     const theme = useTheme();
     const isMobile = useMediaQuery(theme.breakpoints.down("md"));
-    const { language, languages, setLanguage, t } = useI18n();
+    const {
+        language,
+        languages,
+        measurementSystem,
+        measurementSystems,
+        setLanguage,
+        setMeasurementSystem,
+        t
+    } = useI18n();
     const { mode, toggleMode } = useThemeMode();
     const isDarkMode = mode === "dark";
     const vitta = theme.vitta;
@@ -305,6 +313,31 @@ export default function Navbar({ open, setOpen, selectedPatient }) {
                             ))}
                         </Select>
                     )}
+
+                    <Select
+                        size="small"
+                        value={measurementSystem}
+                        title={t("measurement.toggle")}
+                        inputProps={{ "aria-label": t("measurement.toggle") }}
+                        onChange={(event) => setMeasurementSystem(event.target.value)}
+                        sx={{
+                            minWidth: { xs: 64, sm: 112 },
+                            borderRadius: 2,
+                            bgcolor: "background.paper",
+                            "& .MuiSelect-select": {
+                                py: 0.75,
+                                fontWeight: 800
+                            }
+                        }}
+                    >
+                        {measurementSystems.map((item) => (
+                            <MenuItem key={item.code} value={item.code}>
+                                {isMobile
+                                    ? t(`measurement.${item.code}Short`)
+                                    : t(`measurement.${item.code}`)}
+                            </MenuItem>
+                        ))}
+                    </Select>
 
                     <Tooltip title={isDarkMode ? t("theme.light") : t("theme.dark")}>
                         <IconButton

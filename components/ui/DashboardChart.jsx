@@ -11,6 +11,8 @@ import {
     YAxis
 } from "recharts";
 
+import { useI18n } from "../../src/i18n";
+
 const chartColors = ["#3b82f6", "#22d3ee", "#8b5cf6", "#f59e0b", "#ec4899", "#6366f1"];
 
 function mergeSeries(series) {
@@ -34,13 +36,24 @@ export default function DashboardChart({
     title,
     seriesNames,
     formatDate,
-    formatMeasurement,
     formatNumber,
     emptyText
 }) {
     const theme = useTheme();
+    const { convertMeasurement, formatUnit } = useI18n();
     const isDark = theme.palette.mode === "dark";
-    const chartData = mergeSeries(category.series);
+    const displayUnit = formatUnit(category.unidade);
+    const chartData = mergeSeries(category.series).map((point) => {
+        const convertedPoint = { ...point };
+
+        category.series.forEach((serie) => {
+            if (convertedPoint[serie.codigo] != null) {
+                convertedPoint[serie.codigo] = convertMeasurement(convertedPoint[serie.codigo], category.unidade);
+            }
+        });
+
+        return convertedPoint;
+    });
 
     return (
         <Paper
@@ -59,7 +72,7 @@ export default function DashboardChart({
                     {title}
                 </Typography>
                 <Typography variant="body2" color="text.secondary">
-                    {category.unidade}
+                    {displayUnit}
                 </Typography>
             </Box>
 
@@ -131,7 +144,7 @@ export default function DashboardChart({
                                     year: "numeric"
                                 })}
                                 formatter={(value, name) => [
-                                    formatMeasurement(value, category.unidade),
+                                    displayUnit ? `${formatNumber(value)} ${displayUnit}` : formatNumber(value),
                                     seriesNames[name] || name
                                 ]}
                                 contentStyle={{

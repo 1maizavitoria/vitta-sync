@@ -1,4 +1,4 @@
-import { Box, Container, IconButton, Paper, Stack, Tooltip, Typography } from "@mui/material";
+import { Box, Container, IconButton, InputAdornment, Paper, Stack, Tooltip, Typography } from "@mui/material";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import PersonAddAltOutlinedIcon from "@mui/icons-material/PersonAddAltOutlined";
 import MonitorHeartOutlinedIcon from "@mui/icons-material/MonitorHeartOutlined";
@@ -24,7 +24,12 @@ import { validatePassword } from "../../utils/validators/passwordValidator";
 
 export default function Register() {
     const { showAlert } = useAlert();
-    const { t } = useI18n();
+    const {
+        t,
+        convertMeasurementToMetric,
+        formatUnit,
+        measurementSystem
+    } = useI18n();
     const theme = useTheme();
     const vitta = theme.vitta;
     const isDark = theme.palette.mode === "dark";
@@ -55,6 +60,8 @@ export default function Register() {
     const [phone, setPhone] = useState("");
     const [initialWeight, setInitialWeight] = useState("");
     const [height, setHeight] = useState("");
+    const [heightFeet, setHeightFeet] = useState("");
+    const [heightInches, setHeightInches] = useState("");
 
     const navigate = useNavigate();
 
@@ -76,6 +83,49 @@ export default function Register() {
         return !isNaN(value) && Number(value) > 0;
     }
 
+    function measurementLabel(label, unit) {
+        return `${label} (${formatUnit(unit)})`;
+    }
+
+    function measurementInputProps(unit) {
+        return {
+            input: {
+                endAdornment: (
+                    <InputAdornment position="end">
+                        {formatUnit(unit)}
+                    </InputAdornment>
+                )
+            }
+        };
+    }
+
+    function toMetricMeasurement(value, unit, decimals = 2) {
+        const metricValue = Number(convertMeasurementToMetric(value, unit));
+        if (Number.isNaN(metricValue)) return value;
+
+        return Number(metricValue.toFixed(decimals));
+    }
+
+    function getMetricHeight() {
+        if (measurementSystem !== "imperial") {
+            return toMetricMeasurement(height, "m");
+        }
+
+        const feet = Number(heightFeet) || 0;
+        const inches = Number(heightInches) || 0;
+        const totalInches = (feet * 12) + inches;
+
+        return toMetricMeasurement(totalInches, "m");
+    }
+
+    function hasHeightValue() {
+        if (measurementSystem !== "imperial") {
+            return height !== "";
+        }
+
+        return heightFeet !== "" || heightInches !== "";
+    }
+
     const canRegister = () => {
         if (
             email == "" ||
@@ -86,7 +136,7 @@ export default function Register() {
             birthDate == null ||
             password == "" ||
             repeatPassword == "" ||
-            (userType.value === "paciente" && (initialWeight == "" || height == "")) ||
+            (userType.value === "paciente" && (initialWeight == "" || !hasHeightValue())) ||
             (userType.value === "saude" && advice == "")
         ) {
             setErrorName(name == "");
@@ -94,7 +144,7 @@ export default function Register() {
             setErrorEmail(email == "");
             setErrorPhone(phone == "");
             setErrorWeight(userType?.value === "paciente" && initialWeight == "");
-            setErrorHeight(userType?.value === "paciente" && height == "");
+            setErrorHeight(userType?.value === "paciente" && !hasHeightValue());
             setErrorUserType(userType == null);
             setErrorBirthDate(birthDate == null);
             setErrorPassword(password == "");
@@ -122,13 +172,13 @@ export default function Register() {
             return false;
         }
 
-        if (userType?.value === "paciente" && !isValidPositiveNumber(initialWeight)) {
+        if (userType?.value === "paciente" && !isValidPositiveNumber(toMetricMeasurement(initialWeight, "kg"))) {
             setErrorWeight(true);
             showAlert("error", t("messages.invalidWeight"));
             return false;
         }
 
-        if (userType?.value === "paciente" && !isValidPositiveNumber(height)) {
+        if (userType?.value === "paciente" && !isValidPositiveNumber(getMetricHeight())) {
             setErrorHeight(true);
             showAlert("error", t("messages.invalidHeight"));
             return false;
@@ -196,8 +246,8 @@ export default function Register() {
             tipo: userType.value,
             dataNascimento: birthDate,
             ...(userType.value === "paciente" && {
-                pesoInicial: Number(initialWeight),
-                altura: Number(height),
+                pesoInicial: toMetricMeasurement(initialWeight, "kg"),
+                altura: getMetricHeight(),
             }),
             ...(userType.value === "saude" && {
                 conselho: advice,
@@ -415,40 +465,82 @@ export default function Register() {
                             <>
                                 <Box sx={fieldSx}>
                                     <InputUI
-                                        label={t("auth.initialWeight")}
+                                        label={measurementLabel(t("auth.initialWeight"), "kg")}
                                         placeholder={t("auth.placeholders.weight")}
+                                        type="number"
                                         error={errorWeight}
                                         value={initialWeight}
                                         onChange={(e) => {
                                             let value = e.target.value.replace(",", ".");
-                                            if (value.length > 4) return;
+                                            if (value.length > 6) return;
 
                                             setInitialWeight(value);
                                             setErrorWeight(false);
                                         }}
+                                        slotProps={measurementInputProps("kg")}
                                     />
                                 </Box>
 
-                                <Box sx={fieldSx}>
-                                    <InputUI
-                                        label={t("auth.height")}
-                                        placeholder={t("auth.placeholders.height")}
-                                        error={errorHeight}
-                                        value={height}
-                                        onChange={(e) => {
-                                            let raw = e.target.value.replace(/\D/g, "");
-                                            if (raw.length === 3) {
-                                                const num = parseFloat(raw[0] + "." + raw.slice(1));
-                                                if (num >= 0.5 && num <= 2.7) {
-                                                    setHeight(num.toFixed(2));
-                                                    setErrorHeight(false);
-                                                }
-                                            } else {
-                                                setHeight(raw);
-                                            }
+                                {measurementSystem === "imperial" ? (
+                                    <Box
+                                        sx={{
+                                            ...fieldSx,
+                                            display: "grid",
+                                            gridTemplateColumns: "repeat(2, minmax(0, 1fr))",
+                                            gap: 1
                                         }}
-                                    />
-                                </Box>
+                                    >
+                                        <InputUI
+                                            label={t("auth.height")}
+                                            placeholder="Ex: 5"
+                                            type="number"
+                                            error={errorHeight}
+                                            value={heightFeet}
+                                            onChange={(e) => {
+                                                const value = e.target.value.replace(/\D/g, "");
+                                                if (value.length > 1) return;
+
+                                                setHeightFeet(value);
+                                                setErrorHeight(false);
+                                            }}
+                                            slotProps={measurementInputProps("ft")}
+                                        />
+
+                                        <InputUI
+                                            label={t("auth.height")}
+                                            placeholder="Ex: 9"
+                                            type="number"
+                                            error={errorHeight}
+                                            value={heightInches}
+                                            onChange={(e) => {
+                                                const value = e.target.value.replace(",", ".");
+                                                if (value.length > 4) return;
+
+                                                setHeightInches(value);
+                                                setErrorHeight(false);
+                                            }}
+                                            slotProps={measurementInputProps("in")}
+                                        />
+                                    </Box>
+                                ) : (
+                                    <Box sx={fieldSx}>
+                                        <InputUI
+                                            label={measurementLabel(t("auth.height"), "m")}
+                                            placeholder={t("auth.placeholders.height")}
+                                            type="number"
+                                            error={errorHeight}
+                                            value={height}
+                                            onChange={(e) => {
+                                                let value = e.target.value.replace(",", ".");
+                                                if (value.length > 6) return;
+
+                                                setHeight(value);
+                                                setErrorHeight(false);
+                                            }}
+                                            slotProps={measurementInputProps("m")}
+                                        />
+                                    </Box>
+                                )}
                             </>
                         )}
 

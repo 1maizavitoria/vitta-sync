@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 
-import { Box, Grid, IconButton, Paper, Tooltip, Typography } from "@mui/material";
+import { Box, Grid, IconButton, InputAdornment, Paper, Tooltip, Typography } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
 
 import CheckIcon from "@mui/icons-material/Check";
@@ -63,7 +63,13 @@ export default function Perfil({ view = "patient" }) {
     const theme = useTheme();
     const vitta = theme.vitta;
     const isDark = theme.palette.mode === "dark";
-    const { t } = useI18n();
+    const {
+        t,
+        convertMeasurement,
+        convertMeasurementToMetric,
+        formatUnit,
+        measurementSystem
+    } = useI18n();
 
     const [editing, setEditing] = useState(false);
     const [error, setError] = useState(false);
@@ -137,6 +143,39 @@ export default function Perfil({ view = "patient" }) {
         resetErrors();
     }
 
+    function measurementLabel(label, unit) {
+        return `${label} (${formatUnit(unit)})`;
+    }
+
+    function measurementInputProps(unit) {
+        return {
+            input: {
+                endAdornment: (
+                    <InputAdornment position="end">
+                        {formatUnit(unit)}
+                    </InputAdornment>
+                )
+            }
+        };
+    }
+
+    function formatInputMeasurement(value, unit) {
+        if (value == null || value === "") return "";
+
+        const convertedValue = Number(convertMeasurement(value, unit));
+        if (Number.isNaN(convertedValue)) return "";
+
+        const decimals = measurementSystem === "imperial" || unit === "kg" ? 1 : 2;
+        return String(Number(convertedValue.toFixed(decimals)));
+    }
+
+    function toMetricMeasurement(value, unit, decimals = 2) {
+        const metricValue = Number(convertMeasurementToMetric(value, unit));
+        if (Number.isNaN(metricValue)) return value;
+
+        return Number(metricValue.toFixed(decimals));
+    }
+
     function canSave() {
         if (!formData.nome || !formData.email || !formData.dataNascimento) {
             showAlert("error", t("messages.fillAll"));
@@ -162,12 +201,12 @@ export default function Perfil({ view = "patient" }) {
         }
 
         if (formData.tipo === "paciente") {
-            if (Number(formData.pesoInicial) <= 0) {
+            if (Number(toMetricMeasurement(formData.pesoInicial, "kg")) <= 0) {
                 showAlert("error", t("messages.invalidWeight"));
                 return false;
             }
 
-            if (Number(formData.altura) <= 0) {
+            if (Number(toMetricMeasurement(formData.altura, "m")) <= 0) {
                 showAlert("error", t("messages.invalidHeight"));
                 return false;
             }
@@ -195,8 +234,8 @@ export default function Perfil({ view = "patient" }) {
             dataNascimento: formData.dataNascimento,
             telefone: formData.telefone,
             ...(formData.tipo === "paciente" && {
-                pesoInicial: Number(formData.pesoInicial),
-                altura: Number(formData.altura),
+                pesoInicial: toMetricMeasurement(formData.pesoInicial, "kg"),
+                altura: toMetricMeasurement(formData.altura, "m"),
             }),
             ...(formData.tipo === "responsavel" && {
                 funcaoResponsavel: formData.funcaoResponsavel,
@@ -252,8 +291,8 @@ export default function Perfil({ view = "patient" }) {
                 setFormData({
                     nome: data.nome || "",
                     telefone: data.telefone || "",
-                    pesoInicial: data.pesoInicial || "",
-                    altura: data.altura || "",
+                    pesoInicial: formatInputMeasurement(data.pesoInicial, "kg"),
+                    altura: formatInputMeasurement(data.altura, "m"),
                     dataNascimento: data.dataNascimento || "",
                     cpf: data.cpf || "",
                     email: data.email || "",
@@ -267,7 +306,7 @@ export default function Perfil({ view = "patient" }) {
         }
 
         fetchUser();
-    }, [targetCpf]);
+    }, [targetCpf, measurementSystem]);
 
     return (
         <Paper
@@ -476,7 +515,7 @@ export default function Perfil({ view = "patient" }) {
                 {formData.tipo === "paciente" && (
                     <Grid item xs={12} md={6}>
                         <InputUI
-                            label={t("reports.profile.initialWeight")}
+                            label={measurementLabel(t("reports.profile.initialWeight"), "kg")}
                             type="number"
                             value={formData.pesoInicial}
                             onChange={(event) =>
@@ -484,6 +523,7 @@ export default function Perfil({ view = "patient" }) {
                             }
                             disabled={!editing}
                             fullWidth
+                            slotProps={measurementInputProps("kg")}
                         />
                     </Grid>
                 )}
@@ -491,7 +531,7 @@ export default function Perfil({ view = "patient" }) {
                 {formData.tipo === "paciente" && (
                     <Grid item xs={12} md={6}>
                         <InputUI
-                            label={t("reports.profile.height")}
+                            label={measurementLabel(t("reports.profile.height"), "m")}
                             type="number"
                             value={formData.altura}
                             onChange={(event) =>
@@ -499,6 +539,7 @@ export default function Perfil({ view = "patient" }) {
                             }
                             disabled={!editing}
                             fullWidth
+                            slotProps={measurementInputProps("m")}
                         />
                     </Grid>
                 )}

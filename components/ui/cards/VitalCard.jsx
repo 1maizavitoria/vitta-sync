@@ -1,6 +1,7 @@
 import Box from "@mui/material/Box";
 import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
+import InputAdornment from "@mui/material/InputAdornment";
 import Typography from "@mui/material/Typography";
 import { useTheme } from "@mui/material/styles";
 
@@ -18,6 +19,7 @@ export default function VitalCard({
     userName,
     userFunction,
     inputValue,
+    inputUnit,
     onInputChange,
     userStyle,
     showInput
@@ -123,7 +125,7 @@ export default function VitalCard({
                         overflowWrap: "anywhere"
                     }}
                 >
-                    {value} {unit}
+                    {unit ? `${value} ${unit}` : value}
                 </Typography>
 
                 <Typography
@@ -173,6 +175,17 @@ export default function VitalCard({
                             type={type}
                             onChange={onInputChange}
                             error={error}
+                            slotProps={{
+                                input: inputUnit
+                                    ? {
+                                        endAdornment: (
+                                            <InputAdornment position="end">
+                                                {inputUnit}
+                                            </InputAdornment>
+                                        )
+                                    }
+                                    : undefined
+                            }}
                         />
                     </Box>
                 )}

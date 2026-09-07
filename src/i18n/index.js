@@ -3,9 +3,12 @@ import { createContext, createElement, useContext, useMemo, useState } from "rea
 import { formatCurrency as formatCurrencyValue } from "../../utils/formatters/formatCurrency";
 import { formatDate as formatDateValue, formatDateTime as formatDateTimeValue } from "../../utils/formatters/formatDate";
 import {
+    convertMeasurementToMetricValue,
+    convertMeasurementValue,
     formatMeasurement as formatMeasurementValue,
     formatNumber as formatNumberValue,
-    formatPercent as formatPercentValue
+    formatPercent as formatPercentValue,
+    getDisplayUnit
 } from "../../utils/formatters/formatNumber";
 
 export const languages = [
@@ -52,6 +55,14 @@ const dictionaries = {
             light: "Modo claro",
             dark: "Modo escuro",
             toggle: "Alternar tema"
+        },
+        measurement: {
+            label: "Medidas",
+            metric: "Métrico",
+            imperial: "Imperial",
+            metricShort: "MET",
+            imperialShort: "IMP",
+            toggle: "Sistema de medidas"
         },
         userTypes: {
             paciente: "Paciente",
@@ -331,6 +342,14 @@ const dictionaries = {
                 fillAll: "Preencha todos os campos",
                 invalidExercise: "Exercício deve estar em minutos válidos (0-1440)",
                 invalidSleep: "Sono deve estar em horas válidas (0-24)",
+                restIndex: "Índice de repouso",
+                restRecommended: "Repouso recomendado",
+                notificationChannel: "Canal de notificação",
+                email: "E-mail",
+                sms: "SMS",
+                both: "Ambos",
+                yes: "Sim",
+                no: "Não",
                 registered: "Hábitos registrados com sucesso",
                 edited: "Hábitos editados com sucesso",
                 saveError: "Erro ao salvar hábitos"
@@ -613,8 +632,8 @@ const dictionaries = {
                 email: "Email",
                 cpf: "CPF",
                 council: "Conselho",
-                initialWeight: "Peso inicial (kg)",
-                height: "Altura (m)",
+                initialWeight: "Peso inicial",
+                height: "Altura",
                 deleteConfirmation: "Tem certeza que deseja deletar sua conta? Essa ação não pode ser desfeita.",
                 accountDeleted: "Conta deletada com sucesso",
                 deleteError: "Erro ao deletar conta",
@@ -721,6 +740,14 @@ const dictionaries = {
             light: "Light mode",
             dark: "Dark mode",
             toggle: "Toggle theme"
+        },
+        measurement: {
+            label: "Measurements",
+            metric: "Metric",
+            imperial: "Imperial",
+            metricShort: "MET",
+            imperialShort: "IMP",
+            toggle: "Measurement system"
         },
         userTypes: {
             paciente: "Patient",
@@ -999,6 +1026,14 @@ const dictionaries = {
                 fillAll: "Fill in all fields",
                 invalidExercise: "Exercise must be valid minutes (0-1440)",
                 invalidSleep: "Sleep must be valid hours (0-24)",
+                restIndex: "Rest index",
+                restRecommended: "Rest recommended",
+                notificationChannel: "Notification channel",
+                email: "Email",
+                sms: "SMS",
+                both: "Both",
+                yes: "Yes",
+                no: "No",
                 registered: "Habits recorded successfully",
                 edited: "Habits edited successfully",
                 saveError: "Error saving habits"
@@ -1281,8 +1316,8 @@ const dictionaries = {
                 email: "Email",
                 cpf: "CPF",
                 council: "Council",
-                initialWeight: "Initial weight (kg)",
-                height: "Height (m)",
+                initialWeight: "Initial weight",
+                height: "Height",
                 deleteConfirmation: "Are you sure you want to delete your account? This action cannot be undone.",
                 accountDeleted: "Account deleted successfully",
                 deleteError: "Error deleting account",
@@ -1389,6 +1424,14 @@ const dictionaries = {
             light: "Modo claro",
             dark: "Modo oscuro",
             toggle: "Alternar tema"
+        },
+        measurement: {
+            label: "Medidas",
+            metric: "Métrico",
+            imperial: "Imperial",
+            metricShort: "MET",
+            imperialShort: "IMP",
+            toggle: "Sistema de medidas"
         },
         userTypes: {
             paciente: "Paciente",
@@ -1667,6 +1710,14 @@ const dictionaries = {
                 fillAll: "Completa todos los campos",
                 invalidExercise: "El ejercicio debe estar en minutos válidos (0-1440)",
                 invalidSleep: "El sueño debe estar en horas válidas (0-24)",
+                restIndex: "Índice de reposo",
+                restRecommended: "Reposo recomendado",
+                notificationChannel: "Canal de notificación",
+                email: "Email",
+                sms: "SMS",
+                both: "Ambos",
+                yes: "Sí",
+                no: "No",
                 registered: "Hábitos registrados con éxito",
                 edited: "Hábitos editados con éxito",
                 saveError: "Error al guardar hábitos"
@@ -1949,8 +2000,8 @@ const dictionaries = {
                 email: "Email",
                 cpf: "CPF",
                 council: "Consejo",
-                initialWeight: "Peso inicial (kg)",
-                height: "Altura (m)",
+                initialWeight: "Peso inicial",
+                height: "Altura",
                 deleteConfirmation: "¿Seguro que deseas eliminar tu cuenta? Esta acción no se puede deshacer.",
                 accountDeleted: "Cuenta eliminada con éxito",
                 deleteError: "Error al eliminar cuenta",
@@ -2036,11 +2087,22 @@ const dateInputFormatByLanguage = {
     es: "DD/MM/YYYY"
 };
 
+const measurementSystems = [
+    { code: "metric" },
+    { code: "imperial" }
+];
+
+const measurementStorageKey = "vitta-measurement-system";
+
 function readPath(source, path) {
     return path.split(".").reduce((value, key) => value?.[key], source);
 }
 
-function createFormatter(locale) {
+function normalizeMeasurementSystem(system) {
+    return system === "imperial" ? "imperial" : "metric";
+}
+
+function createFormatter(locale, measurementSystem) {
     return {
         locale,
         formatNumber: (value, options) => formatNumberValue(value, locale, options),
@@ -2048,31 +2110,44 @@ function createFormatter(locale) {
         formatDateTime: (value, options) => formatDateTimeValue(value, locale, options),
         formatCurrency: (value, currency = "BRL", options) => formatCurrencyValue(value, locale, currency, options),
         formatPercent: (value, options) => formatPercentValue(value, locale, options),
-        formatMeasurement: (value, unit, options) => formatMeasurementValue(value, unit, locale, options)
+        formatMeasurement: (value, unit, options) => formatMeasurementValue(value, unit, locale, options, measurementSystem),
+        formatUnit: (unit) => getDisplayUnit(unit, measurementSystem),
+        convertMeasurement: (value, unit) => convertMeasurementValue(value, unit, measurementSystem),
+        convertMeasurementToMetric: (value, unit) => convertMeasurementToMetricValue(value, unit, measurementSystem)
     };
 }
 
 export function LanguageProvider({ children }) {
     const [language, setLanguageState] = useState(() => localStorage.getItem("vitta-language") || "pt-BR");
+    const [measurementSystem, setMeasurementSystemState] = useState(() =>
+        normalizeMeasurementSystem(localStorage.getItem(measurementStorageKey))
+    );
 
     const value = useMemo(() => {
         const dictionary = dictionaries[language] || dictionaries["pt-BR"];
         const locale = localeByLanguage[language] || localeByLanguage["pt-BR"];
-        const formatter = createFormatter(locale);
+        const formatter = createFormatter(locale, measurementSystem);
 
         return {
             language,
             languages,
             locale,
             dateInputFormat: dateInputFormatByLanguage[language] || dateInputFormatByLanguage["pt-BR"],
+            measurementSystem,
+            measurementSystems,
             setLanguage: (nextLanguage) => {
                 localStorage.setItem("vitta-language", nextLanguage);
                 setLanguageState(nextLanguage);
             },
+            setMeasurementSystem: (nextSystem) => {
+                const normalizedSystem = normalizeMeasurementSystem(nextSystem);
+                localStorage.setItem(measurementStorageKey, normalizedSystem);
+                setMeasurementSystemState(normalizedSystem);
+            },
             t: (path) => readPath(dictionary, path) ?? readPath(dictionaries["pt-BR"], path) ?? path,
             ...formatter
         };
-    }, [language]);
+    }, [language, measurementSystem]);
 
     return createElement(I18nContext.Provider, { value }, children);
 }
