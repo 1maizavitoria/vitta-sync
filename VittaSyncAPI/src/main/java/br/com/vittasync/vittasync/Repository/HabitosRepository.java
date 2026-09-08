@@ -22,6 +22,8 @@ public interface HabitosRepository extends JpaRepository<Habitos, Integer> {
 
     List<Habitos> findByPacienteId(Integer pacienteId);
 
+    List<Habitos> findByPacienteIdOrderByDataRegistroAsc(Integer pacienteId);
+
     List<Habitos> findByPacienteIdAndRepousoTrue(Integer pacienteId);
 
     List<Habitos> findByPacienteIdAndCanal(Integer pacienteId, String canal);

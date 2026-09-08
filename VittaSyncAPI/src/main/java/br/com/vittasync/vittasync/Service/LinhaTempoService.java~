@@ -1,0 +1,91 @@
+package br.com.vittasync.vittasync.Service;
+
+
+import br.com.vittasync.vittasync.Model.Habitos;
+import br.com.vittasync.vittasync.Model.SinaisVitais;
+import br.com.vittasync.vittasync.Model.DiarioSintomas;
+import br.com.vittasync.vittasync.Repository.HabitosRepository;
+import br.com.vittasync.vittasync.Repository.SinaisVitaisRepository;
+import br.com.vittasync.vittasync.Repository.DiarioSintomasRepository;
+import br.com.vittasync.vittasync.Exception.AcessoNegadoException;
+import org.springframework.stereotype.Service;
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
+
+
+@Service
+public class LinhaTempoService {
+
+    private final HabitosRepository habitosRepository;
+    private final SinaisVitaisRepository sinaisVitaisRepository;
+    private final DiarioSintomasRepository diarioSintomasRepository;
+    private final PermissaoService permissaoService;
+
+    public LinhaTempoService(HabitosRepository habitosRepository,
+                             SinaisVitaisRepository sinaisVitaisRepository,
+                             DiarioSintomasRepository diarioSintomasRepository,
+                             PermissaoService permissaoService) {
+        this.habitosRepository = habitosRepository;
+        this.sinaisVitaisRepository = sinaisVitaisRepository;
+        this.diarioSintomasRepository = diarioSintomasRepository;
+        this.permissaoService = permissaoService;
+    }
+
+    public List<LinhaTempoItemDTO> montarLinhaTempo(Integer usuarioLogadoId,
+                                                    Integer pacienteId,
+                                                    LocalDate inicio,
+                                                    LocalDate fim,
+                                                    String categoria) {
+        if (!permissaoService.podeVisualizarPaciente(usuarioLogadoId, pacienteId)) {
+            throw new AcessoNegadoException("Você não tem permissão para visualizar este paciente.");
+        }
+
+        List<LinhaTempoItemDTO> itens = new ArrayList<>();
+
+        for (SinaisVitais sv : sinaisVitaisRepository.findByPacienteId(pacienteId)) {
+            LinhaTempoItemDTO item = new LinhaTempoItemDTO(sv.getDataRegistro(), "SINAIS VITAIS");
+            item.setPeso(sv.getPeso());
+            item.setFcBpm(sv.getFcBpm());
+            item.setFrRpm(sv.getFrRpm());
+            item.setPaSistolica(sv.getPaSistolica());
+            item.setPaDiastolica(sv.getPaDiastolica());
+            item.setTempCelcius(sv.getTempCelcius());
+            item.setSpo2Porcento(sv.getSpo2Porcento());
+            itens.add(item);
+        }
+
+        for (Habitos h : habitosRepository.findByPacienteId(pacienteId)) {
+            LinhaTempoItemDTO item = new LinhaTempoItemDTO(h.getDataRegistro(), "HÁBITO");
+            item.setHorasSono(h.getHorasSono());
+            item.setMinutosExercicio(h.getMinutosExercicio());
+            item.setIndiceRepouso(h.getIndiceRepouso());
+            item.setRepouso(h.getRepouso());
+            item.setCanal(h.getCanal());
+            item.setDataReferenciaHabito(h.getDataReferencia());
+            itens.add(item);
+        }
+
+        for (DiarioSintomas s : diarioSintomasRepository.findByPacienteId(pacienteId)) {
+            LinhaTempoItemDTO item = new LinhaTempoItemDTO(s.getDataRegistro(), "SINTOMA");
+            item.setSintoma(s.getSintoma());
+            item.setIntensidadeDor(s.getIntensidadeDor());
+            item.setDataReferenciaSintoma(s.getDataReferencia());
+            itens.add(item);
+        }
+
+        if (inicio != null && fim != null) {
+            itens.removeIf(item -> item.getDataHora().toLocalDate().isBefore(inicio) ||
+                    item.getDataHora().toLocalDate().isAfter(fim));
+        }
+
+        if (categoria != null && !categoria.isEmpty()) {
+            itens.removeIf(item -> !item.getCategoria().equalsIgnoreCase(categoria));
+        }
+
+        itens.sort(Comparator.comparing(LinhaTempoItemDTO::getDataHora).reversed());
+
+        return itens;
+    }
+}

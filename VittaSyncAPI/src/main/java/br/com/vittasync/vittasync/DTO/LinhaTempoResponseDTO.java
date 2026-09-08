@@ -1,0 +1,24 @@
+package br.com.vittasync.vittasync.DTO;
+
+
+import java.util.List;
+
+
+public class LinhaTempoResponseDTO {
+    private List<LinhaTempoSinaisVitaisDTO> sinaisVitais;
+    private List<LinhaTempoHabitosDTO> habitos;
+    private List<LinhaTempoSintomasDTO> sintomas;
+
+    public LinhaTempoResponseDTO(List<LinhaTempoSinaisVitaisDTO> sinaisVitais,
+                                 List<LinhaTempoHabitosDTO> habitos,
+                                 List<LinhaTempoSintomasDTO> sintomas) {
+        this.sinaisVitais = sinaisVitais;
+        this.habitos = habitos;
+        this.sintomas = sintomas;
+    }
+
+
+    public List<LinhaTempoSinaisVitaisDTO> getSinaisVitais() { return sinaisVitais; }
+    public List<LinhaTempoHabitosDTO> getHabitos() { return habitos; }
+    public List<LinhaTempoSintomasDTO> getSintomas() { return sintomas; }
+}
