@@ -6,12 +6,14 @@ import java.time.LocalDateTime;
 
 
 public class LinhaTempoSintomasDTO {
+    private Integer id;
     private LocalDateTime dataHora;
     private String sintoma;
     private Integer intensidadeDor;
     private LocalDate dataReferencia;
 
-    public LinhaTempoSintomasDTO(LocalDateTime dataHora, String sintoma, Integer intensidadeDor, LocalDate dataReferencia) {
+    public LinhaTempoSintomasDTO(Integer id, LocalDateTime dataHora, String sintoma, Integer intensidadeDor, LocalDate dataReferencia) {
+        this.id = id;
         this.dataHora = dataHora;
         this.sintoma = sintoma;
         this.intensidadeDor = intensidadeDor;
@@ -19,6 +21,7 @@ public class LinhaTempoSintomasDTO {
     }
 
 
+    public Integer getId() { return id; }
     public LocalDateTime getDataHora() { return dataHora; }
     public String getSintoma() { return sintoma; }
     public Integer getIntensidadeDor() { return intensidadeDor; }

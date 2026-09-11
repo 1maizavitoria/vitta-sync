@@ -6,6 +6,7 @@ import java.time.LocalDateTime;
 
 
 public class LinhaTempoHabitosDTO {
+    private Integer id;
     private LocalDateTime dataHora;
     private Integer horasSono;
     private Integer minutosExercicio;
@@ -14,8 +15,9 @@ public class LinhaTempoHabitosDTO {
     private String canal;
     private LocalDate dataReferencia;
 
-    public LinhaTempoHabitosDTO(LocalDateTime dataHora, Integer horasSono, Integer minutosExercicio,
+    public LinhaTempoHabitosDTO(Integer id, LocalDateTime dataHora, Integer horasSono, Integer minutosExercicio,
                                 Double indiceRepouso, Boolean repouso, String canal, LocalDate dataReferencia) {
+        this.id = id;
         this.dataHora = dataHora;
         this.horasSono = horasSono;
         this.minutosExercicio = minutosExercicio;
@@ -26,6 +28,7 @@ public class LinhaTempoHabitosDTO {
     }
 
 
+    public Integer getId() { return id; }
     public LocalDateTime getDataHora() { return dataHora; }
     public Integer getHorasSono() { return horasSono; }
     public Integer getMinutosExercicio() { return minutosExercicio; }

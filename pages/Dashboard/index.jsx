@@ -17,6 +17,7 @@ import { useEffect, useMemo, useState } from "react";
 
 import DashboardChart from "../../components/ui/DashboardChart";
 import ClinicalStability from "../../components/ui/ClinicalStability";
+import ClinicalTimeline from "../../components/ui/ClinicalTimeline";
 import { usePatient } from "../../context/PatientContext";
 import { getDashboard } from "../../services/dashboardService";
 import { useI18n } from "../../src/i18n";
@@ -76,12 +77,13 @@ function getLatestValue(category, formatMeasurement, formatNumber) {
 export default function Dashboard() {
     const theme = useTheme();
     const { selectedPatient } = usePatient();
-    const { t, formatDate, formatMeasurement, formatNumber } = useI18n();
+    const { t, formatDate, formatMeasurement, formatNumber, locale } = useI18n();
     const [period, setPeriod] = useState(7);
     const [categoryFilter, setCategoryFilter] = useState("todas");
     const [dashboard, setDashboard] = useState(null);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(false);
+    const dateRange = useMemo(() => getDateRange(period), [period]);
 
     useEffect(() => {
         if (!selectedPatient?.cpf) {
@@ -92,14 +94,13 @@ export default function Dashboard() {
         let active = true;
 
         async function loadDashboard() {
-            const range = getDateRange(period);
             setLoading(true);
             setError(false);
 
             try {
                 const data = await getDashboard({
                     cpf: selectedPatient.cpf,
-                    ...range,
+                    ...dateRange,
                     categorias: categoryFilter === "todas" ? undefined : categoryFilter
                 });
 
@@ -124,7 +125,7 @@ export default function Dashboard() {
         return () => {
             active = false;
         };
-    }, [selectedPatient?.cpf, period, categoryFilter]);
+    }, [selectedPatient?.cpf, dateRange, categoryFilter]);
 
     const seriesNames = useMemo(() => ({
         sistolica: t("dashboard.series.sistolica"),
@@ -306,6 +307,17 @@ export default function Dashboard() {
                             </Box>
                         </>
                     )}
+
+                    <ClinicalTimeline
+                        cpf={selectedPatient.cpf}
+                        inicio={dateRange.inicio}
+                        fim={dateRange.fim}
+                        formatDate={formatDate}
+                        formatMeasurement={formatMeasurement}
+                        formatNumber={formatNumber}
+                        locale={locale}
+                        t={t}
+                    />
                 </>
             )}
         </Box>
