@@ -266,6 +266,39 @@ const dictionaries = {
             latestValue: "Último valor do período",
             loadError: "Não foi possível carregar os dados do dashboard.",
             emptyPeriod: "Nenhum registro encontrado neste período.",
+            timeline: {
+                title: "Linha do tempo clínica",
+                description: "Sinais vitais, hábitos e sintomas organizados pela data de referência.",
+                loadError: "Não foi possível carregar a linha do tempo clínica.",
+                empty: "Nenhum registro encontrado para este filtro e período.",
+                filters: {
+                    todos: "Todos",
+                    sinal_vital: "Sinais vitais",
+                    habito: "Hábitos",
+                    sintoma: "Sintomas"
+                },
+                types: {
+                    sinal_vital: "Sinais vitais",
+                    habito: "Hábito",
+                    sintoma: "Sintoma"
+                },
+                fields: {
+                    pressure: "Pressão arterial",
+                    heartRate: "Frequência cardíaca",
+                    respiratoryRate: "Frequência respiratória",
+                    temperature: "Temperatura",
+                    oxygenSaturation: "Saturação de oxigênio",
+                    weight: "Peso",
+                    sleep: "Sono",
+                    exercise: "Exercício",
+                    painIntensity: "Intensidade da dor",
+                    unreportedSymptom: "Sintoma não informado"
+                },
+                units: {
+                    hours: "horas",
+                    minutes: "minutos"
+                }
+            },
             stability: {
                 title: "Estabilidade clínica geral",
                 factorsTitle: "Fatores de estabilidade",
@@ -950,6 +983,39 @@ const dictionaries = {
             latestValue: "Latest value in the period",
             loadError: "Dashboard data could not be loaded.",
             emptyPeriod: "No records were found in this period.",
+            timeline: {
+                title: "Clinical timeline",
+                description: "Vital signs, habits, and symptoms organized by reference date.",
+                loadError: "The clinical timeline could not be loaded.",
+                empty: "No records were found for this filter and period.",
+                filters: {
+                    todos: "All",
+                    sinal_vital: "Vital signs",
+                    habito: "Habits",
+                    sintoma: "Symptoms"
+                },
+                types: {
+                    sinal_vital: "Vital signs",
+                    habito: "Habit",
+                    sintoma: "Symptom"
+                },
+                fields: {
+                    pressure: "Blood pressure",
+                    heartRate: "Heart rate",
+                    respiratoryRate: "Respiratory rate",
+                    temperature: "Temperature",
+                    oxygenSaturation: "Oxygen saturation",
+                    weight: "Weight",
+                    sleep: "Sleep",
+                    exercise: "Exercise",
+                    painIntensity: "Pain intensity",
+                    unreportedSymptom: "Unreported symptom"
+                },
+                units: {
+                    hours: "hours",
+                    minutes: "minutes"
+                }
+            },
             stability: {
                 title: "Overall clinical stability",
                 factorsTitle: "Stability factors",
@@ -1634,6 +1700,39 @@ const dictionaries = {
             latestValue: "Último valor del período",
             loadError: "No fue posible cargar los datos del panel.",
             emptyPeriod: "No se encontraron registros en este período.",
+            timeline: {
+                title: "Línea de tiempo clínica",
+                description: "Signos vitales, hábitos y síntomas organizados por fecha de referencia.",
+                loadError: "No fue posible cargar la línea de tiempo clínica.",
+                empty: "No se encontraron registros para este filtro y período.",
+                filters: {
+                    todos: "Todos",
+                    sinal_vital: "Signos vitales",
+                    habito: "Hábitos",
+                    sintoma: "Síntomas"
+                },
+                types: {
+                    sinal_vital: "Signos vitales",
+                    habito: "Hábito",
+                    sintoma: "Síntoma"
+                },
+                fields: {
+                    pressure: "Presión arterial",
+                    heartRate: "Frecuencia cardíaca",
+                    respiratoryRate: "Frecuencia respiratoria",
+                    temperature: "Temperatura",
+                    oxygenSaturation: "Saturación de oxígeno",
+                    weight: "Peso",
+                    sleep: "Sueño",
+                    exercise: "Ejercicio",
+                    painIntensity: "Intensidad del dolor",
+                    unreportedSymptom: "Síntoma no informado"
+                },
+                units: {
+                    hours: "horas",
+                    minutes: "minutos"
+                }
+            },
             stability: {
                 title: "Estabilidad clínica general",
                 factorsTitle: "Factores de estabilidad",
