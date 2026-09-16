@@ -4,6 +4,7 @@ package br.com.vittasync.vittasync.Repository;
 import br.com.vittasync.vittasync.Model.DiarioSintomas;
 import org.springframework.data.jpa.repository.JpaRepository;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 
@@ -16,4 +17,12 @@ public interface DiarioSintomasRepository extends JpaRepository<DiarioSintomas, 
             LocalDate inicio,
             LocalDate fim
     );
+
+    List<DiarioSintomas> findByPacienteIdAndDataRegistroBetweenOrderByDataRegistroAsc(
+            Integer pacienteId,
+            LocalDateTime inicio,
+            LocalDateTime fim
+    );
+
+
 }

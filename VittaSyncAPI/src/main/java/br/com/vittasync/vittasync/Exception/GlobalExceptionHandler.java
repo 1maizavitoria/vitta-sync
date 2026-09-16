@@ -59,6 +59,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<Map<String, String>> handleErroGenerico(Exception ex) {
+        ex.printStackTrace();
         Map<String, String> error = new HashMap<>();
         error.put("name", "AxiosError: Request failed with status code 500");
         error.put("value", "internalServerError");

@@ -4,6 +4,7 @@ package br.com.vittasync.vittasync.Repository;
 import br.com.vittasync.vittasync.Model.Habitos;
 import org.springframework.data.jpa.repository.JpaRepository;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -31,4 +32,10 @@ public interface HabitosRepository extends JpaRepository<Habitos, Integer> {
     List<Habitos> findByPacienteIdAndIndiceRepousoLessThan(Integer pacienteId, Double limite);
 
     List<Habitos> findByPacienteIdAndIndiceRepousoGreaterThanEqual(Integer pacienteId, Double limite);
+
+    List<Habitos> findByPacienteIdAndDataRegistroBetweenOrderByDataRegistroAsc(
+            Integer pacienteId,
+            LocalDateTime inicio,
+            LocalDateTime fim
+    );
 }

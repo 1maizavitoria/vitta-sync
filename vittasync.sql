@@ -196,6 +196,19 @@ CREATE TABLE EstabilidadeClinica (
     CONSTRAINT fk_estabilidade_paciente FOREIGN KEY (paciente_id) REFERENCES Usuario(id) ON DELETE CASCADE
 );
 
+CREATE TABLE ExportacaoRelatorio (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    paciente_id INT NOT NULL,
+    usuario_id INT NOT NULL, 
+    formato VARCHAR(10) NOT NULL,
+    categorias VARCHAR(50) NOT NULL,
+    data_inicio DATE NULL,
+    data_fim DATE NULL,
+    data_exportacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT fk_exportacao_paciente FOREIGN KEY (paciente_id) REFERENCES Usuario(id) ON DELETE CASCADE,
+    CONSTRAINT fk_exportacao_usuario FOREIGN KEY (usuario_id) REFERENCES Usuario(id) ON DELETE CASCADE
+);
+
 SHOW TABLES;
 
 DESCRIBE Usuario;
@@ -210,6 +223,7 @@ DESCRIBE ConviteVinculo;
 DESCRIBE ContatoEmergencia;
 DESCRIBE ArquivoMedico;
 DESCRIBE EstabilidadeClinica;
+DESCRIBE ExportacaoRelatorio;
 
 SELECT * FROM Usuario;
 SELECT * FROM CodigoVerificacao;
@@ -223,3 +237,4 @@ SELECT * FROM ConviteVinculo;
 SELECT * FROM ContatoEmergencia;
 SELECT * FROM ArquivoMedico;
 SELECT * FROM EstabilidadeClinica;
+SELECT * FROM ExportacaoRelatorio;
