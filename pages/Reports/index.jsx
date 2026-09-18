@@ -5,6 +5,8 @@ import { useSearchParams } from "react-router-dom";
 import Perfil from "../../components/ui/Perfil";
 import EmergencyContactsCard from "../../components/ui/cards/EmergencyContactsCard";
 import { useI18n } from "../../src/i18n";
+import { usePatient } from "../../context/PatientContext";
+import ReportExport from "../../components/ui/ReportExport";
 
 export default function Reports() {
     const theme = useTheme();
@@ -17,6 +19,9 @@ export default function Reports() {
     const showEmergencyContacts = view === "patient" || userType === "paciente";
     const isProfileView = view === "profile";
     const isPatientUser = userType === "paciente";
+    const { selectedPatient } = usePatient();
+    const reportCpf = isPatientUser ? localStorage.getItem("CPF") : selectedPatient?.cpf;
+    const showReport = isPatientUser || !isProfileView;
 
     const chipLabel = isProfileView
         ? t("reports.chips.profile")
@@ -114,6 +119,11 @@ export default function Reports() {
                 <Perfil view={view} />
                 {showEmergencyContacts && <EmergencyContactsCard />}
             </Box>
+            {showReport && (
+                <Box sx={{ mt: 3 }}>
+                    <ReportExport key={reportCpf || "no-patient"} cpf={reportCpf} />
+                </Box>
+            )}
         </Box>
     );
 }
