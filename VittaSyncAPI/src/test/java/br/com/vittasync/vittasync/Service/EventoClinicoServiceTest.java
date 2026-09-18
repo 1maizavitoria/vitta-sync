@@ -4,6 +4,7 @@ import br.com.vittasync.vittasync.Model.DiarioSintomas;
 import br.com.vittasync.vittasync.Model.Habitos;
 import br.com.vittasync.vittasync.Model.SinaisVitais;
 import br.com.vittasync.vittasync.Model.Usuario;
+import br.com.vittasync.vittasync.Repository.ContatoEmergenciaRepository;
 import br.com.vittasync.vittasync.Util.EventoPrioridades;
 import br.com.vittasync.vittasync.Util.EventoTipos;
 import org.junit.jupiter.api.BeforeEach;
@@ -14,13 +15,22 @@ import static org.mockito.Mockito.*;
 class EventoClinicoServiceTest {
 
     private EventoPacienteService eventoPacienteService;
+    private ContatoEmergenciaRepository contatoEmergenciaRepository;
+    private NotificacaoService notificacaoService;
     private EventoClinicoService service;
     private Usuario paciente;
 
     @BeforeEach
     void setup() {
         eventoPacienteService = mock(EventoPacienteService.class);
-        service = new EventoClinicoService(eventoPacienteService);
+        contatoEmergenciaRepository = mock(ContatoEmergenciaRepository.class);
+        notificacaoService = mock(NotificacaoService.class);
+
+        service = new EventoClinicoService(
+                eventoPacienteService,
+                contatoEmergenciaRepository,
+                notificacaoService
+        );
 
         paciente = new Usuario();
         paciente.setId(1);
@@ -47,7 +57,7 @@ class EventoClinicoServiceTest {
     }
 
     @Test
-    void testAnalisarPressaoAltaDisparaEvento() {
+    void testAnalisarPressaoAltaDisparaAlertaEmergencia() {
         SinaisVitais sinais = sinaisBase();
         sinais.setPaSistolica(150);
         sinais.setPaDiastolica(95);
@@ -56,15 +66,16 @@ class EventoClinicoServiceTest {
 
         verify(eventoPacienteService).criarEvento(
                 eq(1), eq(99),
-                eq(EventoTipos.PRESSAO_ANORMAL),
-                eq("Pressão arterial elevada"),
-                eq("Foi registrada pressão arterial acima do normal"),
-                eq(EventoPrioridades.ALTA)
+                eq("alerta_emergencia"),
+                eq("Alerta de emergência"),
+                contains("Pressão arterial"),
+                any(),
+                eq(EventoPrioridades.CRITICO)
         );
     }
 
     @Test
-    void testAnalisarFebreDisparaEvento() {
+    void testAnalisarFebreDisparaEventoEspecifico() {
         SinaisVitais sinais = sinaisBase();
         sinais.setTempCelcius(38.5);
 
@@ -80,20 +91,20 @@ class EventoClinicoServiceTest {
     }
 
     @Test
-    void testAnalisarSpo2CriticoDisparaDoisEventos() {
+    void testAnalisarSpo2CriticoDisparaAlertaEmergencia() {
         SinaisVitais sinais = sinaisBase();
         sinais.setSpo2Porcento(88);
 
         service.analisarSinaisVitais(sinais, 99);
 
-        verify(eventoPacienteService).criarEvento(eq(1), eq(99),
-                eq(EventoTipos.SPO2_BAIXA),
-                anyString(), anyString(),
-                eq(EventoPrioridades.ALTA));
-        verify(eventoPacienteService).criarEvento(eq(1), eq(99),
-                eq(EventoTipos.SPO2_CRITICA),
-                anyString(), anyString(),
-                eq(EventoPrioridades.CRITICO));
+        verify(eventoPacienteService).criarEvento(
+                eq(1), eq(99),
+                eq("alerta_emergencia"),
+                eq("Alerta de emergência"),
+                contains("Saturação de oxigênio"),
+                any(),
+                eq(EventoPrioridades.CRITICO)
+        );
     }
 
     @Test
