@@ -1,20 +1,28 @@
 import AppBar from "@mui/material/AppBar";
 import Box from "@mui/material/Box";
 import Chip from "@mui/material/Chip";
+import Dialog from "@mui/material/Dialog";
+import DialogContent from "@mui/material/DialogContent";
+import DialogTitle from "@mui/material/DialogTitle";
+import Divider from "@mui/material/Divider";
+import FormControlLabel from "@mui/material/FormControlLabel";
 import IconButton from "@mui/material/IconButton";
 import MenuItem from "@mui/material/MenuItem";
 import Select from "@mui/material/Select";
+import Stack from "@mui/material/Stack";
+import Switch from "@mui/material/Switch";
 import Toolbar from "@mui/material/Toolbar";
 import Tooltip from "@mui/material/Tooltip";
 import Typography from "@mui/material/Typography";
 import useMediaQuery from "@mui/material/useMediaQuery";
 import { useTheme } from "@mui/material/styles";
 
-import DarkModeIcon from "@mui/icons-material/DarkMode";
-import LightModeIcon from "@mui/icons-material/LightMode";
 import MenuIcon from "@mui/icons-material/Menu";
 import MenuOpenIcon from "@mui/icons-material/MenuOpen";
+import CloseIcon from "@mui/icons-material/Close";
+import SettingsIcon from "@mui/icons-material/Settings";
 
+import { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useI18n } from "../../src/i18n";
 import { useThemeMode } from "../../src/theme/ThemeModeProvider";
@@ -34,7 +42,13 @@ export default function Navbar({ open, setOpen, selectedPatient }) {
         setMeasurementSystem,
         t
     } = useI18n();
-    const { mode, toggleMode } = useThemeMode();
+    const {
+        mode,
+        toggleMode,
+        accessibilityMode,
+        setAccessibilityMode
+    } = useThemeMode();
+    const [settingsOpen, setSettingsOpen] = useState(false);
     const isDarkMode = mode === "dark";
     const vitta = theme.vitta;
 
@@ -263,104 +277,22 @@ export default function Navbar({ open, setOpen, selectedPatient }) {
                         flexShrink: 0
                     }}
                 >
-                    {isPublicPage && (
-                        <Select
-                            size="small"
-                            value={language}
-                            title={t("nav.language")}
-                            inputProps={{ "aria-label": t("nav.language") }}
-                            onChange={(event) => setLanguage(event.target.value)}
-                            sx={{
-                                minWidth: 72,
-                                borderRadius: 2,
-                                bgcolor: "background.paper",
-                                "& .MuiSelect-select": {
-                                    py: 0.75,
-                                    fontWeight: 700
-                                }
-                            }}
-                        >
-                            {languages.map((item) => (
-                                <MenuItem key={item.code} value={item.code}>
-                                    {item.label}
-                                </MenuItem>
-                            ))}
-                        </Select>
-                    )}
-
-                    {!isPublicPage && (
-                        <Select
-                            size="small"
-                            value={language}
-                            title={t("nav.language")}
-                            inputProps={{ "aria-label": t("nav.language") }}
-                            onChange={(event) => setLanguage(event.target.value)}
-                            sx={{
-                                display: { xs: "none", sm: "inline-flex" },
-                                minWidth: 68,
-                                borderRadius: 2,
-                                bgcolor: "background.paper",
-                                "& .MuiSelect-select": {
-                                    py: 0.75,
-                                    fontWeight: 800
-                                }
-                            }}
-                        >
-                            {languages.map((item) => (
-                                <MenuItem key={item.code} value={item.code}>
-                                    {item.label}
-                                </MenuItem>
-                            ))}
-                        </Select>
-                    )}
-
-                    <Select
-                        size="small"
-                        value={measurementSystem}
-                        title={t("measurement.toggle")}
-                        inputProps={{ "aria-label": t("measurement.toggle") }}
-                        onChange={(event) => setMeasurementSystem(event.target.value)}
-                        sx={{
-                            minWidth: { xs: 64, sm: 112 },
-                            borderRadius: 2,
-                            bgcolor: "background.paper",
-                            "& .MuiSelect-select": {
-                                py: 0.75,
-                                fontWeight: 800
-                            }
-                        }}
-                    >
-                        {measurementSystems.map((item) => (
-                            <MenuItem key={item.code} value={item.code}>
-                                {isMobile
-                                    ? t(`measurement.${item.code}Short`)
-                                    : t(`measurement.${item.code}`)}
-                            </MenuItem>
-                        ))}
-                    </Select>
-
-                    <Tooltip title={isDarkMode ? t("theme.light") : t("theme.dark")}>
+                    <Tooltip title={t("settings.open")}>
                         <IconButton
-                            onClick={toggleMode}
+                            onClick={() => setSettingsOpen(true)}
                             size="small"
-                            aria-label={t("theme.toggle")}
+                            aria-label={t("settings.open")}
                             sx={{
-                                color: isDarkMode ? "warning.light" : "primary.main",
-                                bgcolor: isDarkMode
-                                    ? "rgba(250, 204, 21, 0.12)"
-                                    : "rgba(22, 163, 74, 0.08)",
+                                color: "primary.main",
+                                bgcolor: isDarkMode ? "rgba(34, 197, 94, 0.12)" : "rgba(22, 163, 74, 0.08)",
                                 border: "1px solid",
-                                borderColor: isDarkMode
-                                    ? "rgba(250, 204, 21, 0.22)"
-                                    : "rgba(22, 163, 74, 0.14)",
+                                borderColor: vitta.border,
                                 "&:hover": {
-                                    bgcolor: isDarkMode
-                                        ? "rgba(250, 204, 21, 0.18)"
-                                        : "rgba(22, 163, 74, 0.14)"
+                                    bgcolor: isDarkMode ? "rgba(34, 197, 94, 0.18)" : "rgba(22, 163, 74, 0.14)"
                                 }
                             }}
                         >
-                            {isDarkMode ? <LightModeIcon fontSize="small" /> : <DarkModeIcon fontSize="small" />}
+                            <SettingsIcon fontSize="small" />
                         </IconButton>
                     </Tooltip>
 
@@ -378,6 +310,92 @@ export default function Navbar({ open, setOpen, selectedPatient }) {
                     )}
                 </Box>
             </Toolbar>
+
+            <Dialog
+                open={settingsOpen}
+                onClose={() => setSettingsOpen(false)}
+                fullWidth
+                maxWidth="xs"
+                aria-labelledby="settings-dialog-title"
+            >
+                <DialogTitle id="settings-dialog-title" sx={{ pr: 7, fontWeight: 800 }}>
+                    {t("settings.title")}
+                    <IconButton
+                        onClick={() => setSettingsOpen(false)}
+                        aria-label={t("settings.close")}
+                        sx={{ position: "absolute", right: 12, top: 12 }}
+                    >
+                        <CloseIcon />
+                    </IconButton>
+                </DialogTitle>
+
+                <DialogContent dividers>
+                    <Stack spacing={2.5}>
+                        <Box>
+                            <Typography component="label" htmlFor="settings-language" fontWeight={800}>
+                                {t("nav.language")}
+                            </Typography>
+                            <Select
+                                id="settings-language"
+                                fullWidth
+                                value={language}
+                                inputProps={{ "aria-label": t("nav.language") }}
+                                onChange={(event) => setLanguage(event.target.value)}
+                                sx={{ mt: 1 }}
+                            >
+                                {languages.map((item) => (
+                                    <MenuItem key={item.code} value={item.code}>{item.label}</MenuItem>
+                                ))}
+                            </Select>
+                        </Box>
+
+                        <Box>
+                            <Typography component="label" htmlFor="settings-measurement" fontWeight={800}>
+                                {t("measurement.toggle")}
+                            </Typography>
+                            <Select
+                                id="settings-measurement"
+                                fullWidth
+                                value={measurementSystem}
+                                inputProps={{ "aria-label": t("measurement.toggle") }}
+                                onChange={(event) => setMeasurementSystem(event.target.value)}
+                                sx={{ mt: 1 }}
+                            >
+                                {measurementSystems.map((item) => (
+                                    <MenuItem key={item.code} value={item.code}>
+                                        {t(`measurement.${item.code}`)}
+                                    </MenuItem>
+                                ))}
+                            </Select>
+                        </Box>
+
+                        <Divider />
+
+                        <Box>
+
+                            <FormControlLabel
+                                control={<Switch checked={isDarkMode} onChange={toggleMode} />}
+                                label={isDarkMode ? t("theme.dark") : t("theme.light")}
+                            />
+                        </Box>
+
+                        <Box>
+                            <FormControlLabel
+                                control={(
+                                    <Switch
+                                        checked={accessibilityMode}
+                                        onChange={(event) => setAccessibilityMode(event.target.checked)}
+                                    />
+                                )}
+                                label={t("settings.accessibilityMode")}
+                            />
+                            <Typography color="text.secondary" variant="body2" sx={{ ml: 6 }}>
+                                {t("settings.accessibilityDescription")}
+                            </Typography>
+                        </Box>
+                    </Stack>
+                </DialogContent>
+            </Dialog>
         </AppBar>
     );
 }

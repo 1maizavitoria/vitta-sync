@@ -56,6 +56,13 @@ const dictionaries = {
             dark: "Modo escuro",
             toggle: "Alternar tema"
         },
+        settings: {
+            title: "Configurações",
+            open: "Abrir configurações",
+            close: "Fechar configurações",
+            accessibilityMode: "Modo acessível",
+            accessibilityDescription: "Aumenta textos, campos e botões e exibe orientações junto aos campos."
+        },
         measurement: {
             label: "Medidas",
             metric: "Métrico",
@@ -798,6 +805,13 @@ const dictionaries = {
             dark: "Dark mode",
             toggle: "Toggle theme"
         },
+        settings: {
+            title: "Settings",
+            open: "Open settings",
+            close: "Close settings",
+            accessibilityMode: "Accessible mode",
+            accessibilityDescription: "Enlarges text, fields and buttons and displays guidance next to fields."
+        },
         measurement: {
             label: "Measurements",
             metric: "Metric",
@@ -1538,6 +1552,13 @@ const dictionaries = {
             light: "Modo claro",
             dark: "Modo oscuro",
             toggle: "Alternar tema"
+        },
+        settings: {
+            title: "Configuración",
+            open: "Abrir configuración",
+            close: "Cerrar configuración",
+            accessibilityMode: "Modo accesible",
+            accessibilityDescription: "Amplía textos, campos y botones y muestra orientaciones junto a los campos."
         },
         measurement: {
             label: "Medidas",

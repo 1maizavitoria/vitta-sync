@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 
-import { Box, Grid, IconButton, Paper, Tooltip, Typography } from "@mui/material";
+import { Box, Button, Grid, IconButton, Paper, Tooltip, Typography } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
 
 import AddIcon from "@mui/icons-material/Add";
@@ -19,6 +19,7 @@ import { editVitalSigns, getVitalSigns, registerVitalSigns } from "../../service
 import { getMedicoStyle, getNomeFuncao, getResponsavelStyle } from "../../utils/validators/userFunction";
 import VitalCard from "../ui/cards/VitalCard";
 import { useI18n } from "../../src/i18n";
+import { useThemeMode } from "../../src/theme/ThemeModeProvider";
 
 const emptyInputs = {
     peso: "",
@@ -69,6 +70,7 @@ export function VitalTracker() {
         formatUnit,
         measurementSystem
     } = useI18n();
+    const { accessibilityMode } = useThemeMode();
 
     const [editing, setEditing] = useState(false);
     const [addVital, setAddVital] = useState(false);
@@ -109,6 +111,20 @@ export function VitalTracker() {
             "&:hover": { bgcolor: "primary.dark" }
         }
     };
+
+    const accessibleActionButtonSx = (variant) => ({
+        ...actionButtonSx[variant],
+        minHeight: 48,
+        px: { xs: 1.5, sm: 2 },
+        borderRadius: 2,
+        fontWeight: 800,
+        textTransform: "none",
+        "&:focus-visible": {
+            outline: "3px solid",
+            outlineColor: "secondary.main",
+            outlineOffset: 2
+        }
+    });
 
     const lastVital = vitals.reduce((latest, current) => {
         if (!latest) return current;
@@ -380,50 +396,109 @@ export function VitalTracker() {
                 </Box>
 
                 {isFormOpen ? (
-                    <Box display="flex" gap={1} flexShrink={0}>
-                        <Tooltip title={t("healthTracker.common.cancel")}>
-                            <IconButton onClick={closeForm} sx={actionButtonSx.cancel}>
-                                <CloseIcon />
-                            </IconButton>
-                        </Tooltip>
+                    <Box display="flex" gap={1} flexShrink={0} flexWrap="wrap">
+                        {accessibilityMode ? (
+                            <>
+                                <Button
+                                    onClick={closeForm}
+                                    startIcon={<CloseIcon />}
+                                    sx={accessibleActionButtonSx("cancel")}
+                                >
+                                    {t("healthTracker.common.cancel")}
+                                </Button>
 
-                        <Tooltip title={t("healthTracker.common.save")}>
-                            <IconButton onClick={handleRegister} sx={actionButtonSx.save}>
-                                <CheckIcon />
-                            </IconButton>
-                        </Tooltip>
+                                <Button
+                                    onClick={handleRegister}
+                                    startIcon={<CheckIcon />}
+                                    sx={accessibleActionButtonSx("save")}
+                                >
+                                    {t("healthTracker.common.save")}
+                                </Button>
+                            </>
+                        ) : (
+                            <>
+                                <Tooltip title={t("healthTracker.common.cancel")}>
+                                    <IconButton
+                                        onClick={closeForm}
+                                        aria-label={t("healthTracker.common.cancel")}
+                                        sx={actionButtonSx.cancel}
+                                    >
+                                        <CloseIcon />
+                                    </IconButton>
+                                </Tooltip>
+
+                                <Tooltip title={t("healthTracker.common.save")}>
+                                    <IconButton
+                                        onClick={handleRegister}
+                                        aria-label={t("healthTracker.common.save")}
+                                        sx={actionButtonSx.save}
+                                    >
+                                        <CheckIcon />
+                                    </IconButton>
+                                </Tooltip>
+                            </>
+                        )}
                     </Box>
                 ) : (
-                    <Box display="flex" alignItems="center" gap={1} flexShrink={0}>
+                    <Box display="flex" alignItems="center" gap={1} flexShrink={0} flexWrap="wrap">
                         {canEdit && (
-                            <Tooltip title={t("healthTracker.vitals.add")}>
-                                <IconButton
+                            accessibilityMode ? (
+                                <Button
                                     onClick={() => {
                                         setAddVital(true);
                                         handleClearInputs();
                                     }}
-                                    sx={actionButtonSx.add}
+                                    startIcon={<AddIcon />}
+                                    sx={accessibleActionButtonSx("add")}
                                 >
-                                    <AddIcon />
-                                </IconButton>
-                            </Tooltip>
+                                    {t("healthTracker.vitals.add")}
+                                </Button>
+                            ) : (
+                                <Tooltip title={t("healthTracker.vitals.add")}>
+                                    <IconButton
+                                        onClick={() => {
+                                            setAddVital(true);
+                                            handleClearInputs();
+                                        }}
+                                        aria-label={t("healthTracker.vitals.add")}
+                                        sx={actionButtonSx.add}
+                                    >
+                                        <AddIcon />
+                                    </IconButton>
+                                </Tooltip>
+                            )
                         )}
 
                         {canEdit && (
-                            <Tooltip title={t("healthTracker.vitals.edit")}>
-                                <span>
-                                    <IconButton
-                                        onClick={() => {
-                                            setEditing(true);
-                                            handleDataEditing();
-                                        }}
-                                        disabled={!lastVital}
-                                        sx={actionButtonSx.edit}
-                                    >
-                                        <EditOutlinedIcon />
-                                    </IconButton>
-                                </span>
-                            </Tooltip>
+                            accessibilityMode ? (
+                                <Button
+                                    onClick={() => {
+                                        setEditing(true);
+                                        handleDataEditing();
+                                    }}
+                                    disabled={!lastVital}
+                                    startIcon={<EditOutlinedIcon />}
+                                    sx={accessibleActionButtonSx("edit")}
+                                >
+                                    {t("healthTracker.vitals.edit")}
+                                </Button>
+                            ) : (
+                                <Tooltip title={t("healthTracker.vitals.edit")}>
+                                    <span>
+                                        <IconButton
+                                            onClick={() => {
+                                                setEditing(true);
+                                                handleDataEditing();
+                                            }}
+                                            disabled={!lastVital}
+                                            aria-label={t("healthTracker.vitals.edit")}
+                                            sx={actionButtonSx.edit}
+                                        >
+                                            <EditOutlinedIcon />
+                                        </IconButton>
+                                    </span>
+                                </Tooltip>
+                            )
                         )}
                     </Box>
                 )}
@@ -436,6 +511,8 @@ export function VitalTracker() {
                         showInput={isFormOpen}
                         icon={<ScaleIcon />}
                         title={t("healthTracker.vitals.weight")}
+                        error={error && !vitalInputs.peso}
+                        helperText={error && !vitalInputs.peso ? t("healthTracker.vitals.fillAll") : undefined}
                         type="number"
                         value={lastVital ? formatMeasurement(lastVital.peso, "kg") : t("healthTracker.common.notAvailable")}
                         unit=""
@@ -455,6 +532,13 @@ export function VitalTracker() {
                         icon={<MonitorHeartIcon />}
                         title={t("healthTracker.vitals.heartRate")}
                         error={(error && !vitalInputs.frequenciaCardiaca) || errorFC}
+                        helperText={
+                            errorFC
+                                ? t("healthTracker.vitals.invalidHeartRate")
+                                : error && !vitalInputs.frequenciaCardiaca
+                                    ? t("healthTracker.vitals.fillAll")
+                                    : undefined
+                        }
                         type="number"
                         value={lastVital ? formatMeasurement(lastVital.fcBpm, "bpm") : t("healthTracker.common.notAvailable")}
                         unit=""
@@ -477,6 +561,13 @@ export function VitalTracker() {
                         icon={<FavoriteIcon />}
                         title={t("healthTracker.vitals.respiratoryRate")}
                         error={(error && !vitalInputs.frequenciaRespiratoria) || errorFR}
+                        helperText={
+                            errorFR
+                                ? t("healthTracker.vitals.invalidRespiratoryRate")
+                                : error && !vitalInputs.frequenciaRespiratoria
+                                    ? t("healthTracker.vitals.fillAll")
+                                    : undefined
+                        }
                         type="number"
                         value={lastVital ? formatMeasurement(lastVital.frRpm, "rpm") : t("healthTracker.common.notAvailable")}
                         unit=""
@@ -499,6 +590,13 @@ export function VitalTracker() {
                         icon={<AirIcon />}
                         title={t("healthTracker.vitals.oxygenSaturation")}
                         error={(error && !vitalInputs.saturacao) || errorSPO2}
+                        helperText={
+                            errorSPO2
+                                ? t("healthTracker.vitals.invalidSaturation")
+                                : error && !vitalInputs.saturacao
+                                    ? t("healthTracker.vitals.fillAll")
+                                    : undefined
+                        }
                         type="number"
                         value={lastVital ? formatMeasurement(lastVital.spo2Porcento, "%") : t("healthTracker.common.notAvailable")}
                         unit=""
@@ -521,6 +619,13 @@ export function VitalTracker() {
                         icon={<DeviceThermostatIcon />}
                         title={t("healthTracker.vitals.bodyTemperature")}
                         error={(error && !vitalInputs.temperatura) || errorTemp}
+                        helperText={
+                            errorTemp
+                                ? t("healthTracker.vitals.invalidTemperature")
+                                : error && !vitalInputs.temperatura
+                                    ? t("healthTracker.vitals.fillAll")
+                                    : undefined
+                        }
                         type="number"
                         value={lastVital ? formatMeasurement(lastVital.tempCelcius, "°C") : t("healthTracker.common.notAvailable")}
                         unit=""
@@ -543,6 +648,13 @@ export function VitalTracker() {
                         icon={<MonitorHeartIcon />}
                         title={t("healthTracker.vitals.systolicPressure")}
                         error={(error && !vitalInputs.sistolica) || errorSistolica}
+                        helperText={
+                            errorSistolica
+                                ? t("healthTracker.vitals.invalidBloodPressure")
+                                : error && !vitalInputs.sistolica
+                                    ? t("healthTracker.vitals.fillAll")
+                                    : undefined
+                        }
                         type="number"
                         value={lastVital ? formatMeasurement(lastVital.paSistolica, "mmHg") : t("healthTracker.common.notAvailable")}
                         unit=""
@@ -565,6 +677,13 @@ export function VitalTracker() {
                         icon={<MonitorHeartIcon />}
                         title={t("healthTracker.vitals.diastolicPressure")}
                         error={(error && !vitalInputs.diastolica) || errorDiastolica}
+                        helperText={
+                            errorDiastolica
+                                ? t("healthTracker.vitals.invalidBloodPressure")
+                                : error && !vitalInputs.diastolica
+                                    ? t("healthTracker.vitals.fillAll")
+                                    : undefined
+                        }
                         type="number"
                         value={lastVital ? formatMeasurement(lastVital.paDiastolica, "mmHg") : t("healthTracker.common.notAvailable")}
                         unit=""

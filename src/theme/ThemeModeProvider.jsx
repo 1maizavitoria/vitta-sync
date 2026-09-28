@@ -7,6 +7,7 @@ import { createVittaTheme } from ".";
 const ThemeModeContext = createContext(null);
 
 const storageKey = "vitta-theme-mode";
+const accessibilityStorageKey = "vitta-accessibility-mode";
 const defaultMode = "light";
 
 function normalizeMode(mode) {
@@ -16,6 +17,9 @@ function normalizeMode(mode) {
 export function VittaThemeProvider({ children }) {
     const [mode, setModeState] = useState(() =>
         normalizeMode(localStorage.getItem(storageKey) || defaultMode)
+    );
+    const [accessibilityMode, setAccessibilityModeState] = useState(
+        () => localStorage.getItem(accessibilityStorageKey) === "true"
     );
 
     const theme = useMemo(() => createVittaTheme(mode), [mode]);
@@ -33,8 +37,21 @@ export function VittaThemeProvider({ children }) {
                 localStorage.setItem(storageKey, nextMode);
                 return nextMode;
             });
+        },
+        accessibilityMode,
+        setAccessibilityMode: (enabled) => {
+            const nextValue = Boolean(enabled);
+            localStorage.setItem(accessibilityStorageKey, String(nextValue));
+            setAccessibilityModeState(nextValue);
+        },
+        toggleAccessibilityMode: () => {
+            setAccessibilityModeState((currentValue) => {
+                const nextValue = !currentValue;
+                localStorage.setItem(accessibilityStorageKey, String(nextValue));
+                return nextValue;
+            });
         }
-    }), [mode]);
+    }), [mode, accessibilityMode]);
 
     return (
         <ThemeModeContext.Provider value={value}>
