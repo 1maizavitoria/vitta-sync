@@ -6,11 +6,14 @@ import br.com.vittasync.vittasync.DTO.DashboardPontoDTO;
 import br.com.vittasync.vittasync.DTO.DashboardResponseDTO;
 import br.com.vittasync.vittasync.DTO.DashboardSerieDTO;
 import br.com.vittasync.vittasync.DTO.EstabilidadeClinicaDTO;
+import br.com.vittasync.vittasync.DTO.LinhaBaseDTO;
 import br.com.vittasync.vittasync.Exception.DadosInvalidosException;
 import br.com.vittasync.vittasync.Model.Habitos;
+import br.com.vittasync.vittasync.Model.LinhaBase;
 import br.com.vittasync.vittasync.Model.SinaisVitais;
 import br.com.vittasync.vittasync.Model.Usuario;
 import br.com.vittasync.vittasync.Repository.HabitosRepository;
+import br.com.vittasync.vittasync.Repository.LinhaBaseRepository;
 import br.com.vittasync.vittasync.Repository.SinaisVitaisRepository;
 import org.springframework.stereotype.Service;
 import java.time.LocalDate;
@@ -36,15 +39,21 @@ public class DashboardService {
     private final SinaisVitaisRepository sinaisVitaisRepository;
     private final HabitosRepository habitosRepository;
     private final EstabilidadeClinicaService estabilidadeClinicaService;
+    private final LinhaBaseService linhaBaseService;
+    private final LinhaBaseRepository linhaBaseRepository;
 
     public DashboardService(
             SinaisVitaisRepository sinaisVitaisRepository,
             HabitosRepository habitosRepository,
-            EstabilidadeClinicaService estabilidadeClinicaService
+            EstabilidadeClinicaService estabilidadeClinicaService,
+            LinhaBaseService linhaBaseService,
+            LinhaBaseRepository linhaBaseRepository
     ) {
         this.sinaisVitaisRepository = sinaisVitaisRepository;
         this.habitosRepository = habitosRepository;
         this.estabilidadeClinicaService = estabilidadeClinicaService;
+        this.linhaBaseService = linhaBaseService;
+        this.linhaBaseRepository = linhaBaseRepository;
     }
 
     public DashboardResponseDTO consultar(
@@ -92,8 +101,69 @@ public class DashboardService {
                 inicio,
                 fim,
                 categoriasResposta,
-                estabilidadeClinica
+                estabilidadeClinica,
+                montarLinhaBase(paciente.getId())
         );
+    }
+
+    private List<LinhaBaseDTO> montarLinhaBase(Integer pacienteId) {
+        List<SinaisVitais> historico = sinaisVitaisRepository.findByPacienteIdOrderByDataRegistroAsc(pacienteId);
+
+        Map<String, LinhaBase> linhasBasePorSinal = new HashMap<>();
+        for (LinhaBase linhaBase : linhaBaseRepository.findByPacienteId(pacienteId)) {
+            linhasBasePorSinal.put(linhaBase.getSinal(), linhaBase);
+        }
+
+        List<LinhaBaseDTO> linhasBase = new ArrayList<>();
+        for (String sinal : LinhaBaseService.SINAIS) {
+            LinhaBase linhaBase = linhasBasePorSinal.get(sinal);
+            SinaisVitais ultimoRegistro = buscarUltimoRegistro(historico, sinal);
+            Number ultimoValor = ultimoRegistro != null ? linhaBaseService.valorSinal(ultimoRegistro, sinal) : null;
+            LocalDateTime dataUltimoValor = ultimoRegistro != null ? ultimoRegistro.getDataRegistro() : null;
+
+            if (linhaBase == null) {
+                linhasBase.add(new LinhaBaseDTO(
+                        sinal,
+                        "em_formacao",
+                        linhaBaseService.calcularProgresso(pacienteId, sinal),
+                        LinhaBaseService.diasNecessarios,
+                        null, null, null, null, null, null,
+                        ultimoValor,
+                        dataUltimoValor,
+                        null
+                ));
+                continue;
+            }
+
+            // só compara medições feitas depois da formação da referência; as que formaram a referência ficam com comparacao null
+            boolean medicaoNova = dataUltimoValor != null && dataUltimoValor.isAfter(linhaBase.getDataFormacao());
+
+            linhasBase.add(new LinhaBaseDTO(
+                    sinal,
+                    linhaBase.getLimiteInferior() == null ? "sem_variacao" : "formada",
+                    LinhaBaseService.diasNecessarios,
+                    LinhaBaseService.diasNecessarios,
+                    linhaBase.getDataInicio(),
+                    linhaBase.getDataFim(),
+                    linhaBase.getMedia(),
+                    linhaBase.getDesvioPadrao(),
+                    linhaBase.getLimiteInferior(),
+                    linhaBase.getLimiteSuperior(),
+                    ultimoValor,
+                    dataUltimoValor,
+                    medicaoNova ? linhaBaseService.comparar(linhaBase, ultimoValor) : null
+            ));
+        }
+        return linhasBase;
+    }
+
+    private SinaisVitais buscarUltimoRegistro(List<SinaisVitais> historico, String sinal) {
+        for (int i = historico.size() - 1; i >= 0; i--) {
+            if (linhaBaseService.valorSinal(historico.get(i), sinal) != null) {
+                return historico.get(i);
+            }
+        }
+        return null;
     }
 
     private Set<String> resolverCategorias(String categoriasInformadas) {

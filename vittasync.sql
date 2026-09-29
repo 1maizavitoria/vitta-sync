@@ -209,6 +209,21 @@ CREATE TABLE ExportacaoRelatorio (
     CONSTRAINT fk_exportacao_usuario FOREIGN KEY (usuario_id) REFERENCES Usuario(id) ON DELETE CASCADE
 );
 
+CREATE TABLE LinhaBase (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    paciente_id INT NOT NULL,
+    sinal VARCHAR(30) NOT NULL,
+    data_inicio DATE NOT NULL,
+    data_fim DATE NOT NULL,
+    media DOUBLE NOT NULL,
+    desvio_padrao DOUBLE NOT NULL,
+    limite_inferior DOUBLE,
+    limite_superior DOUBLE,
+    data_formacao DATETIME NOT NULL,
+    CONSTRAINT uk_linha_base_paciente_sinal UNIQUE (paciente_id, sinal),
+    CONSTRAINT fk_linha_base_paciente FOREIGN KEY (paciente_id) REFERENCES Usuario(id) ON DELETE CASCADE
+);
+
 SHOW TABLES;
 
 DESCRIBE Usuario;
@@ -224,6 +239,7 @@ DESCRIBE ContatoEmergencia;
 DESCRIBE ArquivoMedico;
 DESCRIBE EstabilidadeClinica;
 DESCRIBE ExportacaoRelatorio;
+DESCRIBE LinhaBase;
 
 SELECT * FROM Usuario;
 SELECT * FROM CodigoVerificacao;
@@ -238,3 +254,4 @@ SELECT * FROM ContatoEmergencia;
 SELECT * FROM ArquivoMedico;
 SELECT * FROM EstabilidadeClinica;
 SELECT * FROM ExportacaoRelatorio;
+SELECT * FROM LinhaBase;

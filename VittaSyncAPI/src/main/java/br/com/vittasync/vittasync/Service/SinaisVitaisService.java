@@ -17,15 +17,18 @@ public class SinaisVitaisService {
     private final SinaisVitaisRepository repository;
     private final EventoPacienteService eventoPacienteService;
     private final EventoClinicoService eventoClinicoService;
+    private final LinhaBaseService linhaBaseService;
 
     public SinaisVitaisService(
             SinaisVitaisRepository repository,
             EventoPacienteService eventoPacienteService,
-            EventoClinicoService eventoClinicoService
+            EventoClinicoService eventoClinicoService,
+            LinhaBaseService linhaBaseService
     ) {
         this.repository = repository;
         this.eventoPacienteService = eventoPacienteService;
         this.eventoClinicoService = eventoClinicoService;
+        this.linhaBaseService = linhaBaseService;
     }
 
     public SinaisVitais create(SinaisVitais sinais, Integer usuarioLogadoId) {
@@ -49,6 +52,7 @@ public class SinaisVitaisService {
         );
 
         eventoClinicoService.analisarSinaisVitais(salvo, usuarioLogadoId);
+        linhaBaseService.atualizarLinhasBase(salvo.getPaciente().getId());
 
         return salvo;
     }
@@ -82,6 +86,7 @@ public class SinaisVitaisService {
         );
 
         eventoClinicoService.analisarSinaisVitais(atualizado, usuarioLogadoId);
+        linhaBaseService.atualizarLinhasBase(atualizado.getPaciente().getId());
 
         return atualizado;
     }
@@ -108,6 +113,7 @@ public class SinaisVitaisService {
         );
 
         repository.deleteById(id);
+        linhaBaseService.atualizarLinhasBase(sinais.getPaciente().getId());
     }
 
     public List<SinaisVitais> findByPacienteCpf(String cpf) {
