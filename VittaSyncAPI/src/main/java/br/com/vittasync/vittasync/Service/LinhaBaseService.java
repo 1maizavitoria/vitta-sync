@@ -5,7 +5,10 @@ import br.com.vittasync.vittasync.Model.LinhaBase;
 import br.com.vittasync.vittasync.Model.SinaisVitais;
 import br.com.vittasync.vittasync.Repository.LinhaBaseRepository;
 import br.com.vittasync.vittasync.Repository.SinaisVitaisRepository;
+import br.com.vittasync.vittasync.Repository.UsuarioRepository;
+import br.com.vittasync.vittasync.Exception.RecursoNaoEncontradoException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
@@ -16,6 +19,7 @@ public class LinhaBaseService {
 
     private final LinhaBaseRepository linhaBaseRepository;
     private final SinaisVitaisRepository sinaisVitaisRepository;
+    private final UsuarioRepository usuarioRepository;
 
     public static final List<String> SINAIS = List.of(
             "peso",
@@ -32,14 +36,20 @@ public class LinhaBaseService {
 
     public LinhaBaseService(
             LinhaBaseRepository linhaBaseRepository,
-            SinaisVitaisRepository sinaisVitaisRepository
+            SinaisVitaisRepository sinaisVitaisRepository,
+            UsuarioRepository usuarioRepository
     ) {
         this.linhaBaseRepository = linhaBaseRepository;
         this.sinaisVitaisRepository = sinaisVitaisRepository;
+        this.usuarioRepository = usuarioRepository;
     }
 
 
+    @Transactional
     public void atualizarLinhasBase(Integer pacienteId) {
+        // Serializa a formação por paciente, inclusive quando ainda não existe referência.
+        usuarioRepository.buscarPorIdComBloqueio(pacienteId)
+                .orElseThrow(() -> new RecursoNaoEncontradoException("Paciente não encontrado"));
         List<SinaisVitais> sinais = sinaisVitaisRepository.findByPacienteIdOrderByDataRegistroAsc(pacienteId);
 
         for (String sinal : SINAIS) {
@@ -140,12 +150,12 @@ public class LinhaBaseService {
         linhaBase.setSinal(sinal);
         linhaBase.setDataInicio(periodo.get(0));
         linhaBase.setDataFim(periodo.get(periodo.size() - 1));
-        linhaBase.setMedia(arredondar(media));
-        linhaBase.setDesvioPadrao(arredondar(desvioPadrao));
+        linhaBase.setMedia(media);
+        linhaBase.setDesvioPadrao(desvioPadrao);
 
         if (desvioPadrao > 0) {
-            linhaBase.setLimiteInferior(arredondar(media - desviosPadraoFaixa * desvioPadrao));
-            linhaBase.setLimiteSuperior(arredondar(media + desviosPadraoFaixa * desvioPadrao));
+            linhaBase.setLimiteInferior(media - desviosPadraoFaixa * desvioPadrao);
+            linhaBase.setLimiteSuperior(media + desviosPadraoFaixa * desvioPadrao);
         }
 
         linhaBase.setDataFormacao(LocalDateTime.now());
@@ -157,11 +167,13 @@ public class LinhaBaseService {
     }
 
     private double calcularDesvioPadraoAmostral(List<Double> valores, double media) {
+        double menor = Collections.min(valores);
+        double maior = Collections.max(valores);
+        // ULP mede a precisão do double nesta escala. Não é uma tolerância clínica.
+        double toleranciaNumerica = 8 * Math.ulp(Math.max(Math.abs(menor), Math.abs(maior)));
+        if (maior - menor <= toleranciaNumerica) return 0;
+
         double somaQuadrados = valores.stream().mapToDouble(v -> Math.pow(v - media, 2)).sum();
         return Math.sqrt(somaQuadrados / (valores.size() - 1));
-    }
-
-    private double arredondar(double valor) {
-        return Math.round(valor * 100.0) / 100.0;
     }
 }

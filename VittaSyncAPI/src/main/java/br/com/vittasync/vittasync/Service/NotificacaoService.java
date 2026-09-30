@@ -5,10 +5,36 @@ import br.com.vittasync.vittasync.Model.ContatoEmergencia;
 import br.com.vittasync.vittasync.Model.Usuario;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 @Service
 public class NotificacaoService {
+
+    private static final Logger logger = LoggerFactory.getLogger(NotificacaoService.class);
+
+    @Async
+    public void enviarDesvioLinhaBase(Integer contatoId, String nomeContato, String email,
+                                     String telefone, boolean canalEmail, boolean canalSms,
+                                     String nomePaciente, String detalhes) {
+        // Dados simples evitam acessar entidades JPA fora da requisição original.
+        if (canalEmail) {
+            try {
+                emailService.enviarEmailPersonalizado(email,
+                        "VittaSync - Medição fora do padrão individual de " + nomePaciente,
+                        "Olá, " + nomeContato + "\n\nPaciente: " + nomePaciente
+                                + "\nMedição fora do padrão individual:\n" + detalhes
+                                + "\n\nEquipe VittaSync");
+            } catch (RuntimeException exception) {
+                logger.error("Falha no e-mail de desvio da linha de base para contato {}", contatoId, exception);
+            }
+        }
+        // Uma falha no e-mail não impede a tentativa pelo outro canal configurado.
+        if (canalSms) {
+            smsService.enviarDesvioLinhaBase(telefone, nomePaciente, detalhes);
+        }
+    }
 
     private final EmailService emailService;
     private final SmsService smsService;

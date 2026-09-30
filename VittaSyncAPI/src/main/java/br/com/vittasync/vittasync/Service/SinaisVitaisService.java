@@ -9,6 +9,7 @@ import br.com.vittasync.vittasync.Util.EventoTipos;
 import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Set;
 
 
 @Service
@@ -18,17 +19,20 @@ public class SinaisVitaisService {
     private final EventoPacienteService eventoPacienteService;
     private final EventoClinicoService eventoClinicoService;
     private final LinhaBaseService linhaBaseService;
+    private final LinhaBaseAlertaService linhaBaseAlertaService;
 
     public SinaisVitaisService(
             SinaisVitaisRepository repository,
             EventoPacienteService eventoPacienteService,
             EventoClinicoService eventoClinicoService,
-            LinhaBaseService linhaBaseService
+            LinhaBaseService linhaBaseService,
+            LinhaBaseAlertaService linhaBaseAlertaService
     ) {
         this.repository = repository;
         this.eventoPacienteService = eventoPacienteService;
         this.eventoClinicoService = eventoClinicoService;
         this.linhaBaseService = linhaBaseService;
+        this.linhaBaseAlertaService = linhaBaseAlertaService;
     }
 
     public SinaisVitais create(SinaisVitais sinais, Integer usuarioLogadoId) {
@@ -51,8 +55,9 @@ public class SinaisVitaisService {
                 EventoPrioridades.NORMAL
         );
 
-        eventoClinicoService.analisarSinaisVitais(salvo, usuarioLogadoId);
+        Set<Integer> contatosEmergenciaAcionados = eventoClinicoService.analisarSinaisVitais(salvo, usuarioLogadoId);
         linhaBaseService.atualizarLinhasBase(salvo.getPaciente().getId());
+        linhaBaseAlertaService.notificarDesvios(salvo, usuarioLogadoId, contatosEmergenciaAcionados);
 
         return salvo;
     }

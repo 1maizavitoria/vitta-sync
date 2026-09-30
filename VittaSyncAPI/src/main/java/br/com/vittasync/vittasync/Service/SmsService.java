@@ -59,6 +59,11 @@ public class SmsService {
     }
 
 
+    public void enviarDesvioLinhaBase(String telefone, String nomePaciente, String detalhes) {
+        enviarSMS(telefone, "VittaSync - Paciente " + nomePaciente
+                + ": medição fora do padrão individual.\n" + detalhes);
+    }
+
     private void enviarSMS(String telefone, String mensagem) {
         try {
             String numeroFormatado = telefone.startsWith("+55") ? telefone : "+55" + telefone;
