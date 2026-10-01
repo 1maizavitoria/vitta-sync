@@ -18,6 +18,7 @@ import { useEffect, useMemo, useState } from "react";
 import DashboardChart from "../../components/ui/DashboardChart";
 import ClinicalStability from "../../components/ui/ClinicalStability";
 import ClinicalTimeline from "../../components/ui/ClinicalTimeline";
+import PersonalBaseline from "../../components/ui/PersonalBaseline";
 import { usePatient } from "../../context/PatientContext";
 import { getDashboard } from "../../services/dashboardService";
 import { useI18n } from "../../src/i18n";
@@ -141,6 +142,7 @@ export default function Dashboard() {
 
     const categories = dashboard?.categorias || [];
     const clinicalStability = dashboard?.estabilidadeClinica || [];
+    const baselines = dashboard?.linhasBase || [];
 
     return (
         <Box
@@ -256,6 +258,8 @@ export default function Dashboard() {
                                 formatNumber={formatNumber}
                             />
 
+                            <PersonalBaseline items={baselines} categoryFilter={categoryFilter} />
+
                             <Box
                                 sx={{
                                     display: "grid",
@@ -296,6 +300,7 @@ export default function Dashboard() {
                                     <DashboardChart
                                         key={category.codigo}
                                         category={category}
+                                        baselines={baselines}
                                         title={t(`dashboard.categories.${category.codigo}`)}
                                         seriesNames={seriesNames}
                                         formatDate={formatDate}
