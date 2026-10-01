@@ -257,6 +257,29 @@ const dictionaries = {
         },
         dashboard: {
             title: "Dashboard de saúde",
+            baseline: {
+                "title": "Linha de base personalizada",
+                "description": "Referência fixa do padrão observado, independente do período do gráfico. Estar dentro da faixa não equivale a uma avaliação clínica.",
+                "unavailable": "Linha de base indisponível para esta categoria.",
+                "status": {
+                    "em_formacao": "Em formação",
+                    "formada": "Formada",
+                    "sem_variacao": "Sem variação"
+                },
+                "progress": "{days} de {required} dias consecutivos",
+                "formationHint": "Registre este sinal todos os dias. Um dia completo sem registro reinicia a sequência ainda em formação.",
+                "mean": "Média",
+                "range": "Faixa individual",
+                "period": "Período de formação",
+                "latest": "Última medição geral",
+                "noVariation": "Não houve variação no período. Comparação automática indisponível.",
+                "waiting": "Aguardando uma nova medição para comparar.",
+                "comparison": {
+                    "abaixo": "Abaixo da faixa individual",
+                    "dentro": "Dentro da faixa individual",
+                    "acima": "Acima da faixa individual"
+                }
+            },
             description: "Acompanhe a evolução dos sinais vitais e hábitos ao longo do tempo.",
             patient: "Paciente",
             noPatient: "Nenhum paciente",
@@ -998,6 +1021,29 @@ const dictionaries = {
         },
         dashboard: {
             title: "Health dashboard",
+            baseline: {
+                "title": "Personal baseline",
+                "description": "Fixed reference of the observed pattern, independent of the chart period. Being within the range is not a clinical assessment.",
+                "unavailable": "Baseline unavailable for this category.",
+                "status": {
+                    "em_formacao": "In progress",
+                    "formada": "Established",
+                    "sem_variacao": "No variation"
+                },
+                "progress": "{days} of {required} consecutive days",
+                "formationHint": "Record this vital sign every day. A full day without a record restarts the sequence while the baseline is being established.",
+                "mean": "Mean",
+                "range": "Individual range",
+                "period": "Baseline period",
+                "latest": "Latest measurement overall",
+                "noVariation": "No variation was observed during the period. Automatic comparison is unavailable.",
+                "waiting": "Waiting for a new measurement to compare.",
+                "comparison": {
+                    "abaixo": "Below the individual range",
+                    "dentro": "Within the individual range",
+                    "acima": "Above the individual range"
+                }
+            },
             description: "Track changes in vital signs and habits over time.",
             patient: "Patient",
             noPatient: "No patient",
@@ -1739,6 +1785,29 @@ const dictionaries = {
         },
         dashboard: {
             title: "Panel de salud",
+            baseline: {
+                "title": "Línea de base personalizada",
+                "description": "Referencia fija del patrón observado, independiente del período del gráfico. Estar dentro del rango no equivale a una evaluación clínica.",
+                "unavailable": "Línea de base no disponible para esta categoría.",
+                "status": {
+                    "em_formacao": "En formación",
+                    "formada": "Formada",
+                    "sem_variacao": "Sin variación"
+                },
+                "progress": "{days} de {required} días consecutivos",
+                "formationHint": "Registra este signo todos los días. Un día completo sin registros reinicia la secuencia que aún está en formación.",
+                "mean": "Media",
+                "range": "Rango individual",
+                "period": "Período de formación",
+                "latest": "Última medición general",
+                "noVariation": "No hubo variación durante el período. Comparación automática no disponible.",
+                "waiting": "Esperando una nueva medición para comparar.",
+                "comparison": {
+                    "abaixo": "Por debajo del rango individual",
+                    "dentro": "Dentro del rango individual",
+                    "acima": "Por encima del rango individual"
+                }
+            },
             description: "Acompaña la evolución de los signos vitales y hábitos a lo largo del tiempo.",
             patient: "Paciente",
             noPatient: "Ningún paciente",
