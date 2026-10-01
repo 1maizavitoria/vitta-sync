@@ -11,6 +11,8 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
+import java.util.HashSet;
 
 @Service
 public class EventoClinicoService {
@@ -47,15 +49,16 @@ public class EventoClinicoService {
         this.notificacaoService = notificacaoService;
     }
 
-    public void analisarSinaisVitais(
+    public Set<Integer> analisarSinaisVitais(
             SinaisVitais sinais,
             Integer usuarioLogadoId
     ) {
         List<String> situacoesCriticas = detectarSituacoesCriticas(sinais);
+        Set<Integer> contatosEmergenciaAcionados = new HashSet<>();
 
         if (!situacoesCriticas.isEmpty()) {
             registrarAlertaEmergencia(sinais, usuarioLogadoId, situacoesCriticas);
-            notificarContatosEmergencia(sinais, situacoesCriticas);
+            contatosEmergenciaAcionados = notificarContatosEmergencia(sinais, situacoesCriticas);
         }
 
         analisarPressao(
@@ -82,6 +85,7 @@ public class EventoClinicoService {
                 sinais,
                 usuarioLogadoId
         );
+        return contatosEmergenciaAcionados;
     }
 
     public void analisarSintoma(
@@ -385,10 +389,11 @@ public class EventoClinicoService {
         );
     }
 
-    private void notificarContatosEmergencia(
+    private Set<Integer> notificarContatosEmergencia(
             SinaisVitais sinais,
             List<String> situacoesCriticas
     ) {
+        Set<Integer> acionados = new HashSet<>();
         List<ContatoEmergencia> contatos = contatoEmergenciaRepository
                 .findByPacienteIdOrderByDataRegistroAsc(sinais.getPaciente().getId());
 
@@ -398,8 +403,10 @@ public class EventoClinicoService {
         for (ContatoEmergencia contato : contatos) {
             if (Boolean.TRUE.equals(contato.getReceberAlertaSinaisVitaisCritico())) {
                 notificacaoService.enviarAlertaEmergencia(contato, mensagem, "critico");
+                acionados.add(contato.getId());
             }
         }
+        return acionados;
     }
 
     private boolean frequenciaCardiacaCritica(SinaisVitais sinais) {

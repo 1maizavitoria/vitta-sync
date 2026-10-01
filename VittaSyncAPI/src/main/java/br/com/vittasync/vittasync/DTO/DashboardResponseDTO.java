@@ -1,7 +1,9 @@
 package br.com.vittasync.vittasync.DTO;
 
+
 import java.time.LocalDate;
 import java.util.List;
+
 
 public class DashboardResponseDTO {
 
@@ -10,9 +12,8 @@ public class DashboardResponseDTO {
     private LocalDate inicio;
     private LocalDate fim;
     private List<DashboardCategoriaDTO> categorias;
-
-    // Novo campo: índices de estabilidade clínica
     private List<EstabilidadeClinicaDTO> estabilidadeClinica;
+    private List<LinhaBaseDTO> linhasBase;
 
     public DashboardResponseDTO(
             String pacienteCpf,
@@ -20,7 +21,8 @@ public class DashboardResponseDTO {
             LocalDate inicio,
             LocalDate fim,
             List<DashboardCategoriaDTO> categorias,
-            List<EstabilidadeClinicaDTO> estabilidadeClinica
+            List<EstabilidadeClinicaDTO> estabilidadeClinica,
+            List<LinhaBaseDTO> linhasBase
     ) {
         this.pacienteCpf = pacienteCpf;
         this.pacienteNome = pacienteNome;
@@ -28,6 +30,7 @@ public class DashboardResponseDTO {
         this.fim = fim;
         this.categorias = categorias;
         this.estabilidadeClinica = estabilidadeClinica;
+        this.linhasBase = linhasBase;
     }
 
     public String getPacienteCpf() {
@@ -52,5 +55,9 @@ public class DashboardResponseDTO {
 
     public List<EstabilidadeClinicaDTO> getEstabilidadeClinica() {
         return estabilidadeClinica;
+    }
+
+    public List<LinhaBaseDTO> getLinhasBase() {
+        return linhasBase;
     }
 }

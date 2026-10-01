@@ -2,6 +2,8 @@ package br.com.vittasync.vittasync.Util;
 
 public class EventoTipos {
 
+    public static final String DESVIO_LINHA_BASE = "desvio_linha_base";
+
     public static final String SINAIS_VITAIS_CRIADOS = "sinais_vitais_criados";
     public static final String SINAIS_VITAIS_EDITADOS = "sinais_vitais_editados";
     public static final String SINAIS_VITAIS_REMOVIDOS = "sinais_vitais_removidos";

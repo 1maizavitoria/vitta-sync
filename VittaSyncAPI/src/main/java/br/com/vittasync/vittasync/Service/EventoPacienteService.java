@@ -10,11 +10,15 @@ import br.com.vittasync.vittasync.Repository.EventoVisualizacaoRepository;
 import br.com.vittasync.vittasync.Repository.UsuarioRepository;
 import br.com.vittasync.vittasync.Repository.VinculoRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import br.com.vittasync.vittasync.Util.EventoTipos;
 
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.StringJoiner;
+import java.util.LinkedHashSet;
+import java.util.Set;
 
 @Service
 public class EventoPacienteService {
@@ -35,6 +39,7 @@ public class EventoPacienteService {
         this.eventoVisualizacaoRepository = eventoVisualizacaoRepository;
     }
 
+    @Transactional
     public void criarEvento(
             Integer pacienteId,
             Integer usuarioId,
@@ -54,6 +59,7 @@ public class EventoPacienteService {
         );
     }
 
+    @Transactional
     public void criarEvento(
             Integer pacienteId,
             Integer usuarioId,
@@ -89,18 +95,22 @@ public class EventoPacienteService {
                         pacienteId
                 );
 
+        Set<Integer> destinatarios = new LinkedHashSet<>();
         for (Vinculo vinculo : vinculos) {
+            destinatarios.add(vinculo.getUsuarioId());
+        }
+        if (EventoTipos.DESVIO_LINHA_BASE.equals(tipoEvento)) {
+            // O autor também recebe quando é o paciente ou um membro vinculado.
+            destinatarios.add(pacienteId);
+        } else {
+            destinatarios.remove(usuarioId);
+        }
 
-            if (
-                    vinculo.getUsuarioId()
-                            .equals(usuarioId)
-            ) {
-                continue;
-            }
+        for (Integer destinatarioId : destinatarios) {
 
             Usuario usuario =
                     usuarioRepository.findById(
-                            vinculo.getUsuarioId()
+                            destinatarioId
                     ).orElse(null);
 
             if (usuario == null) {

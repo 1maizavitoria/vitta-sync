@@ -21,6 +21,7 @@ class SinaisVitaisServiceTest {
     private SinaisVitaisRepository repository;
     private EventoPacienteService eventoPacienteService;
     private EventoClinicoService eventoClinicoService;
+    private LinhaBaseService linhaBaseService;
     private SinaisVitaisService service;
 
     private Usuario paciente;
@@ -30,8 +31,9 @@ class SinaisVitaisServiceTest {
         repository = mock(SinaisVitaisRepository.class);
         eventoPacienteService = mock(EventoPacienteService.class);
         eventoClinicoService = mock(EventoClinicoService.class);
+        linhaBaseService = mock(LinhaBaseService.class);
 
-        service = new SinaisVitaisService(repository, eventoPacienteService, eventoClinicoService);
+        service = new SinaisVitaisService(repository, eventoPacienteService, eventoClinicoService, linhaBaseService);
 
         paciente = new Usuario();
         paciente.setId(1);

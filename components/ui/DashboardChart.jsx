@@ -5,6 +5,7 @@ import {
     AreaChart,
     CartesianGrid,
     Legend,
+    ReferenceArea,
     ResponsiveContainer,
     Tooltip,
     XAxis,
@@ -37,12 +38,24 @@ export default function DashboardChart({
     seriesNames,
     formatDate,
     formatNumber,
-    emptyText
+    emptyText,
+    baselines = []
 }) {
     const theme = useTheme();
-    const { convertMeasurement, formatUnit } = useI18n();
+    const { t, convertMeasurement, formatUnit } = useI18n();
     const isDark = theme.palette.mode === "dark";
     const displayUnit = formatUnit(category.unidade);
+    const baselineBands = category.series.flatMap((serie, index) => {
+        const signal = { sistolica: "pressao_sistolica", diastolica: "pressao_diastolica" }[serie.codigo] || serie.codigo;
+        const baseline = baselines.find((item) => item.sinal === signal);
+        if (baseline?.situacao !== "formada" || baseline.limiteInferior == null || baseline.limiteSuperior == null) return [];
+        return [{
+            code: serie.codigo,
+            lower: convertMeasurement(baseline.limiteInferior, category.unidade),
+            upper: convertMeasurement(baseline.limiteSuperior, category.unidade),
+            color: chartColors[index % chartColors.length]
+        }];
+    });
     const chartData = mergeSeries(category.series).map((point) => {
         const convertedPoint = { ...point };
 
@@ -75,6 +88,19 @@ export default function DashboardChart({
                     {displayUnit}
                 </Typography>
             </Box>
+
+            {baselineBands.length > 0 && (
+                <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1.5, mb: 2 }}>
+                    {baselineBands.map((band) => (
+                        <Box key={band.code} sx={{ display: "flex", alignItems: "center", gap: 0.75 }}>
+                            <Box aria-hidden="true" sx={{ width: 14, height: 14, flexShrink: 0, border: `1px dashed ${band.color}`, bgcolor: `${band.color}26` }} />
+                            <Typography variant="caption" color="text.secondary">
+                                {t("dashboard.baseline.range")} · {seriesNames[band.code] || band.code}: {formatNumber(band.lower, { maximumFractionDigits: 2 })}–{formatNumber(band.upper, { maximumFractionDigits: 2 })} {displayUnit}
+                            </Typography>
+                        </Box>
+                    ))}
+                </Box>
+            )}
 
             {chartData.length === 0 ? (
                 <Box
@@ -167,6 +193,19 @@ export default function DashboardChart({
                                     fontWeight: 700
                                 }}
                             />
+                            {baselineBands.map((band) => (
+                                <ReferenceArea
+                                    key={`baseline-${band.code}`}
+                                    y1={band.lower}
+                                    y2={band.upper}
+                                    ifOverflow="extendDomain"
+                                    fill={band.color}
+                                    fillOpacity={isDark ? 0.12 : 0.08}
+                                    stroke={band.color}
+                                    strokeOpacity={0.5}
+                                    strokeDasharray="4 4"
+                                />
+                            ))}
                             {category.series.map((serie, index) => (
                                 <Area
                                     key={serie.codigo}
