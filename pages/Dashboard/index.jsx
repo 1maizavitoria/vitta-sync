@@ -1,6 +1,7 @@
 import {
     Alert,
     Box,
+    Button,
     Chip,
     FormControl,
     InputLabel,
@@ -14,6 +15,7 @@ import {
 } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
 import { useEffect, useMemo, useState } from "react";
+import SettingsOutlinedIcon from "@mui/icons-material/SettingsOutlined";
 
 import DashboardChart from "../../components/ui/DashboardChart";
 import ClinicalStability from "../../components/ui/ClinicalStability";
@@ -23,6 +25,9 @@ import { usePatient } from "../../context/PatientContext";
 import { getDashboard } from "../../services/dashboardService";
 import { useI18n } from "../../src/i18n";
 import { useThemeMode } from "../../src/theme/ThemeModeProvider";
+import { useDashboardPreferences } from "../../src/features/dashboard/application/useDashboardPreferences";
+import { createLocalDashboardPreferencesRepository } from "../../src/features/dashboard/infrastructure/localDashboardPreferencesRepository";
+import DashboardCustomizationDialog from "../../src/features/dashboard/presentation/DashboardCustomizationDialog";
 
 const periods = [7, 30, 90];
 const categoryCodes = [
@@ -81,6 +86,12 @@ export default function Dashboard() {
     const { selectedPatient } = usePatient();
     const { t, formatDate, formatMeasurement, formatNumber, locale } = useI18n();
     const { accessibilityMode } = useThemeMode();
+    const loggedUserCpf = localStorage.getItem("CPF") || localStorage.getItem("cpf");
+    const preferencesRepository = useMemo(
+        () => createLocalDashboardPreferencesRepository(loggedUserCpf),
+        [loggedUserCpf]
+    );
+    const dashboardPreferences = useDashboardPreferences(preferencesRepository);
     const [period, setPeriod] = useState(7);
     const [categoryFilter, setCategoryFilter] = useState("todas");
     const [dashboard, setDashboard] = useState(null);
@@ -145,6 +156,83 @@ export default function Dashboard() {
     const categories = dashboard?.categorias || [];
     const clinicalStability = dashboard?.estabilidadeClinica || [];
     const baselines = dashboard?.linhasBase || [];
+    const widgetRegistry = {
+        stability: (
+            <ClinicalStability
+                items={clinicalStability}
+                period={period}
+                t={t}
+                formatNumber={formatNumber}
+            />
+        ),
+        baseline: <PersonalBaseline items={baselines} categoryFilter={categoryFilter} />,
+        latestValues: (
+            <Box
+                sx={{
+                    display: "grid",
+                    gridTemplateColumns: { xs: "1fr", sm: "repeat(2, 1fr)", lg: "repeat(4, 1fr)" },
+                    gap: 2,
+                    mb: 3
+                }}
+            >
+                {categories.map((category) => {
+                    const latestValue = getLatestValue(category, formatMeasurement, formatNumber);
+                    return (
+                        <Paper
+                            key={category.codigo}
+                            sx={{
+                                p: 2.5,
+                                borderRadius: 3,
+                                border: "1px solid",
+                                borderColor: theme.vitta.border,
+                                boxShadow: theme.vitta.shadow,
+                                minHeight: accessibilityMode ? 150 : undefined
+                            }}
+                        >
+                            <Typography variant={accessibilityMode ? "body1" : "body2"} color="text.secondary" sx={{ mb: 1 }}>
+                                {t(`dashboard.categories.${category.codigo}`)}
+                            </Typography>
+                            <Typography variant="h5" sx={{ fontWeight: 800 }}>
+                                {latestValue || "—"}
+                            </Typography>
+                            <Typography variant={accessibilityMode ? "body2" : "caption"} color="text.secondary">
+                                {t("dashboard.latestValue")}
+                            </Typography>
+                        </Paper>
+                    );
+                })}
+            </Box>
+        ),
+        charts: (
+            <Box sx={{ display: "grid", gridTemplateColumns: { xs: "minmax(0, 1fr)", xl: "repeat(2, minmax(0, 1fr))" }, gap: 3 }}>
+                {categories.map((category) => (
+                    <DashboardChart
+                        key={category.codigo}
+                        category={category}
+                        baselines={baselines}
+                        title={t(`dashboard.categories.${category.codigo}`)}
+                        seriesNames={seriesNames}
+                        formatDate={formatDate}
+                        formatMeasurement={formatMeasurement}
+                        formatNumber={formatNumber}
+                        emptyText={t("dashboard.emptyPeriod")}
+                    />
+                ))}
+            </Box>
+        ),
+        timeline: (
+            <ClinicalTimeline
+                cpf={selectedPatient?.cpf}
+                inicio={dateRange.inicio}
+                fim={dateRange.fim}
+                formatDate={formatDate}
+                formatMeasurement={formatMeasurement}
+                formatNumber={formatNumber}
+                locale={locale}
+                t={t}
+            />
+        )
+    };
 
     return (
         <Box
@@ -249,104 +337,93 @@ export default function Dashboard() {
                             ))}
                         </ToggleButtonGroup>
 
-                        <FormControl size={accessibilityMode ? "medium" : "small"} sx={{ minWidth: { xs: "100%", md: 260 } }}>
-                            <InputLabel>{t("dashboard.category")}</InputLabel>
-                            <Select
-                                value={categoryFilter}
-                                label={t("dashboard.category")}
-                                onChange={(event) => setCategoryFilter(event.target.value)}
+                        <Box display="flex" flexDirection={{ xs: "column", sm: "row" }} gap={1.5} sx={{ minWidth: { md: 420 } }}>
+                            <FormControl size={accessibilityMode ? "medium" : "small"} sx={{ minWidth: { xs: "100%", md: 260 }, flex: 1 }}>
+                                <InputLabel>{t("dashboard.category")}</InputLabel>
+                                <Select
+                                    value={categoryFilter}
+                                    label={t("dashboard.category")}
+                                    onChange={(event) => setCategoryFilter(event.target.value)}
+                                >
+                                    {categoryCodes.map((code) => (
+                                        <MenuItem key={code} value={code}>
+                                            {t(`dashboard.categories.${code}`)}
+                                        </MenuItem>
+                                    ))}
+                                </Select>
+                            </FormControl>
+                            <Button
+                                variant="outlined"
+                                startIcon={<SettingsOutlinedIcon />}
+                                onClick={dashboardPreferences.openCustomization}
+                                disabled={dashboardPreferences.loadingPreferences}
+                                sx={{
+                                    minHeight: accessibilityMode ? 48 : 40,
+                                    px: 2,
+                                    fontWeight: 800,
+                                    textTransform: "none",
+                                    whiteSpace: "nowrap",
+                                    "&:focus-visible": {
+                                        outline: "3px solid",
+                                        outlineColor: "secondary.main",
+                                        outlineOffset: 2
+                                    }
+                                }}
                             >
-                                {categoryCodes.map((code) => (
-                                    <MenuItem key={code} value={code}>
-                                        {t(`dashboard.categories.${code}`)}
-                                    </MenuItem>
-                                ))}
-                            </Select>
-                        </FormControl>
+                                {t("dashboard.customization.open")}
+                            </Button>
+                        </Box>
                     </Paper>
 
                     {error && <Alert severity="error" sx={{ mb: 3 }}>{t("dashboard.loadError")}</Alert>}
 
-                    {loading ? (
+                    {loading && (
                         <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", md: "repeat(3, 1fr)" }, gap: 2 }}>
                             {[1, 2, 3, 4, 5, 6].map((item) => (
                                 <Skeleton key={item} variant="rounded" height={150} />
                             ))}
                         </Box>
-                    ) : !error && (
-                        <>
-                            <ClinicalStability
-                                items={clinicalStability}
-                                period={period}
-                                t={t}
-                                formatNumber={formatNumber}
-                            />
-
-                            <PersonalBaseline items={baselines} categoryFilter={categoryFilter} />
-
-                            <Box
-                                sx={{
-                                    display: "grid",
-                                    gridTemplateColumns: { xs: "1fr", sm: "repeat(2, 1fr)", lg: "repeat(4, 1fr)" },
-                                    gap: 2,
-                                    mb: 3
-                                }}
-                            >
-                                {categories.map((category) => {
-                                    const latestValue = getLatestValue(category, formatMeasurement, formatNumber);
-                                    return (
-                                        <Paper
-                                            key={category.codigo}
-                                            sx={{
-                                                p: 2.5,
-                                                borderRadius: 3,
-                                                border: "1px solid",
-                                                borderColor: theme.vitta.border,
-                                                boxShadow: theme.vitta.shadow,
-                                                minHeight: accessibilityMode ? 150 : undefined
-                                            }}
-                                        >
-                                            <Typography variant={accessibilityMode ? "body1" : "body2"} color="text.secondary" sx={{ mb: 1 }}>
-                                                {t(`dashboard.categories.${category.codigo}`)}
-                                            </Typography>
-                                            <Typography variant="h5" sx={{ fontWeight: 800 }}>
-                                                {latestValue || "—"}
-                                            </Typography>
-                                            <Typography variant={accessibilityMode ? "body2" : "caption"} color="text.secondary">
-                                                {t("dashboard.latestValue")}
-                                            </Typography>
-                                        </Paper>
-                                    );
-                                })}
-                            </Box>
-
-                            <Box sx={{ display: "grid", gridTemplateColumns: { xs: "minmax(0, 1fr)", xl: "repeat(2, minmax(0, 1fr))" }, gap: 3 }}>
-                                {categories.map((category) => (
-                                    <DashboardChart
-                                        key={category.codigo}
-                                        category={category}
-                                        baselines={baselines}
-                                        title={t(`dashboard.categories.${category.codigo}`)}
-                                        seriesNames={seriesNames}
-                                        formatDate={formatDate}
-                                        formatMeasurement={formatMeasurement}
-                                        formatNumber={formatNumber}
-                                        emptyText={t("dashboard.emptyPeriod")}
-                                    />
-                                ))}
-                            </Box>
-                        </>
                     )}
 
-                    <ClinicalTimeline
-                        cpf={selectedPatient.cpf}
-                        inicio={dateRange.inicio}
-                        fim={dateRange.fim}
-                        formatDate={formatDate}
-                        formatMeasurement={formatMeasurement}
-                        formatNumber={formatNumber}
-                        locale={locale}
+                    <Box
+                        component="section"
+                        aria-label={t("dashboard.customization.currentLayout")}
+                        sx={{
+                            display: "flex",
+                            flexDirection: "column",
+                            gap: 3,
+                            "& > [data-dashboard-widget] > *": {
+                                mt: "0 !important",
+                                mb: "0 !important"
+                            }
+                        }}
+                    >
+                        {dashboardPreferences.layout.widgets
+                            .filter((widget) => widget.visible)
+                            .map((widget) => {
+                                if (widget.id !== "timeline" && (loading || error)) return null;
+                                if (widget.id === "baseline" && ["sono", "exercicio"].includes(categoryFilter)) return null;
+
+                                return (
+                                    <Box key={widget.id} data-dashboard-widget={widget.id}>
+                                        {widgetRegistry[widget.id]}
+                                    </Box>
+                                );
+                            })}
+                    </Box>
+
+                    <DashboardCustomizationDialog
+                        open={dashboardPreferences.open}
+                        draft={dashboardPreferences.draft}
+                        saving={dashboardPreferences.savingPreferences}
+                        error={dashboardPreferences.preferenceError}
+                        accessibilityMode={accessibilityMode}
                         t={t}
+                        onClose={dashboardPreferences.cancelCustomization}
+                        onSave={dashboardPreferences.saveCustomization}
+                        onRestore={dashboardPreferences.restoreDefault}
+                        onToggle={dashboardPreferences.toggleWidget}
+                        onMove={dashboardPreferences.moveWidget}
                     />
                 </>
             )}

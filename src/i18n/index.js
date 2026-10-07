@@ -307,6 +307,26 @@ const dictionaries = {
             latestValue: "Último valor do período",
             loadError: "Não foi possível carregar os dados do dashboard.",
             emptyPeriod: "Nenhum registro encontrado neste período.",
+            customization: {
+                open: "Personalizar Dashboard",
+                title: "Personalizar Dashboard",
+                description: "Escolha quais seções serão exibidas e organize a ordem de apresentação.",
+                widgetList: "Widgets do Dashboard",
+                currentLayout: "Conteúdo personalizado do Dashboard",
+                moveUp: "Mover para cima",
+                moveDown: "Mover para baixo",
+                restore: "Restaurar padrão",
+                minimumWidget: "Pelo menos uma seção deve permanecer visível.",
+                saving: "Salvando...",
+                saveError: "Não foi possível salvar a personalização.",
+                widgets: {
+                    stability: "Estabilidade clínica",
+                    baseline: "Linha de base personalizada",
+                    latestValues: "Valores mais recentes",
+                    charts: "Gráficos de evolução",
+                    timeline: "Linha do tempo clínica"
+                }
+            },
             chartSummary: {
                 title: "Resumo textual do gráfico",
                 series: "Série",
@@ -1120,6 +1140,26 @@ const dictionaries = {
             latestValue: "Latest value in the period",
             loadError: "Dashboard data could not be loaded.",
             emptyPeriod: "No records were found in this period.",
+            customization: {
+                open: "Customize Dashboard",
+                title: "Customize Dashboard",
+                description: "Choose which sections are displayed and organize their presentation order.",
+                widgetList: "Dashboard widgets",
+                currentLayout: "Customized Dashboard content",
+                moveUp: "Move up",
+                moveDown: "Move down",
+                restore: "Restore default",
+                minimumWidget: "At least one section must remain visible.",
+                saving: "Saving...",
+                saveError: "The customization could not be saved.",
+                widgets: {
+                    stability: "Clinical stability",
+                    baseline: "Personal baseline",
+                    latestValues: "Latest values",
+                    charts: "Trend charts",
+                    timeline: "Clinical timeline"
+                }
+            },
             chartSummary: {
                 title: "Chart text summary",
                 series: "Series",
@@ -1933,6 +1973,26 @@ const dictionaries = {
             latestValue: "Último valor del período",
             loadError: "No fue posible cargar los datos del panel.",
             emptyPeriod: "No se encontraron registros en este período.",
+            customization: {
+                open: "Personalizar panel",
+                title: "Personalizar panel",
+                description: "Elige qué secciones se muestran y organiza su orden de presentación.",
+                widgetList: "Widgets del panel",
+                currentLayout: "Contenido personalizado del panel",
+                moveUp: "Mover hacia arriba",
+                moveDown: "Mover hacia abajo",
+                restore: "Restaurar predeterminado",
+                minimumWidget: "Al menos una sección debe permanecer visible.",
+                saving: "Guardando...",
+                saveError: "No fue posible guardar la personalización.",
+                widgets: {
+                    stability: "Estabilidad clínica",
+                    baseline: "Línea de base personalizada",
+                    latestValues: "Valores más recientes",
+                    charts: "Gráficos de evolución",
+                    timeline: "Línea de tiempo clínica"
+                }
+            },
             chartSummary: {
                 title: "Resumen textual del gráfico",
                 series: "Serie",
