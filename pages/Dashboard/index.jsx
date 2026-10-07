@@ -22,6 +22,7 @@ import PersonalBaseline from "../../components/ui/PersonalBaseline";
 import { usePatient } from "../../context/PatientContext";
 import { getDashboard } from "../../services/dashboardService";
 import { useI18n } from "../../src/i18n";
+import { useThemeMode } from "../../src/theme/ThemeModeProvider";
 
 const periods = [7, 30, 90];
 const categoryCodes = [
@@ -79,6 +80,7 @@ export default function Dashboard() {
     const theme = useTheme();
     const { selectedPatient } = usePatient();
     const { t, formatDate, formatMeasurement, formatNumber, locale } = useI18n();
+    const { accessibilityMode } = useThemeMode();
     const [period, setPeriod] = useState(7);
     const [categoryFilter, setCategoryFilter] = useState("todas");
     const [dashboard, setDashboard] = useState(null);
@@ -187,10 +189,22 @@ export default function Dashboard() {
                         color: "primary.dark",
                         bgcolor: theme.palette.mode === "dark" ? "rgba(34, 197, 94, 0.14)" : "rgba(22, 163, 74, 0.12)",
                         border: "1px solid",
-                        borderColor: theme.vitta.borderStrong
+                        borderColor: theme.vitta.borderStrong,
+                        height: accessibilityMode ? "auto" : undefined,
+                        minHeight: accessibilityMode ? 40 : undefined,
+                        "& .MuiChip-label": {
+                            whiteSpace: accessibilityMode ? "normal" : "nowrap",
+                            overflowWrap: "anywhere"
+                        }
                     }}
                 />
             </Box>
+
+            {selectedPatient && accessibilityMode && (
+                <Alert severity="info" sx={{ mb: 3, fontSize: "1rem" }}>
+                    {t("dashboard.accessibilityHint")}
+                </Alert>
+            )}
 
             {!selectedPatient ? (
                 <Alert severity="info">{t("dashboard.selectPatient")}</Alert>
@@ -215,8 +229,18 @@ export default function Dashboard() {
                             exclusive
                             value={period}
                             onChange={(_, value) => value && setPeriod(value)}
-                            size="small"
-                            sx={{ flexWrap: "wrap" }}
+                            size={accessibilityMode ? "medium" : "small"}
+                            sx={{
+                                flexWrap: "wrap",
+                                "& .MuiToggleButton-root": accessibilityMode
+                                    ? { minHeight: 48, px: 2, fontSize: "1rem" }
+                                    : undefined,
+                                "& .MuiToggleButton-root:focus-visible": {
+                                    outline: "3px solid",
+                                    outlineColor: "secondary.main",
+                                    outlineOffset: 2
+                                }
+                            }}
                         >
                             {periods.map((days) => (
                                 <ToggleButton key={days} value={days} sx={{ fontWeight: 700 }}>
@@ -225,7 +249,7 @@ export default function Dashboard() {
                             ))}
                         </ToggleButtonGroup>
 
-                        <FormControl size="small" sx={{ minWidth: { xs: "100%", md: 260 } }}>
+                        <FormControl size={accessibilityMode ? "medium" : "small"} sx={{ minWidth: { xs: "100%", md: 260 } }}>
                             <InputLabel>{t("dashboard.category")}</InputLabel>
                             <Select
                                 value={categoryFilter}
@@ -278,16 +302,17 @@ export default function Dashboard() {
                                                 borderRadius: 3,
                                                 border: "1px solid",
                                                 borderColor: theme.vitta.border,
-                                                boxShadow: theme.vitta.shadow
+                                                boxShadow: theme.vitta.shadow,
+                                                minHeight: accessibilityMode ? 150 : undefined
                                             }}
                                         >
-                                            <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+                                            <Typography variant={accessibilityMode ? "body1" : "body2"} color="text.secondary" sx={{ mb: 1 }}>
                                                 {t(`dashboard.categories.${category.codigo}`)}
                                             </Typography>
                                             <Typography variant="h5" sx={{ fontWeight: 800 }}>
                                                 {latestValue || "—"}
                                             </Typography>
-                                            <Typography variant="caption" color="text.secondary">
+                                            <Typography variant={accessibilityMode ? "body2" : "caption"} color="text.secondary">
                                                 {t("dashboard.latestValue")}
                                             </Typography>
                                         </Paper>

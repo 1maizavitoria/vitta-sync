@@ -67,6 +67,7 @@ export function VitalTracker() {
         convertMeasurementToMetric,
         formatDateTime,
         formatMeasurement,
+        formatNumber,
         formatUnit,
         measurementSystem
     } = useI18n();
@@ -119,6 +120,7 @@ export function VitalTracker() {
         borderRadius: 2,
         fontWeight: 800,
         textTransform: "none",
+        flex: { xs: "1 1 140px", sm: "0 0 auto" },
         "&:focus-visible": {
             outline: "3px solid",
             outlineColor: "secondary.main",
@@ -133,6 +135,12 @@ export function VitalTracker() {
             ? current
             : latest;
     }, null);
+
+    const inputExample = (value, unit) =>
+        t("healthTracker.common.example").replace(
+            "{value}",
+            formatNumber(convertMeasurement(value, unit))
+        );
 
     let style = null;
 
@@ -365,8 +373,9 @@ export function VitalTracker() {
         >
             <Box
                 display="flex"
-                alignItems="center"
+                alignItems={{ xs: "stretch", sm: "center" }}
                 justifyContent="space-between"
+                flexDirection={{ xs: "column", sm: "row" }}
                 gap={2}
                 mb={2.5}
                 sx={{ minWidth: 0 }}
@@ -377,7 +386,8 @@ export function VitalTracker() {
                             fontWeight: 800,
                             color: "text.primary",
                             fontSize: "1.05rem",
-                            overflowWrap: "anywhere"
+                            overflowWrap: "break-word",
+                            wordBreak: "normal"
                         }}
                     >
                         {t("healthTracker.vitals.title")}
@@ -388,7 +398,8 @@ export function VitalTracker() {
                             color: "text.secondary",
                             fontSize: "0.88rem",
                             mt: 0.25,
-                            overflowWrap: "anywhere"
+                            overflowWrap: "break-word",
+                            wordBreak: "normal"
                         }}
                     >
                         {t("healthTracker.vitals.description")}
@@ -396,7 +407,13 @@ export function VitalTracker() {
                 </Box>
 
                 {isFormOpen ? (
-                    <Box display="flex" gap={1} flexShrink={0} flexWrap="wrap">
+                    <Box
+                        display="flex"
+                        gap={1}
+                        flexShrink={0}
+                        flexWrap="wrap"
+                        width={{ xs: "100%", sm: "auto" }}
+                    >
                         {accessibilityMode ? (
                             <>
                                 <Button
@@ -440,7 +457,14 @@ export function VitalTracker() {
                         )}
                     </Box>
                 ) : (
-                    <Box display="flex" alignItems="center" gap={1} flexShrink={0} flexWrap="wrap">
+                    <Box
+                        display="flex"
+                        alignItems="center"
+                        gap={1}
+                        flexShrink={0}
+                        flexWrap="wrap"
+                        width={{ xs: "100%", sm: "auto" }}
+                    >
                         {canEdit && (
                             accessibilityMode ? (
                                 <Button
@@ -519,6 +543,7 @@ export function VitalTracker() {
                         date={lastVital ? formatDateTime(lastVital.dataRegistro) : t("healthTracker.common.notAvailable")}
                         inputValue={vitalInputs.peso}
                         inputUnit={formatUnit("kg")}
+                        placeholder={inputExample(80, "kg")}
                         onInputChange={(event) => updateInput("peso", event.target.value)}
                         userName={lastVital?.usuarioNome}
                         userFunction={getNomeFuncao(lastVital?.usuarioFuncao, t)}
@@ -545,6 +570,7 @@ export function VitalTracker() {
                         date={lastVital ? formatDateTime(lastVital.dataRegistro) : t("healthTracker.common.notAvailable")}
                         inputValue={vitalInputs.frequenciaCardiaca}
                         inputUnit={formatUnit("bpm")}
+                        placeholder={inputExample(72, "bpm")}
                         onInputChange={(event) => {
                             updateInput("frequenciaCardiaca", event.target.value);
                             setErrorFC(false);
@@ -574,6 +600,7 @@ export function VitalTracker() {
                         date={lastVital ? formatDateTime(lastVital.dataRegistro) : t("healthTracker.common.notAvailable")}
                         inputValue={vitalInputs.frequenciaRespiratoria}
                         inputUnit={formatUnit("rpm")}
+                        placeholder={inputExample(16, "rpm")}
                         onInputChange={(event) => {
                             updateInput("frequenciaRespiratoria", event.target.value);
                             setErrorFR(false);
@@ -603,6 +630,7 @@ export function VitalTracker() {
                         date={lastVital ? formatDateTime(lastVital.dataRegistro) : t("healthTracker.common.notAvailable")}
                         inputValue={vitalInputs.saturacao}
                         inputUnit={formatUnit("%")}
+                        placeholder={inputExample(98, "%")}
                         onInputChange={(event) => {
                             updateInput("saturacao", event.target.value);
                             setErrorSPO2(false);
@@ -632,6 +660,7 @@ export function VitalTracker() {
                         date={lastVital ? formatDateTime(lastVital.dataRegistro) : t("healthTracker.common.notAvailable")}
                         inputValue={vitalInputs.temperatura}
                         inputUnit={formatUnit("°C")}
+                        placeholder={inputExample(36.5, "°C")}
                         onInputChange={(event) => {
                             updateInput("temperatura", event.target.value);
                             setErrorTemp(false);
@@ -661,6 +690,7 @@ export function VitalTracker() {
                         date={lastVital ? formatDateTime(lastVital.dataRegistro) : t("healthTracker.common.notAvailable")}
                         inputValue={vitalInputs.sistolica}
                         inputUnit={formatUnit("mmHg")}
+                        placeholder={inputExample(120, "mmHg")}
                         onInputChange={(event) => {
                             updateInput("sistolica", event.target.value);
                             setErrorSistolica(false);
@@ -690,6 +720,7 @@ export function VitalTracker() {
                         date={lastVital ? formatDateTime(lastVital.dataRegistro) : t("healthTracker.common.notAvailable")}
                         inputValue={vitalInputs.diastolica}
                         inputUnit={formatUnit("mmHg")}
+                        placeholder={inputExample(80, "mmHg")}
                         onInputChange={(event) => {
                             updateInput("diastolica", event.target.value);
                             setErrorDiastolica(false);

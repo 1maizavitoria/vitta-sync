@@ -16,6 +16,7 @@ import { useTheme } from "@mui/material/styles";
 import { useEffect, useMemo, useState } from "react";
 
 import { getClinicalTimeline } from "../../services/timelineService";
+import { useThemeMode } from "../../src/theme/ThemeModeProvider";
 
 const filters = ["TODOS", "SINAL_VITAL", "HABITO", "SINTOMA"];
 
@@ -98,6 +99,7 @@ export default function ClinicalTimeline({
     t
 }) {
     const theme = useTheme();
+    const { accessibilityMode } = useThemeMode();
     const [items, setItems] = useState([]);
     const [filter, setFilter] = useState("TODOS");
     const [loading, setLoading] = useState(false);
@@ -179,7 +181,7 @@ export default function ClinicalTimeline({
                     <Typography variant="h5" sx={{ fontWeight: 800 }}>
                         {t("dashboard.timeline.title")}
                     </Typography>
-                    <Typography color="text.secondary" sx={{ mt: 0.5 }}>
+                    <Typography color="text.secondary" sx={{ mt: 0.5, fontSize: accessibilityMode ? "1rem" : undefined }}>
                         {t("dashboard.timeline.description")}
                     </Typography>
                 </Box>
@@ -188,8 +190,18 @@ export default function ClinicalTimeline({
                     exclusive
                     value={filter}
                     onChange={(_, value) => value && setFilter(value)}
-                    size="small"
-                    sx={{ flexWrap: "wrap" }}
+                    size={accessibilityMode ? "medium" : "small"}
+                    sx={{
+                        flexWrap: "wrap",
+                        "& .MuiToggleButton-root": accessibilityMode
+                            ? { minHeight: 48, px: 2, fontSize: "1rem" }
+                            : undefined,
+                        "& .MuiToggleButton-root:focus-visible": {
+                            outline: "3px solid",
+                            outlineColor: "secondary.main",
+                            outlineOffset: 2
+                        }
+                    }}
                 >
                     {filters.map((type) => (
                         <ToggleButton key={type} value={type} sx={{ fontWeight: 700 }}>
@@ -218,7 +230,7 @@ export default function ClinicalTimeline({
                             </Typography>
 
                             <Box sx={{ ml: 1.25, pl: 2.5, borderLeft: "2px solid", borderColor: theme.vitta.borderStrong }}>
-                                <Stack spacing={1.5}>
+                                <Stack spacing={1.5} role="list" aria-label={formatDate(date)}>
                                     {groups[date].map((item) => {
                                         const values = getItemValues(item, t, formatMeasurement, formatNumber);
                                         const time = formatTime(item.dataRegistro, locale);
@@ -226,6 +238,8 @@ export default function ClinicalTimeline({
                                         return (
                                             <Box
                                                 key={`${item.tipo}-${item.id}`}
+                                                component="article"
+                                                role="listitem"
                                                 sx={{
                                                     position: "relative",
                                                     p: 2,
@@ -255,22 +269,22 @@ export default function ClinicalTimeline({
                                                     sx={{ mb: 1 }}
                                                 >
                                                     <Chip
-                                                        size="small"
+                                                        size={accessibilityMode ? "medium" : "small"}
                                                         color={getItemColor(item.tipo)}
                                                         icon={getItemIcon(item.tipo)}
                                                         label={t(`dashboard.timeline.types.${item.tipo.toLowerCase()}`)}
                                                         sx={{ fontWeight: 700 }}
                                                     />
                                                     {time && (
-                                                        <Typography variant="caption" color="text.secondary">
-                                                            {time}
+                                                        <Typography variant={accessibilityMode ? "body2" : "caption"} color="text.secondary">
+                                                            {accessibilityMode && `${t("dashboard.timeline.time")}: `}{time}
                                                         </Typography>
                                                     )}
                                                 </Stack>
 
                                                 <Stack spacing={0.5}>
                                                     {values.map((value) => (
-                                                        <Typography key={value} variant="body2">
+                                                        <Typography key={value} variant={accessibilityMode ? "body1" : "body2"}>
                                                             {value}
                                                         </Typography>
                                                     ))}

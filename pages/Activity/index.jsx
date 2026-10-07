@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 
-import { Box, Chip, Skeleton, Typography } from "@mui/material";
+import { Alert, Box, Chip, Skeleton, Stack, Typography } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
 
 import NotificationsActiveOutlinedIcon from "@mui/icons-material/NotificationsActiveOutlined";
@@ -8,6 +8,7 @@ import NotificationsActiveOutlinedIcon from "@mui/icons-material/NotificationsAc
 import EventCard from "../../components/ui/cards/EventCard";
 import { usePatient } from "../../context/PatientContext";
 import { useI18n } from "../../src/i18n";
+import { useThemeMode } from "../../src/theme/ThemeModeProvider";
 import { getPatientEvents, markEventsAsRead } from "../../services/eventService";
 
 export default function Activity() {
@@ -16,6 +17,7 @@ export default function Activity() {
     const isDark = theme.palette.mode === "dark";
     const { selectedPatient } = usePatient();
     const { t } = useI18n();
+    const { accessibilityMode } = useThemeMode();
     const [events, setEvents] = useState([]);
     const [loading, setLoading] = useState(false);
 
@@ -132,12 +134,21 @@ export default function Activity() {
                             color: "inherit"
                         },
                         "& .MuiChip-label": {
-                            overflow: "hidden",
-                            textOverflow: "ellipsis"
-                        }
+                            overflow: accessibilityMode ? "visible" : "hidden",
+                            textOverflow: accessibilityMode ? "clip" : "ellipsis",
+                            whiteSpace: accessibilityMode ? "normal" : "nowrap"
+                        },
+                        height: accessibilityMode ? "auto" : undefined,
+                        minHeight: accessibilityMode ? 40 : undefined
                     }}
                 />
             </Box>
+
+            {accessibilityMode && (
+                <Alert severity="info" sx={{ mb: 3, fontSize: "1rem" }}>
+                    {t("activity.accessibilityHint")}
+                </Alert>
+            )}
 
             <Box
                 sx={{
@@ -163,7 +174,7 @@ export default function Activity() {
                             sx={{
                                 fontWeight: 800,
                                 color: "text.primary",
-                                fontSize: "1.2rem",
+                                fontSize: accessibilityMode ? "1.35rem" : "1.2rem",
                                 overflowWrap: "anywhere"
                             }}
                         >
@@ -173,7 +184,7 @@ export default function Activity() {
                         <Typography
                             sx={{
                                 color: "text.secondary",
-                                fontSize: "0.9rem",
+                                fontSize: accessibilityMode ? "1rem" : "0.9rem",
                                 mt: 0.25,
                                 overflowWrap: "anywhere"
                             }}
@@ -182,6 +193,23 @@ export default function Activity() {
                         </Typography>
                     </Box>
                 </Box>
+
+                {accessibilityMode && (
+                    <Box
+                        component="section"
+                        aria-labelledby="activity-priority-legend"
+                        sx={{ mb: 3 }}
+                    >
+                        <Typography id="activity-priority-legend" sx={{ fontWeight: 800, mb: 1 }}>
+                            {t("activity.priorityLegend")}
+                        </Typography>
+                        <Stack direction="row" useFlexGap flexWrap="wrap" gap={1}>
+                            <Chip label={t("activity.priorities.normal")} color="info" variant="outlined" sx={{ minHeight: 40 }} />
+                            <Chip label={t("activity.priorities.alta")} color="warning" variant="outlined" sx={{ minHeight: 40 }} />
+                            <Chip label={t("activity.priorities.critico")} color="error" variant="outlined" sx={{ minHeight: 40 }} />
+                        </Stack>
+                    </Box>
+                )}
 
                 {loading ? (
                     <Box display="flex" flexDirection="column" gap={2}>
@@ -224,7 +252,7 @@ export default function Activity() {
                         </Typography>
                     </Box>
                 ) : (
-                    <Box display="flex" flexDirection="column" gap={2}>
+                    <Box display="flex" flexDirection="column" gap={2} role="list" aria-label={t("activity.history")}>
                         {events.map((event) => (
                             <EventCard
                                 key={event.id}

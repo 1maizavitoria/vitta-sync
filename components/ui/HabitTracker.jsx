@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 
-import { Box, Chip, FormControl, IconButton, InputLabel, MenuItem, Paper, Select, Tooltip, Typography } from "@mui/material";
+import { Box, Button, Chip, FormControl, IconButton, InputLabel, MenuItem, Paper, Select, Tooltip, Typography } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
 
 import AddIcon from "@mui/icons-material/Add";
@@ -17,6 +17,7 @@ import { editHabits, getHabits, registerHabits } from "../../services/habitServi
 import { getMedicoStyle, getNomeFuncao, getResponsavelStyle } from "../../utils/validators/userFunction";
 import HabitCard from "../ui/cards/HabitCard";
 import { useI18n } from "../../src/i18n";
+import { useThemeMode } from "../../src/theme/ThemeModeProvider";
 
 const emptyInputs = {
     timeExercise: "",
@@ -60,6 +61,7 @@ export function HabitTracker() {
     const theme = useTheme();
     const isDark = theme.palette.mode === "dark";
     const { t, formatDate, formatDateTime, formatNumber } = useI18n();
+    const { accessibilityMode } = useThemeMode();
 
     const [editing, setEditing] = useState(false);
     const [addHabit, setAddHabit] = useState(false);
@@ -98,6 +100,20 @@ export function HabitTracker() {
             "&:hover": { bgcolor: "primary.dark" }
         }
     };
+    const accessibleActionButtonSx = (variant) => ({
+        ...actionButtonSx[variant],
+        minHeight: 48,
+        px: { xs: 1.5, sm: 2 },
+        borderRadius: 2,
+        fontWeight: 800,
+        textTransform: "none",
+        flex: { xs: "1 1 140px", sm: "0 0 auto" },
+        "&:focus-visible": {
+            outline: "3px solid",
+            outlineColor: "secondary.main",
+            outlineOffset: 2
+        }
+    });
 
     const lastHabit = habits.reduce((latest, current) => {
         if (!latest) return current;
@@ -270,8 +286,9 @@ export function HabitTracker() {
         >
             <Box
                 display="flex"
-                alignItems="center"
+                alignItems={{ xs: "stretch", sm: "center" }}
                 justifyContent="space-between"
+                flexDirection={{ xs: "column", sm: "row" }}
                 gap={2}
                 mb={2.5}
                 sx={{ minWidth: 0 }}
@@ -282,7 +299,8 @@ export function HabitTracker() {
                             fontWeight: 800,
                             color: "text.primary",
                             fontSize: "1.05rem",
-                            overflowWrap: "anywhere"
+                            overflowWrap: "break-word",
+                            wordBreak: "normal"
                         }}
                     >
                         {t("healthTracker.habits.title")}
@@ -293,7 +311,8 @@ export function HabitTracker() {
                             color: "text.secondary",
                             fontSize: "0.88rem",
                             mt: 0.25,
-                            overflowWrap: "anywhere"
+                            overflowWrap: "break-word",
+                            wordBreak: "normal"
                         }}
                     >
                         {t("healthTracker.habits.description")}
@@ -301,50 +320,91 @@ export function HabitTracker() {
                 </Box>
 
                 {isFormOpen ? (
-                    <Box display="flex" gap={1} flexShrink={0}>
-                        <Tooltip title={t("healthTracker.common.cancel")}>
-                            <IconButton onClick={closeForm} sx={actionButtonSx.cancel}>
-                                <CloseIcon />
-                            </IconButton>
-                        </Tooltip>
-
-                        <Tooltip title={t("healthTracker.common.save")}>
-                            <IconButton onClick={handleRegister} sx={actionButtonSx.save}>
-                                <CheckIcon />
-                            </IconButton>
-                        </Tooltip>
+                    <Box display="flex" gap={1} flexShrink={0} flexWrap="wrap" width={{ xs: "100%", sm: "auto" }}>
+                        {accessibilityMode ? (
+                            <>
+                                <Button onClick={closeForm} startIcon={<CloseIcon />} sx={accessibleActionButtonSx("cancel")}>
+                                    {t("healthTracker.common.cancel")}
+                                </Button>
+                                <Button onClick={handleRegister} startIcon={<CheckIcon />} sx={accessibleActionButtonSx("save")}>
+                                    {t("healthTracker.common.save")}
+                                </Button>
+                            </>
+                        ) : (
+                            <>
+                                <Tooltip title={t("healthTracker.common.cancel")}>
+                                    <IconButton onClick={closeForm} aria-label={t("healthTracker.common.cancel")} sx={actionButtonSx.cancel}>
+                                        <CloseIcon />
+                                    </IconButton>
+                                </Tooltip>
+                                <Tooltip title={t("healthTracker.common.save")}>
+                                    <IconButton onClick={handleRegister} aria-label={t("healthTracker.common.save")} sx={actionButtonSx.save}>
+                                        <CheckIcon />
+                                    </IconButton>
+                                </Tooltip>
+                            </>
+                        )}
                     </Box>
                 ) : (
-                    <Box display="flex" alignItems="center" gap={1} flexShrink={0}>
+                    <Box display="flex" alignItems="center" gap={1} flexShrink={0} flexWrap="wrap" width={{ xs: "100%", sm: "auto" }}>
                         {canEdit && (
-                            <Tooltip title={t("healthTracker.habits.add")}>
-                                <IconButton
+                            accessibilityMode ? (
+                                <Button
                                     onClick={() => {
                                         setAddHabit(true);
                                         handleClearInputs();
                                     }}
-                                    sx={actionButtonSx.add}
+                                    startIcon={<AddIcon />}
+                                    sx={accessibleActionButtonSx("add")}
                                 >
-                                    <AddIcon />
-                                </IconButton>
-                            </Tooltip>
+                                    {t("healthTracker.habits.add")}
+                                </Button>
+                            ) : (
+                                <Tooltip title={t("healthTracker.habits.add")}>
+                                    <IconButton
+                                        onClick={() => {
+                                            setAddHabit(true);
+                                            handleClearInputs();
+                                        }}
+                                        aria-label={t("healthTracker.habits.add")}
+                                        sx={actionButtonSx.add}
+                                    >
+                                        <AddIcon />
+                                    </IconButton>
+                                </Tooltip>
+                            )
                         )}
 
                         {canEdit && (
-                            <Tooltip title={t("healthTracker.habits.edit")}>
-                                <span>
-                                    <IconButton
-                                        onClick={() => {
-                                            setEditing(true);
-                                            handleDataEditing();
-                                        }}
-                                        disabled={!lastHabit}
-                                        sx={actionButtonSx.edit}
-                                    >
-                                        <EditOutlinedIcon />
-                                    </IconButton>
-                                </span>
-                            </Tooltip>
+                            accessibilityMode ? (
+                                <Button
+                                    onClick={() => {
+                                        setEditing(true);
+                                        handleDataEditing();
+                                    }}
+                                    disabled={!lastHabit}
+                                    startIcon={<EditOutlinedIcon />}
+                                    sx={accessibleActionButtonSx("edit")}
+                                >
+                                    {t("healthTracker.habits.edit")}
+                                </Button>
+                            ) : (
+                                <Tooltip title={t("healthTracker.habits.edit")}>
+                                    <span>
+                                        <IconButton
+                                            onClick={() => {
+                                                setEditing(true);
+                                                handleDataEditing();
+                                            }}
+                                            disabled={!lastHabit}
+                                            aria-label={t("healthTracker.habits.edit")}
+                                            sx={actionButtonSx.edit}
+                                        >
+                                            <EditOutlinedIcon />
+                                        </IconButton>
+                                    </span>
+                                </Tooltip>
+                            )
                         )}
                     </Box>
                 )}
@@ -363,6 +423,14 @@ export function HabitTracker() {
                         unit={t("healthTracker.common.hours")}
                         date={lastHabit ? formatDateTime(lastHabit.dataRegistro) : t("healthTracker.common.notAvailable")}
                         inputValue={habitInputs.timeSleep}
+                        placeholder={t("healthTracker.common.example").replace("{value}", "8")}
+                        helperText={
+                            errorSl
+                                ? t("healthTracker.habits.invalidSleep")
+                                : error && isEmptyInput(habitInputs.timeSleep)
+                                    ? t("healthTracker.habits.fillAll")
+                                    : undefined
+                        }
                         onInputChange={(event) => {
                             updateInput("timeSleep", event.target.value);
                             setErrorSl(false);
@@ -384,6 +452,14 @@ export function HabitTracker() {
                         unit={t("healthTracker.common.minutes")}
                         date={lastHabit ? formatDateTime(lastHabit.dataRegistro) : t("healthTracker.common.notAvailable")}
                         inputValue={habitInputs.timeExercise}
+                        placeholder={t("healthTracker.common.example").replace("{value}", "30")}
+                        helperText={
+                            errorEx
+                                ? t("healthTracker.habits.invalidExercise")
+                                : error && isEmptyInput(habitInputs.timeExercise)
+                                    ? t("healthTracker.habits.fillAll")
+                                    : undefined
+                        }
                         onInputChange={(event) => {
                             updateInput("timeExercise", event.target.value);
                             setErrorEx(false);

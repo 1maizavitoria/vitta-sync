@@ -1,4 +1,4 @@
-import { Box, Paper, Typography } from "@mui/material";
+import { Box, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
 import {
     Area,
@@ -13,6 +13,7 @@ import {
 } from "recharts";
 
 import { useI18n } from "../../src/i18n";
+import { useThemeMode } from "../../src/theme/ThemeModeProvider";
 
 const chartColors = ["#3b82f6", "#22d3ee", "#8b5cf6", "#f59e0b", "#ec4899", "#6366f1"];
 
@@ -43,6 +44,7 @@ export default function DashboardChart({
 }) {
     const theme = useTheme();
     const { t, convertMeasurement, formatUnit } = useI18n();
+    const { accessibilityMode } = useThemeMode();
     const isDark = theme.palette.mode === "dark";
     const displayUnit = formatUnit(category.unidade);
     const baselineBands = category.series.flatMap((serie, index) => {
@@ -67,6 +69,23 @@ export default function DashboardChart({
 
         return convertedPoint;
     });
+    const textualSummary = category.series.map((serie) => {
+        const values = chartData
+            .map((point) => point[serie.codigo])
+            .filter((value) => value != null && Number.isFinite(Number(value)))
+            .map(Number);
+
+        return {
+            code: serie.codigo,
+            count: values.length,
+            minimum: values.length ? Math.min(...values) : null,
+            maximum: values.length ? Math.max(...values) : null,
+            latest: values.length ? values.at(-1) : null
+        };
+    });
+    const summaryValue = (value) => value == null
+        ? "—"
+        : `${formatNumber(value)}${displayUnit ? ` ${displayUnit}` : ""}`;
 
     return (
         <Paper
@@ -84,7 +103,7 @@ export default function DashboardChart({
                 <Typography variant="h6" sx={{ fontWeight: 800 }}>
                     {title}
                 </Typography>
-                <Typography variant="body2" color="text.secondary">
+                <Typography variant={accessibilityMode ? "body1" : "body2"} color="text.secondary">
                     {displayUnit}
                 </Typography>
             </Box>
@@ -115,9 +134,9 @@ export default function DashboardChart({
                     <Typography>{emptyText}</Typography>
                 </Box>
             ) : (
-                <Box sx={{ width: "100%", height: 300, minWidth: 0 }}>
+                <Box sx={{ width: "100%", height: 300, minWidth: 0 }} aria-label={`${title}. ${displayUnit}`}>
                     <ResponsiveContainer width="100%" height="100%">
-                        <AreaChart data={chartData} margin={{ top: 10, right: 12, left: -12, bottom: 4 }}>
+                        <AreaChart data={chartData} margin={{ top: 10, right: 12, left: -12, bottom: 4 }} accessibilityLayer>
                             <defs>
                                 {category.series.map((serie, index) => {
                                     const color = chartColors[index % chartColors.length];
@@ -231,6 +250,38 @@ export default function DashboardChart({
                             ))}
                         </AreaChart>
                     </ResponsiveContainer>
+                </Box>
+            )}
+
+            {accessibilityMode && chartData.length > 0 && (
+                <Box component="section" aria-label={t("dashboard.chartSummary.title")} sx={{ mt: 3 }}>
+                    <Typography sx={{ fontWeight: 800, mb: 1 }}>
+                        {t("dashboard.chartSummary.title")}
+                    </Typography>
+                    <TableContainer sx={{ overflowX: "auto" }}>
+                        <Table size="small" aria-label={`${t("dashboard.chartSummary.title")}: ${title}`}>
+                            <TableHead>
+                                <TableRow>
+                                    <TableCell>{t("dashboard.chartSummary.series")}</TableCell>
+                                    <TableCell align="right">{t("dashboard.chartSummary.records")}</TableCell>
+                                    <TableCell align="right">{t("dashboard.chartSummary.minimum")}</TableCell>
+                                    <TableCell align="right">{t("dashboard.chartSummary.maximum")}</TableCell>
+                                    <TableCell align="right">{t("dashboard.chartSummary.latest")}</TableCell>
+                                </TableRow>
+                            </TableHead>
+                            <TableBody>
+                                {textualSummary.map((summary) => (
+                                    <TableRow key={summary.code}>
+                                        <TableCell component="th" scope="row">{seriesNames[summary.code] || summary.code}</TableCell>
+                                        <TableCell align="right">{summary.count}</TableCell>
+                                        <TableCell align="right">{summaryValue(summary.minimum)}</TableCell>
+                                        <TableCell align="right">{summaryValue(summary.maximum)}</TableCell>
+                                        <TableCell align="right">{summaryValue(summary.latest)}</TableCell>
+                                    </TableRow>
+                                ))}
+                            </TableBody>
+                        </Table>
+                    </TableContainer>
                 </Box>
             )}
         </Paper>

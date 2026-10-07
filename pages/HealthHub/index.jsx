@@ -21,6 +21,7 @@ import UploadFileIcon from "@mui/icons-material/UploadFile";
 import InputUI from "../../components/ui/Input";
 import { usePatient } from "../../context/PatientContext";
 import { useI18n } from "../../src/i18n";
+import { useThemeMode } from "../../src/theme/ThemeModeProvider";
 import {
     deleteDocument,
     downloadDocument,
@@ -45,11 +46,13 @@ export default function HealthHub() {
     const vitta = theme.vitta;
     const isDark = theme.palette.mode === "dark";
     const { t, formatDateTime } = useI18n();
+    const { accessibilityMode } = useThemeMode();
     const [dragging, setDragging] = useState(false);
     const [documents, setDocuments] = useState([]);
     const [selectedFile, setSelectedFile] = useState(null);
     const [nomeArquivo, setNomeArquivo] = useState("");
     const [loading, setLoading] = useState(false);
+    const [fileError, setFileError] = useState(false);
 
     const cpfUsuario =
         localStorage.getItem("cpf") ||
@@ -65,6 +68,7 @@ export default function HealthHub() {
     function resetUpload() {
         setSelectedFile(null);
         setNomeArquivo("");
+        setFileError(false);
 
         if (fileInputRef.current) {
             fileInputRef.current.value = "";
@@ -76,9 +80,12 @@ export default function HealthHub() {
 
         if (file.type === "application/pdf") {
             setSelectedFile(file);
+            setFileError(false);
             return;
         }
 
+        setSelectedFile(null);
+        setFileError(true);
         alert(t("documents.upload.onlyPdf"));
     }
 
@@ -188,6 +195,8 @@ export default function HealthHub() {
                                 borderRadius: 2,
                                 px: 2.2,
                                 py: 1.05,
+                                minHeight: accessibilityMode ? 48 : undefined,
+                                width: { xs: "100%", md: "auto" },
                                 fontWeight: 800,
                                 textTransform: "none",
                                 color: "#ffffff",
@@ -287,9 +296,22 @@ export default function HealthHub() {
 
                     <InputUI
                         label={t("documents.upload.documentName")}
+                        placeholder={accessibilityMode ? t("documents.upload.nameExample") : undefined}
+                        error={accessibilityMode && Boolean(selectedFile) && !nomeArquivo.trim()}
+                        helperText={accessibilityMode
+                            ? selectedFile && !nomeArquivo.trim()
+                                ? t("documents.upload.nameRequired")
+                                : t("documents.upload.nameHint")
+                            : undefined}
                         value={nomeArquivo}
                         onChange={(event) => setNomeArquivo(event.target.value)}
-                        sx={{ maxWidth: 360 }}
+                        sx={{
+                            maxWidth: 360,
+                            width: "100%",
+                            "& .MuiOutlinedInput-root": accessibilityMode ? { minHeight: 52 } : undefined,
+                            "& .MuiInputBase-input": accessibilityMode ? { fontSize: "1rem" } : undefined,
+                            "& .MuiFormHelperText-root": accessibilityMode ? { fontSize: "0.9rem" } : undefined
+                        }}
                         disabled={!hasPatientSelected}
                     />
 
@@ -302,7 +324,9 @@ export default function HealthHub() {
                             textTransform: "none",
                             fontWeight: 800,
                             borderColor: vitta.borderStrong,
-                            color: "primary.dark"
+                            color: "primary.dark",
+                            minHeight: accessibilityMode ? 48 : undefined,
+                            px: accessibilityMode ? 2.5 : undefined
                         }}
                     >
                         {t("documents.upload.selectPdf")}
@@ -315,6 +339,20 @@ export default function HealthHub() {
                         />
                     </Button>
 
+                    {accessibilityMode && (
+                        <Typography
+                            variant="body2"
+                            color={fileError ? "error.main" : "text.secondary"}
+                            role={fileError ? "alert" : undefined}
+                        >
+                            {fileError
+                                ? t("documents.upload.onlyPdf")
+                                : selectedFile
+                                    ? t("documents.upload.fileSelected")
+                                    : t("documents.upload.fileHint")}
+                        </Typography>
+                    )}
+
                     {selectedFile && (
                         <Box
                             display="flex"
@@ -322,6 +360,9 @@ export default function HealthHub() {
                             gap={1}
                             sx={{
                                 maxWidth: "100%",
+                                flexDirection: accessibilityMode
+                                    ? { xs: "column", sm: "row" }
+                                    : "row",
                                 px: 1.5,
                                 py: 1,
                                 borderRadius: 2,
@@ -337,19 +378,31 @@ export default function HealthHub() {
                                 color="text.secondary"
                                 sx={{
                                     minWidth: 0,
-                                    overflow: "hidden",
-                                    textOverflow: "ellipsis",
-                                    whiteSpace: "nowrap"
+                                    overflow: accessibilityMode ? "visible" : "hidden",
+                                    textOverflow: accessibilityMode ? "clip" : "ellipsis",
+                                    whiteSpace: accessibilityMode ? "normal" : "nowrap",
+                                    overflowWrap: "anywhere"
                                 }}
                             >
                                 {selectedFile.name}
                             </Typography>
 
-                            <Tooltip title={t("documents.upload.removeFile")}>
-                                <IconButton size="small" onClick={resetUpload}>
-                                    <CloseIcon fontSize="small" />
-                                </IconButton>
-                            </Tooltip>
+                            {accessibilityMode ? (
+                                <Button
+                                    onClick={resetUpload}
+                                    startIcon={<CloseIcon />}
+                                    color="error"
+                                    sx={{ minHeight: 48, fontWeight: 800, textTransform: "none" }}
+                                >
+                                    {t("documents.upload.removeFile")}
+                                </Button>
+                            ) : (
+                                <Tooltip title={t("documents.upload.removeFile")}>
+                                    <IconButton size="small" onClick={resetUpload} aria-label={t("documents.upload.removeFile")}>
+                                        <CloseIcon fontSize="small" />
+                                    </IconButton>
+                                </Tooltip>
+                            )}
                         </Box>
                     )}
                 </Box>
@@ -424,13 +477,22 @@ export default function HealthHub() {
                                 minWidth: 0
                             }}
                         >
-                            <Box display="flex" gap={2} sx={{ minWidth: 0 }}>
+                            <Box
+                                display="flex"
+                                gap={2}
+                                sx={{
+                                    minWidth: 0,
+                                    flexDirection: accessibilityMode
+                                        ? { xs: "column", sm: "row" }
+                                        : "row"
+                                }}
+                            >
                                 <Avatar
                                     sx={{
                                         bgcolor: "primary.main",
                                         color: "#ffffff",
-                                        width: 46,
-                                        height: 46,
+                                        width: accessibilityMode ? 54 : 46,
+                                        height: accessibilityMode ? 54 : 46,
                                         fontWeight: 800,
                                         boxShadow: isDark
                                             ? "0 10px 20px rgba(0, 0, 0, 0.24)"
@@ -447,16 +509,23 @@ export default function HealthHub() {
                                         justifyContent="space-between"
                                         alignItems="flex-start"
                                         gap={1.5}
-                                        sx={{ minWidth: 0 }}
+                                        sx={{
+                                            minWidth: 0,
+                                            flexDirection: accessibilityMode
+                                                ? { xs: "column", sm: "row" }
+                                                : "row"
+                                        }}
                                     >
                                         <Box sx={{ minWidth: 0 }}>
                                             <Typography
                                                 sx={{
                                                     fontWeight: 800,
                                                     color: "text.primary",
-                                                    overflow: "hidden",
-                                                    textOverflow: "ellipsis",
-                                                    whiteSpace: "nowrap"
+                                                    overflow: accessibilityMode ? "visible" : "hidden",
+                                                    textOverflow: accessibilityMode ? "clip" : "ellipsis",
+                                                    whiteSpace: accessibilityMode ? "normal" : "nowrap",
+                                                    overflowWrap: "anywhere",
+                                                    fontSize: accessibilityMode ? "1.1rem" : undefined
                                                 }}
                                             >
                                                 {doc.nomeArquivo}
@@ -465,29 +534,44 @@ export default function HealthHub() {
                                             <Typography
                                                 sx={{
                                                     color: "text.secondary",
-                                                    overflow: "hidden",
-                                                    textOverflow: "ellipsis",
-                                                    whiteSpace: "nowrap"
+                                                    overflow: accessibilityMode ? "visible" : "hidden",
+                                                    textOverflow: accessibilityMode ? "clip" : "ellipsis",
+                                                    whiteSpace: accessibilityMode ? "normal" : "nowrap",
+                                                    overflowWrap: "anywhere",
+                                                    fontSize: accessibilityMode ? "1rem" : undefined
                                                 }}
                                             >
                                                 {doc.pacienteNome || t("documents.upload.patientFallback")}
                                             </Typography>
                                         </Box>
 
-                                        <Tooltip title={t("documents.upload.remove")}>
-                                            <IconButton
+                                        {accessibilityMode ? (
+                                            <Button
                                                 onClick={() => handleDelete(doc.id)}
-                                                size="small"
-                                                sx={{
-                                            color: "#dc2626",
-                                                    bgcolor: "rgba(220, 38, 38, 0.08)",
-                                                    border: "1px solid rgba(220, 38, 38, 0.14)",
-                                                    flex: "0 0 auto"
-                                                }}
+                                                startIcon={<DeleteOutlineIcon />}
+                                                color="error"
+                                                variant="outlined"
+                                                sx={{ minHeight: 48, fontWeight: 800, textTransform: "none" }}
                                             >
-                                                <DeleteOutlineIcon fontSize="small" />
-                                            </IconButton>
-                                        </Tooltip>
+                                                {t("documents.upload.remove")}
+                                            </Button>
+                                        ) : (
+                                            <Tooltip title={t("documents.upload.remove")}>
+                                                <IconButton
+                                                    onClick={() => handleDelete(doc.id)}
+                                                    size="small"
+                                                    aria-label={t("documents.upload.remove")}
+                                                    sx={{
+                                                        color: "#dc2626",
+                                                        bgcolor: "rgba(220, 38, 38, 0.08)",
+                                                        border: "1px solid rgba(220, 38, 38, 0.14)",
+                                                        flex: "0 0 auto"
+                                                    }}
+                                                >
+                                                    <DeleteOutlineIcon fontSize="small" />
+                                                </IconButton>
+                                            </Tooltip>
+                                        )}
                                     </Box>
 
                                     <Box
@@ -495,7 +579,7 @@ export default function HealthHub() {
                                         alignItems="center"
                                         gap={1}
                                         mt={2}
-                                        sx={{ minWidth: 0 }}
+                                        sx={{ minWidth: 0, flexWrap: accessibilityMode ? "wrap" : "nowrap" }}
                                     >
                                         <Box
                                             sx={{
@@ -517,9 +601,10 @@ export default function HealthHub() {
                                             sx={{
                                                 minWidth: 0,
                                                 flex: 1,
-                                                overflow: "hidden",
-                                                textOverflow: "ellipsis",
-                                                whiteSpace: "nowrap",
+                                                overflow: accessibilityMode ? "visible" : "hidden",
+                                                textOverflow: accessibilityMode ? "clip" : "ellipsis",
+                                                whiteSpace: accessibilityMode ? "normal" : "nowrap",
+                                                overflowWrap: "anywhere",
                                                 color: "text.primary",
                                                 fontWeight: 700
                                             }}
@@ -527,23 +612,32 @@ export default function HealthHub() {
                                             {doc.nomeOriginal || t("documents.upload.oldFile")}
                                         </Typography>
 
-                                        <Tooltip title={t("documents.upload.download")}>
-                                            <IconButton
-                                                onClick={() =>
-                                                    downloadDocument(doc.id, doc.nomeOriginal)
-                                                }
-                                                size="small"
-                                                sx={{
-                                                    color: "primary.main",
-                                                    bgcolor: isDark ? "rgba(34, 197, 94, 0.12)" : "rgba(22, 163, 74, 0.08)",
-                                                    border: "1px solid",
-                                                    borderColor: vitta.borderStrong,
-                                                    flex: "0 0 auto"
-                                                }}
+                                        {accessibilityMode ? (
+                                            <Button
+                                                onClick={() => downloadDocument(doc.id, doc.nomeOriginal)}
+                                                startIcon={<DownloadIcon />}
+                                                sx={{ minHeight: 48, fontWeight: 800, textTransform: "none" }}
                                             >
-                                                <DownloadIcon fontSize="small" />
-                                            </IconButton>
-                                        </Tooltip>
+                                                {t("documents.upload.download")}
+                                            </Button>
+                                        ) : (
+                                            <Tooltip title={t("documents.upload.download")}>
+                                                <IconButton
+                                                    onClick={() => downloadDocument(doc.id, doc.nomeOriginal)}
+                                                    size="small"
+                                                    aria-label={t("documents.upload.download")}
+                                                    sx={{
+                                                        color: "primary.main",
+                                                        bgcolor: isDark ? "rgba(34, 197, 94, 0.12)" : "rgba(22, 163, 74, 0.08)",
+                                                        border: "1px solid",
+                                                        borderColor: vitta.borderStrong,
+                                                        flex: "0 0 auto"
+                                                    }}
+                                                >
+                                                    <DownloadIcon fontSize="small" />
+                                                </IconButton>
+                                            </Tooltip>
+                                        )}
                                     </Box>
 
                                     <Typography

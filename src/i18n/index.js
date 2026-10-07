@@ -43,12 +43,12 @@ const dictionaries = {
             closeSidebar: "Fechar menu"
         },
         goals: {
-            title: "Metas de acompanhamento", description: "Defina objetivos e acompanhe a evolução do paciente.", patient: "Paciente", new: "Nova meta", selectPatient: "Selecione um paciente para visualizar suas metas.", empty: "Nenhuma meta cadastrada", emptyHint: "Crie a primeira meta de acompanhamento.", progress: "Progresso", limitUsed: "Limite utilizado", limitExceeded: "Limite ultrapassado em", current: "Valor atual", target: "Valor-alvo", deadline: "Prazo", complete: "Concluir", updateValue: "Registrar avanço", manualTitle: "Registrar avanço", manualAmount: "Valor realizado agora", manualNewValue: "Novo acumulado", edit: "Editar", delete: "Excluir", deleteConfirm: "Deseja realmente excluir esta meta?",
+            title: "Metas de acompanhamento", description: "Defina objetivos e acompanhe a evolução do paciente.", patient: "Paciente", new: "Nova meta", selectPatient: "Selecione um paciente para visualizar suas metas.", empty: "Nenhuma meta cadastrada", emptyHint: "Crie a primeira meta de acompanhamento.", progress: "Progresso", limitUsed: "Limite utilizado", limitExceeded: "Limite ultrapassado em", current: "Valor atual", target: "Valor-alvo", deadline: "Prazo", complete: "Concluir", updateValue: "Registrar avanço", manualTitle: "Registrar avanço", manualAmount: "Valor realizado agora", manualNewValue: "Novo acumulado", edit: "Editar", delete: "Excluir", deleteTitle: "Excluir meta", deleteConfirm: "Deseja realmente excluir esta meta?",
             types: { sinais_vitais: "Sinais vitais", habitos: "Hábitos", personalizado: "Personalizado" },
             indicators: { peso: "Peso", horas_sono: "Horas de sono", minutos_exercicio: "Minutos de exercício", personalizado: "Meta personalizada" },
             directions: { aumentar: "Aumentar", reduzir: "Reduzir", reachMinimum: "Alcançar pelo menos", doNotExceed: "Não ultrapassar" },
             status: { em_andamento: "Em andamento", concluido: "Concluída", concluido_atrasado: "Concluída com atraso", nao_atingida: "Não atingida" },
-            form: { createTitle: "Nova meta", editTitle: "Editar meta", name: "Nome", type: "Tipo de dado", indicator: "Indicador", direction: "Objetivo", unit: "Unidade", initialValue: "Valor inicial", target: "Valor-alvo", deadline: "Data-limite", cancel: "Cancelar", save: "Salvar", saving: "Salvando..." },
+            form: { createTitle: "Nova meta", editTitle: "Editar meta", name: "Nome", nameExample: "Ex.: Reduzir peso", nameRequired: "Informe um nome para a meta", type: "Tipo de dado", indicator: "Indicador", direction: "Objetivo", unit: "Unidade", unitExample: "Ex.: kg, minutos ou copos", initialValue: "Valor inicial", target: "Valor-alvo", targetExample: "Ex.: 80", targetRequired: "Informe um valor-alvo maior que zero", deadline: "Data-limite", deadlineRequired: "Informe uma data-limite", manualExample: "Ex.: 1", manualRequired: "Informe um avanço maior que zero", cancel: "Cancelar", save: "Salvar", saving: "Salvando..." },
             alerts: { loadError: "Não foi possível carregar as metas.", createSuccess: "Meta criada com sucesso.", updateSuccess: "Meta atualizada com sucesso.", valueSuccess: "Progresso atualizado com sucesso.", completeSuccess: "Meta concluída com sucesso.", deleteSuccess: "Meta excluída com sucesso.", saveError: "Não foi possível salvar a meta.", actionError: "Não foi possível realizar esta ação." }
         },
         theme: {
@@ -223,6 +223,7 @@ const dictionaries = {
                 selectRole: "Selecione uma função no grupo",
                 linkCreatedSuccess: "Vínculo criado com sucesso",
                 invalidCode: "Código inválido",
+                invalidEmail: "Informe um email válido",
                 emailAlreadyAdded: "Email já adicionado",
                 addAtLeastOneEmail: "Adicione pelo menos um email",
                 invitesSentSuccess: "Convites enviados com sucesso",
@@ -230,6 +231,7 @@ const dictionaries = {
             },
             groupTitle: "Grupo de",
             groupSubtitle: "Pessoas que acompanham o paciente",
+            accessibilityHint: "Nesta tela você pode gerenciar participantes, usar convites e acessar os módulos do paciente. Os cartões dos módulos também funcionam com Enter ou Espaço.",
             groupActions: "Ações do grupo",
             groupActionsDescription: "Gerencie convites e participação no grupo.",
             inviteParticipant: "Convidar participante",
@@ -253,17 +255,26 @@ const dictionaries = {
             emailTab: "Enviar por Email",
             sendInviteByEmail: "Enviar convite por email",
             email: "Email",
+            emailExample: "Ex.: familiar@email.com",
+            emailHint: "Digite um email válido e selecione Adicionar email.",
+            addEmail: "Adicionar email",
+            copyCode: "Copiar código",
+            copyLink: "Copiar link",
             sendingInvites: "Enviando convites...",
             sendInvites: "Enviar Convites",
             roleInGroup: "Função no grupo",
             invitationCode: "Código de convite",
+            codeExample: "Ex.: A1B2C3",
+            codeHint: "Digite o código recebido no convite.",
             removeLink: "Remover vínculo",
+            removeMember: "Remover participante",
             leaveQuestion: "Deseja sair deste grupo?",
             removeQuestion: "Deseja remover este participante?",
             linkedAt: "Vinculado em"
         },
         dashboard: {
             title: "Dashboard de saúde",
+            accessibilityHint: "Use os filtros para escolher o período e a categoria. O dashboard apresenta estabilidade, linha de base, valores recentes, gráficos com resumo textual e linha do tempo.",
             baseline: {
                 "title": "Linha de base personalizada",
                 "description": "Referência fixa do padrão observado, independente do período do gráfico. Estar dentro da faixa não equivale a uma avaliação clínica.",
@@ -296,9 +307,18 @@ const dictionaries = {
             latestValue: "Último valor do período",
             loadError: "Não foi possível carregar os dados do dashboard.",
             emptyPeriod: "Nenhum registro encontrado neste período.",
+            chartSummary: {
+                title: "Resumo textual do gráfico",
+                series: "Série",
+                records: "Registros",
+                minimum: "Mínimo",
+                maximum: "Máximo",
+                latest: "Último valor"
+            },
             timeline: {
                 title: "Linha do tempo clínica",
                 description: "Sinais vitais, hábitos e sintomas organizados pela data de referência.",
+                time: "Horário",
                 loadError: "Não foi possível carregar a linha do tempo clínica.",
                 empty: "Nenhum registro encontrado para este filtro e período.",
                 filters: {
@@ -391,6 +411,7 @@ const dictionaries = {
                 notAvailable: "N/A",
                 lastRecord: "Último registro",
                 lastMeasurement: "Última medição",
+                example: "Ex.: {value}",
                 date: "Data",
                 hours: "Horas",
                 minutes: "Minutos"
@@ -424,6 +445,8 @@ const dictionaries = {
                 edit: "Editar sintomas",
                 symptom: "Sintoma",
                 intensity: "Intensidade",
+                symptomExample: "Ex.: Dor de cabeça",
+                intensityExample: "Ex.: 5 (de 1 a 10)",
                 invalidIntensity: "Intensidade deve estar em um valor válido (1-10)",
                 registered: "Sintomas registrados com sucesso",
                 edited: "Sintomas editados com sucesso",
@@ -484,6 +507,12 @@ const dictionaries = {
         },
         activity: {
             title: "Atividade",
+            accessibilityHint: "Os eventos estão organizados do mais recente para o mais antigo. Cada cartão informa a prioridade, o responsável e a data.",
+            priorityLegend: "Legenda de prioridade",
+            priority: "Prioridade",
+            responsible: "Responsável",
+            userType: "Tipo de usuário",
+            eventDate: "Data do evento",
             descriptions: {
                 patient: "Acompanhe suas atualizações, registros e notificações importantes.",
                 linkedPatient: "Acompanhe atualizações, registros e notificações do paciente selecionado."
@@ -615,6 +644,7 @@ const dictionaries = {
         },
         documents: {
             title: "Documentos",
+            accessibilityHint: "Use as abas para consultar documentos recebidos ou enviar um PDF. No modo acessível, os nomes completos e as ações ficam sempre visíveis.",
             tabs: {
                 myDocuments: "Meus documentos",
                 patientDocuments: "Documentos do paciente",
@@ -643,7 +673,12 @@ const dictionaries = {
                 dragPdf: "Arraste um PDF para enviar",
                 manualSelect: "Você também pode selecionar um arquivo manualmente.",
                 documentName: "Nome do documento",
+                nameExample: "Ex.: Resultado do exame de sangue",
+                nameHint: "Informe um nome que ajude o paciente a identificar o documento.",
+                nameRequired: "Informe o nome do documento antes de enviar.",
                 selectPdf: "Selecionar PDF",
+                fileHint: "Selecione um arquivo no formato PDF.",
+                fileSelected: "PDF selecionado. Confira o nome antes de enviar.",
                 removeFile: "Remover arquivo",
                 sentDocuments: "Documentos enviados",
                 updating: "Atualizando...",
@@ -665,6 +700,7 @@ const dictionaries = {
                 oldFile: "Arquivo antigo",
                 view: "Visualizar",
                 download: "Baixar",
+                closeViewer: "Fechar visualização",
                 pdfUnavailable: "Não foi possível visualizar o PDF.",
                 imageAlt: "Documento"
             }
@@ -673,6 +709,7 @@ const dictionaries = {
             title: "Informações",
             export: {
                 title: "Relatório de acompanhamento", description: "Escolha o período e os dados para levar à consulta.",
+                accessibilityHint: "Siga as etapas abaixo: escolha o período, selecione os dados, defina o formato e visualize a prévia antes de baixar.",
                 period: "Período", presets: { "7": "Últimos 7 dias", "30": "Últimos 30 dias", all: "Todos os registros", custom: "Personalizado" },
                 start: "Data inicial", end: "Data final", noStart: "Sem limite inicial", noEnd: "Sem limite final",
                 datesHint: "Deixe uma data vazia para não limitar esse lado do período.",
@@ -714,13 +751,18 @@ const dictionaries = {
                 cancel: "Cancelar",
                 save: "Salvar",
                 name: "Nome",
+                nameExample: "Ex.: Maria da Silva",
                 phone: "Telefone",
+                phoneExample: "Ex.: (11) 99999-9999",
                 birthDate: "Data de nascimento",
                 email: "Email",
+                emailExample: "Ex.: maria@email.com",
                 cpf: "CPF",
                 council: "Conselho",
+                councilExample: "Ex.: CRM 123456",
                 initialWeight: "Peso inicial",
                 height: "Altura",
+                example: "Ex.: {value}",
                 deleteConfirmation: "Tem certeza que deseja deletar sua conta? Essa ação não pode ser desfeita.",
                 accountDeleted: "Conta deletada com sucesso",
                 deleteError: "Erro ao deletar conta",
@@ -815,12 +857,12 @@ const dictionaries = {
             closeSidebar: "Close menu"
         },
         goals: {
-            title: "Tracking goals", description: "Set objectives and track the patient's progress.", patient: "Patient", new: "New goal", selectPatient: "Select a patient to view their goals.", empty: "No goals yet", emptyHint: "Create the first tracking goal.", progress: "Progress", limitUsed: "Limit used", limitExceeded: "Limit exceeded by", current: "Current value", target: "Target value", deadline: "Deadline", complete: "Complete", updateValue: "Log progress", manualTitle: "Log progress", manualAmount: "Amount completed now", manualNewValue: "New total", edit: "Edit", delete: "Delete", deleteConfirm: "Do you really want to delete this goal?",
+            title: "Tracking goals", description: "Set objectives and track the patient's progress.", patient: "Patient", new: "New goal", selectPatient: "Select a patient to view their goals.", empty: "No goals yet", emptyHint: "Create the first tracking goal.", progress: "Progress", limitUsed: "Limit used", limitExceeded: "Limit exceeded by", current: "Current value", target: "Target value", deadline: "Deadline", complete: "Complete", updateValue: "Log progress", manualTitle: "Log progress", manualAmount: "Amount completed now", manualNewValue: "New total", edit: "Edit", delete: "Delete", deleteTitle: "Delete goal", deleteConfirm: "Do you really want to delete this goal?",
             types: { sinais_vitais: "Vital signs", habitos: "Habits", personalizado: "Custom" },
             indicators: { peso: "Weight", horas_sono: "Sleep hours", minutos_exercicio: "Exercise minutes", personalizado: "Custom goal" },
             directions: { aumentar: "Increase", reduzir: "Reduce", reachMinimum: "Reach at least", doNotExceed: "Do not exceed" },
             status: { em_andamento: "In progress", concluido: "Completed", concluido_atrasado: "Completed late", nao_atingida: "Not achieved" },
-            form: { createTitle: "New goal", editTitle: "Edit goal", name: "Name", type: "Data type", indicator: "Indicator", direction: "Objective", unit: "Unit", initialValue: "Initial value", target: "Target value", deadline: "Deadline", cancel: "Cancel", save: "Save", saving: "Saving..." },
+            form: { createTitle: "New goal", editTitle: "Edit goal", name: "Name", nameExample: "E.g.: Reduce weight", nameRequired: "Enter a name for the goal", type: "Data type", indicator: "Indicator", direction: "Objective", unit: "Unit", unitExample: "E.g.: kg, minutes or glasses", initialValue: "Initial value", target: "Target value", targetExample: "E.g.: 80", targetRequired: "Enter a target value greater than zero", deadline: "Deadline", deadlineRequired: "Enter a deadline", manualExample: "E.g.: 1", manualRequired: "Enter progress greater than zero", cancel: "Cancel", save: "Save", saving: "Saving..." },
             alerts: { loadError: "Goals could not be loaded.", createSuccess: "Goal created successfully.", updateSuccess: "Goal updated successfully.", valueSuccess: "Progress updated successfully.", completeSuccess: "Goal completed successfully.", deleteSuccess: "Goal deleted successfully.", saveError: "Goal could not be saved.", actionError: "This action could not be completed." }
         },
         theme: {
@@ -994,6 +1036,7 @@ const dictionaries = {
                 selectRole: "Select a group role",
                 linkCreatedSuccess: "Link created successfully",
                 invalidCode: "Invalid code",
+                invalidEmail: "Enter a valid email",
                 emailAlreadyAdded: "Email already added",
                 addAtLeastOneEmail: "Add at least one email",
                 invitesSentSuccess: "Invites sent successfully",
@@ -1001,6 +1044,7 @@ const dictionaries = {
             },
             groupTitle: "Group of",
             groupSubtitle: "People who follow the patient",
+            accessibilityHint: "On this screen you can manage participants, use invitations, and access the patient's modules. Module cards also work with Enter or Space.",
             groupActions: "Group actions",
             groupActionsDescription: "Manage invitations and group participation.",
             inviteParticipant: "Invite participant",
@@ -1024,17 +1068,26 @@ const dictionaries = {
             emailTab: "Send by Email",
             sendInviteByEmail: "Send invitation by email",
             email: "Email",
+            emailExample: "E.g.: family@email.com",
+            emailHint: "Enter a valid email and select Add email.",
+            addEmail: "Add email",
+            copyCode: "Copy code",
+            copyLink: "Copy link",
             sendingInvites: "Sending invites...",
             sendInvites: "Send Invites",
             roleInGroup: "Group role",
             invitationCode: "Invitation code",
+            codeExample: "E.g.: A1B2C3",
+            codeHint: "Enter the code received in the invitation.",
             removeLink: "Remove link",
+            removeMember: "Remove participant",
             leaveQuestion: "Do you want to leave this group?",
             removeQuestion: "Do you want to remove this participant?",
             linkedAt: "Linked on"
         },
         dashboard: {
             title: "Health dashboard",
+            accessibilityHint: "Use the filters to choose a period and category. The dashboard shows stability, baseline, recent values, charts with a text summary, and a timeline.",
             baseline: {
                 "title": "Personal baseline",
                 "description": "Fixed reference of the observed pattern, independent of the chart period. Being within the range is not a clinical assessment.",
@@ -1067,9 +1120,18 @@ const dictionaries = {
             latestValue: "Latest value in the period",
             loadError: "Dashboard data could not be loaded.",
             emptyPeriod: "No records were found in this period.",
+            chartSummary: {
+                title: "Chart text summary",
+                series: "Series",
+                records: "Records",
+                minimum: "Minimum",
+                maximum: "Maximum",
+                latest: "Latest value"
+            },
             timeline: {
                 title: "Clinical timeline",
                 description: "Vital signs, habits, and symptoms organized by reference date.",
+                time: "Time",
                 loadError: "The clinical timeline could not be loaded.",
                 empty: "No records were found for this filter and period.",
                 filters: {
@@ -1162,6 +1224,7 @@ const dictionaries = {
                 notAvailable: "N/A",
                 lastRecord: "Last record",
                 lastMeasurement: "Last measurement",
+                example: "E.g.: {value}",
                 date: "Date",
                 hours: "Hours",
                 minutes: "Minutes"
@@ -1195,6 +1258,8 @@ const dictionaries = {
                 edit: "Edit symptoms",
                 symptom: "Symptom",
                 intensity: "Intensity",
+                symptomExample: "E.g.: Headache",
+                intensityExample: "E.g.: 5 (from 1 to 10)",
                 invalidIntensity: "Intensity must be a valid value (1-10)",
                 registered: "Symptoms recorded successfully",
                 edited: "Symptoms edited successfully",
@@ -1255,6 +1320,12 @@ const dictionaries = {
         },
         activity: {
             title: "Activity",
+            accessibilityHint: "Events are ordered from newest to oldest. Each card shows its priority, responsible person, and date.",
+            priorityLegend: "Priority legend",
+            priority: "Priority",
+            responsible: "Responsible person",
+            userType: "User type",
+            eventDate: "Event date",
             descriptions: {
                 patient: "Track your updates, records and important notifications.",
                 linkedPatient: "Track updates, records and notifications for the selected patient."
@@ -1386,6 +1457,7 @@ const dictionaries = {
         },
         documents: {
             title: "Documents",
+            accessibilityHint: "Use the tabs to view received documents or upload a PDF. In accessible mode, full names and actions remain visible.",
             tabs: {
                 myDocuments: "My documents",
                 patientDocuments: "Patient documents",
@@ -1414,7 +1486,12 @@ const dictionaries = {
                 dragPdf: "Drag a PDF to upload",
                 manualSelect: "You can also select a file manually.",
                 documentName: "Document name",
+                nameExample: "E.g.: Blood test result",
+                nameHint: "Enter a name that helps the patient identify the document.",
+                nameRequired: "Enter the document name before uploading.",
                 selectPdf: "Select PDF",
+                fileHint: "Select a file in PDF format.",
+                fileSelected: "PDF selected. Check the name before uploading.",
                 removeFile: "Remove file",
                 sentDocuments: "Uploaded documents",
                 updating: "Updating...",
@@ -1436,6 +1513,7 @@ const dictionaries = {
                 oldFile: "Old file",
                 view: "View",
                 download: "Download",
+                closeViewer: "Close preview",
                 pdfUnavailable: "Could not preview the PDF.",
                 imageAlt: "Document"
             }
@@ -1444,6 +1522,7 @@ const dictionaries = {
             title: "Information",
             export: {
                 title: "Health report", description: "Choose the period and records to take to your appointment.",
+                accessibilityHint: "Follow the steps below: choose the period, select the records, set the format, and preview the report before downloading.",
                 period: "Period", presets: { "7": "Last 7 days", "30": "Last 30 days", all: "All records", custom: "Custom" },
                 start: "Start date", end: "End date", noStart: "No start limit", noEnd: "No end limit",
                 datesHint: "Leave a date blank to keep that end of the period open.",
@@ -1485,13 +1564,18 @@ const dictionaries = {
                 cancel: "Cancel",
                 save: "Save",
                 name: "Name",
+                nameExample: "E.g.: Maria Silva",
                 phone: "Phone",
+                phoneExample: "E.g.: (11) 99999-9999",
                 birthDate: "Date of birth",
                 email: "Email",
+                emailExample: "E.g.: maria@email.com",
                 cpf: "CPF",
                 council: "Council",
+                councilExample: "E.g.: CRM 123456",
                 initialWeight: "Initial weight",
                 height: "Height",
+                example: "E.g.: {value}",
                 deleteConfirmation: "Are you sure you want to delete your account? This action cannot be undone.",
                 accountDeleted: "Account deleted successfully",
                 deleteError: "Error deleting account",
@@ -1586,12 +1670,12 @@ const dictionaries = {
             closeSidebar: "Cerrar menú"
         },
         goals: {
-            title: "Metas de seguimiento", description: "Define objetivos y acompaña la evolución del paciente.", patient: "Paciente", new: "Nueva meta", selectPatient: "Selecciona un paciente para ver sus metas.", empty: "No hay metas registradas", emptyHint: "Crea la primera meta de seguimiento.", progress: "Progreso", limitUsed: "Límite utilizado", limitExceeded: "Límite superado por", current: "Valor actual", target: "Valor objetivo", deadline: "Fecha límite", complete: "Completar", updateValue: "Registrar avance", manualTitle: "Registrar avance", manualAmount: "Valor realizado ahora", manualNewValue: "Nuevo acumulado", edit: "Editar", delete: "Eliminar", deleteConfirm: "¿Realmente deseas eliminar esta meta?",
+            title: "Metas de seguimiento", description: "Define objetivos y acompaña la evolución del paciente.", patient: "Paciente", new: "Nueva meta", selectPatient: "Selecciona un paciente para ver sus metas.", empty: "No hay metas registradas", emptyHint: "Crea la primera meta de seguimiento.", progress: "Progreso", limitUsed: "Límite utilizado", limitExceeded: "Límite superado por", current: "Valor actual", target: "Valor objetivo", deadline: "Fecha límite", complete: "Completar", updateValue: "Registrar avance", manualTitle: "Registrar avance", manualAmount: "Valor realizado ahora", manualNewValue: "Nuevo acumulado", edit: "Editar", delete: "Eliminar", deleteTitle: "Eliminar meta", deleteConfirm: "¿Realmente deseas eliminar esta meta?",
             types: { sinais_vitais: "Signos vitales", habitos: "Hábitos", personalizado: "Personalizado" },
             indicators: { peso: "Peso", horas_sono: "Horas de sueño", minutos_exercicio: "Minutos de ejercicio", personalizado: "Meta personalizada" },
             directions: { aumentar: "Aumentar", reduzir: "Reducir", reachMinimum: "Alcanzar al menos", doNotExceed: "No superar" },
             status: { em_andamento: "En progreso", concluido: "Completada", concluido_atrasado: "Completada con retraso", nao_atingida: "No alcanzada" },
-            form: { createTitle: "Nueva meta", editTitle: "Editar meta", name: "Nombre", type: "Tipo de dato", indicator: "Indicador", direction: "Objetivo", unit: "Unidad", initialValue: "Valor inicial", target: "Valor objetivo", deadline: "Fecha límite", cancel: "Cancelar", save: "Guardar", saving: "Guardando..." },
+            form: { createTitle: "Nueva meta", editTitle: "Editar meta", name: "Nombre", nameExample: "Ej.: Reducir peso", nameRequired: "Introduce un nombre para la meta", type: "Tipo de dato", indicator: "Indicador", direction: "Objetivo", unit: "Unidad", unitExample: "Ej.: kg, minutos o vasos", initialValue: "Valor inicial", target: "Valor objetivo", targetExample: "Ej.: 80", targetRequired: "Introduce un valor objetivo mayor que cero", deadline: "Fecha límite", deadlineRequired: "Introduce una fecha límite", manualExample: "Ej.: 1", manualRequired: "Introduce un avance mayor que cero", cancel: "Cancelar", save: "Guardar", saving: "Guardando..." },
             alerts: { loadError: "No se pudieron cargar las metas.", createSuccess: "Meta creada correctamente.", updateSuccess: "Meta actualizada correctamente.", valueSuccess: "Progreso actualizado correctamente.", completeSuccess: "Meta completada correctamente.", deleteSuccess: "Meta eliminada correctamente.", saveError: "No se pudo guardar la meta.", actionError: "No se pudo realizar esta acción." }
         },
         theme: {
@@ -1765,6 +1849,7 @@ const dictionaries = {
                 selectRole: "Selecciona una función en el grupo",
                 linkCreatedSuccess: "Vínculo creado con éxito",
                 invalidCode: "Código inválido",
+                invalidEmail: "Introduce un email válido",
                 emailAlreadyAdded: "Email ya agregado",
                 addAtLeastOneEmail: "Agrega al menos un email",
                 invitesSentSuccess: "Invitaciones enviadas con éxito",
@@ -1772,6 +1857,7 @@ const dictionaries = {
             },
             groupTitle: "Grupo de",
             groupSubtitle: "Personas que acompañan al paciente",
+            accessibilityHint: "En esta pantalla puedes gestionar participantes, usar invitaciones y acceder a los módulos del paciente. Las tarjetas también funcionan con Enter o Espacio.",
             groupActions: "Acciones del grupo",
             groupActionsDescription: "Gestiona invitaciones y participación en el grupo.",
             inviteParticipant: "Invitar participante",
@@ -1795,17 +1881,26 @@ const dictionaries = {
             emailTab: "Enviar por Email",
             sendInviteByEmail: "Enviar invitación por email",
             email: "Email",
+            emailExample: "Ej.: familiar@email.com",
+            emailHint: "Introduce un email válido y selecciona Agregar email.",
+            addEmail: "Agregar email",
+            copyCode: "Copiar código",
+            copyLink: "Copiar enlace",
             sendingInvites: "Enviando invitaciones...",
             sendInvites: "Enviar Invitaciones",
             roleInGroup: "Función en el grupo",
             invitationCode: "Código de invitación",
+            codeExample: "Ej.: A1B2C3",
+            codeHint: "Introduce el código recibido en la invitación.",
             removeLink: "Eliminar vínculo",
+            removeMember: "Eliminar participante",
             leaveQuestion: "¿Deseas salir de este grupo?",
             removeQuestion: "¿Deseas eliminar este participante?",
             linkedAt: "Vinculado el"
         },
         dashboard: {
             title: "Panel de salud",
+            accessibilityHint: "Usa los filtros para elegir el período y la categoría. El panel muestra estabilidad, línea de base, valores recientes, gráficos con resumen textual y línea de tiempo.",
             baseline: {
                 "title": "Línea de base personalizada",
                 "description": "Referencia fija del patrón observado, independiente del período del gráfico. Estar dentro del rango no equivale a una evaluación clínica.",
@@ -1838,9 +1933,18 @@ const dictionaries = {
             latestValue: "Último valor del período",
             loadError: "No fue posible cargar los datos del panel.",
             emptyPeriod: "No se encontraron registros en este período.",
+            chartSummary: {
+                title: "Resumen textual del gráfico",
+                series: "Serie",
+                records: "Registros",
+                minimum: "Mínimo",
+                maximum: "Máximo",
+                latest: "Último valor"
+            },
             timeline: {
                 title: "Línea de tiempo clínica",
                 description: "Signos vitales, hábitos y síntomas organizados por fecha de referencia.",
+                time: "Horario",
                 loadError: "No fue posible cargar la línea de tiempo clínica.",
                 empty: "No se encontraron registros para este filtro y período.",
                 filters: {
@@ -1933,6 +2037,7 @@ const dictionaries = {
                 notAvailable: "N/A",
                 lastRecord: "Último registro",
                 lastMeasurement: "Última medición",
+                example: "Ej.: {value}",
                 date: "Fecha",
                 hours: "Horas",
                 minutes: "Minutos"
@@ -1966,6 +2071,8 @@ const dictionaries = {
                 edit: "Editar síntomas",
                 symptom: "Síntoma",
                 intensity: "Intensidad",
+                symptomExample: "Ej.: Dolor de cabeza",
+                intensityExample: "Ej.: 5 (de 1 a 10)",
                 invalidIntensity: "La intensidad debe ser un valor válido (1-10)",
                 registered: "Síntomas registrados con éxito",
                 edited: "Síntomas editados con éxito",
@@ -2026,6 +2133,12 @@ const dictionaries = {
         },
         activity: {
             title: "Actividad",
+            accessibilityHint: "Los eventos están ordenados del más reciente al más antiguo. Cada tarjeta muestra la prioridad, la persona responsable y la fecha.",
+            priorityLegend: "Leyenda de prioridad",
+            priority: "Prioridad",
+            responsible: "Responsable",
+            userType: "Tipo de usuario",
+            eventDate: "Fecha del evento",
             descriptions: {
                 patient: "Acompaña tus actualizaciones, registros y notificaciones importantes.",
                 linkedPatient: "Acompaña actualizaciones, registros y notificaciones del paciente seleccionado."
@@ -2157,6 +2270,7 @@ const dictionaries = {
         },
         documents: {
             title: "Documentos",
+            accessibilityHint: "Usa las pestañas para consultar documentos recibidos o enviar un PDF. En el modo accesible, los nombres completos y las acciones permanecen visibles.",
             tabs: {
                 myDocuments: "Mis documentos",
                 patientDocuments: "Documentos del paciente",
@@ -2185,7 +2299,12 @@ const dictionaries = {
                 dragPdf: "Arrastra un PDF para enviar",
                 manualSelect: "También puedes seleccionar un archivo manualmente.",
                 documentName: "Nombre del documento",
+                nameExample: "Ej.: Resultado del análisis de sangre",
+                nameHint: "Introduce un nombre que ayude al paciente a identificar el documento.",
+                nameRequired: "Introduce el nombre del documento antes de enviarlo.",
                 selectPdf: "Seleccionar PDF",
+                fileHint: "Selecciona un archivo en formato PDF.",
+                fileSelected: "PDF seleccionado. Comprueba el nombre antes de enviarlo.",
                 removeFile: "Quitar archivo",
                 sentDocuments: "Documentos enviados",
                 updating: "Actualizando...",
@@ -2207,6 +2326,7 @@ const dictionaries = {
                 oldFile: "Archivo antiguo",
                 view: "Visualizar",
                 download: "Descargar",
+                closeViewer: "Cerrar vista previa",
                 pdfUnavailable: "No fue posible visualizar el PDF.",
                 imageAlt: "Documento"
             }
@@ -2215,6 +2335,7 @@ const dictionaries = {
             title: "Información",
             export: {
                 title: "Informe de seguimiento", description: "Elige el período y los datos para llevar a la consulta.",
+                accessibilityHint: "Sigue los pasos: elige el período, selecciona los datos, define el formato y revisa la vista previa antes de descargar.",
                 period: "Período", presets: { "7": "Últimos 7 días", "30": "Últimos 30 días", all: "Todos los registros", custom: "Personalizado" },
                 start: "Fecha inicial", end: "Fecha final", noStart: "Sin límite inicial", noEnd: "Sin límite final",
                 datesHint: "Deja una fecha vacía para no limitar ese extremo del período.",
@@ -2256,13 +2377,18 @@ const dictionaries = {
                 cancel: "Cancelar",
                 save: "Guardar",
                 name: "Nombre",
+                nameExample: "Ej.: María Silva",
                 phone: "Teléfono",
+                phoneExample: "Ej.: (11) 99999-9999",
                 birthDate: "Fecha de nacimiento",
                 email: "Email",
+                emailExample: "Ej.: maria@email.com",
                 cpf: "CPF",
                 council: "Consejo",
+                councilExample: "Ej.: CRM 123456",
                 initialWeight: "Peso inicial",
                 height: "Altura",
+                example: "Ej.: {value}",
                 deleteConfirmation: "¿Seguro que deseas eliminar tu cuenta? Esta acción no se puede deshacer.",
                 accountDeleted: "Cuenta eliminada con éxito",
                 deleteError: "Error al eliminar cuenta",

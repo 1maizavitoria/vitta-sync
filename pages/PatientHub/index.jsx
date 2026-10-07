@@ -1,4 +1,4 @@
-import { Box, Typography, IconButton, Button, TextField, Stack, Chip, Skeleton, Tabs, Tab } from "@mui/material";
+import { Alert, Box, Typography, IconButton, Button, TextField, Stack, Chip, Skeleton, Tabs, Tab } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
 
 import { useCallback, useEffect, useState } from "react";
@@ -28,6 +28,7 @@ import {
     getMedicoStyle
 } from "../../utils/validators/userFunction";
 import { useI18n } from "../../src/i18n";
+import { useThemeMode } from "../../src/theme/ThemeModeProvider";
 
 export default function PatientHub() {
 
@@ -37,6 +38,7 @@ export default function PatientHub() {
     const vitta = theme.vitta;
     const isDark = theme.palette.mode === "dark";
     const { t } = useI18n();
+    const { accessibilityMode } = useThemeMode();
 
     const {
         selectedPatient,
@@ -61,6 +63,8 @@ export default function PatientHub() {
     const [selectedTab, setSelectedTab] = useState(0);
     const [isLeavingGroup, setIsLeavingGroup] = useState(false);
     const [sendingEmails, setSendingEmails] = useState(false);
+    const [emailError, setEmailError] = useState(null);
+    const [joinCodeError, setJoinCodeError] = useState(false);
     const userType = localStorage.getItem("tipo");
     const [funcao, setFuncao] = useState("");
 
@@ -253,12 +257,14 @@ export default function PatientHub() {
             setOpenJoinModal(false);
 
             setJoinCode("");
+            setJoinCodeError(false);
 
             setFuncao("");
 
         } catch (error) {
 
             console.error(error);
+            setJoinCodeError(true);
 
             showAlert(
                 "error",
@@ -272,7 +278,8 @@ export default function PatientHub() {
         const formattedEmail =
             emailInput.trim().toLowerCase();
 
-        if (!formattedEmail) {
+        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formattedEmail)) {
+            setEmailError("invalidEmail");
             return;
         }
 
@@ -280,6 +287,7 @@ export default function PatientHub() {
             emails.includes(formattedEmail);
 
         if (emailExists) {
+            setEmailError("emailAlreadyAdded");
 
             showAlert(
                 "warning",
@@ -295,6 +303,7 @@ export default function PatientHub() {
         ]);
 
         setEmailInput("");
+        setEmailError(null);
     }
 
     function handleRemoveEmail(email) {
@@ -437,8 +446,30 @@ export default function PatientHub() {
 
     const supportingTextSx = {
         ...textWrapSx,
-        color: "text.secondary"
+        color: "text.secondary",
+        fontSize: accessibilityMode ? "1rem" : undefined
     };
+
+    const accessibleActionSx = accessibilityMode
+        ? {
+            minHeight: 48,
+            px: 2.5,
+            fontSize: "1rem",
+            fontWeight: 800,
+            "&:focus-visible": {
+                outline: "3px solid",
+                outlineColor: "secondary.main",
+                outlineOffset: 2
+            }
+        }
+        : {};
+
+    function handleModuleKeyDown(event, action) {
+        if (event.key === "Enter" || event.key === " ") {
+            event.preventDefault();
+            action();
+        }
+    }
 
     const moduleCardSx = {
         ...panelSx,
@@ -451,6 +482,11 @@ export default function PatientHub() {
             transform: "translateY(-4px)",
             borderColor: vitta.borderStrong,
             boxShadow: vitta.shadow
+        },
+        "&:focus-visible": {
+            outline: "3px solid",
+            outlineColor: "secondary.main",
+            outlineOffset: 3
         }
     };
 
@@ -502,6 +538,12 @@ export default function PatientHub() {
                 overflowX: "hidden"
             }}
         >
+
+            {selectedPatient && accessibilityMode && (
+                <Alert severity="info" sx={{ mb: 3, fontSize: "1rem" }}>
+                    {t("patientHub.accessibilityHint")}
+                </Alert>
+            )}
 
             <Box
                 display="flex"
@@ -599,6 +641,7 @@ export default function PatientHub() {
                                     minWidth: 0,
                                     whiteSpace: "normal",
                                     width: { xs: "100%", sm: "auto" },
+                                    ...accessibleActionSx
                                 }}
                             >
                                 {t("patientHub.inviteParticipant")}
@@ -622,6 +665,7 @@ export default function PatientHub() {
                                         minWidth: 0,
                                         whiteSpace: "normal",
                                         width: { xs: "100%", sm: "auto" },
+                                        ...accessibleActionSx,
                                         zIndex: 0,
                                         color: isDark ? "#dcfce7" : "#064e3b",
                                         background: isDark
@@ -674,6 +718,7 @@ export default function PatientHub() {
                                     minWidth: 0,
                                     whiteSpace: "normal",
                                     width: { xs: "100%", sm: "auto" },
+                                    ...accessibleActionSx,
                                     color: isDark ? "#fecaca" : "#7f1d1d",
                                     background: isDark
                                         ? "rgba(248, 113, 113, 0.16)"
@@ -1007,6 +1052,10 @@ export default function PatientHub() {
 
                             <Box
                                 onClick={() => navigate("/health-tracker")}
+                                onKeyDown={(event) => handleModuleKeyDown(event, () => navigate("/health-tracker"))}
+                                role="link"
+                                tabIndex={0}
+                                aria-label={t("nav.records")}
                                 sx={moduleCardSx}
                             >
 
@@ -1031,6 +1080,10 @@ export default function PatientHub() {
 
                             <Box
                                 onClick={() => handleOpenPerfil()}
+                                onKeyDown={(event) => handleModuleKeyDown(event, handleOpenPerfil)}
+                                role="button"
+                                tabIndex={0}
+                                aria-label={t("nav.information")}
                                 sx={moduleCardSx}
                             >
 
@@ -1055,6 +1108,10 @@ export default function PatientHub() {
 
                             <Box
                                 onClick={() => navigate("/documents")}
+                                onKeyDown={(event) => handleModuleKeyDown(event, () => navigate("/documents"))}
+                                role="link"
+                                tabIndex={0}
+                                aria-label={t("nav.documents")}
                                 sx={moduleCardSx}
                             >
 
@@ -1079,6 +1136,10 @@ export default function PatientHub() {
 
                             <Box
                                 onClick={() => navigate("/dashboard")}
+                                onKeyDown={(event) => handleModuleKeyDown(event, () => navigate("/dashboard"))}
+                                role="link"
+                                tabIndex={0}
+                                aria-label={t("patientHub.dashboard")}
                                 sx={moduleCardSx}
                             >
 
@@ -1103,6 +1164,10 @@ export default function PatientHub() {
 
                             <Box
                                 onClick={() => navigate("/goals")}
+                                onKeyDown={(event) => handleModuleKeyDown(event, () => navigate("/goals"))}
+                                role="link"
+                                tabIndex={0}
+                                aria-label={t("nav.goals")}
                                 sx={moduleCardSx}
                             >
 
@@ -1127,6 +1192,10 @@ export default function PatientHub() {
 
                             <Box
                                 onClick={() => navigate("/activity")}
+                                onKeyDown={(event) => handleModuleKeyDown(event, () => navigate("/activity"))}
+                                role="link"
+                                tabIndex={0}
+                                aria-label={t("nav.activity")}
                                 sx={moduleCardSx}
                             >
 
@@ -1167,8 +1236,17 @@ export default function PatientHub() {
                         setSelectedTab(newValue)
                     }
                     sx={{
-                        mb: 3
+                        mb: 3,
+                        "& .MuiTab-root": accessibilityMode
+                            ? { minHeight: 48, fontSize: "1rem", fontWeight: 800 }
+                            : undefined,
+                        "& .MuiTab-root:focus-visible": {
+                            outline: "3px solid",
+                            outlineColor: "secondary.main",
+                            outlineOffset: -3
+                        }
                     }}
+                    variant="fullWidth"
                 >
 
                     <Tab label={t("patientHub.codeTab")} />
@@ -1196,6 +1274,7 @@ export default function PatientHub() {
                                 <Box
                                     sx={{
                                         display: "flex",
+                                        flexDirection: accessibilityMode ? { xs: "column", sm: "row" } : "row",
                                         alignItems: "center",
                                         justifyContent: "space-between",
                                         gap: 1,
@@ -1221,13 +1300,22 @@ export default function PatientHub() {
                                         {generatedCode}
                                     </Typography>
 
-                                    <IconButton
-                                        onClick={() =>
-                                            handleCopy(generatedCode)
-                                        }
-                                    >
-                                        <ContentCopyIcon />
-                                    </IconButton>
+                                    {accessibilityMode ? (
+                                        <Button
+                                            onClick={() => handleCopy(generatedCode)}
+                                            startIcon={<ContentCopyIcon />}
+                                            sx={{ ...accessibleActionSx, flex: "0 0 auto", width: { xs: "100%", sm: "auto" } }}
+                                        >
+                                            {t("patientHub.copyCode")}
+                                        </Button>
+                                    ) : (
+                                        <IconButton
+                                            onClick={() => handleCopy(generatedCode)}
+                                            aria-label={t("patientHub.copyCode")}
+                                        >
+                                            <ContentCopyIcon />
+                                        </IconButton>
+                                    )}
 
                                 </Box>
 
@@ -1249,6 +1337,7 @@ export default function PatientHub() {
                                 <Box
                                     sx={{
                                         display: "flex",
+                                        flexDirection: accessibilityMode ? { xs: "column", sm: "row" } : "row",
                                         alignItems: "center",
                                         justifyContent: "space-between",
                                         gap: 1,
@@ -1266,9 +1355,10 @@ export default function PatientHub() {
 
                                     <Typography
                                         sx={{
-                                            overflow: "hidden",
-                                            textOverflow: "ellipsis",
-                                            whiteSpace: "nowrap",
+                                            overflow: accessibilityMode ? "visible" : "hidden",
+                                            textOverflow: accessibilityMode ? "clip" : "ellipsis",
+                                            whiteSpace: accessibilityMode ? "normal" : "nowrap",
+                                            overflowWrap: "anywhere",
                                             minWidth: 0,
                                             flex: 1
                                         }}
@@ -1276,13 +1366,22 @@ export default function PatientHub() {
                                         {generatedLink}
                                     </Typography>
 
-                                    <IconButton
-                                        onClick={() =>
-                                            handleCopy(generatedLink)
-                                        }
-                                    >
-                                        <ContentCopyIcon />
-                                    </IconButton>
+                                    {accessibilityMode ? (
+                                        <Button
+                                            onClick={() => handleCopy(generatedLink)}
+                                            startIcon={<ContentCopyIcon />}
+                                            sx={{ ...accessibleActionSx, flex: "0 0 auto", width: { xs: "100%", sm: "auto" } }}
+                                        >
+                                            {t("patientHub.copyLink")}
+                                        </Button>
+                                    ) : (
+                                        <IconButton
+                                            onClick={() => handleCopy(generatedLink)}
+                                            aria-label={t("patientHub.copyLink")}
+                                        >
+                                            <ContentCopyIcon />
+                                        </IconButton>
+                                    )}
 
                                 </Box>
 
@@ -1312,24 +1411,39 @@ export default function PatientHub() {
 
                                 <TextField
                                     label={t("patientHub.email")}
+                                    placeholder={accessibilityMode ? t("patientHub.emailExample") : undefined}
+                                    error={Boolean(emailError)}
+                                    helperText={emailError
+                                        ? t(`patientHub.alerts.${emailError}`)
+                                        : accessibilityMode ? t("patientHub.emailHint") : undefined}
                                     value={emailInput}
-                                    onChange={(e) =>
-                                        setEmailInput(e.target.value)
-                                    }
+                                    onChange={(e) => {
+                                        setEmailInput(e.target.value);
+                                        setEmailError(null);
+                                    }}
                                     fullWidth
-                                    size="small"
+                                    size={accessibilityMode ? "medium" : "small"}
                                 />
 
                                 <Button
                                     variant="contained"
                                     onClick={handleAddEmail}
+                                    aria-label={t("patientHub.addEmail")}
                                     sx={{
                                         minWidth: "56px",
                                         width: { xs: "100%", sm: "auto" },
-                                        borderRadius: "14px"
+                                        borderRadius: "14px",
+                                        ...accessibleActionSx
                                     }}
                                 >
-                                    <AddIcon />
+                                    {accessibilityMode ? (
+                                        <>
+                                            <AddIcon sx={{ mr: 1 }} />
+                                            {t("patientHub.addEmail")}
+                                        </>
+                                    ) : (
+                                        <AddIcon />
+                                    )}
                                 </Button>
 
                             </Box>
@@ -1372,7 +1486,8 @@ export default function PatientHub() {
                                         borderRadius: "14px",
                                         textTransform: "none",
                                         fontWeight: 600,
-                                        width: { xs: "100%", sm: "auto" }
+                                        width: { xs: "100%", sm: "auto" },
+                                        ...accessibleActionSx
                                     }}
                                 >
 
@@ -1443,10 +1558,21 @@ export default function PatientHub() {
 
                 <InputUI
                     label={t("patientHub.invitationCode")}
+                    placeholder={accessibilityMode ? t("patientHub.codeExample") : undefined}
+                    error={joinCodeError}
+                    helperText={joinCodeError
+                        ? t("patientHub.alerts.invalidCode")
+                        : accessibilityMode ? t("patientHub.codeHint") : undefined}
+                    sx={accessibilityMode ? {
+                        "& .MuiOutlinedInput-root": { minHeight: 52 },
+                        "& .MuiInputBase-input": { fontSize: "1rem" },
+                        "& .MuiFormHelperText-root": { fontSize: "0.9rem" }
+                    } : undefined}
                     value={joinCode}
-                    onChange={(e) =>
-                        setJoinCode(e.target.value)
-                    }
+                    onChange={(e) => {
+                        setJoinCode(e.target.value);
+                        setJoinCodeError(false);
+                    }}
                 />
 
             </DialogUI>

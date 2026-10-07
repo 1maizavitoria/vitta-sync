@@ -11,6 +11,7 @@ import DescriptionOutlinedIcon from "@mui/icons-material/DescriptionOutlined";
 import { CartesianGrid, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import dayjs from "dayjs";
 import { useI18n } from "../../src/i18n";
+import { useThemeMode } from "../../src/theme/ThemeModeProvider";
 import { previewReport, downloadReport } from "../../services/reportService";
 import DatePickerUI from "./DatePicker";
 
@@ -43,7 +44,7 @@ function chartPoints(points) {
     return result;
 }
 
-function ReportPreview({ report }) {
+function ReportPreview({ report, accessibilityMode }) {
     const { t, formatDate, formatDateTime, formatNumber } = useI18n();
     const theme = useTheme();
     const tr = (key) => t(`reports.export.${key}`);
@@ -58,7 +59,15 @@ function ReportPreview({ report }) {
         : `${report.dataInicio ? formatDate(report.dataInicio) : tr("noStart")} — ${report.dataFim ? formatDate(report.dataFim) : tr("noEnd")}`;
 
     return (
-        <Box sx={{ mt: 3 }} aria-live="polite">
+        <Box
+            sx={{
+                mt: 3,
+                "& .MuiTableCell-root": accessibilityMode
+                    ? { fontSize: "1rem", py: 1.5 }
+                    : undefined
+            }}
+            aria-live="polite"
+        >
             <Divider sx={{ mb: 3 }} />
             <Typography variant="h6" sx={{ fontWeight: 800 }}>{tr("previewTitle")}</Typography>
             <Typography sx={{ fontWeight: 700, mt: 1 }}>{report.paciente?.nome}</Typography>
@@ -92,7 +101,7 @@ function ReportPreview({ report }) {
                             </TableContainer>
                             {active && (
                                 <Box sx={{ mt: 3 }}>
-                                    <TextField select size="small" label={tr("evolution")} value={active.chave}
+                                    <TextField select size={accessibilityMode ? "medium" : "small"} label={tr("evolution")} value={active.chave}
                                         onChange={(event) => setMetric(event.target.value)} sx={{ width: { xs: "100%", sm: 300 } }}>
                                         {chartIndicators.map((item) => <MenuItem key={item.chave} value={item.chave}>{tr(`metrics.${item.chave}`)}</MenuItem>)}
                                     </TextField>
@@ -159,6 +168,7 @@ function ReportPreview({ report }) {
 export default function ReportExport({ cpf }) {
     const { t } = useI18n();
     const theme = useTheme();
+    const { accessibilityMode } = useThemeMode();
     const tr = (key) => t(`reports.export.${key}`);
     const [filters, setFilters] = useState(initialFilters);
     const [preset, setPreset] = useState("7");
@@ -171,6 +181,25 @@ export default function ReportExport({ cpf }) {
     const invalidDates = !validDate(filters.dataInicio) || !validDate(filters.dataFim)
         || (filters.dataInicio && filters.dataFim && filters.dataInicio > filters.dataFim);
     const invalid = !filters.categorias.length || invalidDates;
+    const focusSx = accessibilityMode
+        ? {
+            "&:focus-visible": {
+                outline: "3px solid",
+                outlineColor: "secondary.main",
+                outlineOffset: 2
+            }
+        }
+        : undefined;
+    const choiceSx = accessibilityMode
+        ? {
+            m: 0,
+            minHeight: 48,
+            pr: 1.5,
+            "& .MuiButtonBase-root": { p: 1.25 },
+            "& .MuiSvgIcon-root": { fontSize: 28 },
+            "& .MuiFormControlLabel-label": { fontSize: "1rem" }
+        }
+        : undefined;
 
     function updateFilters(values) {
         setFilters((current) => ({ ...current, ...values }));
@@ -229,58 +258,75 @@ export default function ReportExport({ cpf }) {
         <Paper component="section" aria-labelledby="report-export-title" elevation={0}
             sx={{ p: { xs: 2, md: 3 }, borderRadius: 3, border: "1px solid", borderColor: theme.vitta.border,
                 boxShadow: theme.vitta.shadow, minWidth: 0, overflow: "hidden" }}>
-            <Stack direction="row" spacing={1.5} alignItems="center" sx={{ mb: 2 }}>
+            <Stack direction="row" spacing={1.5} alignItems="flex-start" sx={{ mb: 2 }}>
                 <DescriptionOutlinedIcon color="primary" />
                 <Box><Typography id="report-export-title" variant="h6" sx={{ fontWeight: 800 }}>{tr("title")}</Typography>
-                    <Typography variant="body2" color="text.secondary">{tr("description")}</Typography></Box>
+                    <Typography variant={accessibilityMode ? "body1" : "body2"} color="text.secondary">{tr("description")}</Typography></Box>
             </Stack>
             {!cpf ? <Alert severity="info">{tr("selectPatient")}</Alert> : (
                 <>
                     <Box component="fieldset" disabled={!!busy} sx={{ border: 0, p: 0, m: 0, minWidth: 0 }}>
-                        <Typography sx={{ fontWeight: 700, mb: 1 }}>{tr("period")}</Typography>
+                        {accessibilityMode && (
+                            <Alert severity="info" sx={{ mb: 2 }}>
+                                {tr("accessibilityHint")}
+                            </Alert>
+                        )}
+                        <Typography component="h3" sx={{ fontWeight: 800, mb: 1 }}>{tr("period")}</Typography>
                         <Stack direction="row" useFlexGap flexWrap="wrap" gap={1}>
                             {presets.map((item) => <Chip key={item} label={tr(`presets.${item}`)} disabled={!!busy}
                                 color={preset === item ? "primary" : "default"} variant={preset === item ? "filled" : "outlined"}
-                                onClick={() => changePreset(item)} aria-pressed={preset === item} />)}
+                                onClick={() => changePreset(item)} aria-pressed={preset === item}
+                                sx={accessibilityMode ? { minHeight: 48, fontSize: "1rem", px: 0.5, ...focusSx } : undefined} />)}
                         </Stack>
-                        <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", sm: "1fr 1fr" }, gap: 2, mt: 2 }}>
+                        <Box sx={{
+                            display: "grid",
+                            gridTemplateColumns: { xs: "minmax(0, 1fr)", sm: "repeat(2, minmax(0, 1fr))" },
+                            gap: 2,
+                            mt: 2,
+                            "& .MuiOutlinedInput-root": accessibilityMode ? { minHeight: 52 } : undefined,
+                            "& .MuiInputBase-input": accessibilityMode ? { fontSize: "1rem" } : undefined
+                        }}>
                             <DatePickerUI label={tr("start")} value={filters.dataInicio} disabled={!!busy || preset === "all"}
                                 error={!!invalidDates} onChange={(value) => { setPreset("custom"); updateFilters({ dataInicio: value }); }} />
                             <DatePickerUI label={tr("end")} value={filters.dataFim} disabled={!!busy || preset === "all"}
                                 error={!!invalidDates} onChange={(value) => { setPreset("custom"); updateFilters({ dataFim: value }); }} />
                         </Box>
-                        <Typography variant="caption" color={invalidDates ? "error" : "text.secondary"}>{tr(invalidDates ? "invalidDates" : "datesHint")}</Typography>
+                        <Typography variant={accessibilityMode ? "body2" : "caption"} color={invalidDates ? "error" : "text.secondary"}>
+                            {tr(invalidDates ? "invalidDates" : "datesHint")}
+                        </Typography>
                         <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", md: "1fr 1fr" }, gap: 3, mt: 3 }}>
                             <FormControl component="fieldset" error={!filters.categorias.length} disabled={!!busy}>
-                                <FormLabel component="legend">{tr("include")}</FormLabel>
+                                <FormLabel component="legend" sx={{ fontWeight: accessibilityMode ? 800 : undefined }}>{tr("include")}</FormLabel>
                                 <FormGroup row>{categories.map((category) => <FormControlLabel key={category} label={tr(`categories.${category}`)}
                                     control={<Checkbox checked={filters.categorias.includes(category)} onChange={(event) => updateFilters({
                                         categorias: event.target.checked ? [...filters.categorias, category] : filters.categorias.filter((item) => item !== category),
-                                    })} />} />)}</FormGroup>
-                                {!filters.categorias.length && <Typography variant="caption" color="error">{tr("chooseCategory")}</Typography>}
+                                    })} sx={focusSx} />} sx={choiceSx} />)}</FormGroup>
+                                {!filters.categorias.length && <Typography variant={accessibilityMode ? "body2" : "caption"} color="error">{tr("chooseCategory")}</Typography>}
                             </FormControl>
                             <FormControl component="fieldset" disabled={!!busy}>
-                                <FormLabel component="legend">{tr("format")}</FormLabel>
+                                <FormLabel component="legend" sx={{ fontWeight: accessibilityMode ? 800 : undefined }}>{tr("format")}</FormLabel>
                                 <RadioGroup row value={filters.formato} onChange={(event) => updateFilters({ formato: event.target.value })}>
-                                    <FormControlLabel value="PDF" control={<Radio />} label="PDF" />
-                                    <FormControlLabel value="CSV" control={<Radio />} label="CSV" />
+                                    <FormControlLabel value="PDF" control={<Radio sx={focusSx} />} label="PDF" sx={choiceSx} />
+                                    <FormControlLabel value="CSV" control={<Radio sx={focusSx} />} label="CSV" sx={choiceSx} />
                                 </RadioGroup>
-                                <Typography variant="caption" color="text.secondary">{tr(filters.formato === "PDF" ? "pdfHint" : "csvHint")}</Typography>
+                                <Typography variant={accessibilityMode ? "body2" : "caption"} color="text.secondary">{tr(filters.formato === "PDF" ? "pdfHint" : "csvHint")}</Typography>
                             </FormControl>
                         </Box>
                     </Box>
                     {notice && <Alert severity={notice.severity} sx={{ mt: 2 }}>{tr(notice.key)}</Alert>}
                     <Stack direction={{ xs: "column", sm: "row" }} justifyContent="flex-end" spacing={1.5} sx={{ mt: 3 }}>
                         <Button variant="outlined" disabled={!!busy || !!invalid} onClick={() => run("preview")}
+                            sx={accessibilityMode ? { minHeight: 48, px: 2.5, fontWeight: 800, ...focusSx } : undefined}
                             startIcon={busy === "preview" ? <CircularProgress size={18} color="inherit" /> : <VisibilityOutlinedIcon />}>
                             {tr(busy === "preview" ? "loadingPreview" : "preview")}
                         </Button>
                         <Button variant="contained" disabled={!!busy || !!invalid || preview?.semRegistros} onClick={() => run("download")}
+                            sx={accessibilityMode ? { minHeight: 48, px: 2.5, fontWeight: 800, ...focusSx } : undefined}
                             startIcon={busy === "download" ? <CircularProgress size={18} color="inherit" /> : <DownloadOutlinedIcon />}>
                             {tr(busy === "download" ? "generating" : "download")}
                         </Button>
                     </Stack>
-                    {preview && <ReportPreview report={preview} />}
+                    {preview && <ReportPreview report={preview} accessibilityMode={accessibilityMode} />}
                 </>
             )}
         </Paper>

@@ -1,5 +1,6 @@
 import {
     Box,
+    Button,
     Typography,
     Chip,
     IconButton
@@ -9,6 +10,7 @@ import { useTheme } from "@mui/material/styles";
 import DeleteIcon from "@mui/icons-material/Delete";
 
 import { useI18n } from "../../../src/i18n";
+import { useThemeMode } from "../../../src/theme/ThemeModeProvider";
 
 export default function MemberCard({
     link,
@@ -21,6 +23,7 @@ export default function MemberCard({
     const vitta = theme.vitta;
     const isDark = theme.palette.mode === "dark";
     const { t, formatDate } = useI18n();
+    const { accessibilityMode } = useThemeMode();
 
     const getIniciais = (nome) => {
         if (!nome) return "";
@@ -87,9 +90,9 @@ export default function MemberCard({
 
                     <Box
                         sx={{
-                            width: 52,
-                            height: 52,
-                            fontSize: "1rem",
+                            width: accessibilityMode ? 60 : 52,
+                            height: accessibilityMode ? 60 : 52,
+                            fontSize: accessibilityMode ? "1.1rem" : "1rem",
                             boxShadow: isDark
                                 ? "0 10px 20px rgba(0, 0, 0, 0.24)"
                                 : "0 10px 20px rgba(22, 163, 74, 0.22)",
@@ -129,7 +132,7 @@ export default function MemberCard({
                             variant="h6"
                             sx={{
                                 fontWeight: 700,
-                                fontSize: "1rem",
+                                fontSize: accessibilityMode ? "1.15rem" : "1rem",
                                 minWidth: 0,
                                 overflowWrap: "anywhere",
                                 wordBreak: "break-word"
@@ -158,7 +161,7 @@ export default function MemberCard({
                         <Typography
                             sx={{
                                 color: "text.secondary",
-                                fontSize: ".9rem",
+                                fontSize: accessibilityMode ? "1rem" : ".9rem",
                                 minWidth: 0,
                                 overflowWrap: "anywhere",
                                 wordBreak: "break-word"
@@ -172,7 +175,7 @@ export default function MemberCard({
                             <Typography
                                 sx={{
                                     color: "text.secondary",
-                                    fontSize: ".9rem",
+                                    fontSize: accessibilityMode ? "1rem" : ".9rem",
                                     minWidth: 0,
                                     overflowWrap: "anywhere",
                                     wordBreak: "break-word"
@@ -186,7 +189,7 @@ export default function MemberCard({
                         <Typography
                             sx={{
                                 color: "text.secondary",
-                                fontSize: ".85rem",
+                                fontSize: accessibilityMode ? "0.95rem" : ".85rem",
                                 mt: 1,
                                 minWidth: 0,
                                 overflowWrap: "anywhere",
@@ -201,16 +204,38 @@ export default function MemberCard({
                 </Box>
 
                 {!hideRemove && onRemove && (
-
-                    <IconButton
-                        color="error"
-                        onClick={onRemove}
-                        sx={{
-                            flex: "0 0 auto"
-                        }}
-                    >
-                        <DeleteIcon />
-                    </IconButton>
+                    accessibilityMode ? (
+                        <Button
+                            color="error"
+                            variant="outlined"
+                            onClick={onRemove}
+                            startIcon={<DeleteIcon />}
+                            sx={{
+                                minHeight: 48,
+                                px: 2,
+                                fontWeight: 800,
+                                textTransform: "none",
+                                flex: "0 0 auto",
+                                width: { xs: "100%", sm: "auto" },
+                                "&:focus-visible": {
+                                    outline: "3px solid",
+                                    outlineColor: "secondary.main",
+                                    outlineOffset: 2
+                                }
+                            }}
+                        >
+                            {t("patientHub.removeMember")}
+                        </Button>
+                    ) : (
+                        <IconButton
+                            color="error"
+                            onClick={onRemove}
+                            aria-label={t("patientHub.removeMember")}
+                            sx={{ flex: "0 0 auto" }}
+                        >
+                            <DeleteIcon />
+                        </IconButton>
+                    )
 
                 )}
 

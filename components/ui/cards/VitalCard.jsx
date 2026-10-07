@@ -21,6 +21,7 @@ export default function VitalCard({
     userFunction,
     inputValue,
     inputUnit,
+    placeholder,
     helperText,
     onInputChange,
     userStyle,
@@ -103,7 +104,8 @@ export default function VitalCard({
                                 overflow: accessibilityMode ? "visible" : "hidden",
                                 textOverflow: accessibilityMode ? "clip" : "ellipsis",
                                 whiteSpace: accessibilityMode ? "normal" : "nowrap",
-                                overflowWrap: accessibilityMode ? "anywhere" : "normal"
+                                overflowWrap: accessibilityMode ? "break-word" : "normal",
+                                wordBreak: "normal"
                             }}
                         >
                             {title}
@@ -176,9 +178,9 @@ export default function VitalCard({
                 {showInput && (
                     <Box sx={{ mt: 2 }}>
                         <InputUI
-                            label={accessibilityMode ? title : undefined}
                             value={inputValue}
                             type={type}
+                            placeholder={placeholder}
                             onChange={onInputChange}
                             error={error}
                             helperText={accessibilityMode ? helperText : undefined}

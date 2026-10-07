@@ -1,6 +1,7 @@
 import { Alert, Box, Chip, LinearProgress, Paper, Typography } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
 import { useI18n } from "../../src/i18n";
+import { useThemeMode } from "../../src/theme/ThemeModeProvider";
 
 const signals = {
     peso: { unit: "kg", label: "dashboard.categories.peso" },
@@ -15,6 +16,7 @@ const signals = {
 export default function PersonalBaseline({ items = [], categoryFilter = "todas" }) {
     const theme = useTheme();
     const { t, formatDate, formatMeasurement } = useI18n();
+    const { accessibilityMode } = useThemeMode();
     const visibleItems = items.filter((item) => signals[item.sinal] && (
         categoryFilter === "todas" || item.sinal === categoryFilter ||
         (categoryFilter === "pressao" && item.sinal.startsWith("pressao_"))
@@ -27,7 +29,7 @@ export default function PersonalBaseline({ items = [], categoryFilter = "todas" 
             <Typography id="personal-baseline-title" variant="h6" sx={{ fontWeight: 800 }}>
                 {t("dashboard.baseline.title")}
             </Typography>
-            <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5, mb: 2 }}>
+            <Typography variant={accessibilityMode ? "body1" : "body2"} color="text.secondary" sx={{ mt: 0.5, mb: 2 }}>
                 {t("dashboard.baseline.description")}
             </Typography>
             {visibleItems.length === 0 ? (
@@ -48,35 +50,35 @@ export default function PersonalBaseline({ items = [], categoryFilter = "todas" 
                             <Paper key={item.sinal} sx={{ p: 2.5, borderRadius: 3, minWidth: 0, border: "1px solid", borderColor: theme.vitta.border, boxShadow: theme.vitta.shadow }}>
                                 <Box sx={{ display: "flex", alignItems: "center", flexWrap: "wrap", gap: 1, mb: 2 }}>
                                     <Typography component="h3" variant="subtitle1" sx={{ fontWeight: 800, flexGrow: 1 }}>{t(signal.label)}</Typography>
-                                    <Chip size="small" variant="outlined" label={t(`dashboard.baseline.status.${item.situacao}`)} />
+                                    <Chip size={accessibilityMode ? "medium" : "small"} variant="outlined" label={t(`dashboard.baseline.status.${item.situacao}`)} />
                                 </Box>
                                 {forming ? (
                                     <>
-                                        <Typography variant="body2" sx={{ mb: 1 }}>
+                                        <Typography variant={accessibilityMode ? "body1" : "body2"} sx={{ mb: 1 }}>
                                             {t("dashboard.baseline.progress").replace("{days}", days).replace("{required}", required)}
                                         </Typography>
-                                        <LinearProgress variant="determinate" value={progress} aria-label={`${t(signal.label)}: ${days}/${required}`} sx={{ height: 8, borderRadius: 4, mb: 1.5 }} />
-                                        <Typography variant="body2" color="text.secondary">{t("dashboard.baseline.formationHint")}</Typography>
+                                        <LinearProgress variant="determinate" value={progress} aria-label={`${t(signal.label)}: ${days}/${required}`} sx={{ height: accessibilityMode ? 12 : 8, borderRadius: 4, mb: 1.5 }} />
+                                        <Typography variant={accessibilityMode ? "body1" : "body2"} color="text.secondary">{t("dashboard.baseline.formationHint")}</Typography>
                                     </>
                                 ) : (
                                     <>
-                                        <Typography variant="body2">{t("dashboard.baseline.mean")}: {measurement(item.media)}</Typography>
+                                        <Typography variant={accessibilityMode ? "body1" : "body2"}>{t("dashboard.baseline.mean")}: {measurement(item.media)}</Typography>
                                         {noVariation ? (
-                                            <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>{t("dashboard.baseline.noVariation")}</Typography>
+                                            <Typography variant={accessibilityMode ? "body1" : "body2"} color="text.secondary" sx={{ mt: 1 }}>{t("dashboard.baseline.noVariation")}</Typography>
                                         ) : (
                                             <Typography sx={{ fontWeight: 700, mt: 1 }}>
                                                 {t("dashboard.baseline.range")}: {measurement(item.limiteInferior)} – {measurement(item.limiteSuperior)}
                                             </Typography>
                                         )}
                                         {item.dataInicio && item.dataFim && (
-                                            <Typography variant="caption" color="text.secondary" sx={{ display: "block", mt: 1 }}>
+                                            <Typography variant={accessibilityMode ? "body2" : "caption"} color="text.secondary" sx={{ display: "block", mt: 1 }}>
                                                 {t("dashboard.baseline.period")}: {formatDate(item.dataInicio)} – {formatDate(item.dataFim)}
                                             </Typography>
                                         )}
                                     </>
                                 )}
                                 <Box sx={{ mt: 2, pt: 1.5, borderTop: "1px solid", borderColor: "divider" }}>
-                                    <Typography variant="body2">{t("dashboard.baseline.latest")}: {measurement(item.ultimoValor)}</Typography>
+                                    <Typography variant={accessibilityMode ? "body1" : "body2"}>{t("dashboard.baseline.latest")}: {measurement(item.ultimoValor)}</Typography>
                                     {item.dataUltimoValor && (
                                         <Typography variant="caption" color="text.secondary">
                                             {formatDate(item.dataUltimoValor, { hour: "2-digit", minute: "2-digit" })}

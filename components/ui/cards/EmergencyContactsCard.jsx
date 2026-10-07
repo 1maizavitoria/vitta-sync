@@ -2,10 +2,14 @@ import { useEffect, useState } from "react";
 
 import {
     Box,
+    Button,
     Checkbox,
     Chip,
     Divider,
     FormControlLabel,
+    FormControl,
+    FormGroup,
+    FormLabel,
     Grid,
     IconButton,
     Paper,
@@ -35,6 +39,7 @@ import { formatPhone, isValidPhone } from "../../../utils/formatters/formatPhone
 import DialogUI from "../Dialog";
 import InputUI from "../Input";
 import { useI18n } from "../../../src/i18n";
+import { useThemeMode } from "../../../src/theme/ThemeModeProvider";
 
 const emptyContact = {
     nome: "",
@@ -80,63 +85,87 @@ const alertGroups = [
     }
 ];
 
-function AlertPreferences({ data, onChange, t }) {
+function AlertPreferences({ data, onChange, t, accessibilityMode, channelError }) {
+    const checkboxSx = accessibilityMode
+        ? {
+            p: 1.25,
+            "& .MuiSvgIcon-root": { fontSize: 28 },
+            "&:focus-visible": {
+                outline: "3px solid",
+                outlineColor: "secondary.main",
+                outlineOffset: 1
+            }
+        }
+        : undefined;
+
     return (
         <Box mt={2}>
             <Divider sx={{ mb: 2 }} />
 
-            <Typography fontWeight={800} mb={0.5}>
-                {t("reports.emergencyContacts.channels")}
-            </Typography>
-            <Typography variant="body2" color="text.secondary" mb={1}>
-                {t("reports.emergencyContacts.channelsDescription")}
-            </Typography>
+            <FormControl component="fieldset" error={channelError} fullWidth>
+                <FormLabel component="legend" sx={{ fontWeight: 800, color: "text.primary" }}>
+                    {t("reports.emergencyContacts.channels")}
+                </FormLabel>
+                <Typography variant="body2" color="text.secondary" mb={1}>
+                    {t("reports.emergencyContacts.channelsDescription")}
+                </Typography>
 
-            <Box display="flex" flexWrap="wrap" gap={1}>
-                <FormControlLabel
-                    control={
-                        <Checkbox
-                            checked={Boolean(data.canalEmail)}
-                            onChange={(event) => onChange("canalEmail", event.target.checked)}
-                        />
-                    }
-                    label={t("reports.emergencyContacts.emailChannel")}
-                />
-                <FormControlLabel
-                    control={
-                        <Checkbox
-                            checked={Boolean(data.canalSms)}
-                            onChange={(event) => onChange("canalSms", event.target.checked)}
-                        />
-                    }
-                    label={t("reports.emergencyContacts.smsChannel")}
-                />
-            </Box>
+                <FormGroup row sx={{ gap: 1 }}>
+                    <FormControlLabel
+                        control={
+                            <Checkbox
+                                checked={Boolean(data.canalEmail)}
+                                onChange={(event) => onChange("canalEmail", event.target.checked)}
+                                sx={checkboxSx}
+                            />
+                        }
+                        label={t("reports.emergencyContacts.emailChannel")}
+                    />
+                    <FormControlLabel
+                        control={
+                            <Checkbox
+                                checked={Boolean(data.canalSms)}
+                                onChange={(event) => onChange("canalSms", event.target.checked)}
+                                sx={checkboxSx}
+                            />
+                        }
+                        label={t("reports.emergencyContacts.smsChannel")}
+                    />
+                </FormGroup>
+                {channelError && accessibilityMode && (
+                    <Typography variant="caption" color="error.main">
+                        {t("reports.emergencyContacts.selectChannel")}
+                    </Typography>
+                )}
+            </FormControl>
 
-            <Typography fontWeight={800} mt={2} mb={0.5}>
+            <Typography component="h4" fontWeight={800} mt={2} mb={0.5}>
                 {t("reports.emergencyContacts.alertPreferences")}
             </Typography>
 
             {alertGroups.map((group) => (
                 <Box key={group.labelKey} mt={1.5}>
-                    <Typography variant="body2" fontWeight={800} color="text.secondary">
-                        {t(`reports.emergencyContacts.${group.labelKey}`)}
-                    </Typography>
-                    <Box display="flex" flexWrap="wrap" gap={0.5}>
-                        {group.fields.map(([field, label]) => (
-                            <FormControlLabel
-                                key={field}
-                                control={
-                                    <Checkbox
-                                        size="small"
-                                        checked={Boolean(data[field])}
-                                        onChange={(event) => onChange(field, event.target.checked)}
-                                    />
-                                }
-                                label={t(`reports.emergencyContacts.${label}`)}
-                            />
-                        ))}
-                    </Box>
+                    <FormControl component="fieldset" fullWidth>
+                        <FormLabel component="legend" sx={{ fontSize: "0.9rem", fontWeight: 800, color: "text.secondary" }}>
+                            {t(`reports.emergencyContacts.${group.labelKey}`)}
+                        </FormLabel>
+                        <FormGroup row sx={{ gap: 0.5 }}>
+                            {group.fields.map(([field, label]) => (
+                                <FormControlLabel
+                                    key={field}
+                                    control={
+                                        <Checkbox
+                                            size="small"
+                                            checked={Boolean(data[field])}
+                                            onChange={(event) => onChange(field, event.target.checked)}
+                                            sx={checkboxSx}
+                                        />
+                                    }
+                                    label={t(`reports.emergencyContacts.${label}`)}
+                                />
+                            ))}
+                        </FormGroup>
+                    </FormControl>
                 </Box>
             ))}
         </Box>
@@ -190,6 +219,7 @@ export default function EmergencyContacts() {
     const vitta = theme.vitta;
     const isDark = theme.palette.mode === "dark";
     const { t } = useI18n();
+    const { accessibilityMode } = useThemeMode();
 
     const [contacts, setContacts] = useState([]);
     const [loading, setLoading] = useState(false);
@@ -202,7 +232,8 @@ export default function EmergencyContacts() {
     const [hasError, setHasError] = useState({
         nome: false,
         telefone: false,
-        email: false
+        email: false,
+        channel: false
     });
 
     const userType = localStorage.getItem("tipo")?.toLowerCase();
@@ -238,12 +269,33 @@ export default function EmergencyContacts() {
             "&:hover": { bgcolor: "primary.dark" }
         }
     };
+    const accessibleActionSx = {
+        minHeight: 48,
+        px: 2,
+        borderRadius: 2,
+        fontWeight: 800,
+        textTransform: "none",
+        flex: { xs: "1 1 140px", sm: "0 0 auto" },
+        "&:focus-visible": {
+            outline: "3px solid",
+            outlineColor: "secondary.main",
+            outlineOffset: 2
+        }
+    };
+    const accessibleInputSx = accessibilityMode
+        ? {
+            "& .MuiOutlinedInput-root": { minHeight: 52 },
+            "& .MuiInputBase-input": { fontSize: "1rem" },
+            "& .MuiFormHelperText-root": { fontSize: "0.9rem", lineHeight: 1.4 }
+        }
+        : undefined;
 
     function resetErrors() {
         setHasError({
             nome: false,
             telefone: false,
-            email: false
+            email: false,
+            channel: false
         });
     }
 
@@ -256,7 +308,8 @@ export default function EmergencyContacts() {
         const newErrors = {
             nome: false,
             telefone: false,
-            email: false
+            email: false,
+            channel: false
         };
 
         if (data.nome.trim().length < 5) {
@@ -275,6 +328,7 @@ export default function EmergencyContacts() {
         }
 
         if (!data.canalEmail && !data.canalSms) {
+            newErrors.channel = true;
             showAlert("warning", t("reports.emergencyContacts.selectChannel"));
             setHasError(newErrors);
             return false;
@@ -379,7 +433,8 @@ export default function EmergencyContacts() {
         setHasError({
             nome: false,
             telefone: false,
-            email: false
+            email: false,
+            channel: false
         });
         fetchContacts();
     }, [selectedPatient?.cpf]);
@@ -404,8 +459,9 @@ export default function EmergencyContacts() {
         >
             <Box
                 display="flex"
-                alignItems="center"
+                alignItems={{ xs: "stretch", sm: "center" }}
                 justifyContent="space-between"
+                flexDirection={{ xs: "column", sm: "row" }}
                 gap={2}
                 mb={2.5}
                 sx={{ minWidth: 0 }}
@@ -416,7 +472,8 @@ export default function EmergencyContacts() {
                             fontWeight: 800,
                             color: "text.primary",
                             fontSize: "1.2rem",
-                            overflowWrap: "anywhere"
+                            overflowWrap: "break-word",
+                            wordBreak: "normal"
                         }}
                     >
                         {t("reports.emergencyContacts.title")}
@@ -425,9 +482,10 @@ export default function EmergencyContacts() {
                     <Typography
                         sx={{
                             color: "text.secondary",
-                            fontSize: "0.9rem",
+                            fontSize: accessibilityMode ? "1rem" : "0.9rem",
                             mt: 0.25,
-                            overflowWrap: "anywhere"
+                            overflowWrap: "break-word",
+                            wordBreak: "normal"
                         }}
                     >
                         {t("reports.emergencyContacts.description")}
@@ -435,18 +493,33 @@ export default function EmergencyContacts() {
                 </Box>
 
                 {canEdit && !adding && contacts.length < 3 && (
-                    <Tooltip title={t("reports.emergencyContacts.add")}>
-                        <IconButton
+                    accessibilityMode ? (
+                        <Button
                             onClick={() => {
                                 setAdding(true);
                                 setEditingId(null);
                                 resetForm();
                             }}
-                            sx={actionButtonSx.add}
+                            startIcon={<AddIcon />}
+                            sx={{ ...actionButtonSx.add, ...accessibleActionSx }}
                         >
-                            <AddIcon />
-                        </IconButton>
-                    </Tooltip>
+                            {t("reports.emergencyContacts.add")}
+                        </Button>
+                    ) : (
+                        <Tooltip title={t("reports.emergencyContacts.add")}>
+                            <IconButton
+                                onClick={() => {
+                                    setAdding(true);
+                                    setEditingId(null);
+                                    resetForm();
+                                }}
+                                aria-label={t("reports.emergencyContacts.add")}
+                                sx={actionButtonSx.add}
+                            >
+                                <AddIcon />
+                            </IconButton>
+                        </Tooltip>
+                    )
                 )}
             </Box>
 
@@ -490,8 +563,11 @@ export default function EmergencyContacts() {
                                         <Grid item xs={12}>
                                             <InputUI
                                                 label={t("reports.profile.name")}
+                                                placeholder={t("reports.profile.nameExample")}
                                                 value={editData.nome}
                                                 error={hasError.nome}
+                                                helperText={accessibilityMode && hasError.nome ? t("reports.emergencyContacts.shortName") : undefined}
+                                                sx={accessibleInputSx}
                                                 onChange={(event) => {
                                                     setEditData({
                                                         ...editData,
@@ -509,7 +585,9 @@ export default function EmergencyContacts() {
                                             <InputUI
                                                 label={t("reports.profile.phone")}
                                                 error={hasError.telefone}
-                                                placeholder="(11) 99999-9999"
+                                                placeholder={t("reports.profile.phoneExample")}
+                                                helperText={accessibilityMode && hasError.telefone ? t("reports.emergencyContacts.invalidPhone") : undefined}
+                                                sx={accessibleInputSx}
                                                 limit={15}
                                                 value={formatPhone(editData.telefone)}
                                                 onChange={(event) => {
@@ -532,9 +610,12 @@ export default function EmergencyContacts() {
                                         <Grid item xs={12}>
                                             <InputUI
                                                 label={t("reports.emergencyContacts.email")}
+                                                placeholder={t("reports.profile.emailExample")}
                                                 type="email"
                                                 value={editData.email}
                                                 error={hasError.email}
+                                                helperText={accessibilityMode && hasError.email ? t("reports.emergencyContacts.invalidEmail") : undefined}
+                                                sx={accessibleInputSx}
                                                 onChange={(event) => {
                                                     setEditData({
                                                         ...editData,
@@ -552,35 +633,58 @@ export default function EmergencyContacts() {
                                     <AlertPreferences
                                         data={editData}
                                         t={t}
+                                        accessibilityMode={accessibilityMode}
+                                        channelError={hasError.channel}
                                         onChange={(field, value) => {
                                             setEditData((current) => ({
                                                 ...current,
                                                 [field]: value
                                             }));
+                                            if ((field === "canalEmail" || field === "canalSms") && value) {
+                                                setHasError((current) => ({ ...current, channel: false }));
+                                            }
                                         }}
                                     />
 
-                                    <Box display="flex" justifyContent="flex-end" gap={1} mt={1}>
-                                        <Tooltip title={t("reports.profile.cancel")}>
-                                            <IconButton
-                                                onClick={() => {
-                                                    setEditingId(null);
-                                                    resetErrors();
-                                                }}
-                                                sx={actionButtonSx.cancel}
-                                            >
-                                                <CloseIcon />
-                                            </IconButton>
-                                        </Tooltip>
+                                    <Box display="flex" justifyContent="flex-end" gap={1} mt={1} flexWrap="wrap">
+                                        {accessibilityMode ? (
+                                            <>
+                                                <Button
+                                                    onClick={() => {
+                                                        setEditingId(null);
+                                                        resetErrors();
+                                                    }}
+                                                    startIcon={<CloseIcon />}
+                                                    sx={{ ...actionButtonSx.cancel, ...accessibleActionSx }}
+                                                >
+                                                    {t("reports.profile.cancel")}
+                                                </Button>
+                                                <Button onClick={() => saveEdit(contact.id)} startIcon={<CheckIcon />} sx={{ ...actionButtonSx.save, ...accessibleActionSx }}>
+                                                    {t("reports.profile.save")}
+                                                </Button>
+                                            </>
+                                        ) : (
+                                            <>
+                                                <Tooltip title={t("reports.profile.cancel")}>
+                                                    <IconButton
+                                                        onClick={() => {
+                                                            setEditingId(null);
+                                                            resetErrors();
+                                                        }}
+                                                        aria-label={t("reports.profile.cancel")}
+                                                        sx={actionButtonSx.cancel}
+                                                    >
+                                                        <CloseIcon />
+                                                    </IconButton>
+                                                </Tooltip>
 
-                                        <Tooltip title={t("reports.profile.save")}>
-                                            <IconButton
-                                                onClick={() => saveEdit(contact.id)}
-                                                sx={actionButtonSx.save}
-                                            >
-                                                <CheckIcon />
-                                            </IconButton>
-                                        </Tooltip>
+                                                <Tooltip title={t("reports.profile.save")}>
+                                                    <IconButton onClick={() => saveEdit(contact.id)} aria-label={t("reports.profile.save")} sx={actionButtonSx.save}>
+                                                        <CheckIcon />
+                                                    </IconButton>
+                                                </Tooltip>
+                                            </>
+                                        )}
                                     </Box>
                                 </Box>
                             ) : (
@@ -589,7 +693,12 @@ export default function EmergencyContacts() {
                                     justifyContent="space-between"
                                     alignItems="flex-start"
                                     gap={2}
-                                    sx={{ minWidth: 0 }}
+                                    sx={{
+                                        minWidth: 0,
+                                        flexDirection: accessibilityMode
+                                            ? { xs: "column", sm: "row" }
+                                            : "row"
+                                    }}
                                 >
                                     <Box sx={{ minWidth: 0 }}>
                                         <Box
@@ -610,9 +719,10 @@ export default function EmergencyContacts() {
                                                 sx={{
                                                     fontWeight: 800,
                                                     color: "text.primary",
-                                                    overflow: "hidden",
-                                                    textOverflow: "ellipsis",
-                                                    whiteSpace: "nowrap"
+                                                    overflow: accessibilityMode ? "visible" : "hidden",
+                                                    textOverflow: accessibilityMode ? "clip" : "ellipsis",
+                                                    whiteSpace: accessibilityMode ? "normal" : "nowrap",
+                                                    overflowWrap: "anywhere"
                                                 }}
                                             >
                                                 {contact.nome}
@@ -637,9 +747,10 @@ export default function EmergencyContacts() {
                                             <Typography
                                                 sx={{
                                                     color: "text.secondary",
-                                                    overflow: "hidden",
-                                                    textOverflow: "ellipsis",
-                                                    whiteSpace: "nowrap"
+                                                    overflow: accessibilityMode ? "visible" : "hidden",
+                                                    textOverflow: accessibilityMode ? "clip" : "ellipsis",
+                                                    whiteSpace: accessibilityMode ? "normal" : "nowrap",
+                                                    overflowWrap: "anywhere"
                                                 }}
                                             >
                                                 {formatPhone(contact.telefone)}
@@ -663,9 +774,10 @@ export default function EmergencyContacts() {
                                             <Typography
                                                 sx={{
                                                     color: "text.secondary",
-                                                    overflow: "hidden",
-                                                    textOverflow: "ellipsis",
-                                                    whiteSpace: "nowrap"
+                                                    overflow: accessibilityMode ? "visible" : "hidden",
+                                                    textOverflow: accessibilityMode ? "clip" : "ellipsis",
+                                                    whiteSpace: accessibilityMode ? "normal" : "nowrap",
+                                                    overflowWrap: "anywhere"
                                                 }}
                                             >
                                                 {contact.email}
@@ -705,29 +817,55 @@ export default function EmergencyContacts() {
                                     </Box>
 
                                     {canEdit && (
-                                        <Box display="flex" gap={1} flexShrink={0}>
-                                            <Tooltip title={t("reports.profile.edit")}>
-                                                <IconButton
-                                                    onClick={() => startEdit(contact)}
-                                                    size="small"
-                                                    sx={actionButtonSx.edit}
-                                                >
-                                                    <EditOutlinedIcon fontSize="small" />
-                                                </IconButton>
-                                            </Tooltip>
+                                        <Box display="flex" gap={1} flexShrink={0} flexWrap="wrap">
+                                            {accessibilityMode ? (
+                                                <>
+                                                    <Button
+                                                        onClick={() => startEdit(contact)}
+                                                        startIcon={<EditOutlinedIcon />}
+                                                        sx={{ ...actionButtonSx.edit, ...accessibleActionSx }}
+                                                    >
+                                                        {t("reports.profile.edit")}
+                                                    </Button>
+                                                    <Button
+                                                        onClick={() => {
+                                                            setSelectedContactId(contact.id);
+                                                            setOpenDeleteDialog(true);
+                                                        }}
+                                                        startIcon={<DeleteOutlineIcon />}
+                                                        sx={{ ...actionButtonSx.delete, ...accessibleActionSx }}
+                                                    >
+                                                        {t("reports.emergencyContacts.remove")}
+                                                    </Button>
+                                                </>
+                                            ) : (
+                                                <>
+                                                    <Tooltip title={t("reports.profile.edit")}>
+                                                        <IconButton
+                                                            onClick={() => startEdit(contact)}
+                                                            size="small"
+                                                            aria-label={t("reports.profile.edit")}
+                                                            sx={actionButtonSx.edit}
+                                                        >
+                                                            <EditOutlinedIcon fontSize="small" />
+                                                        </IconButton>
+                                                    </Tooltip>
 
-                                            <Tooltip title={t("reports.emergencyContacts.remove")}>
-                                                <IconButton
-                                                    onClick={() => {
-                                                        setSelectedContactId(contact.id);
-                                                        setOpenDeleteDialog(true);
-                                                    }}
-                                                    size="small"
-                                                    sx={actionButtonSx.delete}
-                                                >
-                                                    <DeleteOutlineIcon fontSize="small" />
-                                                </IconButton>
-                                            </Tooltip>
+                                                    <Tooltip title={t("reports.emergencyContacts.remove")}>
+                                                        <IconButton
+                                                            onClick={() => {
+                                                                setSelectedContactId(contact.id);
+                                                                setOpenDeleteDialog(true);
+                                                            }}
+                                                            size="small"
+                                                            aria-label={t("reports.emergencyContacts.remove")}
+                                                            sx={actionButtonSx.delete}
+                                                        >
+                                                            <DeleteOutlineIcon fontSize="small" />
+                                                        </IconButton>
+                                                    </Tooltip>
+                                                </>
+                                            )}
                                         </Box>
                                     )}
                                 </Box>
@@ -768,7 +906,10 @@ export default function EmergencyContacts() {
                         <Grid item xs={12} md={6} lg={12}>
                             <InputUI
                                 label={t("reports.profile.name")}
+                                placeholder={t("reports.profile.nameExample")}
                                 error={hasError.nome}
+                                helperText={accessibilityMode && hasError.nome ? t("reports.emergencyContacts.shortName") : undefined}
+                                sx={accessibleInputSx}
                                 fullWidth
                                 value={formData.nome}
                                 onChange={(event) => {
@@ -789,8 +930,10 @@ export default function EmergencyContacts() {
                             <InputUI
                                 label={t("reports.profile.phone")}
                                 error={hasError.telefone}
+                                helperText={accessibilityMode && hasError.telefone ? t("reports.emergencyContacts.invalidPhone") : undefined}
+                                sx={accessibleInputSx}
                                 fullWidth
-                                placeholder="(11) 99999-9999"
+                                placeholder={t("reports.profile.phoneExample")}
                                 limit={15}
                                 value={formatPhone(formData.telefone)}
                                 onChange={(event) => {
@@ -815,7 +958,10 @@ export default function EmergencyContacts() {
                                 label={t("reports.emergencyContacts.email")}
                                 type="email"
                                 error={hasError.email}
+                                helperText={accessibilityMode && hasError.email ? t("reports.emergencyContacts.invalidEmail") : undefined}
+                                sx={accessibleInputSx}
                                 fullWidth
+                                placeholder={t("reports.profile.emailExample")}
                                 value={formData.email}
                                 onChange={(event) => {
                                     setHasError({
@@ -835,35 +981,66 @@ export default function EmergencyContacts() {
                     <AlertPreferences
                         data={formData}
                         t={t}
+                        accessibilityMode={accessibilityMode}
+                        channelError={hasError.channel}
                         onChange={(field, value) => {
                             setFormData((current) => ({
                                 ...current,
                                 [field]: value
                             }));
+                            if ((field === "canalEmail" || field === "canalSms") && value) {
+                                setHasError((current) => ({ ...current, channel: false }));
+                            }
                         }}
                     />
 
-                    <Box display="flex" justifyContent="flex-end" gap={1} mt={1}>
-                        <Tooltip title={t("reports.profile.cancel")}>
-                            <IconButton
-                                onClick={() => {
-                                    setAdding(false);
-                                    resetForm();
-                                }}
-                                sx={actionButtonSx.cancel}
-                            >
-                                <CloseIcon />
-                            </IconButton>
-                        </Tooltip>
+                    <Box display="flex" justifyContent="flex-end" gap={1} mt={1} flexWrap="wrap">
+                        {accessibilityMode ? (
+                            <>
+                                <Button
+                                    onClick={() => {
+                                        setAdding(false);
+                                        resetForm();
+                                    }}
+                                    startIcon={<CloseIcon />}
+                                    sx={{ ...actionButtonSx.cancel, ...accessibleActionSx }}
+                                >
+                                    {t("reports.profile.cancel")}
+                                </Button>
+                                <Button
+                                    onClick={handleSaveContact}
+                                    startIcon={<CheckIcon />}
+                                    sx={{ ...actionButtonSx.save, ...accessibleActionSx }}
+                                >
+                                    {t("reports.emergencyContacts.saveContact")}
+                                </Button>
+                            </>
+                        ) : (
+                            <>
+                                <Tooltip title={t("reports.profile.cancel")}>
+                                    <IconButton
+                                        onClick={() => {
+                                            setAdding(false);
+                                            resetForm();
+                                        }}
+                                        aria-label={t("reports.profile.cancel")}
+                                        sx={actionButtonSx.cancel}
+                                    >
+                                        <CloseIcon />
+                                    </IconButton>
+                                </Tooltip>
 
-                        <Tooltip title={t("reports.emergencyContacts.saveContact")}>
-                            <IconButton
-                                onClick={handleSaveContact}
-                                sx={actionButtonSx.save}
-                            >
-                                <CheckIcon />
-                            </IconButton>
-                        </Tooltip>
+                                <Tooltip title={t("reports.emergencyContacts.saveContact")}>
+                                    <IconButton
+                                        onClick={handleSaveContact}
+                                        aria-label={t("reports.emergencyContacts.saveContact")}
+                                        sx={actionButtonSx.save}
+                                    >
+                                        <CheckIcon />
+                                    </IconButton>
+                                </Tooltip>
+                            </>
+                        )}
                     </Box>
                 </Paper>
             )}

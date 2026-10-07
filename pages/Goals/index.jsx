@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import {
-    Box, Card, CardActions, CardContent, Chip, CircularProgress,
+    Box, Button, Card, CardActions, CardContent, Chip, CircularProgress,
     IconButton, LinearProgress, MenuItem, Stack, Tooltip, Typography
 } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
@@ -19,6 +19,7 @@ import InputUI from "../../components/ui/Input";
 import { usePatient } from "../../context/PatientContext";
 import { useAlert } from "../../hooks/useAlert";
 import { useI18n } from "../../src/i18n";
+import { useThemeMode } from "../../src/theme/ThemeModeProvider";
 import { createGoal, deleteGoal, getGoals, updateGoal, updateGoalValue } from "../../services/goalService";
 
 const indicatorConfig = {
@@ -32,6 +33,7 @@ const emptyForm = { nome: "", indicador: "personalizado", direcao: "aumentar", u
 export default function Goals() {
     const theme = useTheme();
     const { t, formatDate, formatMeasurement, formatPercent } = useI18n();
+    const { accessibilityMode } = useThemeMode();
     const { showAlert } = useAlert();
     const { selectedPatient } = usePatient();
     const isDoctor = localStorage.getItem("tipo")?.toLowerCase() === "saude";
@@ -43,6 +45,9 @@ export default function Goals() {
     const [form, setForm] = useState(emptyForm);
     const [manualGoal, setManualGoal] = useState(null);
     const [manualValue, setManualValue] = useState("");
+    const [formAttempted, setFormAttempted] = useState(false);
+    const [manualAttempted, setManualAttempted] = useState(false);
+    const [goalToDelete, setGoalToDelete] = useState(null);
 
     const cpf = selectedPatient?.cpf;
     const canSubmit = form.nome.trim() && form.indicador && Number(form.valorAlvo) > 0 && form.dataLimite;
@@ -65,11 +70,13 @@ export default function Goals() {
     function openCreate() {
         setEditing(null);
         setForm(emptyForm);
+        setFormAttempted(false);
         setOpen(true);
     }
 
     function openEdit(goal) {
         setEditing(goal);
+        setFormAttempted(false);
         setForm({
             nome: goal.nome,
             indicador: goal.indicador || "personalizado",
@@ -84,7 +91,10 @@ export default function Goals() {
     }
 
     async function saveGoal() {
-        if (!canSubmit) return;
+        if (!canSubmit) {
+            setFormAttempted(true);
+            return;
+        }
         const config = indicatorConfig[form.indicador];
         const payload = {
             ...form,
@@ -110,10 +120,11 @@ export default function Goals() {
         }
     }
 
-    async function handleDelete(goal) {
-        if (!window.confirm(t("goals.deleteConfirm"))) return;
+    async function handleDelete() {
+        if (!goalToDelete) return;
         try {
-            await deleteGoal(goal.id, cpf);
+            await deleteGoal(goalToDelete.id, cpf);
+            setGoalToDelete(null);
             showAlert("success", t("goals.alerts.deleteSuccess"));
             await loadGoals();
         } catch (error) {
@@ -123,7 +134,10 @@ export default function Goals() {
     }
 
     async function saveManualValue() {
-        if (manualValue === "" || Number.isNaN(Number(manualValue))) return;
+        if (manualValue === "" || Number.isNaN(Number(manualValue)) || Number(manualValue) <= 0) {
+            setManualAttempted(true);
+            return;
+        }
 
         const currentValue = Number(manualGoal.valorAtual) || 0;
         const informedValue = Math.max(0, Number(manualValue));
@@ -133,6 +147,7 @@ export default function Goals() {
             setSaving(true);
             await updateGoalValue(manualGoal.id, cpf, newValue);
             setManualGoal(null);
+            setManualAttempted(false);
             showAlert("success", t("goals.alerts.valueSuccess"));
             await loadGoals();
         } catch (error) {
@@ -167,6 +182,18 @@ export default function Goals() {
             border: "1px solid rgba(220, 38, 38, 0.14)"
         }
     };
+    const accessibleActionSx = {
+        minHeight: 48,
+        px: 2,
+        borderRadius: 2,
+        fontWeight: 800,
+        textTransform: "none",
+        "&:focus-visible": {
+            outline: "3px solid",
+            outlineColor: "secondary.main",
+            outlineOffset: 2
+        }
+    };
 
     return (
         <Box sx={{ minHeight: "100vh", p: { xs: 2, md: 4 }, background: theme.vitta.pageBackground }}>
@@ -176,7 +203,14 @@ export default function Goals() {
                     <Typography color="text.secondary" mt={1}>{t("goals.description")}</Typography>
                     {selectedPatient?.nome && <Chip size="small" sx={{ mt: 1.5 }} label={`${t("goals.patient")}: ${selectedPatient.nome}`} />}
                 </Box>
-                <ButtonUI startIcon={<AddIcon />} onClick={openCreate} disabled={!cpf}>{t("goals.new")}</ButtonUI>
+                <ButtonUI
+                    startIcon={<AddIcon />}
+                    onClick={openCreate}
+                    disabled={!cpf}
+                    sx={accessibilityMode ? { minHeight: 48, fontSize: "0.9rem", textTransform: "none" } : undefined}
+                >
+                    {t("goals.new")}
+                </ButtonUI>
             </Box>
 
             {!cpf ? (
@@ -197,22 +231,49 @@ export default function Goals() {
                         const exceeded = limitGoal && Number(goal.valorAtual) > Number(goal.valorAlvo);
                         return <Card key={goal.id} sx={{ borderRadius: 3, border: "1px solid", borderColor: theme.vitta.border, boxShadow: theme.vitta.shadow }}>
                             <CardContent>
-                                <Stack direction="row" justifyContent="space-between" gap={1} alignItems="flex-start">
-                                    <Typography variant="h6" fontWeight={800}>{goal.nome}</Typography>
+                                <Stack direction={{ xs: "column", sm: "row" }} justifyContent="space-between" gap={1} alignItems={{ xs: "flex-start", sm: "flex-start" }}>
+                                    <Typography variant="h6" fontWeight={800} sx={{ overflowWrap: "break-word", wordBreak: "normal", minWidth: 0 }}>{goal.nome}</Typography>
                                     <Chip size="small" color={failed ? "error" : done ? "success" : "primary"} label={statusLabel(goal.status)} />
                                 </Stack>
                                 <Typography color="text.secondary" mt={1}>{indicatorLabel(goal.indicador)} · {typeLabel(goal.tipoDado)}</Typography>
                                 <Stack direction="row" justifyContent="space-between" mt={3}><Typography variant="body2">{t(limitGoal ? "goals.limitUsed" : "goals.progress")}</Typography><Typography variant="body2" fontWeight={800}>{formatPercent(rawProgress)}%</Typography></Stack>
-                                <LinearProgress color={exceeded || failed ? "error" : done ? "success" : "primary"} variant="determinate" value={progress} sx={{ mt: 1, height: 9, borderRadius: 9 }} />
+                                <LinearProgress
+                                    color={exceeded || failed ? "error" : done ? "success" : "primary"}
+                                    variant="determinate"
+                                    value={progress}
+                                    aria-label={`${t(limitGoal ? "goals.limitUsed" : "goals.progress")}: ${formatPercent(rawProgress)}%`}
+                                    sx={{ mt: 1, height: accessibilityMode ? 12 : 9, borderRadius: 9 }}
+                                />
                                 {exceeded && <Typography variant="body2" color="error.main" fontWeight={700} mt={1}>{t("goals.limitExceeded")}: {formatMeasurement(Number(goal.valorAtual) - Number(goal.valorAlvo), goal.unidade, { maximumFractionDigits: 1 })}</Typography>}
                                 <Stack direction="row" justifyContent="space-between" mt={2}><Typography color="text.secondary">{t("goals.current")}</Typography><Typography fontWeight={700}>{goal.valorAtual == null ? "—" : formatMeasurement(goal.valorAtual, goal.unidade)}</Typography></Stack>
-                                <Stack direction="row" justifyContent="space-between"><Typography color="text.secondary">{t("goals.target")}</Typography><Typography fontWeight={700}>{formatMeasurement(goal.valorAlvo, goal.unidade)}</Typography></Stack>
-                                <Stack direction="row" justifyContent="space-between"><Typography color="text.secondary">{t("goals.deadline")}</Typography><Typography>{goal.dataLimite ? formatDate(goal.dataLimite) : "—"}</Typography></Stack>
+                                <Stack direction="row" justifyContent="space-between" gap={2} flexWrap="wrap"><Typography color="text.secondary">{t("goals.target")}</Typography><Typography fontWeight={700}>{formatMeasurement(goal.valorAlvo, goal.unidade)}</Typography></Stack>
+                                <Stack direction="row" justifyContent="space-between" gap={2} flexWrap="wrap"><Typography color="text.secondary">{t("goals.deadline")}</Typography><Typography>{goal.dataLimite ? formatDate(goal.dataLimite) : "—"}</Typography></Stack>
                             </CardContent>
                             <CardActions sx={{ px: 2, pb: 2, gap: 1, flexWrap: "wrap" }}>
-                                {!isDoctor && !terminal && goal.indicador === "personalizado" && <ButtonUI sx={{ py: 0.75, px: 1.5 }} onClick={() => { setManualGoal(goal); setManualValue("0"); }}>{t("goals.updateValue")}</ButtonUI>}
-                                <Tooltip title={t("goals.edit")}><IconButton aria-label={t("goals.edit")} sx={actionButtonSx.edit} onClick={() => openEdit(goal)}><EditOutlinedIcon fontSize="small" /></IconButton></Tooltip>
-                                {!isDoctor && <Tooltip title={t("goals.delete")}><IconButton aria-label={t("goals.delete")} sx={actionButtonSx.delete} onClick={() => handleDelete(goal)}><DeleteOutlineIcon fontSize="small" /></IconButton></Tooltip>}
+                                {!isDoctor && !terminal && goal.indicador === "personalizado" && (
+                                    <ButtonUI
+                                        sx={accessibilityMode
+                                            ? { minHeight: 48, px: 2, fontSize: "0.85rem", textTransform: "none" }
+                                            : { py: 0.75, px: 1.5 }}
+                                        onClick={() => { setManualGoal(goal); setManualValue("0"); setManualAttempted(false); }}
+                                    >
+                                        {t("goals.updateValue")}
+                                    </ButtonUI>
+                                )}
+                                {accessibilityMode ? (
+                                    <Button startIcon={<EditOutlinedIcon />} sx={{ ...actionButtonSx.edit, ...accessibleActionSx }} onClick={() => openEdit(goal)}>
+                                        {t("goals.edit")}
+                                    </Button>
+                                ) : (
+                                    <Tooltip title={t("goals.edit")}><IconButton aria-label={t("goals.edit")} sx={actionButtonSx.edit} onClick={() => openEdit(goal)}><EditOutlinedIcon fontSize="small" /></IconButton></Tooltip>
+                                )}
+                                {!isDoctor && (accessibilityMode ? (
+                                    <Button startIcon={<DeleteOutlineIcon />} sx={{ ...actionButtonSx.delete, ...accessibleActionSx }} onClick={() => setGoalToDelete(goal)}>
+                                        {t("goals.delete")}
+                                    </Button>
+                                ) : (
+                                    <Tooltip title={t("goals.delete")}><IconButton aria-label={t("goals.delete")} sx={actionButtonSx.delete} onClick={() => setGoalToDelete(goal)}><DeleteOutlineIcon fontSize="small" /></IconButton></Tooltip>
+                                ))}
                             </CardActions>
                         </Card>;
                     })}
@@ -224,16 +285,20 @@ export default function Goals() {
                 onClose={() => setOpen(false)}
                 disabledClose={saving}
                 title={t(editing ? "goals.form.editTitle" : "goals.form.createTitle")}
-                onConfirm={saveGoal} disabledConfirm={!canSubmit || saving}
+                onConfirm={saveGoal} disabledConfirm={saving}
                 confirmText={saving ? t("goals.form.saving") : t("goals.form.save")}
                 cancelText={t("goals.form.cancel")}
             >
 
                 <InputUI
                     label={t("goals.form.name")}
+                    placeholder={t("goals.form.nameExample")}
                     value={form.nome}
                     onChange={(e) => setForm({ ...form, nome: e.target.value })}
+                    error={formAttempted && !form.nome.trim()}
+                    helperText={accessibilityMode && formAttempted && !form.nome.trim() ? t("goals.form.nameRequired") : undefined}
                     limit={150}
+                    sx={accessibilityMode ? { "& .MuiOutlinedInput-root": { minHeight: 52 } } : undefined}
                 />
 
                 <InputUI
@@ -268,6 +333,7 @@ export default function Goals() {
                 {form.indicador === "personalizado" &&
                     <InputUI
                         label={t("goals.form.unit")}
+                        placeholder={t("goals.form.unitExample")}
                         value={form.unidade}
                         onChange={(e) => setForm({ ...form, unidade: e.target.value })}
                         limit={30} />}
@@ -275,9 +341,13 @@ export default function Goals() {
                 <InputUI
                     type="number"
                     label={t("goals.form.target")}
+                    placeholder={t("goals.form.targetExample")}
                     value={form.valorAlvo}
                     onChange={(e) => setForm({ ...form, valorAlvo: e.target.value })}
+                    error={formAttempted && Number(form.valorAlvo) <= 0}
+                    helperText={accessibilityMode && formAttempted && Number(form.valorAlvo) <= 0 ? t("goals.form.targetRequired") : undefined}
                     slotProps={{ htmlInput: { min: 0, step: "any" } }}
+                    sx={accessibilityMode ? { "& .MuiOutlinedInput-root": { minHeight: 52 } } : undefined}
                 />
                 <DatePickerUI
                     label={t("goals.form.deadline")}
@@ -285,16 +355,21 @@ export default function Goals() {
                     onChange={(value) => setForm({ ...form, dataLimite: value || "" })}
                     minDate={dayjs().startOf("day")}
                     dateLimit={dayjs().add(50, "year")}
+                    error={formAttempted && !form.dataLimite}
+                    sx={accessibilityMode ? { "& .MuiOutlinedInput-root, & .MuiPickersOutlinedInput-root": { minHeight: 52 } } : undefined}
                 />
+                {accessibilityMode && formAttempted && !form.dataLimite && (
+                    <Typography variant="caption" color="error.main">{t("goals.form.deadlineRequired")}</Typography>
+                )}
             </DialogUI>
 
             <DialogUI
                 open={Boolean(manualGoal)}
-                onClose={() => setManualGoal(null)}
+                onClose={() => { setManualGoal(null); setManualAttempted(false); }}
                 disabledClose={saving}
                 title={t("goals.manualTitle")}
                 onConfirm={saveManualValue}
-                disabledConfirm={saving || manualValue === "" || Number(manualValue) <= 0}
+                disabledConfirm={saving}
                 confirmText={t("goals.form.save")}
                 cancelText={t("goals.form.cancel")}>
 
@@ -318,6 +393,13 @@ export default function Goals() {
                             color: "error.main",
                             bgcolor: "rgba(220, 38, 38, 0.08)",
                             border: "1px solid rgba(220, 38, 38, 0.14)",
+                            width: accessibilityMode ? 48 : "auto",
+                            height: accessibilityMode ? 48 : "auto",
+                            "&:focus-visible": accessibilityMode ? {
+                                outline: "3px solid",
+                                outlineColor: "secondary.main",
+                                outlineOffset: 2
+                            } : undefined,
                             "&:hover": { bgcolor: "rgba(220, 38, 38, 0.14)" }
                         }}
                     >
@@ -328,8 +410,11 @@ export default function Goals() {
                         autoFocus
                         type="number"
                         label={t("goals.manualAmount")}
+                        placeholder={t("goals.form.manualExample")}
                         value={manualValue}
                         onChange={(e) => setManualValue(e.target.value === "" ? "" : String(Math.max(0, Number(e.target.value))))}
+                        error={manualAttempted && (manualValue === "" || Number(manualValue) <= 0)}
+                        helperText={accessibilityMode && manualAttempted && (manualValue === "" || Number(manualValue) <= 0) ? t("goals.form.manualRequired") : undefined}
                         slotProps={{ htmlInput: { min: 0, step: 1 } }}
                         sx={{ flex: 1, mt: 0, mb: 0 }}
                     />
@@ -343,12 +428,33 @@ export default function Goals() {
                             bgcolor: "primary.main",
                             border: "1px solid",
                             borderColor: theme.vitta.borderStrong,
+                            width: accessibilityMode ? 48 : "auto",
+                            height: accessibilityMode ? 48 : "auto",
+                            "&:focus-visible": accessibilityMode ? {
+                                outline: "3px solid",
+                                outlineColor: "secondary.main",
+                                outlineOffset: 2
+                            } : undefined,
                             "&:hover": { bgcolor: "primary.dark" }
                         }}
                     >
                         <AddRoundedIcon />
                     </IconButton>
                 </Stack>
+            </DialogUI>
+
+            <DialogUI
+                open={Boolean(goalToDelete)}
+                onClose={() => setGoalToDelete(null)}
+                disabledClose={saving}
+                title={t("goals.deleteTitle")}
+                onConfirm={handleDelete}
+                disabledConfirm={saving}
+                confirmText={t("goals.delete")}
+                cancelText={t("goals.form.cancel")}
+            >
+                <Typography>{t("goals.deleteConfirm")}</Typography>
+                {goalToDelete?.nome && <Typography fontWeight={800} sx={{ mt: 1 }}>{goalToDelete.nome}</Typography>}
             </DialogUI>
         </Box>
     );

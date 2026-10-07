@@ -1,12 +1,14 @@
 import Box from "@mui/material/Box";
 import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
+import InputAdornment from "@mui/material/InputAdornment";
 import Typography from "@mui/material/Typography";
 import { useTheme } from "@mui/material/styles";
 
 import DatePickerUI from "../DatePicker";
 import InputUI from "../Input";
 import { useI18n } from "../../../src/i18n";
+import { useThemeMode } from "../../../src/theme/ThemeModeProvider";
 
 export default function HabitCard({
     icon,
@@ -20,6 +22,8 @@ export default function HabitCard({
     userName,
     userFunction,
     inputValue,
+    placeholder,
+    helperText,
     onInputChange,
     userStyle,
     showInput
@@ -28,6 +32,7 @@ export default function HabitCard({
     const vitta = theme.vitta;
     const isDark = theme.palette.mode === "dark";
     const { t } = useI18n();
+    const { accessibilityMode } = useThemeMode();
 
     return (
         <Card
@@ -93,12 +98,14 @@ export default function HabitCard({
                     <Box sx={{ minWidth: 0, flex: 1 }}>
                         <Typography
                             sx={{
-                                fontSize: "0.92rem",
+                                fontSize: accessibilityMode ? "1rem" : "0.92rem",
                                 fontWeight: 800,
                                 color: "text.primary",
-                                overflow: "hidden",
-                                textOverflow: "ellipsis",
-                                whiteSpace: "nowrap"
+                                overflow: accessibilityMode ? "visible" : "hidden",
+                                textOverflow: accessibilityMode ? "clip" : "ellipsis",
+                                whiteSpace: accessibilityMode ? "normal" : "nowrap",
+                                overflowWrap: accessibilityMode ? "break-word" : "normal",
+                                wordBreak: "normal"
                             }}
                         >
                             {title}
@@ -108,7 +115,7 @@ export default function HabitCard({
                             sx={{
                                 mt: 0.5,
                                 color: "text.secondary",
-                                fontSize: "0.78rem"
+                                fontSize: accessibilityMode ? "0.9rem" : "0.78rem"
                             }}
                         >
                             {t("healthTracker.common.lastRecord")}
@@ -173,8 +180,36 @@ export default function HabitCard({
                         <InputUI
                             value={inputValue}
                             type={type}
+                            placeholder={placeholder}
                             onChange={onInputChange}
                             error={error}
+                            helperText={accessibilityMode ? helperText : undefined}
+                            inputProps={{
+                                "aria-label": `${title}${unit ? ` (${unit})` : ""}`
+                            }}
+                            sx={{
+                                "& .MuiOutlinedInput-root": {
+                                    minHeight: accessibilityMode ? 52 : "auto"
+                                },
+                                "& .MuiInputBase-input": {
+                                    fontSize: accessibilityMode ? "1rem" : "inherit"
+                                },
+                                "& .MuiFormHelperText-root": {
+                                    fontSize: accessibilityMode ? "0.9rem" : "inherit",
+                                    lineHeight: 1.4
+                                }
+                            }}
+                            slotProps={{
+                                input: unit
+                                    ? {
+                                        endAdornment: (
+                                            <InputAdornment position="end">
+                                                {unit}
+                                            </InputAdornment>
+                                        )
+                                    }
+                                    : undefined
+                            }}
                         />
                     </Box>
                 )}

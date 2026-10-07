@@ -1,6 +1,6 @@
 import { useState } from "react";
 
-import { Box, Chip, Tab, Tabs, Typography } from "@mui/material";
+import { Alert, Box, Chip, Tab, Tabs, Typography } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
 
 import CloudUploadOutlinedIcon from "@mui/icons-material/CloudUploadOutlined";
@@ -8,6 +8,7 @@ import FolderOutlinedIcon from "@mui/icons-material/FolderOutlined";
 
 import { usePatient } from "../../context/PatientContext";
 import { useI18n } from "../../src/i18n";
+import { useThemeMode } from "../../src/theme/ThemeModeProvider";
 import HealthHub from "../HealthHub";
 import SharedDocuments from "../SharedDocuments";
 
@@ -17,6 +18,7 @@ export default function Documents() {
     const isDark = theme.palette.mode === "dark";
     const { selectedPatient } = usePatient();
     const { t } = useI18n();
+    const { accessibilityMode } = useThemeMode();
 
     const userType = localStorage.getItem("tipo")?.toLowerCase();
     const cpfUsuario =
@@ -140,6 +142,12 @@ export default function Documents() {
                 />
             </Box>
 
+            {accessibilityMode && (
+                <Alert severity="info" sx={{ mb: 3, fontSize: "1rem" }}>
+                    {t("documents.accessibilityHint")}
+                </Alert>
+            )}
+
             {tabs.length > 0 ? (
                 <>
                     <Tabs
@@ -160,6 +168,11 @@ export default function Documents() {
                             "& .MuiTabs-indicator": {
                                 display: "none",
                             },
+                            "& .MuiTab-root:focus-visible": {
+                                outline: "3px solid",
+                                outlineColor: "secondary.main",
+                                outlineOffset: -3
+                            }
                         }}
                     >
                         {tabs.map((item) => (
@@ -171,8 +184,9 @@ export default function Documents() {
                                 label={item.label}
                                 sx={{
                                     borderRadius: 2,
-                                    minHeight: 52,
+                                    minHeight: accessibilityMode ? 56 : 52,
                                     minWidth: { xs: 184, sm: 220 },
+                                    fontSize: accessibilityMode ? "1rem" : undefined,
                                     textTransform: "none",
                                     fontWeight: 800,
                                     mx: 0.5,

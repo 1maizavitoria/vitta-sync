@@ -5,6 +5,7 @@ import ErrorOutlineIcon from "@mui/icons-material/ErrorOutline";
 import NotificationsActiveOutlinedIcon from "@mui/icons-material/NotificationsActiveOutlined";
 import PriorityHighIcon from "@mui/icons-material/PriorityHigh";
 import { useI18n } from "../../../src/i18n";
+import { useThemeMode } from "../../../src/theme/ThemeModeProvider";
 
 function getPriorityStyle(priority, isDark) {
     switch (priority) {
@@ -99,6 +100,7 @@ export default function EventCard({ event }) {
     const vitta = theme.vitta;
     const isDark = theme.palette.mode === "dark";
     const { t, formatDateTime } = useI18n();
+    const { accessibilityMode } = useThemeMode();
     const priorityStyle = getPriorityStyle(event.prioridade, isDark);
     const priorityLabel =
         t(`activity.priorities.${event.prioridade}`) ||
@@ -110,6 +112,9 @@ export default function EventCard({ event }) {
 
     return (
         <Box
+            component="article"
+            role="listitem"
+            aria-label={`${eventText.title}. ${t("activity.priority")}: ${priorityLabel}`}
             sx={{
                 backgroundColor: "background.paper",
                 borderRadius: 3,
@@ -131,13 +136,18 @@ export default function EventCard({ event }) {
                 alignItems="flex-start"
                 gap={2}
                 mb={1.5}
-                sx={{ minWidth: 0 }}
+                sx={{
+                    minWidth: 0,
+                    flexDirection: accessibilityMode
+                        ? { xs: "column", sm: "row" }
+                        : "row"
+                }}
             >
                 <Box display="flex" gap={1.5} sx={{ minWidth: 0 }}>
                     <Box
                         sx={{
-                            width: 42,
-                            height: 42,
+                            width: accessibilityMode ? 50 : 42,
+                            height: accessibilityMode ? 50 : 42,
                             borderRadius: 2,
                             background: priorityStyle.background,
                             color: priorityStyle.color,
@@ -155,25 +165,37 @@ export default function EventCard({ event }) {
                             sx={{
                                 fontWeight: 800,
                                 color: "text.primary",
-                                overflowWrap: "anywhere"
+                                overflowWrap: "anywhere",
+                                fontSize: accessibilityMode ? "1.15rem" : undefined
                             }}
                         >
                             {eventText.title}
                         </Typography>
 
-                        <Typography
-                            variant="body2"
-                            sx={{
-                                color: "text.secondary",
-                                fontWeight: 700,
-                                mt: 0.35,
-                                overflowWrap: "anywhere"
-                            }}
-                        >
-                            {event.usuarioNome}
-                            {" • "}
-                            {userTypeLabel}
-                        </Typography>
+                        {accessibilityMode ? (
+                            <Box sx={{ mt: 0.5 }}>
+                                <Typography sx={{ color: "text.secondary", fontSize: "1rem", overflowWrap: "anywhere" }}>
+                                    <strong>{t("activity.responsible")}:</strong> {event.usuarioNome}
+                                </Typography>
+                                <Typography sx={{ color: "text.secondary", fontSize: "1rem", overflowWrap: "anywhere" }}>
+                                    <strong>{t("activity.userType")}:</strong> {userTypeLabel}
+                                </Typography>
+                            </Box>
+                        ) : (
+                            <Typography
+                                variant="body2"
+                                sx={{
+                                    color: "text.secondary",
+                                    fontWeight: 700,
+                                    mt: 0.35,
+                                    overflowWrap: "anywhere"
+                                }}
+                            >
+                                {event.usuarioNome}
+                                {" • "}
+                                {userTypeLabel}
+                            </Typography>
+                        )}
                     </Box>
                 </Box>
 
@@ -185,7 +207,9 @@ export default function EventCard({ event }) {
                         color: priorityStyle.color,
                         border: `1px solid ${priorityStyle.border}`,
                         fontWeight: 800,
-                        flex: "0 0 auto"
+                        flex: "0 0 auto",
+                        minHeight: accessibilityMode ? 36 : undefined,
+                        fontSize: accessibilityMode ? "0.95rem" : undefined
                     }}
                 />
             </Box>
@@ -194,7 +218,9 @@ export default function EventCard({ event }) {
                 sx={{
                     color: "text.secondary",
                     mb: 2,
-                    overflowWrap: "anywhere"
+                    overflowWrap: "anywhere",
+                    fontSize: accessibilityMode ? "1rem" : undefined,
+                    lineHeight: accessibilityMode ? 1.6 : undefined
                 }}
             >
                 {eventText.description}
@@ -204,9 +230,11 @@ export default function EventCard({ event }) {
                 variant="body2"
                 sx={{
                     color: "text.secondary",
-                    fontWeight: 700
+                    fontWeight: 700,
+                    fontSize: accessibilityMode ? "1rem" : undefined
                 }}
             >
+                {accessibilityMode && <>{t("activity.eventDate")}: </>}
                 {formatDateTime(event.criadoEm)}
             </Typography>
         </Box>

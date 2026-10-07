@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 
-import { Box, Grid, IconButton, Paper, Tooltip, Typography } from "@mui/material";
+import { Box, Button, Grid, IconButton, Paper, Tooltip, Typography } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
 
 import AddIcon from "@mui/icons-material/Add";
@@ -17,6 +17,7 @@ import { editSymptom, getSymptom, registerSymptom } from "../../services/symptom
 import { getMedicoStyle, getNomeFuncao, getResponsavelStyle } from "../../utils/validators/userFunction";
 import SymptomCard from "../ui/cards/SymptomCard";
 import { useI18n } from "../../src/i18n";
+import { useThemeMode } from "../../src/theme/ThemeModeProvider";
 
 const emptyInputs = {
     symptom: "",
@@ -55,6 +56,7 @@ export function SymptomTracker() {
     const theme = useTheme();
     const isDark = theme.palette.mode === "dark";
     const { t, formatDate, formatDateTime, formatNumber } = useI18n();
+    const { accessibilityMode } = useThemeMode();
 
     const [editing, setEditing] = useState(false);
     const [addSymptom, setAddSymptom] = useState(false);
@@ -92,6 +94,20 @@ export function SymptomTracker() {
             "&:hover": { bgcolor: "primary.dark" }
         }
     };
+    const accessibleActionButtonSx = (variant) => ({
+        ...actionButtonSx[variant],
+        minHeight: 48,
+        px: { xs: 1.5, sm: 2 },
+        borderRadius: 2,
+        fontWeight: 800,
+        textTransform: "none",
+        flex: { xs: "1 1 140px", sm: "0 0 auto" },
+        "&:focus-visible": {
+            outline: "3px solid",
+            outlineColor: "secondary.main",
+            outlineOffset: 2
+        }
+    });
 
     const lastSymptom = symptoms.reduce((latest, current) => {
         if (!latest) return current;
@@ -246,8 +262,9 @@ export function SymptomTracker() {
         >
             <Box
                 display="flex"
-                alignItems="center"
+                alignItems={{ xs: "stretch", sm: "center" }}
                 justifyContent="space-between"
+                flexDirection={{ xs: "column", sm: "row" }}
                 gap={2}
                 mb={2.5}
                 sx={{ minWidth: 0 }}
@@ -258,7 +275,8 @@ export function SymptomTracker() {
                             fontWeight: 800,
                             color: "text.primary",
                             fontSize: "1.05rem",
-                            overflowWrap: "anywhere"
+                            overflowWrap: "break-word",
+                            wordBreak: "normal"
                         }}
                     >
                         {t("healthTracker.symptoms.title")}
@@ -269,7 +287,8 @@ export function SymptomTracker() {
                             color: "text.secondary",
                             fontSize: "0.88rem",
                             mt: 0.25,
-                            overflowWrap: "anywhere"
+                            overflowWrap: "break-word",
+                            wordBreak: "normal"
                         }}
                     >
                         {t("healthTracker.symptoms.description")}
@@ -277,50 +296,91 @@ export function SymptomTracker() {
                 </Box>
 
                 {isFormOpen ? (
-                    <Box display="flex" gap={1} flexShrink={0}>
-                        <Tooltip title={t("healthTracker.common.cancel")}>
-                            <IconButton onClick={closeForm} sx={actionButtonSx.cancel}>
-                                <CloseIcon />
-                            </IconButton>
-                        </Tooltip>
-
-                        <Tooltip title={t("healthTracker.common.save")}>
-                            <IconButton onClick={handleRegister} sx={actionButtonSx.save}>
-                                <CheckIcon />
-                            </IconButton>
-                        </Tooltip>
+                    <Box display="flex" gap={1} flexShrink={0} flexWrap="wrap" width={{ xs: "100%", sm: "auto" }}>
+                        {accessibilityMode ? (
+                            <>
+                                <Button onClick={closeForm} startIcon={<CloseIcon />} sx={accessibleActionButtonSx("cancel")}>
+                                    {t("healthTracker.common.cancel")}
+                                </Button>
+                                <Button onClick={handleRegister} startIcon={<CheckIcon />} sx={accessibleActionButtonSx("save")}>
+                                    {t("healthTracker.common.save")}
+                                </Button>
+                            </>
+                        ) : (
+                            <>
+                                <Tooltip title={t("healthTracker.common.cancel")}>
+                                    <IconButton onClick={closeForm} aria-label={t("healthTracker.common.cancel")} sx={actionButtonSx.cancel}>
+                                        <CloseIcon />
+                                    </IconButton>
+                                </Tooltip>
+                                <Tooltip title={t("healthTracker.common.save")}>
+                                    <IconButton onClick={handleRegister} aria-label={t("healthTracker.common.save")} sx={actionButtonSx.save}>
+                                        <CheckIcon />
+                                    </IconButton>
+                                </Tooltip>
+                            </>
+                        )}
                     </Box>
                 ) : (
-                    <Box display="flex" alignItems="center" gap={1} flexShrink={0}>
+                    <Box display="flex" alignItems="center" gap={1} flexShrink={0} flexWrap="wrap" width={{ xs: "100%", sm: "auto" }}>
                         {canEdit && (
-                            <Tooltip title={t("healthTracker.symptoms.add")}>
-                                <IconButton
+                            accessibilityMode ? (
+                                <Button
                                     onClick={() => {
                                         setAddSymptom(true);
                                         handleClearInputs();
                                     }}
-                                    sx={actionButtonSx.add}
+                                    startIcon={<AddIcon />}
+                                    sx={accessibleActionButtonSx("add")}
                                 >
-                                    <AddIcon />
-                                </IconButton>
-                            </Tooltip>
+                                    {t("healthTracker.symptoms.add")}
+                                </Button>
+                            ) : (
+                                <Tooltip title={t("healthTracker.symptoms.add")}>
+                                    <IconButton
+                                        onClick={() => {
+                                            setAddSymptom(true);
+                                            handleClearInputs();
+                                        }}
+                                        aria-label={t("healthTracker.symptoms.add")}
+                                        sx={actionButtonSx.add}
+                                    >
+                                        <AddIcon />
+                                    </IconButton>
+                                </Tooltip>
+                            )
                         )}
 
                         {canEdit && (
-                            <Tooltip title={t("healthTracker.symptoms.edit")}>
-                                <span>
-                                    <IconButton
-                                        onClick={() => {
-                                            setEditing(true);
-                                            handleDataEditing();
-                                        }}
-                                        disabled={!lastSymptom}
-                                        sx={actionButtonSx.edit}
-                                    >
-                                        <EditOutlinedIcon />
-                                    </IconButton>
-                                </span>
-                            </Tooltip>
+                            accessibilityMode ? (
+                                <Button
+                                    onClick={() => {
+                                        setEditing(true);
+                                        handleDataEditing();
+                                    }}
+                                    disabled={!lastSymptom}
+                                    startIcon={<EditOutlinedIcon />}
+                                    sx={accessibleActionButtonSx("edit")}
+                                >
+                                    {t("healthTracker.symptoms.edit")}
+                                </Button>
+                            ) : (
+                                <Tooltip title={t("healthTracker.symptoms.edit")}>
+                                    <span>
+                                        <IconButton
+                                            onClick={() => {
+                                                setEditing(true);
+                                                handleDataEditing();
+                                            }}
+                                            disabled={!lastSymptom}
+                                            aria-label={t("healthTracker.symptoms.edit")}
+                                            sx={actionButtonSx.edit}
+                                        >
+                                            <EditOutlinedIcon />
+                                        </IconButton>
+                                    </span>
+                                </Tooltip>
+                            )
                         )}
                     </Box>
                 )}
@@ -338,6 +398,12 @@ export function SymptomTracker() {
                         value={lastSymptom ? lastSymptom.sintoma : t("healthTracker.common.notAvailable")}
                         date={lastSymptom ? formatDateTime(lastSymptom.dataRegistro) : t("healthTracker.common.notAvailable")}
                         inputValue={symptomInputs.symptom}
+                        placeholder={t("healthTracker.symptoms.symptomExample")}
+                        helperText={
+                            error && !symptomInputs.symptom
+                                ? t("healthTracker.habits.fillAll")
+                                : undefined
+                        }
                         onInputChange={(event) => {
                             updateInput("symptom", event.target.value);
                             setErrorIntensity(false);
@@ -358,6 +424,14 @@ export function SymptomTracker() {
                         value={lastSymptom ? formatNumber(lastSymptom.intensidadeDor) : t("healthTracker.common.notAvailable")}
                         date={lastSymptom ? formatDateTime(lastSymptom.dataRegistro) : t("healthTracker.common.notAvailable")}
                         inputValue={symptomInputs.intencity}
+                        placeholder={t("healthTracker.symptoms.intensityExample")}
+                        helperText={
+                            errorSymptom
+                                ? t("healthTracker.symptoms.invalidIntensity")
+                                : error && !symptomInputs.intencity
+                                    ? t("healthTracker.habits.fillAll")
+                                    : undefined
+                        }
                         onInputChange={(event) => {
                             updateInput("intencity", event.target.value);
                             setErrorSymptom(false);

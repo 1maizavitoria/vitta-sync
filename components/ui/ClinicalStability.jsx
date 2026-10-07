@@ -2,6 +2,7 @@ import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import { Box, Chip, Paper, Tooltip, Typography } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
 import { useMemo } from "react";
+import { useThemeMode } from "../../src/theme/ThemeModeProvider";
 
 const categoryOrder = {
     critico: 0,
@@ -19,6 +20,7 @@ const categoryStyles = {
 
 export default function ClinicalStability({ items = [], period, t, formatNumber }) {
     const theme = useTheme();
+    const { accessibilityMode } = useThemeMode();
     const general = items.find((item) => item.tipo === "geral");
     const factors = useMemo(
         () => items
@@ -76,13 +78,22 @@ export default function ClinicalStability({ items = [], period, t, formatNumber 
                 </Box>
 
                 <Box sx={{ minWidth: 0 }}>
-                    <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 2 }}>
-                        <Typography variant="h6" sx={{ fontWeight: 800 }}>
-                            {t("dashboard.stability.factorsTitle")}
-                        </Typography>
-                        <Tooltip title={t("dashboard.stability.weightHelp")} arrow>
-                            <InfoOutlinedIcon fontSize="small" color="action" />
-                        </Tooltip>
+                    <Box sx={{ mb: 2 }}>
+                        <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                            <Typography variant="h6" sx={{ fontWeight: 800 }}>
+                                {t("dashboard.stability.factorsTitle")}
+                            </Typography>
+                            {!accessibilityMode && (
+                                <Tooltip title={t("dashboard.stability.weightHelp")} arrow>
+                                    <InfoOutlinedIcon fontSize="small" color="action" />
+                                </Tooltip>
+                            )}
+                        </Box>
+                        {accessibilityMode && (
+                            <Typography color="text.secondary" sx={{ mt: 0.75, fontSize: "1rem" }}>
+                                {t("dashboard.stability.weightHelp")}
+                            </Typography>
+                        )}
                     </Box>
 
                     {factors.length === 0 ? (
@@ -111,7 +122,7 @@ export default function ClinicalStability({ items = [], period, t, formatNumber 
                                         }}
                                     >
                                         <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 1 }}>
-                                            <Typography sx={{ fontWeight: 800 }}>
+                                            <Typography sx={{ fontWeight: 800, fontSize: accessibilityMode ? "1.05rem" : undefined }}>
                                                 {t(`dashboard.stability.factors.${factor.tipo}`)}
                                             </Typography>
                                             <Typography sx={{ fontWeight: 900, color: factorStyle.color, whiteSpace: "nowrap" }}>
@@ -120,15 +131,21 @@ export default function ClinicalStability({ items = [], period, t, formatNumber 
                                         </Box>
                                         <Box sx={{ mt: 1, display: "flex", alignItems: "center", justifyContent: "space-between", gap: 1 }}>
                                             <Chip
-                                                size="small"
+                                                size={accessibilityMode ? "medium" : "small"}
                                                 label={t(`dashboard.stability.categories.${factorCategory}`)}
                                                 sx={{ color: factorStyle.color, bgcolor: factorStyle.background, fontWeight: 800 }}
                                             />
-                                            <Tooltip title={t("dashboard.stability.weight").replace("{weight}", formatNumber(factor.peso ?? 1))} arrow>
-                                                <Typography variant="caption" color="text.secondary" sx={{ cursor: "help" }}>
-                                                    {t("dashboard.stability.weightShort").replace("{weight}", formatNumber(factor.peso ?? 1))}
+                                            {accessibilityMode ? (
+                                                <Typography variant="body2" color="text.secondary">
+                                                    {t("dashboard.stability.weight").replace("{weight}", formatNumber(factor.peso ?? 1))}
                                                 </Typography>
-                                            </Tooltip>
+                                            ) : (
+                                                <Tooltip title={t("dashboard.stability.weight").replace("{weight}", formatNumber(factor.peso ?? 1))} arrow>
+                                                    <Typography variant="caption" color="text.secondary" sx={{ cursor: "help" }}>
+                                                        {t("dashboard.stability.weightShort").replace("{weight}", formatNumber(factor.peso ?? 1))}
+                                                    </Typography>
+                                                </Tooltip>
+                                            )}
                                         </Box>
                                     </Box>
                                 );
@@ -138,7 +155,7 @@ export default function ClinicalStability({ items = [], period, t, formatNumber 
                 </Box>
             </Box>
 
-            <Typography variant="caption" color="text.secondary" sx={{ display: "block", mt: 2 }}>
+            <Typography variant={accessibilityMode ? "body2" : "caption"} color="text.secondary" sx={{ display: "block", mt: 2 }}>
                 {t("dashboard.stability.disclaimer")}
             </Typography>
         </Paper>

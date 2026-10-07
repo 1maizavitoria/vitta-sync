@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 
-import { Box, Grid, IconButton, InputAdornment, Paper, Tooltip, Typography } from "@mui/material";
+import { Box, Button, Grid, IconButton, InputAdornment, Paper, Tooltip, Typography } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
 
 import CheckIcon from "@mui/icons-material/Check";
@@ -17,8 +17,10 @@ import { isValidEmail } from "../../utils/formatters/formatEmail";
 import { formatPhone, isValidPhone } from "../../utils/formatters/formatPhone";
 import { getDateLimit, isUnder18 } from "../../utils/validators/dateValidator";
 import DatePickerUI from "./DatePicker";
+import DialogUI from "./Dialog";
 import InputUI from "./Input";
 import { useI18n } from "../../src/i18n";
+import { useThemeMode } from "../../src/theme/ThemeModeProvider";
 
 const emptyForm = {
     nome: "",
@@ -67,14 +69,20 @@ export default function Perfil({ view = "patient" }) {
         t,
         convertMeasurement,
         convertMeasurementToMetric,
+        formatNumber,
         formatUnit,
         measurementSystem
     } = useI18n();
+    const { accessibilityMode } = useThemeMode();
 
     const [editing, setEditing] = useState(false);
     const [error, setError] = useState(false);
     const [errorEmail, setErrorEmail] = useState(false);
     const [errorName, setErrorName] = useState(false);
+    const [errorPhone, setErrorPhone] = useState(false);
+    const [errorWeight, setErrorWeight] = useState(false);
+    const [errorHeight, setErrorHeight] = useState(false);
+    const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
     const [formData, setFormData] = useState(emptyForm);
 
     const userType = localStorage.getItem("tipo")?.toLowerCase();
@@ -109,6 +117,26 @@ export default function Perfil({ view = "patient" }) {
         cancel: iconButtonSx.cancel,
         delete: iconButtonSx.delete
     };
+    const accessibleActionSx = {
+        minHeight: 48,
+        px: 2,
+        borderRadius: 2,
+        fontWeight: 800,
+        textTransform: "none",
+        flex: { xs: "1 1 140px", sm: "0 0 auto" },
+        "&:focus-visible": {
+            outline: "3px solid",
+            outlineColor: "secondary.main",
+            outlineOffset: 2
+        }
+    };
+    const accessibleInputSx = accessibilityMode
+        ? {
+            "& .MuiOutlinedInput-root": { minHeight: 52 },
+            "& .MuiInputBase-input": { fontSize: "1rem" },
+            "& .MuiFormHelperText-root": { fontSize: "0.9rem", lineHeight: 1.4 }
+        }
+        : undefined;
 
     const title =
         isProfileView
@@ -136,6 +164,9 @@ export default function Perfil({ view = "patient" }) {
         setError(false);
         setErrorEmail(false);
         setErrorName(false);
+        setErrorPhone(false);
+        setErrorWeight(false);
+        setErrorHeight(false);
     }
 
     function closeEditing() {
@@ -169,6 +200,13 @@ export default function Perfil({ view = "patient" }) {
         return String(Number(convertedValue.toFixed(decimals)));
     }
 
+    function measurementExample(value, unit) {
+        return t("reports.profile.example").replace(
+            "{value}",
+            formatNumber(convertMeasurement(value, unit))
+        );
+    }
+
     function toMetricMeasurement(value, unit, decimals = 2) {
         const metricValue = Number(convertMeasurementToMetric(value, unit));
         if (Number.isNaN(metricValue)) return value;
@@ -196,17 +234,20 @@ export default function Perfil({ view = "patient" }) {
         }
 
         if (!isValidPhone(formData.telefone)) {
+            setErrorPhone(true);
             showAlert("error", t("messages.invalidPhone"));
             return false;
         }
 
         if (formData.tipo === "paciente") {
             if (Number(toMetricMeasurement(formData.pesoInicial, "kg")) <= 0) {
+                setErrorWeight(true);
                 showAlert("error", t("messages.invalidWeight"));
                 return false;
             }
 
             if (Number(toMetricMeasurement(formData.altura, "m")) <= 0) {
+                setErrorHeight(true);
                 showAlert("error", t("messages.invalidHeight"));
                 return false;
             }
@@ -257,14 +298,9 @@ export default function Perfil({ view = "patient" }) {
     }
 
     async function handleDelete() {
-        const confirmed = window.confirm(
-            t("reports.profile.deleteConfirmation")
-        );
-
-        if (!confirmed) return;
-
         try {
             await deleteUser(formData.cpf);
+            setDeleteDialogOpen(false);
             showAlert("success", t("reports.profile.accountDeleted"));
         } catch (deleteError) {
             showAlert("error", t("reports.profile.deleteError"));
@@ -363,7 +399,8 @@ export default function Perfil({ view = "patient" }) {
                                 fontWeight: 800,
                                 color: "text.primary",
                                 fontSize: { xs: "1.25rem", md: "1.45rem" },
-                                overflowWrap: "anywhere"
+                                overflowWrap: "break-word",
+                                wordBreak: "normal"
                             }}
                         >
                             {title}
@@ -372,9 +409,10 @@ export default function Perfil({ view = "patient" }) {
                         <Typography
                             sx={{
                                 color: "text.secondary",
-                                fontSize: "0.9rem",
+                                fontSize: accessibilityMode ? "1rem" : "0.9rem",
                                 mt: 0.25,
-                                overflowWrap: "anywhere"
+                                overflowWrap: "break-word",
+                                wordBreak: "normal"
                             }}
                         >
                             {subtitle}
@@ -383,46 +421,58 @@ export default function Perfil({ view = "patient" }) {
                 </Box>
 
                 {canManage && (
-                    <Box display="flex" gap={1} flexShrink={0}>
+                    <Box display="flex" gap={1} flexShrink={0} flexWrap="wrap" width={{ xs: "100%", sm: "auto" }}>
                         {!editing && (
-                            <Tooltip title={t("reports.profile.edit")}>
-                                <IconButton
+                            accessibilityMode ? (
+                                <Button
                                     onClick={() => setEditing(true)}
-                                    sx={actionButtonSx.edit}
+                                    startIcon={<EditOutlinedIcon />}
+                                    sx={{ ...actionButtonSx.edit, ...accessibleActionSx }}
                                 >
-                                    <EditOutlinedIcon />
-                                </IconButton>
-                            </Tooltip>
+                                    {t("reports.profile.edit")}
+                                </Button>
+                            ) : (
+                                <Tooltip title={t("reports.profile.edit")}>
+                                    <IconButton onClick={() => setEditing(true)} aria-label={t("reports.profile.edit")} sx={actionButtonSx.edit}>
+                                        <EditOutlinedIcon />
+                                    </IconButton>
+                                </Tooltip>
+                            )
                         )}
 
                         {editing && (
                             <>
-                                <Tooltip title={t("reports.profile.deleteAccount")}>
-                                    <IconButton
-                                        onClick={handleDelete}
-                                        sx={actionButtonSx.delete}
-                                    >
-                                        <DeleteOutlineIcon />
-                                    </IconButton>
-                                </Tooltip>
-
-                                <Tooltip title={t("reports.profile.cancel")}>
-                                    <IconButton
-                                        onClick={closeEditing}
-                                        sx={actionButtonSx.cancel}
-                                    >
-                                        <CloseIcon />
-                                    </IconButton>
-                                </Tooltip>
-
-                                <Tooltip title={t("reports.profile.save")}>
-                                    <IconButton
-                                        onClick={handleChangeSave}
-                                        sx={actionButtonSx.save}
-                                    >
-                                        <CheckIcon />
-                                    </IconButton>
-                                </Tooltip>
+                                {accessibilityMode ? (
+                                    <>
+                                        <Button onClick={() => setDeleteDialogOpen(true)} startIcon={<DeleteOutlineIcon />} sx={{ ...actionButtonSx.delete, ...accessibleActionSx }}>
+                                            {t("reports.profile.deleteAccount")}
+                                        </Button>
+                                        <Button onClick={closeEditing} startIcon={<CloseIcon />} sx={{ ...actionButtonSx.cancel, ...accessibleActionSx }}>
+                                            {t("reports.profile.cancel")}
+                                        </Button>
+                                        <Button onClick={handleChangeSave} startIcon={<CheckIcon />} sx={{ ...actionButtonSx.save, ...accessibleActionSx }}>
+                                            {t("reports.profile.save")}
+                                        </Button>
+                                    </>
+                                ) : (
+                                    <>
+                                        <Tooltip title={t("reports.profile.deleteAccount")}>
+                                            <IconButton onClick={() => setDeleteDialogOpen(true)} aria-label={t("reports.profile.deleteAccount")} sx={actionButtonSx.delete}>
+                                                <DeleteOutlineIcon />
+                                            </IconButton>
+                                        </Tooltip>
+                                        <Tooltip title={t("reports.profile.cancel")}>
+                                            <IconButton onClick={closeEditing} aria-label={t("reports.profile.cancel")} sx={actionButtonSx.cancel}>
+                                                <CloseIcon />
+                                            </IconButton>
+                                        </Tooltip>
+                                        <Tooltip title={t("reports.profile.save")}>
+                                            <IconButton onClick={handleChangeSave} aria-label={t("reports.profile.save")} sx={actionButtonSx.save}>
+                                                <CheckIcon />
+                                            </IconButton>
+                                        </Tooltip>
+                                    </>
+                                )}
                             </>
                         )}
                     </Box>
@@ -433,6 +483,7 @@ export default function Perfil({ view = "patient" }) {
                 <Grid item xs={12} md={6}>
                     <InputUI
                         label={t("reports.profile.name")}
+                        placeholder={t("reports.profile.nameExample")}
                         value={formData.nome}
                         onChange={(event) => {
                             handleChange("nome")(event.target.value);
@@ -441,20 +492,33 @@ export default function Perfil({ view = "patient" }) {
                         disabled={!editing}
                         fullWidth
                         error={(error && !formData.nome) || errorName}
+                        helperText={accessibilityMode
+                            ? errorName
+                                ? t("messages.shortName")
+                                : error && !formData.nome
+                                    ? t("messages.fillAll")
+                                    : undefined
+                            : undefined}
+                        sx={accessibleInputSx}
                     />
                 </Grid>
 
                 <Grid item xs={12} md={6}>
                     <InputUI
                         label={t("reports.profile.phone")}
+                        placeholder={t("reports.profile.phoneExample")}
                         limit={15}
                         value={formatPhone(formData.telefone)}
                         onChange={(event) => {
                             const rawValue = event.target.value.replace(/\D/g, "");
                             handleChange("telefone")(rawValue);
+                            setErrorPhone(false);
                         }}
                         disabled={!editing}
                         fullWidth
+                        error={errorPhone}
+                        helperText={accessibilityMode && errorPhone ? t("messages.invalidPhone") : undefined}
+                        sx={accessibleInputSx}
                     />
                 </Grid>
 
@@ -471,12 +535,17 @@ export default function Perfil({ view = "patient" }) {
                         disabled={!editing}
                         fullWidth
                         error={error && !formData.dataNascimento}
+                        sx={accessibilityMode ? { "& .MuiOutlinedInput-root, & .MuiPickersOutlinedInput-root": { minHeight: 52 } } : undefined}
                     />
+                    {accessibilityMode && error && !formData.dataNascimento && (
+                        <Typography variant="caption" color="error.main">{t("messages.fillAll")}</Typography>
+                    )}
                 </Grid>
 
                 <Grid item xs={12} md={6}>
                     <InputUI
                         label={t("reports.profile.email")}
+                        placeholder={t("reports.profile.emailExample")}
                         value={formData.email}
                         onChange={(event) => {
                             handleChange("email")(event.target.value);
@@ -485,6 +554,14 @@ export default function Perfil({ view = "patient" }) {
                         disabled={!editing}
                         fullWidth
                         error={(error && !formData.email) || errorEmail}
+                        helperText={accessibilityMode
+                            ? errorEmail
+                                ? t("messages.invalidEmail")
+                                : error && !formData.email
+                                    ? t("messages.fillAll")
+                                    : undefined
+                            : undefined}
+                        sx={accessibleInputSx}
                     />
                 </Grid>
 
@@ -494,6 +571,7 @@ export default function Perfil({ view = "patient" }) {
                         value={formData.cpf}
                         disabled
                         fullWidth
+                        sx={accessibleInputSx}
                     />
                 </Grid>
 
@@ -501,6 +579,7 @@ export default function Perfil({ view = "patient" }) {
                     <Grid item xs={12} md={6}>
                         <InputUI
                             label={t("reports.profile.council")}
+                            placeholder={t("reports.profile.councilExample")}
                             value={formData.conselho}
                             onChange={(event) =>
                                 handleChange("conselho")(event.target.value)
@@ -508,6 +587,7 @@ export default function Perfil({ view = "patient" }) {
                             disabled={!editing}
                             fullWidth
                             error={error}
+                            sx={accessibleInputSx}
                         />
                     </Grid>
                 )}
@@ -517,13 +597,18 @@ export default function Perfil({ view = "patient" }) {
                         <InputUI
                             label={measurementLabel(t("reports.profile.initialWeight"), "kg")}
                             type="number"
+                            placeholder={measurementExample(80, "kg")}
                             value={formData.pesoInicial}
-                            onChange={(event) =>
-                                handleChange("pesoInicial")(event.target.value)
-                            }
+                            onChange={(event) => {
+                                handleChange("pesoInicial")(event.target.value);
+                                setErrorWeight(false);
+                            }}
                             disabled={!editing}
                             fullWidth
                             slotProps={measurementInputProps("kg")}
+                            error={errorWeight}
+                            helperText={accessibilityMode && errorWeight ? t("messages.invalidWeight") : undefined}
+                            sx={accessibleInputSx}
                         />
                     </Grid>
                 )}
@@ -533,17 +618,33 @@ export default function Perfil({ view = "patient" }) {
                         <InputUI
                             label={measurementLabel(t("reports.profile.height"), "m")}
                             type="number"
+                            placeholder={measurementExample(1.7, "m")}
                             value={formData.altura}
-                            onChange={(event) =>
-                                handleChange("altura")(event.target.value)
-                            }
+                            onChange={(event) => {
+                                handleChange("altura")(event.target.value);
+                                setErrorHeight(false);
+                            }}
                             disabled={!editing}
                             fullWidth
                             slotProps={measurementInputProps("m")}
+                            error={errorHeight}
+                            helperText={accessibilityMode && errorHeight ? t("messages.invalidHeight") : undefined}
+                            sx={accessibleInputSx}
                         />
                     </Grid>
                 )}
             </Grid>
+
+            <DialogUI
+                open={deleteDialogOpen}
+                onClose={() => setDeleteDialogOpen(false)}
+                title={t("reports.profile.deleteAccount")}
+                onConfirm={handleDelete}
+                confirmText={t("reports.profile.deleteAccount")}
+                cancelText={t("reports.profile.cancel")}
+            >
+                <Typography>{t("reports.profile.deleteConfirmation")}</Typography>
+            </DialogUI>
         </Paper>
     );
 }

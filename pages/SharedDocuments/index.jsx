@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import {
     Avatar,
     Box,
+    Button,
     Dialog,
     DialogContent,
     Grid,
@@ -22,6 +23,7 @@ import PictureAsPdfIcon from "@mui/icons-material/PictureAsPdf";
 
 import { usePatient } from "../../context/PatientContext";
 import { useI18n } from "../../src/i18n";
+import { useThemeMode } from "../../src/theme/ThemeModeProvider";
 import {
     downloadDocument,
     getPatientDocuments,
@@ -64,6 +66,7 @@ export default function SharedDocuments() {
     const vitta = theme.vitta;
     const isDark = theme.palette.mode === "dark";
     const { t, formatDateTime } = useI18n();
+    const { accessibilityMode } = useThemeMode();
     const [documents, setDocuments] = useState([]);
     const [loading, setLoading] = useState(false);
     const [openViewer, setOpenViewer] = useState(false);
@@ -217,13 +220,22 @@ export default function SharedDocuments() {
                                 minWidth: 0
                             }}
                         >
-                            <Box display="flex" gap={2} sx={{ minWidth: 0 }}>
+                            <Box
+                                display="flex"
+                                gap={2}
+                                sx={{
+                                    minWidth: 0,
+                                    flexDirection: accessibilityMode
+                                        ? { xs: "column", sm: "row" }
+                                        : "row"
+                                }}
+                            >
                                 <Avatar
                                     sx={{
                                         bgcolor: "primary.main",
                                         color: "#ffffff",
-                                        width: 46,
-                                        height: 46,
+                                        width: accessibilityMode ? 54 : 46,
+                                        height: accessibilityMode ? 54 : 46,
                                         fontWeight: 800,
                                         boxShadow: isDark
                                             ? "0 10px 20px rgba(0, 0, 0, 0.24)"
@@ -239,9 +251,11 @@ export default function SharedDocuments() {
                                         sx={{
                                             fontWeight: 800,
                                             color: "text.primary",
-                                            overflow: "hidden",
-                                            textOverflow: "ellipsis",
-                                            whiteSpace: "nowrap"
+                                            overflow: accessibilityMode ? "visible" : "hidden",
+                                            textOverflow: accessibilityMode ? "clip" : "ellipsis",
+                                            whiteSpace: accessibilityMode ? "normal" : "nowrap",
+                                            overflowWrap: "anywhere",
+                                            fontSize: accessibilityMode ? "1.1rem" : undefined
                                         }}
                                     >
                                         {doc.nomeArquivo}
@@ -250,9 +264,11 @@ export default function SharedDocuments() {
                                     <Typography
                                         sx={{
                                             color: "text.secondary",
-                                            overflow: "hidden",
-                                            textOverflow: "ellipsis",
-                                            whiteSpace: "nowrap"
+                                            overflow: accessibilityMode ? "visible" : "hidden",
+                                            textOverflow: accessibilityMode ? "clip" : "ellipsis",
+                                            whiteSpace: accessibilityMode ? "normal" : "nowrap",
+                                            overflowWrap: "anywhere",
+                                            fontSize: accessibilityMode ? "1rem" : undefined
                                         }}
                                     >
                                         {doc.medicoNome}
@@ -263,7 +279,10 @@ export default function SharedDocuments() {
                                         alignItems="center"
                                         gap={1}
                                         mt={2}
-                                        sx={{ minWidth: 0 }}
+                                        sx={{
+                                            minWidth: 0,
+                                            flexWrap: accessibilityMode ? "wrap" : "nowrap"
+                                        }}
                                     >
                                         <Box
                                             sx={{
@@ -285,9 +304,10 @@ export default function SharedDocuments() {
                                             sx={{
                                                 minWidth: 0,
                                                 flex: 1,
-                                                overflow: "hidden",
-                                                textOverflow: "ellipsis",
-                                                whiteSpace: "nowrap",
+                                                overflow: accessibilityMode ? "visible" : "hidden",
+                                                textOverflow: accessibilityMode ? "clip" : "ellipsis",
+                                                whiteSpace: accessibilityMode ? "normal" : "nowrap",
+                                                overflowWrap: "anywhere",
                                                 color: "text.primary",
                                                 fontWeight: 700
                                             }}
@@ -295,37 +315,58 @@ export default function SharedDocuments() {
                                             {doc.nomeOriginal || t("documents.shared.oldFile")}
                                         </Typography>
 
-                                        <Tooltip title={t("documents.shared.view")}>
-                                            <IconButton
-                                                onClick={() => handleOpen(doc)}
-                                                size="small"
-                                                sx={{
-                                                    color: "secondary.main",
-                                                    bgcolor: isDark ? "rgba(14, 165, 233, 0.12)" : "rgba(15, 118, 110, 0.08)",
-                                                    border: "1px solid",
-                                                    borderColor: isDark ? "rgba(14, 165, 233, 0.22)" : "rgba(15, 118, 110, 0.16)"
-                                                }}
-                                            >
-                                                <OpenInNewIcon fontSize="small" />
-                                            </IconButton>
-                                        </Tooltip>
+                                        {accessibilityMode ? (
+                                            <Box display="flex" gap={1} flexWrap="wrap" sx={{ width: { xs: "100%", sm: "auto" } }}>
+                                                <Button
+                                                    onClick={() => handleOpen(doc)}
+                                                    startIcon={<OpenInNewIcon />}
+                                                    sx={{ minHeight: 48, fontWeight: 800, textTransform: "none", flex: 1 }}
+                                                >
+                                                    {t("documents.shared.view")}
+                                                </Button>
+                                                <Button
+                                                    onClick={() => downloadDocument(doc.id, doc.nomeOriginal)}
+                                                    startIcon={<DownloadIcon />}
+                                                    sx={{ minHeight: 48, fontWeight: 800, textTransform: "none", flex: 1 }}
+                                                >
+                                                    {t("documents.shared.download")}
+                                                </Button>
+                                            </Box>
+                                        ) : (
+                                            <>
+                                                <Tooltip title={t("documents.shared.view")}>
+                                                    <IconButton
+                                                        onClick={() => handleOpen(doc)}
+                                                        size="small"
+                                                        aria-label={t("documents.shared.view")}
+                                                        sx={{
+                                                            color: "secondary.main",
+                                                            bgcolor: isDark ? "rgba(14, 165, 233, 0.12)" : "rgba(15, 118, 110, 0.08)",
+                                                            border: "1px solid",
+                                                            borderColor: isDark ? "rgba(14, 165, 233, 0.22)" : "rgba(15, 118, 110, 0.16)"
+                                                        }}
+                                                    >
+                                                        <OpenInNewIcon fontSize="small" />
+                                                    </IconButton>
+                                                </Tooltip>
 
-                                        <Tooltip title={t("documents.shared.download")}>
-                                            <IconButton
-                                                onClick={() =>
-                                                    downloadDocument(doc.id, doc.nomeOriginal)
-                                                }
-                                                size="small"
-                                                sx={{
-                                                    color: "primary.main",
-                                                    bgcolor: isDark ? "rgba(34, 197, 94, 0.12)" : "rgba(22, 163, 74, 0.08)",
-                                                    border: "1px solid",
-                                                    borderColor: vitta.borderStrong
-                                                }}
-                                            >
-                                                <DownloadIcon fontSize="small" />
-                                            </IconButton>
-                                        </Tooltip>
+                                                <Tooltip title={t("documents.shared.download")}>
+                                                    <IconButton
+                                                        onClick={() => downloadDocument(doc.id, doc.nomeOriginal)}
+                                                        size="small"
+                                                        aria-label={t("documents.shared.download")}
+                                                        sx={{
+                                                            color: "primary.main",
+                                                            bgcolor: isDark ? "rgba(34, 197, 94, 0.12)" : "rgba(22, 163, 74, 0.08)",
+                                                            border: "1px solid",
+                                                            borderColor: vitta.borderStrong
+                                                        }}
+                                                    >
+                                                        <DownloadIcon fontSize="small" />
+                                                    </IconButton>
+                                                </Tooltip>
+                                            </>
+                                        )}
                                     </Box>
 
                                     <Typography
@@ -359,25 +400,46 @@ export default function SharedDocuments() {
                         bgcolor: "background.default"
                     }}
                 >
-                    <IconButton
-                        onClick={handleCloseViewer}
-                        sx={{
-                            position: "absolute",
-                            right: 12,
-                            top: 12,
-                            zIndex: 10,
-                            bgcolor: "background.paper",
-                            border: "1px solid",
-                            borderColor: "divider",
-                            boxShadow: vitta.shadow,
+                    {accessibilityMode ? (
+                        <Button
+                            onClick={handleCloseViewer}
+                            startIcon={<CloseIcon />}
+                            aria-label={t("documents.shared.closeViewer")}
+                            sx={{
+                                position: "absolute",
+                                right: 12,
+                                top: 12,
+                                zIndex: 10,
+                                minHeight: 48,
+                                bgcolor: "background.paper",
+                                fontWeight: 800,
+                                textTransform: "none"
+                            }}
+                        >
+                            {t("documents.shared.closeViewer")}
+                        </Button>
+                    ) : (
+                        <IconButton
+                            onClick={handleCloseViewer}
+                            aria-label={t("documents.shared.closeViewer")}
+                            sx={{
+                                position: "absolute",
+                                right: 12,
+                                top: 12,
+                                zIndex: 10,
+                                bgcolor: "background.paper",
+                                border: "1px solid",
+                                borderColor: "divider",
+                                boxShadow: vitta.shadow,
 
-                            "&:hover": {
-                                bgcolor: isDark ? "rgba(220, 252, 231, 0.08)" : "#f5f5f5"
-                            }
-                        }}
-                    >
-                        <CloseIcon />
-                    </IconButton>
+                                "&:hover": {
+                                    bgcolor: isDark ? "rgba(220, 252, 231, 0.08)" : "#f5f5f5"
+                                }
+                            }}
+                        >
+                            <CloseIcon />
+                        </IconButton>
+                    )}
 
                     {selectedDoc && getFileType(selectedDoc.extensao) === "pdf" ? (
                         <object
