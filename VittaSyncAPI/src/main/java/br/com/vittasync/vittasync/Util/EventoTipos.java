@@ -1,5 +1,6 @@
 package br.com.vittasync.vittasync.Util;
 
+
 public class EventoTipos {
 
     public static final String DESVIO_LINHA_BASE = "desvio_linha_base";

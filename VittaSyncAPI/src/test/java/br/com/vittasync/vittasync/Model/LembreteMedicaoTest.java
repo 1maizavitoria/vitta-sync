@@ -1,8 +1,6 @@
 package br.com.vittasync.vittasync.Model;
 
 
-import br.com.vittasync.vittasync.Model.LembreteMedicao;
-import br.com.vittasync.vittasync.Model.Usuario;
 import org.junit.jupiter.api.Test;
 import java.time.LocalTime;
 import static org.junit.jupiter.api.Assertions.*;

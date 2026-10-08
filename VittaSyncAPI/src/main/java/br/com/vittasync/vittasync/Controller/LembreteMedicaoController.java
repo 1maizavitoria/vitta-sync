@@ -3,9 +3,9 @@ package br.com.vittasync.vittasync.Controller;
 
 import br.com.vittasync.vittasync.DTO.LembreteMedicaoInputDTO;
 import br.com.vittasync.vittasync.DTO.LembreteMedicaoOutputDTO;
+import br.com.vittasync.vittasync.Exception.AcessoNegadoException;
 import br.com.vittasync.vittasync.Model.LembreteMedicao;
 import br.com.vittasync.vittasync.Model.Usuario;
-import br.com.vittasync.vittasync.Service.JwtService;
 import br.com.vittasync.vittasync.Service.LembreteMedicaoService;
 import br.com.vittasync.vittasync.Service.PermissaoService;
 import br.com.vittasync.vittasync.Service.UsuarioService;
@@ -18,19 +18,16 @@ import org.springframework.web.bind.annotation.*;
 public class LembreteMedicaoController {
 
     private final LembreteMedicaoService service;
-    private final JwtService jwtService;
     private final UsuarioService usuarioService;
     private final PermissaoService permissaoService;
 
     public LembreteMedicaoController(
             LembreteMedicaoService service,
-            JwtService jwtService,
             UsuarioService usuarioService,
             PermissaoService permissaoService
     ) {
 
         this.service = service;
-        this.jwtService = jwtService;
         this.usuarioService = usuarioService;
         this.permissaoService = permissaoService;
     }
@@ -52,18 +49,11 @@ public class LembreteMedicaoController {
     @PostMapping("/registrar/{cpf}")
     public ResponseEntity<LembreteMedicaoOutputDTO> create(
             @PathVariable String cpf,
-            @RequestHeader("Authorization") String authHeader,
             @RequestBody LembreteMedicaoInputDTO request
     ) {
 
-        String token =
-                authHeader.replace("Bearer ", "");
-
-        String cpfDoToken =
-                jwtService.extrairCpf(token);
-
         Usuario usuarioLogado =
-                usuarioService.searchByCpf(cpfDoToken);
+                usuarioService.getUsuarioLogado();
 
         Usuario paciente =
                 usuarioService.searchByCpf(cpf);
@@ -75,7 +65,7 @@ public class LembreteMedicaoController {
                 )
         ) {
 
-            return ResponseEntity.status(403).build();
+            throw new AcessoNegadoException("Usuário sem permissão para acessar o paciente");
         }
 
         LembreteMedicao lembrete =
@@ -119,18 +109,11 @@ public class LembreteMedicaoController {
 
     @GetMapping("/getLembrete/{cpf}")
     public ResponseEntity<LembreteMedicaoOutputDTO> getLembrete(
-            @PathVariable String cpf,
-            @RequestHeader("Authorization") String authHeader
+            @PathVariable String cpf
     ) {
 
-        String token =
-                authHeader.replace("Bearer ", "");
-
-        String cpfDoToken =
-                jwtService.extrairCpf(token);
-
         Usuario usuarioLogado =
-                usuarioService.searchByCpf(cpfDoToken);
+                usuarioService.getUsuarioLogado();
 
         Usuario paciente =
                 usuarioService.searchByCpf(cpf);
@@ -142,7 +125,7 @@ public class LembreteMedicaoController {
                 )
         ) {
 
-            return ResponseEntity.status(403).build();
+            throw new AcessoNegadoException("Usuário sem permissão para acessar o paciente");
         }
 
         return service.searchlembrete(paciente)
@@ -158,18 +141,11 @@ public class LembreteMedicaoController {
 
     @PutMapping("/ativar/{cpf}")
     public ResponseEntity<LembreteMedicaoOutputDTO> ativar(
-            @PathVariable String cpf,
-            @RequestHeader("Authorization") String authHeader
+            @PathVariable String cpf
     ) {
 
-        String token =
-                authHeader.replace("Bearer ", "");
-
-        String cpfDoToken =
-                jwtService.extrairCpf(token);
-
         Usuario usuarioLogado =
-                usuarioService.searchByCpf(cpfDoToken);
+                usuarioService.getUsuarioLogado();
 
         Usuario paciente =
                 usuarioService.searchByCpf(cpf);
@@ -181,7 +157,7 @@ public class LembreteMedicaoController {
                 )
         ) {
 
-            return ResponseEntity.status(403).build();
+            throw new AcessoNegadoException("Usuário sem permissão para acessar o paciente");
         }
 
         return service.ativar(
@@ -200,18 +176,11 @@ public class LembreteMedicaoController {
 
     @PutMapping("/desativar/{cpf}")
     public ResponseEntity<LembreteMedicaoOutputDTO> desativar(
-            @PathVariable String cpf,
-            @RequestHeader("Authorization") String authHeader
+            @PathVariable String cpf
     ) {
 
-        String token =
-                authHeader.replace("Bearer ", "");
-
-        String cpfDoToken =
-                jwtService.extrairCpf(token);
-
         Usuario usuarioLogado =
-                usuarioService.searchByCpf(cpfDoToken);
+                usuarioService.getUsuarioLogado();
 
         Usuario paciente =
                 usuarioService.searchByCpf(cpf);
@@ -223,7 +192,7 @@ public class LembreteMedicaoController {
                 )
         ) {
 
-            return ResponseEntity.status(403).build();
+            throw new AcessoNegadoException("Usuário sem permissão para acessar o paciente");
         }
 
         return service.desativar(

@@ -6,9 +6,11 @@ public class SolicitarRedefinicaoDTO {
     private String email;
     private String canal;
 
+
     public String getEmail() {return email;}
     public void setEmail(String email) {this.email = email;}
 
     public String getCanal() {return canal;}
     public void setCanal(String canal) {this.canal = canal;}
+    
 }

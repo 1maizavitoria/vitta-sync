@@ -1,5 +1,6 @@
 package br.com.vittasync.vittasync.Controller;
 
+
 import br.com.vittasync.vittasync.Model.ArquivoMedico;
 import br.com.vittasync.vittasync.Model.Usuario;
 import br.com.vittasync.vittasync.Service.ArquivoMedicoService;
@@ -14,13 +15,12 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.web.servlet.MockMvc;
-
 import java.util.List;
-
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+
 
 @WebMvcTest(ArquivoMedicoController.class)
 @AutoConfigureMockMvc(addFilters = false)
@@ -44,6 +44,7 @@ class ArquivoMedicoControllerTest {
 
         when(jwtService.extrairCpf("token")).thenReturn("111");
         when(usuarioService.searchByCpf("111")).thenReturn(medico);
+        when(usuarioService.getUsuarioLogado()).thenReturn(medico);
         when(usuarioService.searchByCpf("222")).thenReturn(paciente);
         when(permissaoService.medicoVinculadoAoPaciente(1,2)).thenReturn(true);
         when(service.upload(eq(medico), eq(paciente), anyString(), anyString(), anyString(), any())).thenReturn(doc);
@@ -62,6 +63,7 @@ class ArquivoMedicoControllerTest {
 
         when(jwtService.extrairCpf("token")).thenReturn("222");
         when(usuarioService.searchByCpf("222")).thenReturn(paciente);
+        when(usuarioService.getUsuarioLogado()).thenReturn(paciente);
         when(permissaoService.podeVisualizarPaciente(anyInt(), anyInt())).thenReturn(true);
         when(service.listarPorPaciente(paciente)).thenReturn(List.of(doc));
 
@@ -78,6 +80,7 @@ class ArquivoMedicoControllerTest {
 
         when(jwtService.extrairCpf("token")).thenReturn("111");
         when(usuarioService.searchByCpf("111")).thenReturn(medico);
+        when(usuarioService.getUsuarioLogado()).thenReturn(medico);
         when(permissaoService.isMedico(medico)).thenReturn(true);
         when(service.listarPorMedico(medico)).thenReturn(List.of(doc));
 
@@ -93,6 +96,7 @@ class ArquivoMedicoControllerTest {
 
         when(jwtService.extrairCpf("token")).thenReturn("222");
         when(usuarioService.searchByCpf("222")).thenReturn(paciente);
+        when(usuarioService.getUsuarioLogado()).thenReturn(paciente);
         when(permissaoService.podeVisualizarPaciente(anyInt(), anyInt())).thenReturn(true);
         when(service.visualizar(5)).thenReturn(doc);
 
@@ -108,6 +112,7 @@ class ArquivoMedicoControllerTest {
 
         when(jwtService.extrairCpf("token")).thenReturn("222");
         when(usuarioService.searchByCpf("222")).thenReturn(paciente);
+        when(usuarioService.getUsuarioLogado()).thenReturn(paciente);
         when(permissaoService.podeVisualizarPaciente(anyInt(), anyInt())).thenReturn(true);
         when(service.visualizar(5)).thenReturn(doc);
 
@@ -122,6 +127,7 @@ class ArquivoMedicoControllerTest {
 
         when(jwtService.extrairCpf("token")).thenReturn("111");
         when(usuarioService.searchByCpf("111")).thenReturn(medico);
+        when(usuarioService.getUsuarioLogado()).thenReturn(medico);
         when(permissaoService.isMedico(medico)).thenReturn(true);
         doNothing().when(service).deletar(eq(medico), eq(7));
 

@@ -28,11 +28,11 @@ public class RelatorioPreviewDTO {
     }
 
 
-    public RelatorioPacienteResumoDTO getPaciente() { return paciente; }
-    public void setPaciente(RelatorioPacienteResumoDTO paciente) { this.paciente = paciente; }
+    public RelatorioPacienteResumoDTO getPaciente() {return paciente;}
+    public void setPaciente(RelatorioPacienteResumoDTO paciente) {this.paciente = paciente;}
 
     public List<LinhaTempoSinaisVitaisDTO> getSinaisVitais() { return sinaisVitais; }
-    public void setSinaisVitais(List<LinhaTempoSinaisVitaisDTO> sinaisVitais) { this.sinaisVitais = sinaisVitais; }
+    public void setSinaisVitais(List<LinhaTempoSinaisVitaisDTO> sinaisVitais) {this.sinaisVitais = sinaisVitais;}
 
     public List<LinhaTempoHabitosDTO> getHabitos() { return habitos; }
     public void setHabitos(List<LinhaTempoHabitosDTO> habitos) { this.habitos = habitos; }
@@ -42,18 +42,25 @@ public class RelatorioPreviewDTO {
 
     public LocalDate getDataInicio() { return dataInicio; }
     public void setDataInicio(LocalDate dataInicio) { this.dataInicio = dataInicio; }
+    
     public LocalDate getDataFim() { return dataFim; }
     public void setDataFim(LocalDate dataFim) { this.dataFim = dataFim; }
+    
     public LocalDateTime getDataEmissao() { return dataEmissao; }
     public void setDataEmissao(LocalDateTime dataEmissao) { this.dataEmissao = dataEmissao; }
+    
     public List<String> getCategorias() { return categorias; }
     public void setCategorias(List<String> categorias) { this.categorias = List.copyOf(categorias); }
+    
     public RelatorioResumoDTO getResumo() { return resumo; }
     public void setResumo(RelatorioResumoDTO resumo) { this.resumo = resumo; }
+    
     public boolean isSemRegistros() {
         return sinaisVitais.isEmpty() && habitos.isEmpty() && sintomas.isEmpty();
     }
+
     public String getMensagem() {
         return isSemRegistros() ? "Nenhum registro encontrado para os filtros selecionados." : null;
     }
+    
 }

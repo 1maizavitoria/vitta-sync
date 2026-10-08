@@ -52,4 +52,5 @@ public class LembreteMedicao {
 
     public Boolean getEnviarSms() {return enviarSms;}
     public void setEnviarSms(Boolean enviarSms) {this.enviarSms = enviarSms;}
+    
 }

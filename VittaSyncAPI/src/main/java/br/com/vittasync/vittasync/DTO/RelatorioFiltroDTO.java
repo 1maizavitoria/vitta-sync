@@ -46,4 +46,5 @@ public class RelatorioFiltroDTO {
         return (dataInicio == null || (dataInicio.getYear() >= 1 && dataInicio.getYear() <= 9999))
                 && (dataFim == null || (dataFim.getYear() >= 1 && dataFim.getYear() <= 9999));
     }
+    
 }

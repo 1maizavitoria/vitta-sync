@@ -1,15 +1,16 @@
 package br.com.vittasync.vittasync.Service;
 
+
 import br.com.vittasync.vittasync.Exception.RecursoNaoEncontradoException;
 import br.com.vittasync.vittasync.Model.Habitos;
 import br.com.vittasync.vittasync.Model.ContatoEmergencia;
-import br.com.vittasync.vittasync.Model.Usuario;
 import br.com.vittasync.vittasync.Repository.HabitosRepository;
 import br.com.vittasync.vittasync.Util.EventoPrioridades;
 import br.com.vittasync.vittasync.Util.EventoTipos;
 import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.util.List;
+
 
 @Service
 public class HabitosService {

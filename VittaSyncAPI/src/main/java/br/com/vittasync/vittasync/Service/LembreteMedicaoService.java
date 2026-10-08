@@ -1,14 +1,15 @@
 package br.com.vittasync.vittasync.Service;
 
+
 import br.com.vittasync.vittasync.Model.LembreteMedicao;
 import br.com.vittasync.vittasync.Model.Usuario;
 import br.com.vittasync.vittasync.Repository.LembreteMedicaoRepository;
 import br.com.vittasync.vittasync.Util.EventoPrioridades;
 import br.com.vittasync.vittasync.Util.EventoTipos;
 import org.springframework.stereotype.Service;
-
 import java.util.List;
 import java.util.Optional;
+
 
 @Service
 public class LembreteMedicaoService {

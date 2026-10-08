@@ -1,7 +1,9 @@
 package br.com.vittasync.vittasync.DTO;
 
+
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+
 
 public class LinhaTempoItemDTO {
 
@@ -25,9 +27,15 @@ public class LinhaTempoItemDTO {
         this.dados = dados;
     }
 
+    
     public Integer getId() { return id; }
+    
     public String getTipo() { return tipo; }
+    
     public LocalDate getDataReferencia() { return dataReferencia; }
+    
     public LocalDateTime getDataRegistro() { return dataRegistro; }
+    
     public Object getDados() { return dados; }
+
 }

@@ -14,8 +14,8 @@ public class DiarioSintomasOutputDTO {
     private LocalDateTime dataRegistro;
     private LocalDateTime dataModificacao;
 
-
     public DiarioSintomasOutputDTO() {}
+
 
     public Integer getId() { return id; }
     public void setId(Integer id) { this.id = id; }

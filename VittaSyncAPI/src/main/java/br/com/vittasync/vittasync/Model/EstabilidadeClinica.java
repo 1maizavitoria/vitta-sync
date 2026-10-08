@@ -35,26 +35,21 @@ public class EstabilidadeClinica {
     public Long getId() {return id;}
 
     public Integer getPacienteId() {return pacienteId;}
-
     public void setPacienteId(Integer pacienteId) {this.pacienteId = pacienteId;}
 
     public String getTipo() {return tipo;}
-
     public void setTipo(String tipo) {this.tipo = tipo;}
 
     public Integer getIndice() {return indice;}
-
     public void setIndice(Integer indice) {this.indice = indice;}
 
     public String getCategoria() {return categoria;}
-
     public void setCategoria(String categoria) {this.categoria = categoria;}
 
     public Double getPeso() {return peso;}
-
     public void setPeso(Double peso) {this.peso = peso;}
 
     public LocalDateTime getDataCalculo() {return dataCalculo;}
-
     public void setDataCalculo(LocalDateTime dataCalculo) {this.dataCalculo = dataCalculo;}
+    
 }

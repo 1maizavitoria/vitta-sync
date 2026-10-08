@@ -21,8 +21,13 @@ public class RelatorioPacienteResumoDTO {
 
 
     public String getNome() { return nome; }
+    
     public String getCpf() { return cpf; }
+    
     public Double getPesoInicial() { return pesoInicial; }
+    
     public Double getAltura() { return altura; }
+    
     public LocalDate getDataNascimento() { return dataNascimento; }
+    
 }

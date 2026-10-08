@@ -1,14 +1,15 @@
 package br.com.vittasync.vittasync.Service;
 
+
 import br.com.vittasync.vittasync.Exception.RecursoNaoEncontradoException;
 import br.com.vittasync.vittasync.Model.DiarioSintomas;
 import br.com.vittasync.vittasync.Repository.DiarioSintomasRepository;
 import br.com.vittasync.vittasync.Util.EventoPrioridades;
 import br.com.vittasync.vittasync.Util.EventoTipos;
 import org.springframework.stereotype.Service;
-
 import java.time.LocalDateTime;
 import java.util.List;
+
 
 @Service
 public class DiarioSintomasService {

@@ -121,4 +121,5 @@ public class ContatoEmergencia {
 
     public LocalDateTime getDataModificacao() { return dataModificacao; }
     public void setDataModificacao(LocalDateTime dataModificacao) { this.dataModificacao = dataModificacao; }
+
 }

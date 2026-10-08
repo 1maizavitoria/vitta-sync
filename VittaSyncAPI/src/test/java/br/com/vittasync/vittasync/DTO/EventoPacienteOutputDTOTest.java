@@ -1,8 +1,10 @@
 package br.com.vittasync.vittasync.DTO;
 
+
 import org.junit.jupiter.api.Test;
 import java.sql.Timestamp;
 import static org.junit.jupiter.api.Assertions.*;
+
 
 class EventoPacienteOutputDTOTest {
 

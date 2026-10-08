@@ -1,8 +1,9 @@
 package br.com.vittasync.vittasync.Model;
 
-import jakarta.persistence.*;
 
+import jakarta.persistence.*;
 import java.sql.Timestamp;
+
 
 @Entity
 @Table(name = "Vinculo")
@@ -34,43 +35,20 @@ public class Vinculo {
         return id;
     }
 
-    public Integer getPacienteId() {
-        return pacienteId;
-    }
 
-    public void setPacienteId(Integer pacienteId) {
-        this.pacienteId = pacienteId;
-    }
+    public Integer getPacienteId() {return pacienteId;}
+    public void setPacienteId(Integer pacienteId) {this.pacienteId = pacienteId;}
+    
+    public Integer getUsuarioId() {return usuarioId;}
+    public void setUsuarioId(Integer usuarioId) {this.usuarioId = usuarioId;}
 
-    public Integer getUsuarioId() {
-        return usuarioId;
-    }
+    public String getTipo() {return tipo;}
+    public void setTipo(String tipo) {this.tipo = tipo;}
 
-    public void setUsuarioId(Integer usuarioId) {
-        this.usuarioId = usuarioId;
-    }
+    public Timestamp getCriadoEm() {return criadoEm;}
+    public void setCriadoEm(Timestamp criadoEm) {this.criadoEm = criadoEm;}
 
-    public String getTipo() {
-        return tipo;
-    }
-
-    public void setTipo(String tipo) {
-        this.tipo = tipo;
-    }
-
-    public Timestamp getCriadoEm() {
-        return criadoEm;
-    }
-
-    public void setCriadoEm(Timestamp criadoEm) {
-        this.criadoEm = criadoEm;
-    }
-
-    public String getFuncao() {
-        return funcao;
-    }
-
-    public void setFuncao(String funcao) {
-        this.funcao = funcao;
-    }
+    public String getFuncao() {return funcao;}
+    public void setFuncao(String funcao) {this.funcao = funcao;}
+    
 }

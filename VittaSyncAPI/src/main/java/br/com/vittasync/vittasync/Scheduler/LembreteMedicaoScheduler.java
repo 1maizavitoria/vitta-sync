@@ -5,6 +5,8 @@ import br.com.vittasync.vittasync.Model.LembreteMedicao;
 import br.com.vittasync.vittasync.Model.Usuario;
 import br.com.vittasync.vittasync.Service.LembreteMedicaoService;
 import br.com.vittasync.vittasync.Service.NotificacaoService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import java.time.DayOfWeek;
@@ -16,6 +18,8 @@ import java.util.List;
 
 @Component
 public class LembreteMedicaoScheduler {
+
+    private static final Logger logger = LoggerFactory.getLogger(LembreteMedicaoScheduler.class);
 
     private final LembreteMedicaoService service;
     private final NotificacaoService notificacaoService;
@@ -69,6 +73,8 @@ public class LembreteMedicaoScheduler {
                                 + "registrar suas medições "
                                 + "de saúde na plataforma "
                                 + "VittaSync.";
+
+                logger.info("Enviando lembrete de medição id: {} para usuário id: {}", lembrete.getId(), usuario.getId());
 
                 if (
                         Boolean.TRUE.equals(

@@ -1,16 +1,21 @@
 package br.com.vittasync.vittasync.Exception;
 
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-
 import java.util.HashMap;
 import java.util.Map;
 
+
 @RestControllerAdvice
 public class GlobalExceptionHandler {
+
+    private static final Logger logger = LoggerFactory.getLogger(GlobalExceptionHandler.class);
 
     @ExceptionHandler(UsuarioJaCadastradoException.class)
     public ResponseEntity<Map<String, String>> handleUsuarioJaCadastrado(UsuarioJaCadastradoException ex) {
@@ -22,6 +27,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(AcessoNegadoException.class)
     public ResponseEntity<Map<String, String>> handleAcessoNegado(AcessoNegadoException ex) {
+        logger.warn("Acesso negado: {}", ex.getMessage());
         Map<String, String> error = new HashMap<>();
         error.put("name", "AxiosError: Request failed with status code 403");
         error.put("value", "accessDenied");
@@ -59,7 +65,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<Map<String, String>> handleErroGenerico(Exception ex) {
-        ex.printStackTrace();
+        logger.error("Erro inesperado: {}", ex.getMessage(), ex);
         Map<String, String> error = new HashMap<>();
         error.put("name", "AxiosError: Request failed with status code 500");
         error.put("value", "internalServerError");

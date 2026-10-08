@@ -1,5 +1,6 @@
 package br.com.vittasync.vittasync.Repository;
 
+
 import br.com.vittasync.vittasync.Model.Usuario;
 import br.com.vittasync.vittasync.Model.Vinculo;
 import org.junit.jupiter.api.BeforeEach;
@@ -8,15 +9,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.transaction.annotation.Transactional;
-
 import java.sql.Timestamp;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
-
 import static org.assertj.core.api.Assertions.assertThat;
+
 
 @DataJpaTest
 @Transactional

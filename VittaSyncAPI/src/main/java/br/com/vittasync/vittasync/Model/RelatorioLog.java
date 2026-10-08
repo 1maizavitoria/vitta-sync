@@ -57,4 +57,5 @@ public class RelatorioLog {
 
     public LocalDateTime getDataExportacao() { return dataExportacao; }
     public void setDataExportacao(LocalDateTime dataExportacao) { this.dataExportacao = dataExportacao; }
+    
 }

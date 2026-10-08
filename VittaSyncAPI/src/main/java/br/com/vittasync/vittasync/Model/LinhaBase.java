@@ -50,6 +50,7 @@ public class LinhaBase {
 
     public LinhaBase() {}
 
+
     public Integer getId() { return id; }
     public void setId(Integer id) { this.id = id; }
 
@@ -79,4 +80,5 @@ public class LinhaBase {
 
     public LocalDateTime getDataFormacao() { return dataFormacao; }
     public void setDataFormacao(LocalDateTime dataFormacao) { this.dataFormacao = dataFormacao; }
+
 }

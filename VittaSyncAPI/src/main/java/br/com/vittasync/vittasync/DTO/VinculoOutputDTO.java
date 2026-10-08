@@ -1,6 +1,8 @@
 package br.com.vittasync.vittasync.DTO;
 
+
 import java.sql.Timestamp;
+
 
 public class VinculoOutputDTO {
 
@@ -19,59 +21,25 @@ public class VinculoOutputDTO {
     private Timestamp criadoEm;
 
 
-    public Long getId() {
-        return id;
-    }
+    public Long getId() {return id;}
+    public void setId(Long id) {this.id = id;}
 
-    public void setId(Long id) {
-        this.id = id;
-    }
+    public String getNome() {return nome;}
+    public void setNome(String nome) {this.nome = nome;}
 
-    public String getNome() {
-        return nome;
-    }
+    public String getEmail() {return email;}
+    public void setEmail(String email) {this.email = email;}
 
-    public void setNome(String nome) {
-        this.nome = nome;
-    }
+    public String getTipo() {return tipo;}
+    public void setTipo(String tipo) {this.tipo = tipo;}
 
-    public String getEmail() {
-        return email;
-    }
+    public String getConselho() {return conselho;}
+    public void setConselho(String conselho) {this.conselho = conselho;}
 
-    public void setEmail(String email) {
-        this.email = email;
-    }
+    public Timestamp getCriadoEm() {return criadoEm;}
+    public void setCriadoEm(Timestamp criadoEm) {this.criadoEm = criadoEm;}
 
-    public String getTipo() {
-        return tipo;
-    }
-
-    public void setTipo(String tipo) {
-        this.tipo = tipo;
-    }
-
-    public String getConselho() {
-        return conselho;
-    }
-
-    public void setConselho(String conselho) {
-        this.conselho = conselho;
-    }
-
-    public Timestamp getCriadoEm() {
-        return criadoEm;
-    }
-
-    public void setCriadoEm(Timestamp criadoEm) {
-        this.criadoEm = criadoEm;
-    }
-
-    public String getFuncao() {
-        return funcao;
-    }
-
-    public void setFuncao(String funcao) {
-        this.funcao = funcao;
-    }
+    public String getFuncao() {return funcao;}
+    public void setFuncao(String funcao) {this.funcao = funcao;}
+    
 }

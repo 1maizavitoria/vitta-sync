@@ -1,7 +1,6 @@
 package br.com.vittasync.vittasync.Model;
 
-import br.com.vittasync.vittasync.Model.DiarioSintomas;
-import br.com.vittasync.vittasync.Model.Usuario;
+
 import org.junit.jupiter.api.Test;
 import java.time.LocalDate;
 import java.time.LocalDateTime;

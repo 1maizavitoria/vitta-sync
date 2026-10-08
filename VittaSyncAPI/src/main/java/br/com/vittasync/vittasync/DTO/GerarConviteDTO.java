@@ -1,5 +1,6 @@
 package br.com.vittasync.vittasync.DTO;
 
+
 public class GerarConviteDTO {
 
     private Integer pacienteId;
@@ -7,11 +8,8 @@ public class GerarConviteDTO {
     public GerarConviteDTO() {
     }
 
-    public Integer getPacienteId() {
-        return pacienteId;
-    }
 
-    public void setPacienteId(Integer pacienteId) {
-        this.pacienteId = pacienteId;
-    }
+    public Integer getPacienteId() {return pacienteId;}
+    public void setPacienteId(Integer pacienteId) {this.pacienteId = pacienteId;}
+    
 }

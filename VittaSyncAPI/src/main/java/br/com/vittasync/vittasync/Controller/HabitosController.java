@@ -3,6 +3,7 @@ package br.com.vittasync.vittasync.Controller;
 
 import br.com.vittasync.vittasync.DTO.HabitosInputDTO;
 import br.com.vittasync.vittasync.DTO.HabitosOutputDTO;
+import br.com.vittasync.vittasync.Exception.AcessoNegadoException;
 import br.com.vittasync.vittasync.Model.Habitos;
 import br.com.vittasync.vittasync.Model.Usuario;
 import br.com.vittasync.vittasync.Model.SinaisVitais;
@@ -18,7 +19,6 @@ import java.util.stream.Collectors;
 public class HabitosController {
 
     private final HabitosService service;
-    private final JwtService jwtService;
     private final UsuarioService usuarioService;
     private final PermissaoService permissaoService;
     private final EventoPacienteService eventoPacienteService;
@@ -27,7 +27,6 @@ public class HabitosController {
 
     public HabitosController(
             HabitosService service,
-            JwtService jwtService,
             UsuarioService usuarioService,
             PermissaoService permissaoService,
             EventoPacienteService eventoPacienteService,
@@ -35,7 +34,6 @@ public class HabitosController {
             EstabilidadeClinicaService estabilidadeClinicaService
     ) {
         this.service = service;
-        this.jwtService = jwtService;
         this.usuarioService = usuarioService;
         this.permissaoService = permissaoService;
         this.eventoPacienteService = eventoPacienteService;
@@ -46,16 +44,13 @@ public class HabitosController {
 
     @PostMapping("/cadastrar/{cpf}")
     public ResponseEntity<HabitosOutputDTO> create(@PathVariable String cpf,
-                                                   @RequestHeader("Authorization") String authHeader,
                                                    @RequestBody HabitosInputDTO dto) {
 
-        String token = authHeader.replace("Bearer ", "");
-        String cpfDoToken = jwtService.extrairCpf(token);
         Usuario paciente = usuarioService.searchByCpf(cpf);
-        Usuario usuarioLogado = usuarioService.searchByCpf(cpfDoToken);
+        Usuario usuarioLogado = usuarioService.getUsuarioLogado();
 
         if (!permissaoService.podeEditarPaciente(usuarioLogado.getId(), paciente.getId())) {
-            return ResponseEntity.status(403).build();
+            throw new AcessoNegadoException("Usuário sem permissão para editar o paciente");
         }
 
         Habitos entity = new Habitos();
@@ -78,16 +73,13 @@ public class HabitosController {
     @PutMapping("/editar/{id}/{cpf}")
     public ResponseEntity<HabitosOutputDTO> update(@PathVariable Integer id,
                                                    @PathVariable String cpf,
-                                                   @RequestHeader("Authorization") String authHeader,
                                                    @RequestBody HabitosInputDTO dto) {
 
-        String token = authHeader.replace("Bearer ", "");
-        String cpfDoToken = jwtService.extrairCpf(token);
         Usuario paciente = usuarioService.searchByCpf(cpf);
-        Usuario usuarioLogado = usuarioService.searchByCpf(cpfDoToken);
+        Usuario usuarioLogado = usuarioService.getUsuarioLogado();
 
         if (!permissaoService.podeEditarPaciente(usuarioLogado.getId(), paciente.getId())) {
-            return ResponseEntity.status(403).build();
+            throw new AcessoNegadoException("Usuário sem permissão para editar o paciente");
         }
 
         Habitos entity = new Habitos();
@@ -108,16 +100,12 @@ public class HabitosController {
 
     @DeleteMapping("/deletar/{id}/{cpf}")
     public ResponseEntity<Void> delete(@PathVariable Integer id,
-                                       @PathVariable String cpf,
-                                       @RequestHeader("Authorization") String authHeader) {
-        String token = authHeader.replace("Bearer ", "");
-        String cpfDoToken = jwtService.extrairCpf(token);
-
-        Usuario usuarioLogado = usuarioService.searchByCpf(cpfDoToken);
+                                       @PathVariable String cpf) {
+        Usuario usuarioLogado = usuarioService.getUsuarioLogado();
         Usuario paciente = usuarioService.searchByCpf(cpf);
 
         if (!permissaoService.podeEditarPaciente(usuarioLogado.getId(), paciente.getId())) {
-            return ResponseEntity.status(403).build();
+            throw new AcessoNegadoException("Usuário sem permissão para editar o paciente");
         }
 
         service.delete(id, usuarioLogado.getId());
@@ -126,16 +114,12 @@ public class HabitosController {
 
 
     @GetMapping("/getHabitos/{cpf}")
-    public ResponseEntity<List<HabitosOutputDTO>> list(@PathVariable String cpf,
-                                                       @RequestHeader("Authorization") String authHeader) {
-        String token = authHeader.replace("Bearer ", "");
-        String cpfDoToken = jwtService.extrairCpf(token);
-
-        Usuario usuarioLogado = usuarioService.searchByCpf(cpfDoToken);
+    public ResponseEntity<List<HabitosOutputDTO>> list(@PathVariable String cpf) {
+        Usuario usuarioLogado = usuarioService.getUsuarioLogado();
         Usuario paciente = usuarioService.searchByCpf(cpf);
 
         if (!permissaoService.podeVisualizarPaciente(usuarioLogado.getId(), paciente.getId())) {
-            return ResponseEntity.status(403).build();
+            throw new AcessoNegadoException("Usuário sem permissão para visualizar o paciente");
         }
 
         List<Habitos> lista = service.findByPacienteCpf(cpf);

@@ -1,5 +1,6 @@
 package br.com.vittasync.vittasync.Initializer;
 
+
 import br.com.vittasync.vittasync.Repository.SinaisVitaisRepository;
 import br.com.vittasync.vittasync.Service.LinhaBaseService;
 import org.slf4j.Logger;
@@ -7,6 +8,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.stereotype.Component;
+
 
 @Component
 public class LinhaBaseInitializer implements ApplicationRunner {
@@ -24,7 +26,7 @@ public class LinhaBaseInitializer implements ApplicationRunner {
 
     @Override
     public void run(ApplicationArguments args) {
-        // Cada chamada ao serviço tem sua própria transação e preserva bases existentes.
+
         for (Integer pacienteId : sinaisVitaisRepository.findTodosPacientesIds()) {
             try {
                 linhaBaseService.atualizarLinhasBase(pacienteId);

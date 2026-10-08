@@ -19,13 +19,7 @@ public class SessaoController {
 
         String token = authHeader.startsWith("Bearer ") ? authHeader.substring(7) : authHeader;
 
-        try {
-            sessaoService.logout(token);
-            return ResponseEntity.ok("Logout realizado com sucesso.");
-        }
-
-        catch (RuntimeException e) {
-            return ResponseEntity.status(401).body(e.getMessage());
-        }
+        sessaoService.logout(token);
+        return ResponseEntity.ok("Logout realizado com sucesso.");
     }
 }

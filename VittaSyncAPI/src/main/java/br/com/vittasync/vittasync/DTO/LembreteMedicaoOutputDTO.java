@@ -23,10 +23,16 @@ public class LembreteMedicaoOutputDTO {
 
     }
 
-    public Long getId() { return id; }
-    public String getDiasSemana() { return diasSemana; }
-    public LocalTime getHorario() { return horario; }
-    public boolean isAtivo() { return ativo; }
-    public Boolean getEnviarEmail() { return enviarEmail; }
-    public Boolean getEnviarSms() { return enviarSms; }
+
+    public Long getId() {return id;}
+    
+    public String getDiasSemana() {return diasSemana;}
+    
+    public LocalTime getHorario() {return horario;}
+    
+    public boolean isAtivo() {return ativo;}
+    
+    public Boolean getEnviarEmail() {return enviarEmail;}
+    
+    public Boolean getEnviarSms() {return enviarSms;}
 }

@@ -1,15 +1,15 @@
 package br.com.vittasync.vittasync.Service;
 
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
-
 import java.lang.reflect.Field;
-
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
+
 
 class EmailServiceTest {
 
@@ -70,5 +70,32 @@ class EmailServiceTest {
         assertThat(msg.getText()).contains("Convidado");
         assertThat(msg.getText()).contains("Código de vínculo: ABC123");
         assertThat(msg.getText()).contains("http://link.com");
+    }
+
+    @Test
+    void testEnviarAlertaClinico() {
+        ArgumentCaptor<SimpleMailMessage> captor = ArgumentCaptor.forClass(SimpleMailMessage.class);
+
+        emailService.enviarAlertaClinico("destinatario@teste.com", "Maria", "Paciente Teste", "Alerta", "Detalhes do alerta");
+
+        verify(mailSender, times(1)).send(captor.capture());
+        SimpleMailMessage msg = captor.getValue();
+
+        assertThat(msg.getSubject()).isEqualTo("Alerta");
+        assertThat(msg.getText()).contains("Olá, Maria", "Paciente Teste", "Detalhes do alerta");
+    }
+
+    @Test
+    void testEnviarAlertaRepouso() {
+        ArgumentCaptor<SimpleMailMessage> captor = ArgumentCaptor.forClass(SimpleMailMessage.class);
+
+        emailService.enviarAlertaRepouso("destinatario@teste.com", "Paciente Teste");
+
+        verify(mailSender, times(1)).send(captor.capture());
+        SimpleMailMessage msg = captor.getValue();
+
+        assertThat(msg.getFrom()).isEqualTo("no.reply.vittasync@gmail.com");
+        assertThat(msg.getSubject()).contains("Repouso recomendado para paciente Paciente Teste");
+        assertThat(msg.getText()).contains("precisa de repouso");
     }
 }

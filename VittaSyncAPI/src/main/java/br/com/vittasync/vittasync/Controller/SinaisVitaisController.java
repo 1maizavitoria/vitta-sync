@@ -4,6 +4,7 @@ package br.com.vittasync.vittasync.Controller;
 import br.com.vittasync.vittasync.Service.*;
 import br.com.vittasync.vittasync.DTO.SinaisVitaisInputDTO;
 import br.com.vittasync.vittasync.DTO.SinaisVitaisOutputDTO;
+import br.com.vittasync.vittasync.Exception.AcessoNegadoException;
 import br.com.vittasync.vittasync.Model.SinaisVitais;
 import br.com.vittasync.vittasync.Model.Usuario;
 import br.com.vittasync.vittasync.Model.Habitos;
@@ -18,7 +19,6 @@ import java.util.stream.Collectors;
 public class SinaisVitaisController {
 
     private final SinaisVitaisService service;
-    private final JwtService jwtService;
     private final UsuarioService usuarioService;
     private final PermissaoService permissaoService;
     private final EventoPacienteService eventoPacienteService;
@@ -27,7 +27,6 @@ public class SinaisVitaisController {
 
     public SinaisVitaisController(
             SinaisVitaisService service,
-            JwtService jwtService,
             UsuarioService usuarioService,
             PermissaoService permissaoService,
             EventoPacienteService eventoPacienteService,
@@ -35,7 +34,6 @@ public class SinaisVitaisController {
             EstabilidadeClinicaService estabilidadeClinicaService
     ) {
         this.service = service;
-        this.jwtService = jwtService;
         this.usuarioService = usuarioService;
         this.permissaoService = permissaoService;
         this.eventoPacienteService = eventoPacienteService;
@@ -45,15 +43,12 @@ public class SinaisVitaisController {
 
     @PostMapping("/cadastrar/{cpf}")
     public ResponseEntity<SinaisVitaisOutputDTO> create(@PathVariable String cpf,
-                                                        @RequestHeader("Authorization") String authHeader,
                                                         @RequestBody SinaisVitaisInputDTO dto) {
-        String token = authHeader.replace("Bearer ", "");
-        String cpfDoToken = jwtService.extrairCpf(token);
-        Usuario usuarioLogado = usuarioService.searchByCpf(cpfDoToken);
+        Usuario usuarioLogado = usuarioService.getUsuarioLogado();
         Usuario paciente = usuarioService.searchByCpf(cpf);
 
         if (!permissaoService.podeEditarPaciente(usuarioLogado.getId(), paciente.getId())) {
-            return ResponseEntity.status(403).build();
+            throw new AcessoNegadoException("Usuário sem permissão para editar o paciente");
         }
 
         SinaisVitais entity = new SinaisVitais();
@@ -78,16 +73,12 @@ public class SinaisVitaisController {
     @PutMapping("/editar/{id}/{cpf}")
     public ResponseEntity<SinaisVitaisOutputDTO> update(@PathVariable Integer id,
                                                         @PathVariable String cpf,
-                                                        @RequestHeader("Authorization") String authHeader,
                                                         @RequestBody SinaisVitaisInputDTO dto) {
-        String token = authHeader.replace("Bearer ", "");
-        String cpfDoToken = jwtService.extrairCpf(token);
-
-        Usuario usuarioLogado = usuarioService.searchByCpf(cpfDoToken);
+        Usuario usuarioLogado = usuarioService.getUsuarioLogado();
         Usuario paciente = usuarioService.searchByCpf(cpf);
 
         if (!permissaoService.podeEditarPaciente(usuarioLogado.getId(), paciente.getId())) {
-            return ResponseEntity.status(403).build();
+            throw new AcessoNegadoException("Usuário sem permissão para editar o paciente");
         }
 
         SinaisVitais entity = new SinaisVitais();
@@ -110,16 +101,12 @@ public class SinaisVitaisController {
 
     @DeleteMapping("/deletar/{id}/{cpf}")
     public ResponseEntity<Void> delete(@PathVariable Integer id,
-                                       @PathVariable String cpf,
-                                       @RequestHeader("Authorization") String authHeader) {
-        String token = authHeader.replace("Bearer ", "");
-        String cpfDoToken = jwtService.extrairCpf(token);
-
-        Usuario usuarioLogado = usuarioService.searchByCpf(cpfDoToken);
+                                       @PathVariable String cpf) {
+        Usuario usuarioLogado = usuarioService.getUsuarioLogado();
         Usuario paciente = usuarioService.searchByCpf(cpf);
 
         if (!permissaoService.podeEditarPaciente(usuarioLogado.getId(), paciente.getId())) {
-            return ResponseEntity.status(403).build();
+            throw new AcessoNegadoException("Usuário sem permissão para editar o paciente");
         }
 
         service.delete(id, usuarioLogado.getId());
@@ -127,16 +114,12 @@ public class SinaisVitaisController {
     }
 
     @GetMapping("/getSinaisVitais/{cpf}")
-    public ResponseEntity<List<SinaisVitaisOutputDTO>> list(@PathVariable String cpf,
-                                                            @RequestHeader("Authorization") String authHeader) {
-        String token = authHeader.replace("Bearer ", "");
-        String cpfDoToken = jwtService.extrairCpf(token);
-
-        Usuario usuarioLogado = usuarioService.searchByCpf(cpfDoToken);
+    public ResponseEntity<List<SinaisVitaisOutputDTO>> list(@PathVariable String cpf) {
+        Usuario usuarioLogado = usuarioService.getUsuarioLogado();
         Usuario paciente = usuarioService.searchByCpf(cpf);
 
         if (!permissaoService.podeVisualizarPaciente(usuarioLogado.getId(), paciente.getId())) {
-            return ResponseEntity.status(403).build();
+            throw new AcessoNegadoException("Usuário sem permissão para visualizar o paciente");
         }
 
         List<SinaisVitais> lista = service.findByPacienteCpf(cpf);

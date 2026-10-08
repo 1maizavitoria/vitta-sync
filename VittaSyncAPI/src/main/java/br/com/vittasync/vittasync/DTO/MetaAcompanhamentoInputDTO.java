@@ -43,4 +43,5 @@ public class MetaAcompanhamentoInputDTO {
 
     public LocalDate getDataLimite() { return dataLimite; }
     public void setDataLimite(LocalDate dataLimite) { this.dataLimite = dataLimite; }
+    
 }

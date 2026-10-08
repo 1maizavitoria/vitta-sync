@@ -50,6 +50,7 @@ public class Usuario {
     @Column(name = "data_cadastro")
     private LocalDateTime dataCadastro;
 
+
     public Integer getId() { return id; }
     public void setId(Integer id) { this.id = id; }
 
@@ -88,4 +89,5 @@ public class Usuario {
 
     public LocalDateTime getDataCadastro() { return dataCadastro; }
     public void setDataCadastro(LocalDateTime dataCadastro) { this.dataCadastro = dataCadastro; }
+    
 }

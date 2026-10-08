@@ -47,6 +47,7 @@ public class UsuarioInputDTO {
     @JsonFormat(pattern = "yyyy-MM-dd")
     private LocalDate dataNascimento;
 
+    
     public String getNome() { return nome; }
     public void setNome(String nome) { this.nome = nome; }
 

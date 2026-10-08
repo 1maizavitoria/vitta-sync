@@ -1,5 +1,6 @@
 package br.com.vittasync.vittasync.Controller;
 
+
 import br.com.vittasync.vittasync.Model.LembreteMedicao;
 import br.com.vittasync.vittasync.Model.Usuario;
 import br.com.vittasync.vittasync.Service.LembreteMedicaoService;
@@ -14,15 +15,14 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
-
 import java.time.LocalTime;
 import java.util.Optional;
-
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+
 
 @WebMvcTest(LembreteMedicaoController.class)
 @AutoConfigureMockMvc(addFilters = false)
@@ -49,6 +49,7 @@ class LembreteMedicaoControllerTest {
 
         when(jwtService.extrairCpf("token")).thenReturn("123");
         when(usuarioService.searchByCpf("123")).thenReturn(usuario);
+        when(usuarioService.getUsuarioLogado()).thenReturn(usuario);
         when(permissaoService.podeEditarPaciente(anyInt(), anyInt())).thenReturn(true);
         when(service.salvarSubstituir(any(LembreteMedicao.class), anyInt())).thenReturn(lembrete);
 
@@ -70,6 +71,7 @@ class LembreteMedicaoControllerTest {
 
         when(jwtService.extrairCpf("token")).thenReturn("123");
         when(usuarioService.searchByCpf("123")).thenReturn(usuario);
+        when(usuarioService.getUsuarioLogado()).thenReturn(usuario);
         when(permissaoService.podeVisualizarPaciente(anyInt(), anyInt())).thenReturn(true);
         when(service.searchlembrete(usuario)).thenReturn(Optional.of(lembrete));
 
@@ -87,6 +89,7 @@ class LembreteMedicaoControllerTest {
 
         when(jwtService.extrairCpf("token")).thenReturn("123");
         when(usuarioService.searchByCpf("123")).thenReturn(usuario);
+        when(usuarioService.getUsuarioLogado()).thenReturn(usuario);
         when(permissaoService.podeEditarPaciente(anyInt(), anyInt())).thenReturn(true);
         when(service.ativar(any(Usuario.class), anyInt())).thenReturn(Optional.of(lembrete));
 
@@ -104,6 +107,7 @@ class LembreteMedicaoControllerTest {
 
         when(jwtService.extrairCpf("token")).thenReturn("123");
         when(usuarioService.searchByCpf("123")).thenReturn(usuario);
+        when(usuarioService.getUsuarioLogado()).thenReturn(usuario);
         when(permissaoService.podeEditarPaciente(anyInt(), anyInt())).thenReturn(true);
         when(service.desativar(any(Usuario.class), anyInt())).thenReturn(Optional.of(lembrete));
 
@@ -119,6 +123,7 @@ class LembreteMedicaoControllerTest {
 
         when(jwtService.extrairCpf("token")).thenReturn("123");
         when(usuarioService.searchByCpf("123")).thenReturn(usuarioLogado);
+        when(usuarioService.getUsuarioLogado()).thenReturn(usuarioLogado);
         when(usuarioService.searchByCpf("456")).thenReturn(usuarioPaciente);
         when(permissaoService.podeVisualizarPaciente(anyInt(), anyInt())).thenReturn(false);
 

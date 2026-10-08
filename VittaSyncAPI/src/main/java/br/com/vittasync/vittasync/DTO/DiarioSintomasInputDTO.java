@@ -23,6 +23,7 @@ public class DiarioSintomasInputDTO {
 
     public DiarioSintomasInputDTO() {}
 
+    
     public String getSintoma() { return sintoma; }
     public void setSintoma(String sintoma) { this.sintoma = sintoma; }
 

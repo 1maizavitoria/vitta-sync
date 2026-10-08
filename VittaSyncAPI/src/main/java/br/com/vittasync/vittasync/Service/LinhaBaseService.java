@@ -169,7 +169,7 @@ public class LinhaBaseService {
     private double calcularDesvioPadraoAmostral(List<Double> valores, double media) {
         double menor = Collections.min(valores);
         double maior = Collections.max(valores);
-        // ULP mede a precisão do double nesta escala. Não é uma tolerância clínica.
+        //ulp mede precisão do double na escala (não é tolerância clínica)
         double toleranciaNumerica = 8 * Math.ulp(Math.max(Math.abs(menor), Math.abs(maior)));
         if (maior - menor <= toleranciaNumerica) return 0;
 

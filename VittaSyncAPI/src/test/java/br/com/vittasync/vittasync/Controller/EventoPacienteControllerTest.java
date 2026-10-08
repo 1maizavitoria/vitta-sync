@@ -1,5 +1,6 @@
 package br.com.vittasync.vittasync.Controller;
 
+
 import br.com.vittasync.vittasync.Model.EventoPaciente;
 import br.com.vittasync.vittasync.Model.Usuario;
 import br.com.vittasync.vittasync.Service.EventoPacienteService;
@@ -12,16 +13,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
-
 import java.sql.Timestamp;
 import java.util.List;
-
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+
 
 @WebMvcTest(EventoPacienteController.class)
 @AutoConfigureMockMvc(addFilters = false)
@@ -50,6 +49,7 @@ class EventoPacienteControllerTest {
 
         when(jwtService.extrairCpf("token")).thenReturn("123");
         when(usuarioService.searchByCpf("123")).thenReturn(usuario);
+        when(usuarioService.getUsuarioLogado()).thenReturn(usuario);
         when(permissaoService.podeVisualizarPaciente(anyInt(), anyInt())).thenReturn(true);
         when(service.listarPorPaciente(2)).thenReturn(List.of(evento));
         when(usuarioService.searchById(1)).thenReturn(usuario);
@@ -65,6 +65,7 @@ class EventoPacienteControllerTest {
 
         when(jwtService.extrairCpf("token")).thenReturn("123");
         when(usuarioService.searchByCpf("123")).thenReturn(usuario);
+        when(usuarioService.getUsuarioLogado()).thenReturn(usuario);
         when(permissaoService.podeVisualizarPaciente(anyInt(), anyInt())).thenReturn(true);
         when(service.contarNaoVisualizados(2, 1)).thenReturn(5L);
 
@@ -79,6 +80,7 @@ class EventoPacienteControllerTest {
 
         when(jwtService.extrairCpf("token")).thenReturn("123");
         when(usuarioService.searchByCpf("123")).thenReturn(usuario);
+        when(usuarioService.getUsuarioLogado()).thenReturn(usuario);
         when(permissaoService.podeVisualizarPaciente(anyInt(), anyInt())).thenReturn(true);
         doNothing().when(service).marcarComoVisualizados(2, 1);
 
@@ -93,6 +95,7 @@ class EventoPacienteControllerTest {
 
         when(jwtService.extrairCpf("token")).thenReturn("123");
         when(usuarioService.searchByCpf("123")).thenReturn(usuario);
+        when(usuarioService.getUsuarioLogado()).thenReturn(usuario);
         when(permissaoService.podeVisualizarPaciente(anyInt(), anyInt())).thenReturn(false);
 
         mockMvc.perform(get("/eventos/paciente/2")

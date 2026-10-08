@@ -1,5 +1,6 @@
 package br.com.vittasync.vittasync.Service;
 
+
 import br.com.vittasync.vittasync.Exception.RecursoNaoEncontradoException;
 import br.com.vittasync.vittasync.Model.DiarioSintomas;
 import br.com.vittasync.vittasync.Model.Usuario;
@@ -8,13 +9,12 @@ import br.com.vittasync.vittasync.Util.EventoPrioridades;
 import br.com.vittasync.vittasync.Util.EventoTipos;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-
 import java.util.List;
 import java.util.Optional;
-
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.*;
+
 
 class DiarioSintomasServiceTest {
 

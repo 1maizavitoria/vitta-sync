@@ -1,13 +1,14 @@
 package br.com.vittasync.vittasync.Security;
 
+
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import org.springframework.web.cors.CorsConfigurationSource;
-
 import static org.assertj.core.api.Assertions.assertThat;
+
 
 @SpringBootTest
 class CorsConfigTest {

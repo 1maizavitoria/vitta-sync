@@ -3,10 +3,10 @@ package br.com.vittasync.vittasync.Controller;
 
 import br.com.vittasync.vittasync.DTO.ContatoEmergenciaInputDTO;
 import br.com.vittasync.vittasync.DTO.ContatoEmergenciaOutputDTO;
+import br.com.vittasync.vittasync.Exception.AcessoNegadoException;
 import br.com.vittasync.vittasync.Model.ContatoEmergencia;
 import br.com.vittasync.vittasync.Model.Usuario;
 import br.com.vittasync.vittasync.Service.ContatoEmergenciaService;
-import br.com.vittasync.vittasync.Service.JwtService;
 import br.com.vittasync.vittasync.Service.UsuarioService;
 import br.com.vittasync.vittasync.Service.PermissaoService;
 import org.springframework.http.ResponseEntity;
@@ -20,32 +20,25 @@ import java.util.stream.Collectors;
 public class ContatoEmergenciaController {
 
     private final ContatoEmergenciaService service;
-    private final JwtService jwtService;
     private final UsuarioService usuarioService;
     private final PermissaoService permissaoService;
 
     public ContatoEmergenciaController(ContatoEmergenciaService service,
-                                       JwtService jwtService,
                                        UsuarioService usuarioService,
                                        PermissaoService permissaoService) {
         this.service = service;
-        this.jwtService = jwtService;
         this.usuarioService = usuarioService;
         this.permissaoService = permissaoService;
     }
 
     @PostMapping("/cadastrar/{cpf}")
     public ResponseEntity<ContatoEmergenciaOutputDTO> cadastrar(@PathVariable String cpf,
-                                                                @RequestHeader("Authorization") String authHeader,
                                                                 @RequestBody ContatoEmergenciaInputDTO dto) {
-        String token = authHeader.replace("Bearer ", "");
-        String cpfDoToken = jwtService.extrairCpf(token);
-
         Usuario paciente = usuarioService.searchByCpf(cpf);
-        Usuario usuarioLogado = usuarioService.searchByCpf(cpfDoToken);
+        Usuario usuarioLogado = usuarioService.getUsuarioLogado();
 
         if (!permissaoService.podeEditarPaciente(usuarioLogado.getId(), paciente.getId())) {
-            return ResponseEntity.status(403).build();
+            throw new AcessoNegadoException("Usuário sem permissão para acessar o paciente");
         }
 
         ContatoEmergencia contato = new ContatoEmergencia();
@@ -70,16 +63,12 @@ public class ContatoEmergenciaController {
     }
 
     @GetMapping("/listar/{cpf}")
-    public ResponseEntity<List<ContatoEmergenciaOutputDTO>> listar(@PathVariable String cpf,
-                                                                   @RequestHeader("Authorization") String authHeader) {
-        String token = authHeader.replace("Bearer ", "");
-        String cpfDoToken = jwtService.extrairCpf(token);
-
+    public ResponseEntity<List<ContatoEmergenciaOutputDTO>> listar(@PathVariable String cpf) {
         Usuario paciente = usuarioService.searchByCpf(cpf);
-        Usuario usuarioLogado = usuarioService.searchByCpf(cpfDoToken);
+        Usuario usuarioLogado = usuarioService.getUsuarioLogado();
 
         if (!permissaoService.podeVisualizarPaciente(usuarioLogado.getId(), paciente.getId())) {
-            return ResponseEntity.status(403).build();
+            throw new AcessoNegadoException("Usuário sem permissão para acessar o paciente");
         }
 
         List<ContatoEmergencia> contatos = service.listar(usuarioLogado.getId(), paciente);
@@ -89,16 +78,12 @@ public class ContatoEmergenciaController {
     @PutMapping("/editar/{id}/{cpf}")
     public ResponseEntity<ContatoEmergenciaOutputDTO> editar(@PathVariable Integer id,
                                                              @PathVariable String cpf,
-                                                             @RequestHeader("Authorization") String authHeader,
                                                              @RequestBody ContatoEmergenciaInputDTO dto) {
-        String token = authHeader.replace("Bearer ", "");
-        String cpfDoToken = jwtService.extrairCpf(token);
-
         Usuario paciente = usuarioService.searchByCpf(cpf);
-        Usuario usuarioLogado = usuarioService.searchByCpf(cpfDoToken);
+        Usuario usuarioLogado = usuarioService.getUsuarioLogado();
 
         if (!permissaoService.podeEditarPaciente(usuarioLogado.getId(), paciente.getId())) {
-            return ResponseEntity.status(403).build();
+            throw new AcessoNegadoException("Usuário sem permissão para acessar o paciente");
         }
 
         ContatoEmergencia contato = new ContatoEmergencia();
@@ -125,16 +110,12 @@ public class ContatoEmergenciaController {
 
     @DeleteMapping("/deletar/{id}/{cpf}")
     public ResponseEntity<Void> deletar(@PathVariable Integer id,
-                                        @PathVariable String cpf,
-                                        @RequestHeader("Authorization") String authHeader) {
-        String token = authHeader.replace("Bearer ", "");
-        String cpfDoToken = jwtService.extrairCpf(token);
-
+                                        @PathVariable String cpf) {
         Usuario paciente = usuarioService.searchByCpf(cpf);
-        Usuario usuarioLogado = usuarioService.searchByCpf(cpfDoToken);
+        Usuario usuarioLogado = usuarioService.getUsuarioLogado();
 
         if (!permissaoService.podeEditarPaciente(usuarioLogado.getId(), paciente.getId())) {
-            return ResponseEntity.status(403).build();
+            throw new AcessoNegadoException("Usuário sem permissão para acessar o paciente");
         }
 
         service.delete(usuarioLogado.getId(), id);

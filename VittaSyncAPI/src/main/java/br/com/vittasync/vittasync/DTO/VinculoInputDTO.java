@@ -1,6 +1,8 @@
 package br.com.vittasync.vittasync.DTO;
 
+
 import jakarta.validation.constraints.NotBlank;
+
 
 public class VinculoInputDTO {
 
@@ -13,19 +15,11 @@ public class VinculoInputDTO {
     public VinculoInputDTO() {
     }
 
-    public String getCodigo() {
-        return codigo;
-    }
 
-    public void setCodigo(String codigo) {
-        this.codigo = codigo;
-    }
+    public String getCodigo() {return codigo;}
+    public void setCodigo(String codigo) {this.codigo = codigo;}
 
-    public String getFuncao() {
-        return funcao;
-    }
-
-    public void setFuncao(String funcao) {
-        this.funcao = funcao;
-    }
+    public String getFuncao() {return funcao;}
+    public void setFuncao(String funcao) {this.funcao = funcao;}
+    
 }

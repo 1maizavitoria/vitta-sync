@@ -1,5 +1,6 @@
 package br.com.vittasync.vittasync.Controller;
 
+
 import br.com.vittasync.vittasync.Model.Usuario;
 import br.com.vittasync.vittasync.Service.UsuarioService;
 import br.com.vittasync.vittasync.Service.JwtService;
@@ -12,12 +13,12 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
-
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+
 
 @WebMvcTest(UsuarioController.class)
 @AutoConfigureMockMvc(addFilters = false)
@@ -57,6 +58,7 @@ class UsuarioControllerTest {
 
         when(jwtService.extrairCpf("token")).thenReturn("12345678900");
         when(usuarioService.searchByCpf("12345678900")).thenReturn(u);
+        when(usuarioService.getUsuarioLogado()).thenReturn(u);
         when(permissaoService.podeEditarPaciente(anyInt(), anyInt())).thenReturn(true);
         when(usuarioService.update(any(Usuario.class))).thenReturn(u);
 
@@ -76,6 +78,7 @@ class UsuarioControllerTest {
 
         when(jwtService.extrairCpf("token")).thenReturn("12345678900");
         when(usuarioService.searchByCpf("12345678900")).thenReturn(u);
+        when(usuarioService.getUsuarioLogado()).thenReturn(u);
         when(permissaoService.podeVisualizarPaciente(anyInt(), anyInt())).thenReturn(true);
 
         mockMvc.perform(get("/usuario/getUsuario/12345678900")
@@ -91,6 +94,7 @@ class UsuarioControllerTest {
 
         when(jwtService.extrairCpf("token")).thenReturn("12345678900");
         when(usuarioService.searchByCpf("12345678900")).thenReturn(u);
+        when(usuarioService.getUsuarioLogado()).thenReturn(u);
         doNothing().when(usuarioService).delete(anyInt());
 
         mockMvc.perform(delete("/usuario/deletar/12345678900")

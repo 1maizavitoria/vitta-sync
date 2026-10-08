@@ -3,8 +3,8 @@ package br.com.vittasync.vittasync.Util;
 
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
-import
-        java.security.NoSuchAlgorithmException;
+import java.security.NoSuchAlgorithmException;
+
 
 public class HashUtil {
 

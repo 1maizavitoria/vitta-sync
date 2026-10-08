@@ -1,14 +1,14 @@
 package br.com.vittasync.vittasync.Exception;
 
+
 import org.junit.jupiter.api.Test;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BeanPropertyBindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
-
 import java.util.Map;
-
 import static org.junit.jupiter.api.Assertions.*;
+
 
 class GlobalExceptionHandlerTest {
 

@@ -60,4 +60,5 @@ public class ArquivoMedico {
 
     public String getNomeOriginal() { return nomeOriginal; }
     public void setNomeOriginal(String nomeOriginal) { this.nomeOriginal = nomeOriginal; }
+    
 }

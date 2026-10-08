@@ -1,5 +1,6 @@
 package br.com.vittasync.vittasync.Service;
 
+
 import br.com.vittasync.vittasync.Exception.RecursoNaoEncontradoException;
 import br.com.vittasync.vittasync.Model.EventoPaciente;
 import br.com.vittasync.vittasync.Model.EventoVisualizacao;
@@ -12,13 +13,13 @@ import br.com.vittasync.vittasync.Repository.VinculoRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import br.com.vittasync.vittasync.Util.EventoTipos;
-
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.StringJoiner;
 import java.util.LinkedHashSet;
 import java.util.Set;
+
 
 @Service
 public class EventoPacienteService {

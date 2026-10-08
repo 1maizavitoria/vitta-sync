@@ -1,12 +1,13 @@
 package br.com.vittasync.vittasync.Security;
 
+
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
-
 import java.util.List;
+
 
 @Configuration
 public class CorsConfig {
@@ -27,5 +28,3 @@ public class CorsConfig {
         return source;
     }
 }
-
-// Classe de configuração do CORS -- Lucas 24/03

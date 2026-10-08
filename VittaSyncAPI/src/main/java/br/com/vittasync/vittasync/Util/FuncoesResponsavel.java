@@ -1,6 +1,8 @@
 package br.com.vittasync.vittasync.Util;
 
+
 import java.util.Set;
+
 
 public class FuncoesResponsavel {
 

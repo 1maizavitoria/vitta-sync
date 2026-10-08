@@ -1,10 +1,10 @@
 package br.com.vittasync.vittasync.Util;
 
+
 import org.junit.jupiter.api.Test;
-
 import java.lang.reflect.Constructor;
-
 import static org.assertj.core.api.Assertions.assertThat;
+
 
 class EventoPrioridadesTest {
 

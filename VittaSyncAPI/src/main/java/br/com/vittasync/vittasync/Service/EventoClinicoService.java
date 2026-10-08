@@ -1,5 +1,6 @@
 package br.com.vittasync.vittasync.Service;
 
+
 import br.com.vittasync.vittasync.Model.DiarioSintomas;
 import br.com.vittasync.vittasync.Model.Habitos;
 import br.com.vittasync.vittasync.Model.SinaisVitais;
@@ -8,11 +9,11 @@ import br.com.vittasync.vittasync.Repository.ContatoEmergenciaRepository;
 import br.com.vittasync.vittasync.Util.EventoPrioridades;
 import br.com.vittasync.vittasync.Util.EventoTipos;
 import org.springframework.stereotype.Service;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.HashSet;
+
 
 @Service
 public class EventoClinicoService {
@@ -115,7 +116,7 @@ public class EventoClinicoService {
         );
     }
 
-    //Sinais vitais
+    //sinais vitais
     private void analisarPressao(
             SinaisVitais sinais,
             Integer usuarioLogadoId
@@ -266,7 +267,7 @@ public class EventoClinicoService {
         }
     }
 
-    //Sintomas
+    //sintomas
     private void analisarDorIntensa(
             DiarioSintomas sintoma,
             Integer usuarioLogadoId
@@ -301,7 +302,7 @@ public class EventoClinicoService {
         }
     }
 
-    //Habitos
+    //habitos
     private void analisarSono(
             Habitos habitos,
             Integer usuarioLogadoId

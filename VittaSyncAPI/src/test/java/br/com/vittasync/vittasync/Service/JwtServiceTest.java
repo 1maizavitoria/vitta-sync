@@ -1,9 +1,11 @@
 package br.com.vittasync.vittasync.Service;
 
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-
+import org.springframework.test.util.ReflectionTestUtils;
 import static org.assertj.core.api.Assertions.assertThat;
+
 
 class JwtServiceTest {
 
@@ -12,6 +14,7 @@ class JwtServiceTest {
     @BeforeEach
     void setup() {
         jwtService = new JwtService();
+        ReflectionTestUtils.setField(jwtService, "SECRET_KEY", "chavedetestechavedetestechavedeteste123456");
     }
 
     @Test

@@ -2,11 +2,10 @@ package br.com.vittasync.vittasync.Controller;
 
 
 import br.com.vittasync.vittasync.DTO.*;
+import br.com.vittasync.vittasync.Exception.AcessoNegadoException;
 import br.com.vittasync.vittasync.Model.RelatorioLog;
 import br.com.vittasync.vittasync.Model.Usuario;
-import br.com.vittasync.vittasync.Repository.UsuarioRepository;
 import br.com.vittasync.vittasync.Service.RelatorioService;
-import br.com.vittasync.vittasync.Service.JwtService;
 import br.com.vittasync.vittasync.Service.UsuarioService;
 import br.com.vittasync.vittasync.Service.PermissaoService;
 import org.springframework.http.HttpHeaders;
@@ -26,35 +25,25 @@ import jakarta.validation.Valid;
 public class RelatorioController {
 
     private final RelatorioService relatorioService;
-    private final JwtService jwtService;
     private final UsuarioService usuarioService;
-    private final UsuarioRepository usuarioRepository;
     private final PermissaoService permissaoService;
 
     public RelatorioController(RelatorioService relatorioService,
-                               JwtService jwtService,
                                UsuarioService usuarioService,
-                               PermissaoService permissaoService,
-                               UsuarioRepository usuarioRepository) {
+                               PermissaoService permissaoService) {
         this.relatorioService = relatorioService;
-        this.jwtService = jwtService;
         this.usuarioService = usuarioService;
         this.permissaoService = permissaoService;
-        this.usuarioRepository = usuarioRepository;
     }
 
     @PostMapping("/exportar/{cpf}")
     public ResponseEntity<?> exportarRelatorio(@PathVariable String cpf,
-                                               @Valid @RequestBody RelatorioFiltroDTO filtros,
-                                               @RequestHeader("Authorization") String authHeader) {
-        String token = authHeader.replace("Bearer ", "");
-        String cpfDoToken = jwtService.extrairCpf(token);
-
-        Usuario usuarioLogado = usuarioService.searchByCpf(cpfDoToken);
+                                               @Valid @RequestBody RelatorioFiltroDTO filtros) {
+        Usuario usuarioLogado = usuarioService.getUsuarioLogado();
         Usuario paciente = usuarioService.searchByCpf(cpf);
 
         if (!permissaoService.podeVisualizarPaciente(usuarioLogado.getId(), paciente.getId())) {
-            return ResponseEntity.status(403).build();
+            throw new AcessoNegadoException("Usuário sem permissão para visualizar o paciente");
         }
 
         List<String> categorias = filtros.getCategorias().stream().distinct().toList();
@@ -107,16 +96,12 @@ public class RelatorioController {
     }
 
     @GetMapping("/getRelatorioExportacaoLog/{cpf}")
-    public ResponseEntity<List<RelatorioLogDTO>> getRelatorioExportacaoLog(@PathVariable String cpf,
-                                                                           @RequestHeader("Authorization") String authHeader) {
-        String token = authHeader.replace("Bearer ", "");
-        String cpfDoToken = jwtService.extrairCpf(token);
-
-        Usuario usuarioLogado = usuarioService.searchByCpf(cpfDoToken);
+    public ResponseEntity<List<RelatorioLogDTO>> getRelatorioExportacaoLog(@PathVariable String cpf) {
+        Usuario usuarioLogado = usuarioService.getUsuarioLogado();
         Usuario paciente = usuarioService.searchByCpf(cpf);
 
         if (!permissaoService.podeVisualizarPaciente(usuarioLogado.getId(), paciente.getId())) {
-            return ResponseEntity.status(403).build();
+            throw new AcessoNegadoException("Usuário sem permissão para visualizar o paciente");
         }
 
         List<RelatorioLog> logs = relatorioService.consultarLogs(paciente.getId());

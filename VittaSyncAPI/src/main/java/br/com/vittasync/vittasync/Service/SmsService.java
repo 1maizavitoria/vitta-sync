@@ -4,12 +4,16 @@ package br.com.vittasync.vittasync.Service;
 import com.twilio.Twilio;
 import com.twilio.rest.api.v2010.account.Message;
 import jakarta.annotation.PostConstruct;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 
 @Service
 public class SmsService {
+
+    private static final Logger logger = LoggerFactory.getLogger(SmsService.class);
 
     @Value("${twilio.account.sid}")
     private String accountSid;
@@ -68,7 +72,7 @@ public class SmsService {
         try {
             String numeroFormatado = telefone.startsWith("+55") ? telefone : "+55" + telefone;
 
-            System.out.println("Enviando SMS para: " + numeroFormatado);
+            logger.info("Enviando SMS para: {}", numeroFormatado);
 
             Message message = Message.creator(
                     new com.twilio.type.PhoneNumber(numeroFormatado),
@@ -76,12 +80,10 @@ public class SmsService {
                     mensagem
             ).create();
 
-            System.out.println("SID: " + message.getSid());
-            System.out.println("STATUS: " + message.getStatus());
+            logger.info("SMS enviado. SID: {} STATUS: {}", message.getSid(), message.getStatus());
 
         } catch (Exception e) {
-            System.out.println("ERRO AO ENVIAR SMS:");
-            e.printStackTrace();
+            logger.error("Erro ao enviar SMS para: {}", telefone, e);
         }
     }
 }

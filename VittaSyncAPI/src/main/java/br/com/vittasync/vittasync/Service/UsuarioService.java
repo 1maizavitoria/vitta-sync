@@ -6,6 +6,7 @@ import br.com.vittasync.vittasync.Exception.RecursoNaoEncontradoException;
 import br.com.vittasync.vittasync.Model.Usuario;
 import br.com.vittasync.vittasync.Repository.SessaoTokenRepository;
 import br.com.vittasync.vittasync.Repository.UsuarioRepository;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 
@@ -44,6 +45,12 @@ public class UsuarioService {
     public Usuario searchByCpf(String cpf) {
         return usuarioRepository.findByCpf(cpf)
                 .orElseThrow(() -> new RecursoNaoEncontradoException("Usuário não encontrado"));
+    }
+
+    // o JwtFilter já validou o token e guardou o CPF no SecurityContext, então não precisa ler o token de novo
+    public Usuario getUsuarioLogado() {
+        String cpf = SecurityContextHolder.getContext().getAuthentication().getName();
+        return searchByCpf(cpf);
     }
 
     public Usuario searchById(Integer id) {

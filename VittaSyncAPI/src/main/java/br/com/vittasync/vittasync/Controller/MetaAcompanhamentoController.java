@@ -3,6 +3,7 @@ package br.com.vittasync.vittasync.Controller;
 
 import br.com.vittasync.vittasync.DTO.MetaAcompanhamentoInputDTO;
 import br.com.vittasync.vittasync.DTO.MetaAcompanhamentoOutputDTO;
+import br.com.vittasync.vittasync.Exception.AcessoNegadoException;
 import br.com.vittasync.vittasync.Model.MetaAcompanhamento;
 import br.com.vittasync.vittasync.Model.Usuario;
 import br.com.vittasync.vittasync.Service.*;
@@ -18,18 +19,15 @@ import java.util.stream.Collectors;
 public class MetaAcompanhamentoController {
 
     private final MetaAcompanhamentoService service;
-    private final JwtService jwtService;
     private final UsuarioService usuarioService;
     private final PermissaoService permissaoService;
 
     public MetaAcompanhamentoController(
             MetaAcompanhamentoService service,
-            JwtService jwtService,
             UsuarioService usuarioService,
             PermissaoService permissaoService
     ) {
         this.service = service;
-        this.jwtService = jwtService;
         this.usuarioService = usuarioService;
         this.permissaoService = permissaoService;
     }
@@ -37,15 +35,12 @@ public class MetaAcompanhamentoController {
 
     @PostMapping("/cadastrar/{cpf}")
     public ResponseEntity<MetaAcompanhamentoOutputDTO> cadastrar(@PathVariable String cpf,
-                                                                 @RequestHeader("Authorization") String authHeader,
                                                                  @RequestBody MetaAcompanhamentoInputDTO dto) {
-        String token = authHeader.replace("Bearer ", "");
-        String cpfDoToken = jwtService.extrairCpf(token);
-        Usuario usuarioLogado = usuarioService.searchByCpf(cpfDoToken);
+        Usuario usuarioLogado = usuarioService.getUsuarioLogado();
         Usuario paciente = usuarioService.searchByCpf(cpf);
 
         if (!permissaoService.podeCriarEditarMeta(usuarioLogado.getId(), paciente.getId())) {
-            return ResponseEntity.status(403).build();
+            throw new AcessoNegadoException("Usuário sem permissão para acessar o paciente");
         }
 
         MetaAcompanhamento salvo = service.create(dto, paciente, usuarioLogado.getId());
@@ -55,15 +50,12 @@ public class MetaAcompanhamentoController {
     @PutMapping("/editar/{id}/{cpf}")
     public ResponseEntity<MetaAcompanhamentoOutputDTO> editar(@PathVariable Long id,
                                                               @PathVariable String cpf,
-                                                              @RequestHeader("Authorization") String authHeader,
                                                               @RequestBody MetaAcompanhamentoInputDTO dto) {
-        String token = authHeader.replace("Bearer ", "");
-        String cpfDoToken = jwtService.extrairCpf(token);
-        Usuario usuarioLogado = usuarioService.searchByCpf(cpfDoToken);
+        Usuario usuarioLogado = usuarioService.getUsuarioLogado();
         Usuario paciente = usuarioService.searchByCpf(cpf);
 
         if (!permissaoService.podeCriarEditarMeta(usuarioLogado.getId(), paciente.getId())) {
-            return ResponseEntity.status(403).build();
+            throw new AcessoNegadoException("Usuário sem permissão para acessar o paciente");
         }
 
         MetaAcompanhamento atualizado = service.update(id, dto, paciente, usuarioLogado.getId());
@@ -72,15 +64,12 @@ public class MetaAcompanhamentoController {
 
     @DeleteMapping("/deletar/{id}/{cpf}")
     public ResponseEntity<Void> deletar(@PathVariable Long id,
-                                        @PathVariable String cpf,
-                                        @RequestHeader("Authorization") String authHeader) {
-        String token = authHeader.replace("Bearer ", "");
-        String cpfDoToken = jwtService.extrairCpf(token);
-        Usuario usuarioLogado = usuarioService.searchByCpf(cpfDoToken);
+                                        @PathVariable String cpf) {
+        Usuario usuarioLogado = usuarioService.getUsuarioLogado();
         Usuario paciente = usuarioService.searchByCpf(cpf);
 
         if (!permissaoService.podeEditarPaciente(usuarioLogado.getId(), paciente.getId())) {
-            return ResponseEntity.status(403).build();
+            throw new AcessoNegadoException("Usuário sem permissão para acessar o paciente");
         }
 
         service.delete(id, paciente.getId(), usuarioLogado.getId());
@@ -89,15 +78,12 @@ public class MetaAcompanhamentoController {
 
     @PostMapping("/concluir/{id}/{cpf}")
     public ResponseEntity<MetaAcompanhamentoOutputDTO> concluir(@PathVariable Long id,
-                                                                @PathVariable String cpf,
-                                                                @RequestHeader("Authorization") String authHeader) {
-        String token = authHeader.replace("Bearer ", "");
-        String cpfDoToken = jwtService.extrairCpf(token);
-        Usuario usuarioLogado = usuarioService.searchByCpf(cpfDoToken);
+                                                                @PathVariable String cpf) {
+        Usuario usuarioLogado = usuarioService.getUsuarioLogado();
         Usuario paciente = usuarioService.searchByCpf(cpf);
 
         if (!permissaoService.podeCriarEditarMeta(usuarioLogado.getId(), paciente.getId())) {
-            return ResponseEntity.status(403).build();
+            throw new AcessoNegadoException("Usuário sem permissão para acessar o paciente");
         }
 
         MetaAcompanhamento concluida = service.concluirMeta(id, paciente.getId(), usuarioLogado.getId());
@@ -105,15 +91,12 @@ public class MetaAcompanhamentoController {
     }
 
     @GetMapping("/getMetas/{cpf}")
-    public ResponseEntity<List<MetaAcompanhamentoOutputDTO>> listar(@PathVariable String cpf,
-                                                                    @RequestHeader("Authorization") String authHeader) {
-        String token = authHeader.replace("Bearer ", "");
-        String cpfDoToken = jwtService.extrairCpf(token);
-        Usuario usuarioLogado = usuarioService.searchByCpf(cpfDoToken);
+    public ResponseEntity<List<MetaAcompanhamentoOutputDTO>> listar(@PathVariable String cpf) {
+        Usuario usuarioLogado = usuarioService.getUsuarioLogado();
         Usuario paciente = usuarioService.searchByCpf(cpf);
 
         if (!permissaoService.podeVisualizarPaciente(usuarioLogado.getId(), paciente.getId())) {
-            return ResponseEntity.status(403).build();
+            throw new AcessoNegadoException("Usuário sem permissão para acessar o paciente");
         }
 
         List<MetaAcompanhamento> lista = service.listarPorPaciente(paciente.getId(), usuarioLogado.getId());
@@ -124,13 +107,11 @@ public class MetaAcompanhamentoController {
     public ResponseEntity<MetaAcompanhamentoOutputDTO> atualizarValorManual(
             @PathVariable Long id,
             @PathVariable String cpf,
-            @RequestHeader("Authorization") String authHeader,
             @RequestBody Map<String, Double> body) {
-        String token = authHeader.replace("Bearer ", "");
-        Usuario usuarioLogado = usuarioService.searchByCpf(jwtService.extrairCpf(token));
+        Usuario usuarioLogado = usuarioService.getUsuarioLogado();
         Usuario paciente = usuarioService.searchByCpf(cpf);
         if (!permissaoService.podeEditarPaciente(usuarioLogado.getId(), paciente.getId())) {
-            return ResponseEntity.status(403).build();
+            throw new AcessoNegadoException("Usuário sem permissão para acessar o paciente");
         }
         MetaAcompanhamento meta = service.atualizarValorManual(
                 id,

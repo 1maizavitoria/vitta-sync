@@ -33,6 +33,7 @@ public class SinaisVitaisInputDTO {
 
     public SinaisVitaisInputDTO() {}
 
+
     public Double getPeso() { return peso; }
     public void setPeso(Double peso) {this.peso = peso;}
 
@@ -59,4 +60,5 @@ public class SinaisVitaisInputDTO {
 
     public LocalDateTime getDataModificacao() { return dataModificacao; }
     public void setDataModificacao(LocalDateTime dataModificacao) { this.dataModificacao = dataModificacao; }
+
 }

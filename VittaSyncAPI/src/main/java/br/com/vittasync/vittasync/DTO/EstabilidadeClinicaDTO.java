@@ -26,6 +26,7 @@ public class EstabilidadeClinicaDTO {
         this.dataCalculo = dataCalculo;
     }
 
+    
     public String getTipo() {return tipo;}
 
     public Integer getIndice() {return indice;}

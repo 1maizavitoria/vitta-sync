@@ -1,11 +1,12 @@
 package br.com.vittasync.vittasync.Util;
 
+
 import br.com.vittasync.vittasync.DTO.RelatorioPreviewDTO;
 import java.nio.charset.StandardCharsets;
 
+
 public class RelatorioCSVGenerator {
     public byte[] gerarRelatorio(RelatorioPreviewDTO preview) {
-        // BOM identifica UTF-8 no Excel. Uma única tabela facilita importação estatística.
         StringBuilder csv = new StringBuilder("\uFEFF");
         linha(csv, "categoria", "id_registro", "paciente", "data_registro", "data_referencia",
                 "peso_kg", "fc_bpm", "fr_rpm", "pa_sistolica_mmHg", "pa_diastolica_mmHg",
@@ -38,7 +39,6 @@ public class RelatorioCSVGenerator {
             Object valor = valores[i];
             if (valor == null) continue;
             String texto = valor.toString();
-            // Textos livres não devem ser interpretados como fórmulas pela planilha.
             String inicio = texto.stripLeading();
             if (valor instanceof String && !texto.isEmpty()
                     && ((!inicio.isEmpty() && "=+-@".indexOf(inicio.charAt(0)) >= 0)

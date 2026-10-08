@@ -80,4 +80,5 @@ public class Habitos {
 
     public Integer getRegistradoPorUsuarioId() { return registradoPorUsuarioId; }
     public void setRegistradoPorUsuarioId(Integer registradoPorUsuarioId) { this.registradoPorUsuarioId = registradoPorUsuarioId; }
+
 }

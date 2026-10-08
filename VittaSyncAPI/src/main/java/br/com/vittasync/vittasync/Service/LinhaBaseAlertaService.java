@@ -1,5 +1,6 @@
 package br.com.vittasync.vittasync.Service;
 
+
 import br.com.vittasync.vittasync.Model.ContatoEmergencia;
 import br.com.vittasync.vittasync.Model.LinhaBase;
 import br.com.vittasync.vittasync.Model.SinaisVitais;
@@ -8,12 +9,12 @@ import br.com.vittasync.vittasync.Repository.LinhaBaseRepository;
 import br.com.vittasync.vittasync.Util.EventoPrioridades;
 import br.com.vittasync.vittasync.Util.EventoTipos;
 import org.springframework.stereotype.Service;
-
 import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
+
 
 @Service
 public class LinhaBaseAlertaService {
@@ -43,7 +44,7 @@ public class LinhaBaseAlertaService {
         formato.setMaximumFractionDigits(6);
 
         for (LinhaBase base : linhaBaseRepository.findByPacienteId(pacienteId)) {
-            // A medição que completa a formação não é comparada com a própria referência.
+            //a medição que completa a formação não é comparada com a própria referência.
             if (sinais.getDataRegistro() == null || base.getDataFormacao() == null
                     || !sinais.getDataRegistro().isAfter(base.getDataFormacao())) continue;
 
@@ -66,7 +67,7 @@ public class LinhaBaseAlertaService {
                         "measurementId", sinais.getId().toString()), EventoPrioridades.ALTA);
 
         for (ContatoEmergencia contato : contatoEmergenciaRepository.findByPacienteIdOrderByDataRegistroAsc(pacienteId)) {
-            // Prioriza o envio de emergência já solicitado para esta mesma medição.
+            //prioriza o envio de emergência já solicitado para esta mesma medição.
             if (contatosEmergenciaAcionados.contains(contato.getId())) continue;
             notificacaoService.enviarDesvioLinhaBase(contato.getId(), contato.getNome(), contato.getEmail(),
                     contato.getTelefone(), Boolean.TRUE.equals(contato.getCanalEmail()),

@@ -22,6 +22,7 @@ public class SessaoToken {
     @Column(name = "criado_em", nullable = false, updatable = false)
     private LocalDateTime criadoEm = LocalDateTime.now();
 
+
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
 
@@ -33,4 +34,5 @@ public class SessaoToken {
 
     public LocalDateTime getCriadoEm() { return criadoEm; }
     public void setCriadoEm(LocalDateTime criadoEm) { this.criadoEm = criadoEm; }
+    
 }

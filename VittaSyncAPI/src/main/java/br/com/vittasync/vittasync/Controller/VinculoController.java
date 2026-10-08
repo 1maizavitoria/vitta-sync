@@ -2,51 +2,37 @@ package br.com.vittasync.vittasync.Controller;
 
 
 import br.com.vittasync.vittasync.DTO.*;
-import br.com.vittasync.vittasync.Exception.RecursoNaoEncontradoException;
-import br.com.vittasync.vittasync.Repository.VinculoRepository;
-
+import br.com.vittasync.vittasync.Exception.AcessoNegadoException;
 import br.com.vittasync.vittasync.Model.Usuario;
 import br.com.vittasync.vittasync.Model.Vinculo;
-
 import br.com.vittasync.vittasync.Service.*;
-
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
 import java.util.List;
+
 
 @RestController
 @RequestMapping("/vinculos")
 public class VinculoController {
 
     private final VinculoService service;
-    private final JwtService jwtService;
     private final UsuarioService usuarioService;
     private final PermissaoService permissaoService;
-    private final VinculoRepository vinculoRepository;
 
     public VinculoController(
             VinculoService service,
-            JwtService jwtService,
             UsuarioService usuarioService,
-            PermissaoService permissaoService,
-            VinculoRepository vinculoRepository
+            PermissaoService permissaoService
     ) {
         this.service = service;
-        this.jwtService = jwtService;
         this.usuarioService = usuarioService;
         this.permissaoService = permissaoService;
-        this.vinculoRepository = vinculoRepository;
     }
 
     @PostMapping("/gerar")
-    public ResponseEntity<ConviteVinculoOutputDTO> gerarCodigo(@RequestHeader("Authorization") String authHeader) {
+    public ResponseEntity<ConviteVinculoOutputDTO> gerarCodigo() {
 
-        String token = authHeader.replace("Bearer ", "");
-
-        String cpf = jwtService.extrairCpf(token);
-
-        Usuario usuario = usuarioService.searchByCpf(cpf);
+        Usuario usuario = usuarioService.getUsuarioLogado();
 
         ConviteVinculoOutputDTO output = service.gerarCodigo(usuario.getId());
 
@@ -54,13 +40,9 @@ public class VinculoController {
     }
 
     @PostMapping("/entrar")
-    public ResponseEntity<PacienteResumoDTO> entrarComCodigo(@RequestHeader("Authorization") String authHeader, @RequestBody VinculoInputDTO dto) {
+    public ResponseEntity<PacienteResumoDTO> entrarComCodigo(@RequestBody VinculoInputDTO dto) {
 
-        String token = authHeader.replace("Bearer ", "");
-
-        String cpf = jwtService.extrairCpf(token);
-
-        Usuario usuario = usuarioService.searchByCpf(cpf);
+        Usuario usuario = usuarioService.getUsuarioLogado();
 
         PacienteResumoDTO paciente =
                 service.entrarComCodigo(
@@ -81,18 +63,14 @@ public class VinculoController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> removerVinculo(@PathVariable Long id, @RequestHeader("Authorization") String authHeader) {
+    public ResponseEntity<Void> removerVinculo(@PathVariable Long id) {
 
-        String token = authHeader.replace("Bearer ", "");
+        Usuario usuarioLogado = usuarioService.getUsuarioLogado();
 
-        String cpfDoToken = jwtService.extrairCpf(token);
-
-        Usuario usuarioLogado = usuarioService.searchByCpf(cpfDoToken);
-
-        Vinculo vinculo = vinculoRepository.findById(id).orElseThrow(() -> new RecursoNaoEncontradoException("Vínculo não encontrado"));
+        Vinculo vinculo = service.buscarPorId(id);
 
         if (!permissaoService.podeRemoverVinculo(usuarioLogado.getId(), vinculo)) {
-            return ResponseEntity.status(403).build();
+            throw new AcessoNegadoException("Usuário sem permissão para remover o vínculo");
         }
 
         service.removerVinculo(id, usuarioLogado.getId());
@@ -101,28 +79,28 @@ public class VinculoController {
     }
 
     @GetMapping()
-    public ResponseEntity<List<VinculoOutputDTO>> listar(@RequestHeader("Authorization") String authHeader) {
+    public ResponseEntity<List<VinculoOutputDTO>> listar() {
 
-        String token = authHeader.replace("Bearer ", "");
-
-        String cpf = jwtService.extrairCpf(token);
-
-        Usuario usuario = usuarioService.searchByCpf(cpf);
+        Usuario usuario = usuarioService.getUsuarioLogado();
 
         return ResponseEntity.ok(service.listar(usuario.getId()));
     }
 
     @GetMapping("/pacientes")
-    public ResponseEntity<List<PacienteResumoDTO>> listarPacientes(@RequestHeader("Authorization") String authHeader) {
+    public ResponseEntity<List<PacienteResumoDTO>> listarPacientes() {
 
-        String token = authHeader.replace("Bearer ", "");
-        String cpf = jwtService.extrairCpf(token);
-        Usuario usuario = usuarioService.searchByCpf(cpf);
+        Usuario usuario = usuarioService.getUsuarioLogado();
         return ResponseEntity.ok(service.listarPacientesDoUsuario(usuario.getId()));
     }
 
     @GetMapping("/paciente/{id}")
     public ResponseEntity<List<VinculoOutputDTO>> listarPorPaciente(@PathVariable Integer id) {
+
+        Usuario usuarioLogado = usuarioService.getUsuarioLogado();
+
+        if (!permissaoService.podeVisualizarPaciente(usuarioLogado.getId(), id)) {
+            throw new AcessoNegadoException("Usuário sem permissão para visualizar o paciente");
+        }
 
         return ResponseEntity.ok(service.listarPorPaciente(id));
     }

@@ -1,8 +1,9 @@
 package br.com.vittasync.vittasync.Util;
 
-import org.junit.jupiter.api.Test;
 
+import org.junit.jupiter.api.Test;
 import static org.assertj.core.api.Assertions.assertThat;
+
 
 class HashUtilTest {
 
@@ -33,5 +34,10 @@ class HashUtilTest {
         String senha = "testeTamanho";
         String hash = HashUtil.hashSenha(senha);
         assertThat(hash.length()).isEqualTo(64);
+    }
+
+    @Test
+    void testInstancia() {
+        assertThat(new HashUtil()).isNotNull();
     }
 }

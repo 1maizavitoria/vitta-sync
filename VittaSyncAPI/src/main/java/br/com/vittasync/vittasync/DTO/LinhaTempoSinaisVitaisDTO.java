@@ -30,13 +30,23 @@ public class LinhaTempoSinaisVitaisDTO {
         this.spo2Porcento = spo2Porcento;
     }
 
-    public Integer getId() { return id; }
-    public LocalDateTime getDataHora() { return dataHora; }
-    public Double getPeso() { return peso; }
-    public Integer getFcBpm() { return fcBpm; }
-    public Integer getFrRpm() { return frRpm; }
-    public Integer getPaSistolica() { return paSistolica; }
-    public Integer getPaDiastolica() { return paDiastolica; }
-    public Double getTempCelcius() { return tempCelcius; }
-    public Integer getSpo2Porcento() { return spo2Porcento; }
+
+    public Integer getId() {return id;}
+    
+    public LocalDateTime getDataHora() {return dataHora;}
+   
+    public Double getPeso() {return peso;}
+    
+    public Integer getFcBpm() {return fcBpm;}
+    
+    public Integer getFrRpm() {return frRpm;}
+   
+    public Integer getPaSistolica() {return paSistolica;}
+   
+    public Integer getPaDiastolica() {return paDiastolica;}
+   
+    public Double getTempCelcius() {return tempCelcius;}
+   
+    public Integer getSpo2Porcento() {return spo2Porcento;}
+
 }
