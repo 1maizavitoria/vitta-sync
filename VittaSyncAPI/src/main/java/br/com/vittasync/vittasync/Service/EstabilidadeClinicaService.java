@@ -8,7 +8,10 @@ import br.com.vittasync.vittasync.Model.Habitos;
 import br.com.vittasync.vittasync.Model.EstabilidadeClinica;
 import br.com.vittasync.vittasync.Repository.EstabilidadeClinicaRepository;
 import br.com.vittasync.vittasync.Repository.ContatoEmergenciaRepository;
+import br.com.vittasync.vittasync.Repository.HabitosRepository;
+import br.com.vittasync.vittasync.Repository.SinaisVitaisRepository;
 import org.springframework.stereotype.Service;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -20,6 +23,8 @@ public class EstabilidadeClinicaService {
     private final EstabilidadeClinicaRepository estabilidadeClinicaRepository;
     private final ContatoEmergenciaRepository contatoEmergenciaRepository;
     private final NotificacaoService notificacaoService;
+    private final SinaisVitaisRepository sinaisVitaisRepository;
+    private final HabitosRepository habitosRepository;
 
     private static final int minimoRegistros = 3;
     private static final int minimoFatoresIndiceGeral = 3;
@@ -31,11 +36,27 @@ public class EstabilidadeClinicaService {
     public EstabilidadeClinicaService(
             EstabilidadeClinicaRepository estabilidadeClinicaRepository,
             ContatoEmergenciaRepository contatoEmergenciaRepository,
-            NotificacaoService notificacaoService
+            NotificacaoService notificacaoService,
+            SinaisVitaisRepository sinaisVitaisRepository,
+            HabitosRepository habitosRepository
     ) {
         this.estabilidadeClinicaRepository = estabilidadeClinicaRepository;
         this.contatoEmergenciaRepository = contatoEmergenciaRepository;
         this.notificacaoService = notificacaoService;
+        this.sinaisVitaisRepository = sinaisVitaisRepository;
+        this.habitosRepository = habitosRepository;
+    }
+
+    // índices do paciente com todos os sinais vitais e os hábitos dos últimos 30 dias
+    public List<EstabilidadeClinicaDTO> consultarIndices(Integer pacienteId) {
+        List<SinaisVitais> sinais = sinaisVitaisRepository.findByPacienteIdOrderByDataRegistroAsc(pacienteId);
+        List<Habitos> habitos = habitosRepository.findByPacienteIdAndDataReferenciaBetweenOrderByDataReferenciaAsc(
+                pacienteId,
+                LocalDate.now().minusDays(30),
+                LocalDate.now()
+        );
+
+        return calcularIndices(pacienteId, sinais, habitos);
     }
 
     public void verificarMudancaEstabilidade(Integer pacienteId,

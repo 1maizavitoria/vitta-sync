@@ -29,6 +29,7 @@ public class CodigoVerificacao {
     @Column(name = "utilizado", nullable = false)
     private Boolean utilizado = false;
 
+
     public Integer getId() { return id; }
     public void setId(Integer id) { this.id = id; }
 
@@ -46,4 +47,5 @@ public class CodigoVerificacao {
 
     public Boolean getUtilizado() { return utilizado; }
     public void setUtilizado(Boolean utilizado) { this.utilizado = utilizado; }
+
 }

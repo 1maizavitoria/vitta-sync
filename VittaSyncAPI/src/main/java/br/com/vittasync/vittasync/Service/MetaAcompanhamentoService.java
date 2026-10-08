@@ -1,5 +1,6 @@
 package br.com.vittasync.vittasync.Service;
 
+
 import br.com.vittasync.vittasync.DTO.MetaAcompanhamentoInputDTO;
 import br.com.vittasync.vittasync.Exception.RecursoNaoEncontradoException;
 import br.com.vittasync.vittasync.Model.MetaAcompanhamento;
@@ -8,9 +9,9 @@ import br.com.vittasync.vittasync.Repository.HabitosRepository;
 import br.com.vittasync.vittasync.Repository.MetaAcompanhamentoRepository;
 import br.com.vittasync.vittasync.Repository.SinaisVitaisRepository;
 import org.springframework.stereotype.Service;
-
 import java.time.LocalDateTime;
 import java.util.List;
+
 
 @Service
 public class MetaAcompanhamentoService {

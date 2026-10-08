@@ -1,5 +1,6 @@
 package br.com.vittasync.vittasync.Controller;
 
+
 import br.com.vittasync.vittasync.Model.ContatoEmergencia;
 import br.com.vittasync.vittasync.Model.Usuario;
 import br.com.vittasync.vittasync.Service.ContatoEmergenciaService;
@@ -14,14 +15,13 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
-
 import java.util.List;
-
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+
 
 @WebMvcTest(ContatoEmergenciaController.class)
 @AutoConfigureMockMvc(addFilters = false)
@@ -46,6 +46,7 @@ class ContatoEmergenciaControllerTest {
 
         when(jwtService.extrairCpf("token")).thenReturn("222");
         when(usuarioService.searchByCpf("222")).thenReturn(paciente);
+        when(usuarioService.getUsuarioLogado()).thenReturn(paciente);
         when(permissaoService.podeEditarPaciente(anyInt(), anyInt())).thenReturn(true);
         when(service.create(anyInt(), any(Usuario.class), any(ContatoEmergencia.class))).thenReturn(contato);
 
@@ -67,6 +68,7 @@ class ContatoEmergenciaControllerTest {
 
         when(jwtService.extrairCpf("token")).thenReturn("222");
         when(usuarioService.searchByCpf("222")).thenReturn(paciente);
+        when(usuarioService.getUsuarioLogado()).thenReturn(paciente);
         when(permissaoService.podeEditarPaciente(anyInt(), anyInt())).thenReturn(true);
         when(service.update(anyInt(), any(ContatoEmergencia.class))).thenReturn(contato);
 
@@ -83,6 +85,7 @@ class ContatoEmergenciaControllerTest {
 
         when(jwtService.extrairCpf("token")).thenReturn("222");
         when(usuarioService.searchByCpf("222")).thenReturn(paciente);
+        when(usuarioService.getUsuarioLogado()).thenReturn(paciente);
         when(permissaoService.podeEditarPaciente(anyInt(), anyInt())).thenReturn(true);
         doNothing().when(service).delete(anyInt(), anyInt());
 
@@ -102,6 +105,7 @@ class ContatoEmergenciaControllerTest {
 
         when(jwtService.extrairCpf("token")).thenReturn("222");
         when(usuarioService.searchByCpf("222")).thenReturn(paciente);
+        when(usuarioService.getUsuarioLogado()).thenReturn(paciente);
         when(permissaoService.podeVisualizarPaciente(anyInt(), anyInt())).thenReturn(true);
         when(service.listar(anyInt(), any(Usuario.class))).thenReturn(List.of(contato));
 
@@ -117,6 +121,7 @@ class ContatoEmergenciaControllerTest {
 
         when(jwtService.extrairCpf("token")).thenReturn("123");
         when(usuarioService.searchByCpf("123")).thenReturn(usuarioLogado);
+        when(usuarioService.getUsuarioLogado()).thenReturn(usuarioLogado);
         when(usuarioService.searchByCpf("456")).thenReturn(usuarioPaciente);
         when(permissaoService.podeVisualizarPaciente(anyInt(), anyInt())).thenReturn(false);
 

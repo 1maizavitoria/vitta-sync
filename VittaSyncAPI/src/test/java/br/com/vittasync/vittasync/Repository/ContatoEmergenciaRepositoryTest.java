@@ -1,5 +1,6 @@
 package br.com.vittasync.vittasync.Repository;
 
+
 import br.com.vittasync.vittasync.Model.ContatoEmergencia;
 import br.com.vittasync.vittasync.Model.Usuario;
 import org.junit.jupiter.api.BeforeEach;
@@ -8,13 +9,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.transaction.annotation.Transactional;
-
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
-
 import static org.assertj.core.api.Assertions.assertThat;
+
 
 @DataJpaTest
 @Transactional
@@ -51,6 +51,7 @@ class ContatoEmergenciaRepositoryTest {
         c.setPaciente(paciente);
         c.setNome(nome);
         c.setTelefone(telefone);
+        c.setEmail("contato@teste.com");
         c.setDataRegistro(LocalDateTime.now());
         c.setDataModificacao(LocalDateTime.now());
         return contatoEmergenciaRepository.save(c);

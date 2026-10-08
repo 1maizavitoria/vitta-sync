@@ -1,7 +1,6 @@
 package br.com.vittasync.vittasync.Model;
 
 
-import br.com.vittasync.vittasync.Model.SessaoToken;
 import org.junit.jupiter.api.Test;
 import java.time.LocalDateTime;
 import static org.junit.jupiter.api.Assertions.*;

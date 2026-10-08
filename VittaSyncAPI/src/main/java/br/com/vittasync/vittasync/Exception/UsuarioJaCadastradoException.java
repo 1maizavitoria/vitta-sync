@@ -1,5 +1,6 @@
 package br.com.vittasync.vittasync.Exception;
 
+
 public class UsuarioJaCadastradoException extends RuntimeException {
     public UsuarioJaCadastradoException(String msg) { super(msg); }
 }

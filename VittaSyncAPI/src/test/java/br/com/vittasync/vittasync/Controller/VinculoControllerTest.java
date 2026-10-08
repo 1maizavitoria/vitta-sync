@@ -1,5 +1,6 @@
 package br.com.vittasync.vittasync.Controller;
 
+
 import br.com.vittasync.vittasync.DTO.*;
 import br.com.vittasync.vittasync.Model.Usuario;
 import br.com.vittasync.vittasync.Model.Vinculo;
@@ -12,15 +13,13 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
-
 import java.util.List;
-import java.util.Optional;
-
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+
 
 @WebMvcTest(VinculoController.class)
 @AutoConfigureMockMvc(addFilters = false)
@@ -43,6 +42,7 @@ class VinculoControllerTest {
 
         when(jwtService.extrairCpf("token")).thenReturn("123");
         when(usuarioService.searchByCpf("123")).thenReturn(usuario);
+        when(usuarioService.getUsuarioLogado()).thenReturn(usuario);
         when(service.gerarCodigo(1)).thenReturn(output);
 
         mockMvc.perform(post("/vinculos/gerar")
@@ -57,6 +57,7 @@ class VinculoControllerTest {
 
         when(jwtService.extrairCpf("token")).thenReturn("123");
         when(usuarioService.searchByCpf("123")).thenReturn(usuario);
+        when(usuarioService.getUsuarioLogado()).thenReturn(usuario);
         when(service.entrarComCodigo(any(), any(), anyInt())).thenReturn(paciente);
 
         mockMvc.perform(post("/vinculos/entrar")
@@ -83,7 +84,8 @@ class VinculoControllerTest {
 
         when(jwtService.extrairCpf("token")).thenReturn("123");
         when(usuarioService.searchByCpf("123")).thenReturn(usuario);
-        when(vinculoRepository.findById(1L)).thenReturn(Optional.of(vinculo));
+        when(usuarioService.getUsuarioLogado()).thenReturn(usuario);
+        when(service.buscarPorId(1L)).thenReturn(vinculo);
         when(permissaoService.podeRemoverVinculo(1, vinculo)).thenReturn(true);
         doNothing().when(service).removerVinculo(1L, 1);
 
@@ -99,6 +101,7 @@ class VinculoControllerTest {
 
         when(jwtService.extrairCpf("token")).thenReturn("123");
         when(usuarioService.searchByCpf("123")).thenReturn(usuario);
+        when(usuarioService.getUsuarioLogado()).thenReturn(usuario);
         when(service.listar(1)).thenReturn(List.of(dto));
 
         mockMvc.perform(get("/vinculos")
@@ -113,6 +116,7 @@ class VinculoControllerTest {
 
         when(jwtService.extrairCpf("token")).thenReturn("123");
         when(usuarioService.searchByCpf("123")).thenReturn(usuario);
+        when(usuarioService.getUsuarioLogado()).thenReturn(usuario);
         when(service.listarPacientesDoUsuario(1)).thenReturn(List.of(paciente));
 
         mockMvc.perform(get("/vinculos/pacientes")
@@ -123,7 +127,10 @@ class VinculoControllerTest {
     @Test
     void testListarPorPacienteOk() throws Exception {
         VinculoOutputDTO dto = new VinculoOutputDTO(); dto.setId(1L);
+        Usuario usuario = new Usuario(); usuario.setId(1); usuario.setCpf("123");
 
+        when(usuarioService.getUsuarioLogado()).thenReturn(usuario);
+        when(permissaoService.podeVisualizarPaciente(1, 2)).thenReturn(true);
         when(service.listarPorPaciente(2)).thenReturn(List.of(dto));
 
         mockMvc.perform(get("/vinculos/paciente/2"))

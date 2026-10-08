@@ -1,54 +1,45 @@
 package br.com.vittasync.vittasync.Controller;
 
+
 import br.com.vittasync.vittasync.DTO.EventoPacienteOutputDTO;
+import br.com.vittasync.vittasync.Exception.AcessoNegadoException;
 import br.com.vittasync.vittasync.Model.EventoPaciente;
 import br.com.vittasync.vittasync.Model.Usuario;
 import br.com.vittasync.vittasync.Service.EventoPacienteService;
-import br.com.vittasync.vittasync.Service.JwtService;
 import br.com.vittasync.vittasync.Service.PermissaoService;
 import br.com.vittasync.vittasync.Service.UsuarioService;
 import br.com.vittasync.vittasync.Util.EventoTipos;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
 import java.util.List;
 import java.util.stream.Collectors;
+
 
 @RestController
 @RequestMapping("/eventos")
 public class EventoPacienteController {
 
     private final EventoPacienteService service;
-    private final JwtService jwtService;
     private final UsuarioService usuarioService;
     private final PermissaoService permissaoService;
 
     public EventoPacienteController(
             EventoPacienteService service,
-            JwtService jwtService,
             UsuarioService usuarioService,
             PermissaoService permissaoService
     ) {
         this.service = service;
-        this.jwtService = jwtService;
         this.usuarioService = usuarioService;
         this.permissaoService = permissaoService;
     }
 
     @GetMapping("/paciente/{id}")
     public ResponseEntity<List<EventoPacienteOutputDTO>> listarPorPaciente(
-            @PathVariable Integer id,
-            @RequestHeader("Authorization") String authHeader
+            @PathVariable Integer id
     ) {
 
-        String token =
-                authHeader.replace("Bearer ", "");
-
-        String cpfDoToken =
-                jwtService.extrairCpf(token);
-
         Usuario usuarioLogado =
-                usuarioService.searchByCpf(cpfDoToken);
+                usuarioService.getUsuarioLogado();
 
         if (
                 !permissaoService.podeVisualizarPaciente(
@@ -56,7 +47,7 @@ public class EventoPacienteController {
                         id
                 )
         ) {
-            return ResponseEntity.status(403).build();
+            throw new AcessoNegadoException("Usuário sem permissão para visualizar o paciente");
         }
 
         List<EventoPaciente> eventos =
@@ -72,18 +63,11 @@ public class EventoPacienteController {
 
     @GetMapping("/paciente/{id}/nao-visualizados")
     public ResponseEntity<Long> contarNaoVisualizados(
-            @PathVariable Integer id,
-            @RequestHeader("Authorization") String authHeader
+            @PathVariable Integer id
     ) {
 
-        String token =
-                authHeader.replace("Bearer ", "");
-
-        String cpfDoToken =
-                jwtService.extrairCpf(token);
-
         Usuario usuarioLogado =
-                usuarioService.searchByCpf(cpfDoToken);
+                usuarioService.getUsuarioLogado();
 
         if (
                 !permissaoService.podeVisualizarPaciente(
@@ -91,7 +75,7 @@ public class EventoPacienteController {
                         id
                 )
         ) {
-            return ResponseEntity.status(403).build();
+            throw new AcessoNegadoException("Usuário sem permissão para visualizar o paciente");
         }
 
         Long total = service.contarNaoVisualizados(id, usuarioLogado.getId());
@@ -101,13 +85,10 @@ public class EventoPacienteController {
 
     @PutMapping("/paciente/{id}/visualizar")
     public ResponseEntity<Void> visualizarEventos(
-            @PathVariable Integer id,
-            @RequestHeader("Authorization") String authHeader
+            @PathVariable Integer id
     ) {
 
-        String token = authHeader.replace("Bearer ", "");
-        String cpfDoToken = jwtService.extrairCpf(token);
-        Usuario usuarioLogado = usuarioService.searchByCpf(cpfDoToken);
+        Usuario usuarioLogado = usuarioService.getUsuarioLogado();
 
         if (
                 !permissaoService.podeVisualizarPaciente(
@@ -115,7 +96,7 @@ public class EventoPacienteController {
                         id
                 )
         ) {
-            return ResponseEntity.status(403).build();
+            throw new AcessoNegadoException("Usuário sem permissão para visualizar o paciente");
         }
 
         service.marcarComoVisualizados(

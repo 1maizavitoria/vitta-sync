@@ -1,6 +1,7 @@
 package br.com.vittasync.vittasync.Service;
 
 
+import br.com.vittasync.vittasync.Exception.DadosInvalidosException;
 import br.com.vittasync.vittasync.Model.ContatoEmergencia;
 import br.com.vittasync.vittasync.Model.Usuario;
 import org.springframework.scheduling.annotation.Async;
@@ -18,7 +19,6 @@ public class NotificacaoService {
     public void enviarDesvioLinhaBase(Integer contatoId, String nomeContato, String email,
                                      String telefone, boolean canalEmail, boolean canalSms,
                                      String nomePaciente, String detalhes) {
-        // Dados simples evitam acessar entidades JPA fora da requisição original.
         if (canalEmail) {
             try {
                 emailService.enviarEmailPersonalizado(email,
@@ -30,7 +30,7 @@ public class NotificacaoService {
                 logger.error("Falha no e-mail de desvio da linha de base para contato {}", contatoId, exception);
             }
         }
-        // Uma falha no e-mail não impede a tentativa pelo outro canal configurado.
+        // falha no e-mail não impede a tentativa pelo outro canal configurado.
         if (canalSms) {
             smsService.enviarDesvioLinhaBase(telefone, nomePaciente, detalhes);
         }
@@ -55,7 +55,7 @@ public class NotificacaoService {
         switch (canal.toLowerCase()) {
             case "sms" -> smsService.enviarCodigo(usuario.getTelefone(), codigo);
             case "email" -> emailService.enviarCodigo(usuario.getEmail(), codigo);
-            default -> throw new RuntimeException("Canal inválido");
+            default -> throw new DadosInvalidosException("Canal inválido");
         }
     }
 
@@ -71,7 +71,7 @@ public class NotificacaoService {
                 smsService.enviarLembrete(usuario.getTelefone(), usuario.getNome(), mensagem);
                 emailService.enviarLembrete(usuario.getEmail(), usuario.getNome(), mensagem);
             }
-            default -> throw new RuntimeException("Canal inválido");
+            default -> throw new DadosInvalidosException("Canal inválido");
         }
     }
 
@@ -121,7 +121,7 @@ public class NotificacaoService {
                 smsService.enviarAlertaRepouso(contato.getTelefone(), nomePaciente);
                 emailService.enviarAlertaRepouso(contato.getEmail(), nomePaciente);
             }
-            default -> throw new RuntimeException("Canal inválido");
+            default -> throw new DadosInvalidosException("Canal inválido");
         }
     }
 

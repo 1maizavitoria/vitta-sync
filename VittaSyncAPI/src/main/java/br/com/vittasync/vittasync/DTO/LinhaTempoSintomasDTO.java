@@ -22,8 +22,13 @@ public class LinhaTempoSintomasDTO {
 
 
     public Integer getId() { return id; }
+    
     public LocalDateTime getDataHora() { return dataHora; }
+    
     public String getSintoma() { return sintoma; }
+    
     public Integer getIntensidadeDor() { return intensidadeDor; }
+   
     public LocalDate getDataReferencia() { return dataReferencia; }
+    
 }

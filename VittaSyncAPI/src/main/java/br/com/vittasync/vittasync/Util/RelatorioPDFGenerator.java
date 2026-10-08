@@ -1,5 +1,6 @@
 package br.com.vittasync.vittasync.Util;
 
+
 import br.com.vittasync.vittasync.DTO.RelatorioPreviewDTO;
 import br.com.vittasync.vittasync.DTO.RelatorioResumoDTO;
 import com.itextpdf.kernel.pdf.PdfDocument;
@@ -23,6 +24,7 @@ import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.Locale;
+
 
 public class RelatorioPDFGenerator {
     private static final DateTimeFormatter DATA = DateTimeFormatter.ofPattern("dd/MM/yyyy");
@@ -115,7 +117,6 @@ public class RelatorioPDFGenerator {
         TimeSeries serie = new TimeSeries(indicador.nome());
         LocalDate anterior = null;
         for (RelatorioResumoDTO.PontoDiario ponto : indicador.evolucaoDiaria()) {
-            // Interrompe a linha nos intervalos sem registro, sem inventar medições.
             if (anterior != null && ponto.data().isAfter(anterior.plusDays(1))) {
                 serie.add(dia(anterior.plusDays(1)), (Number) null);
             }

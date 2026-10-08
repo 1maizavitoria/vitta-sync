@@ -1,5 +1,6 @@
 package br.com.vittasync.vittasync.Service;
 
+
 import br.com.vittasync.vittasync.DTO.LinhaTempoHabitosDTO;
 import br.com.vittasync.vittasync.DTO.LinhaTempoItemDTO;
 import br.com.vittasync.vittasync.DTO.LinhaTempoResponseDTO;
@@ -13,13 +14,13 @@ import br.com.vittasync.vittasync.Repository.DiarioSintomasRepository;
 import br.com.vittasync.vittasync.Repository.HabitosRepository;
 import br.com.vittasync.vittasync.Repository.SinaisVitaisRepository;
 import org.springframework.stereotype.Service;
-
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+
 
 @Service
 public class LinhaTempoService {

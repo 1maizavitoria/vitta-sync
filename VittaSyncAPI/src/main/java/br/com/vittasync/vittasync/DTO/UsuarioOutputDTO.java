@@ -1,5 +1,6 @@
 package br.com.vittasync.vittasync.DTO;
 
+
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
@@ -52,4 +53,5 @@ public class UsuarioOutputDTO {
 
     public LocalDateTime getDataCadastro() { return dataCadastro; }
     public void setDataCadastro(LocalDateTime dataCadastro) { this.dataCadastro = dataCadastro; }
+    
 }

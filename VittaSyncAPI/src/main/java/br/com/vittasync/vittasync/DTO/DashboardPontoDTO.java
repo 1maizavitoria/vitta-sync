@@ -1,5 +1,6 @@
 package br.com.vittasync.vittasync.DTO;
 
+
 import java.time.LocalDateTime;
 
 public class DashboardPontoDTO {
@@ -12,11 +13,9 @@ public class DashboardPontoDTO {
         this.valor = valor;
     }
 
-    public LocalDateTime getData() {
-        return data;
-    }
 
-    public Number getValor() {
-        return valor;
-    }
+    public LocalDateTime getData() {return data;}
+
+    public Number getValor() {return valor;}
+    
 }

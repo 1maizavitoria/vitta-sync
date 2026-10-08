@@ -1,5 +1,6 @@
 package br.com.vittasync.vittasync.DTO;
 
+
 public class RelatorioPDFDTO {
     private byte[] arquivo;
 

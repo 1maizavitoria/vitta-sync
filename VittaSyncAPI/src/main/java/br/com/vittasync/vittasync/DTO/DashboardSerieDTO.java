@@ -1,6 +1,8 @@
 package br.com.vittasync.vittasync.DTO;
 
+
 import java.util.List;
+
 
 public class DashboardSerieDTO {
 
@@ -14,15 +16,11 @@ public class DashboardSerieDTO {
         this.pontos = pontos;
     }
 
-    public String getCodigo() {
-        return codigo;
-    }
 
-    public String getNome() {
-        return nome;
-    }
+    public String getCodigo() {return codigo;}
 
-    public List<DashboardPontoDTO> getPontos() {
-        return pontos;
-    }
+    public String getNome() {return nome;}
+
+    public List<DashboardPontoDTO> getPontos() {return pontos;}
+    
 }

@@ -49,6 +49,7 @@ public class SinaisVitais {
 
     public SinaisVitais() {}
 
+
     public Integer getId() { return id; }
     public void setId(Integer id) { this.id = id; }
 
@@ -86,10 +87,9 @@ public class SinaisVitais {
         return registradoPorUsuarioId;
     }
 
-    public void setRegistradoPorUsuarioId(
-            Integer registradoPorUsuarioId
-    ) {
+    public void setRegistradoPorUsuarioId(Integer registradoPorUsuarioId) {
         this.registradoPorUsuarioId =
                 registradoPorUsuarioId;
     }
+
 }

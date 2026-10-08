@@ -78,4 +78,5 @@ public class LinhaBaseDTO {
     public LocalDateTime getDataUltimoValor() {return dataUltimoValor;}
 
     public String getComparacao() {return comparacao;}
+    
 }

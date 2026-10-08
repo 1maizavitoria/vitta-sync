@@ -1,32 +1,28 @@
 package br.com.vittasync.vittasync.Service;
 
-import br.com.vittasync.vittasync.DTO.ConviteVinculoOutputDTO;
-import br.com.vittasync.vittasync.DTO.EnviarConviteDTO;
 
+import br.com.vittasync.vittasync.DTO.ConviteVinculoOutputDTO;
 import br.com.vittasync.vittasync.DTO.PacienteResumoDTO;
 import br.com.vittasync.vittasync.DTO.VinculoOutputDTO;
+import br.com.vittasync.vittasync.Exception.AcessoNegadoException;
+import br.com.vittasync.vittasync.Exception.DadosInvalidosException;
 import br.com.vittasync.vittasync.Exception.RecursoNaoEncontradoException;
-
 import br.com.vittasync.vittasync.Model.ConviteVinculo;
 import br.com.vittasync.vittasync.Model.Usuario;
 import br.com.vittasync.vittasync.Model.Vinculo;
-
 import br.com.vittasync.vittasync.Repository.ConviteVinculoRepository;
 import br.com.vittasync.vittasync.Repository.UsuarioRepository;
 import br.com.vittasync.vittasync.Repository.VinculoRepository;
-
-
 import br.com.vittasync.vittasync.Util.EventoTipos;
 import br.com.vittasync.vittasync.Util.FuncoesResponsavel;
 import br.com.vittasync.vittasync.Util.FuncoesSaude;
 import org.springframework.stereotype.Service;
-
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
-
 import br.com.vittasync.vittasync.Util.EventoPrioridades;
+
 
 @Service
 public class VinculoService {
@@ -56,7 +52,7 @@ public class VinculoService {
 
         if (!usuario.getTipo().equalsIgnoreCase("paciente")) {
 
-            throw new RuntimeException("Somente pacientes podem gerar vínculo");
+            throw new AcessoNegadoException("Somente pacientes podem gerar vínculo");
         }
 
         String codigo;
@@ -98,29 +94,29 @@ public class VinculoService {
 
         if (usuario.getTipo().equalsIgnoreCase("paciente")) {
 
-            throw new RuntimeException("Paciente não pode entrar com código");
+            throw new AcessoNegadoException("Paciente não pode entrar com código");
         }
 
         if ((usuario.getTipo().equalsIgnoreCase("responsavel") || usuario.getTipo().equalsIgnoreCase("saude")) && (funcao == null || funcao.isBlank())) {
 
-            throw new RuntimeException("Função é obrigatória");
+            throw new DadosInvalidosException("Função é obrigatória");
         }
 
         if (usuario.getTipo().equalsIgnoreCase("responsavel") && !FuncoesResponsavel.VALIDAS.contains(funcao)) {
 
-            throw new RuntimeException("Função inválida");
+            throw new DadosInvalidosException("Função inválida");
         }
 
         if (usuario.getTipo().equalsIgnoreCase("saude") && !FuncoesSaude.VALIDAS.contains(funcao)) {
 
-            throw new RuntimeException("Função inválida");
+            throw new DadosInvalidosException("Função inválida");
         }
 
         ConviteVinculo convite = conviteRepository.findByCodigo(codigo).orElseThrow(() -> new RecursoNaoEncontradoException("Código inválido"));
 
         if (!convite.getAtivo()) {
 
-            throw new RuntimeException("Código inativo");
+            throw new DadosInvalidosException("Código inativo");
         }
 
         if (convite.getExpiraEm().before(Timestamp.valueOf(LocalDateTime.now()))) {
@@ -129,14 +125,14 @@ public class VinculoService {
 
             conviteRepository.save(convite);
 
-            throw new RuntimeException("Código expirado");
+            throw new DadosInvalidosException("Código expirado");
         }
 
         boolean jaExiste = vinculoRepository.existsByPacienteIdAndUsuarioId(convite.getPacienteId(), usuarioId);
 
         if (jaExiste) {
 
-            throw new RuntimeException("Vínculo já existe");
+            throw new DadosInvalidosException("Vínculo já existe");
         }
 
         Vinculo vinculo = new Vinculo();
@@ -188,7 +184,7 @@ public class VinculoService {
 
         if (!convite.getAtivo()) {
 
-            throw new RuntimeException("Convite inativo");
+            throw new DadosInvalidosException("Convite inativo");
         }
 
         if (convite.getExpiraEm().before(Timestamp.valueOf(LocalDateTime.now()))) {
@@ -197,7 +193,7 @@ public class VinculoService {
 
             conviteRepository.save(convite);
 
-            throw new RuntimeException("Convite expirado");
+            throw new DadosInvalidosException("Convite expirado");
         }
 
         Usuario paciente = usuarioRepository.findById(convite.getPacienteId()).orElseThrow(() -> new RecursoNaoEncontradoException("Paciente não encontrado"));
@@ -206,12 +202,16 @@ public class VinculoService {
 
         if (convidado.getTipo().equalsIgnoreCase("paciente")) {
 
-            throw new RuntimeException("Paciente não pode ser vinculado");
+            throw new DadosInvalidosException("Paciente não pode ser vinculado");
         }
 
         String link = "http://localhost:5173/entrar?codigo=" + convite.getCodigo();
 
         emailService.enviarConviteVinculo(email, convidado.getNome(), paciente.getNome(), convite.getCodigo(), link);
+    }
+
+    public Vinculo buscarPorId(Long id) {
+        return vinculoRepository.findById(id).orElseThrow(() -> new RecursoNaoEncontradoException("Vínculo não encontrado"));
     }
 
     public void removerVinculo(Long id, Integer usuarioLogadoId) {
@@ -294,7 +294,7 @@ public class VinculoService {
 
         Usuario usuario = usuarioRepository.findById(usuarioId).orElseThrow(() -> new RecursoNaoEncontradoException("Usuário não encontrado"));
 
-        // paciente vê apenas ele mesmo
+        // paciente vê só ele mesmo
         if (usuario.getTipo().equalsIgnoreCase("paciente")) {
 
             PacienteResumoDTO dto = new PacienteResumoDTO();

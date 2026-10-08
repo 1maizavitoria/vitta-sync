@@ -1,7 +1,6 @@
 package br.com.vittasync.vittasync.Controller;
 
 
-import br.com.vittasync.vittasync.Controller.AuthController;
 import br.com.vittasync.vittasync.Service.AuthService;
 import br.com.vittasync.vittasync.Service.JwtService;
 import br.com.vittasync.vittasync.Service.SessaoService;

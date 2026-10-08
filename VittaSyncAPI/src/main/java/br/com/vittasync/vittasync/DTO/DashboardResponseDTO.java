@@ -33,31 +33,18 @@ public class DashboardResponseDTO {
         this.linhasBase = linhasBase;
     }
 
-    public String getPacienteCpf() {
-        return pacienteCpf;
-    }
+    public String getPacienteCpf() {return pacienteCpf;}
 
-    public String getPacienteNome() {
-        return pacienteNome;
-    }
+    public String getPacienteNome() {return pacienteNome;}
 
-    public LocalDate getInicio() {
-        return inicio;
-    }
+    public LocalDate getInicio() {return inicio;}
 
-    public LocalDate getFim() {
-        return fim;
-    }
+    public LocalDate getFim() {return fim;}
 
-    public List<DashboardCategoriaDTO> getCategorias() {
-        return categorias;
-    }
+    public List<DashboardCategoriaDTO> getCategorias() {return categorias;}
 
-    public List<EstabilidadeClinicaDTO> getEstabilidadeClinica() {
-        return estabilidadeClinica;
-    }
+    public List<EstabilidadeClinicaDTO> getEstabilidadeClinica() {return estabilidadeClinica;}
 
-    public List<LinhaBaseDTO> getLinhasBase() {
-        return linhasBase;
-    }
+    public List<LinhaBaseDTO> getLinhasBase() {return linhasBase;}
+    
 }

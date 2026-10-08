@@ -1,17 +1,17 @@
 package br.com.vittasync.vittasync.Scheduler;
 
+
 import br.com.vittasync.vittasync.Model.LembreteMedicao;
 import br.com.vittasync.vittasync.Model.Usuario;
 import br.com.vittasync.vittasync.Service.LembreteMedicaoService;
 import br.com.vittasync.vittasync.Service.NotificacaoService;
 import org.junit.jupiter.api.Test;
-
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
-
 import static org.mockito.Mockito.*;
+
 
 class LembreteMedicaoSchedulerTest {
 

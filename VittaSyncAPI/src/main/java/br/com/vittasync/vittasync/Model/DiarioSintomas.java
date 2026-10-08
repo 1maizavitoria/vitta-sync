@@ -38,6 +38,7 @@ public class DiarioSintomas {
 
     public DiarioSintomas() {}
 
+    
     public Integer getId() { return id; }
     public void setId(Integer id) { this.id = id; }
 
@@ -61,4 +62,5 @@ public class DiarioSintomas {
 
     public Integer getRegistradoPorUsuarioId() { return registradoPorUsuarioId; }
     public void setRegistradoPorUsuarioId(Integer registradoPorUsuarioId) { this.registradoPorUsuarioId = registradoPorUsuarioId; }
+
 }

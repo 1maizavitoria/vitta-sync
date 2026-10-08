@@ -22,7 +22,11 @@ public class LinhaTempoResponseDTO {
 
 
     public List<LinhaTempoSinaisVitaisDTO> getSinaisVitais() { return sinaisVitais; }
+    
     public List<LinhaTempoHabitosDTO> getHabitos() { return habitos; }
+    
     public List<LinhaTempoSintomasDTO> getSintomas() { return sintomas; }
+    
     public List<LinhaTempoItemDTO> getItens() { return itens; }
+    
 }

@@ -2,16 +2,13 @@ package br.com.vittasync.vittasync.Controller;
 
 
 import br.com.vittasync.vittasync.DTO.EstabilidadeClinicaDTO;
+import br.com.vittasync.vittasync.Exception.AcessoNegadoException;
 import br.com.vittasync.vittasync.Model.Usuario;
 import br.com.vittasync.vittasync.Service.EstabilidadeClinicaService;
-import br.com.vittasync.vittasync.Service.JwtService;
 import br.com.vittasync.vittasync.Service.PermissaoService;
 import br.com.vittasync.vittasync.Service.UsuarioService;
-import br.com.vittasync.vittasync.Repository.SinaisVitaisRepository;
-import br.com.vittasync.vittasync.Repository.HabitosRepository;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -21,52 +18,32 @@ import java.util.List;
 public class EstabilidadeClinicaController {
 
     private final EstabilidadeClinicaService estabilidadeClinicaService;
-    private final JwtService jwtService;
     private final UsuarioService usuarioService;
     private final PermissaoService permissaoService;
-    private final SinaisVitaisRepository sinaisVitaisRepository;
-    private final HabitosRepository habitosRepository;
 
     public EstabilidadeClinicaController(
             EstabilidadeClinicaService estabilidadeClinicaService,
-            JwtService jwtService,
             UsuarioService usuarioService,
-            PermissaoService permissaoService,
-            SinaisVitaisRepository sinaisVitaisRepository,
-            HabitosRepository habitosRepository
+            PermissaoService permissaoService
     ) {
         this.estabilidadeClinicaService = estabilidadeClinicaService;
-        this.jwtService = jwtService;
         this.usuarioService = usuarioService;
         this.permissaoService = permissaoService;
-        this.sinaisVitaisRepository = sinaisVitaisRepository;
-        this.habitosRepository = habitosRepository;
     }
 
     @GetMapping("/paciente/{cpf}")
     public ResponseEntity<List<EstabilidadeClinicaDTO>> consultarEstabilidade(
-            @PathVariable String cpf,
-            @RequestHeader("Authorization") String authHeader
+            @PathVariable String cpf
     ) {
-        String token = authHeader.replace("Bearer ", "");
-        String cpfDoToken = jwtService.extrairCpf(token);
-
-        Usuario usuarioLogado = usuarioService.searchByCpf(cpfDoToken);
+        Usuario usuarioLogado = usuarioService.getUsuarioLogado();
         Usuario paciente = usuarioService.searchByCpf(cpf);
 
         if (!permissaoService.podeVisualizarPaciente(usuarioLogado.getId(), paciente.getId())) {
-            return ResponseEntity.status(403).build();
+            throw new AcessoNegadoException("Usuário sem permissão para visualizar o paciente");
         }
 
-        var sinais = sinaisVitaisRepository.findByPacienteIdOrderByDataRegistroAsc(paciente.getId());
-        var habitos = habitosRepository.findByPacienteIdAndDataReferenciaBetweenOrderByDataReferenciaAsc(
-                paciente.getId(),
-                LocalDate.now().minusDays(30),
-                LocalDate.now()
-        );
-
         List<EstabilidadeClinicaDTO> indices =
-                estabilidadeClinicaService.calcularIndices(paciente.getId(), sinais, habitos);
+                estabilidadeClinicaService.consultarIndices(paciente.getId());
 
         return ResponseEntity.ok(indices);
     }
@@ -75,17 +52,13 @@ public class EstabilidadeClinicaController {
     public ResponseEntity<Void> testarAlerta(
             @PathVariable String cpf,
             @PathVariable String tipo,
-            @PathVariable String categoria,
-            @RequestHeader("Authorization") String authHeader
+            @PathVariable String categoria
     ) {
-        String token = authHeader.replace("Bearer ", "");
-        String cpfDoToken = jwtService.extrairCpf(token);
-
-        Usuario usuarioLogado = usuarioService.searchByCpf(cpfDoToken);
+        Usuario usuarioLogado = usuarioService.getUsuarioLogado();
         Usuario paciente = usuarioService.searchByCpf(cpf);
 
         if (!permissaoService.podeVisualizarPaciente(usuarioLogado.getId(), paciente.getId())) {
-            return ResponseEntity.status(403).build();
+            throw new AcessoNegadoException("Usuário sem permissão para visualizar o paciente");
         }
 
         EstabilidadeClinicaDTO indiceTeste = new EstabilidadeClinicaDTO(

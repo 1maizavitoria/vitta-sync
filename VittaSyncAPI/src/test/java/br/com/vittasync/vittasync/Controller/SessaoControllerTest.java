@@ -1,12 +1,11 @@
 package br.com.vittasync.vittasync.Controller;
 
 
-import br.com.vittasync.vittasync.Controller.SessaoController;
+import br.com.vittasync.vittasync.Exception.AcessoNegadoException;
 import br.com.vittasync.vittasync.Service.SessaoService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.web.servlet.MockMvc;
@@ -35,12 +34,11 @@ class SessaoControllerTest {
 
     @Test
     void testLogoutUnauthorized() throws Exception {
-        doThrow(new RuntimeException("Token inválido")).when(sessaoService).logout(anyString());
+        doThrow(new AcessoNegadoException("Token inválido")).when(sessaoService).logout(anyString());
 
         mockMvc.perform(post("/sessao/logout")
                         .header("Authorization","Bearer token123"))
-                .andExpect(status().isUnauthorized())
-                .andExpect(content().string("Token inválido"));
+                .andExpect(status().isForbidden());
     }
 }
 

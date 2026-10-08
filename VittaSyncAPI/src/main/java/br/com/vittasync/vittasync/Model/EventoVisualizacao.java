@@ -1,8 +1,9 @@
 package br.com.vittasync.vittasync.Model;
 
-import jakarta.persistence.*;
 
+import jakarta.persistence.*;
 import java.time.LocalDateTime;
+
 
 @Entity
 @Table(name = "evento_visualizacao")
@@ -31,49 +32,29 @@ public class EventoVisualizacao {
 
     private LocalDateTime visualizadoEm;
 
-    public Long getId() {
-        return id;
-    }
 
-    public void setId(Long id) {
-        this.id = id;
-    }
+    public Long getId() {return id;}
+    public void setId(Long id) {this.id = id;}
 
-    public EventoPaciente getEventoPaciente() {
-        return eventoPaciente;
-    }
+    public EventoPaciente getEventoPaciente() {return eventoPaciente;}
 
-    public void setEventoPaciente(
-            EventoPaciente eventoPaciente
-    ) {
+    public void setEventoPaciente(EventoPaciente eventoPaciente) {
         this.eventoPaciente = eventoPaciente;
     }
 
-    public Usuario getUsuario() {
-        return usuario;
-    }
+    public Usuario getUsuario() {return usuario;}
+    public void setUsuario(Usuario usuario) {this.usuario = usuario;}
 
-    public void setUsuario(Usuario usuario) {
-        this.usuario = usuario;
-    }
+    public Boolean getVisualizado() {return visualizado;}
 
-    public Boolean getVisualizado() {
-        return visualizado;
-    }
-
-    public void setVisualizado(
-            Boolean visualizado
-    ) {
+    public void setVisualizado(Boolean visualizado) {
         this.visualizado = visualizado;
     }
 
-    public LocalDateTime getVisualizadoEm() {
-        return visualizadoEm;
-    }
+    public LocalDateTime getVisualizadoEm() {return visualizadoEm;}
 
-    public void setVisualizadoEm(
-            LocalDateTime visualizadoEm
-    ) {
+    public void setVisualizadoEm(LocalDateTime visualizadoEm) {
         this.visualizadoEm = visualizadoEm;
     }
+    
 }

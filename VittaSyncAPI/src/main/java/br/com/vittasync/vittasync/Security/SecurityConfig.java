@@ -44,15 +44,7 @@ public class SecurityConfig {
                                 "/swagger-ui.html"
                         ).permitAll()
 
-                        .requestMatchers("/usuario/editar/**").authenticated()
-                        .requestMatchers("/usuario/getUsuario/**").authenticated()
-                        .requestMatchers("/usuario/deletar/**").authenticated()
-                        .requestMatchers("/sessao/logout").authenticated()
-                        .requestMatchers("/sinaisvitais/**").authenticated()
-                        .requestMatchers("/habitos/**").authenticated()
-                        .requestMatchers("/dashboard/**").authenticated()
-                        .requestMatchers("/contatoemergencia/**").authenticated()
-
+                        // resto = token válido
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);

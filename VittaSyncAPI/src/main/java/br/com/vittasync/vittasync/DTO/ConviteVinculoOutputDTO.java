@@ -1,5 +1,6 @@
 package br.com.vittasync.vittasync.DTO;
 
+
 import java.sql.Timestamp;
 
 public class ConviteVinculoOutputDTO {
@@ -10,30 +11,20 @@ public class ConviteVinculoOutputDTO {
 
     private Timestamp expiraEm;
 
+
     public ConviteVinculoOutputDTO() {
     }
 
-    public String getCodigo() {
-        return codigo;
-    }
+    public String getCodigo() {return codigo;}
 
-    public void setCodigo(String codigo) {
-        this.codigo = codigo;
-    }
+    public void setCodigo(String codigo) {this.codigo = codigo;}
 
-    public String getLink() {
-        return link;
-    }
+    public String getLink() {return link;}
 
-    public void setLink(String link) {
-        this.link = link;
-    }
+    public void setLink(String link) {this.link = link;}
 
-    public Timestamp getExpiraEm() {
-        return expiraEm;
-    }
+    public Timestamp getExpiraEm() {return expiraEm;}
 
-    public void setExpiraEm(Timestamp expiraEm) {
-        this.expiraEm = expiraEm;
-    }
+    public void setExpiraEm(Timestamp expiraEm) {this.expiraEm = expiraEm;}
+    
 }

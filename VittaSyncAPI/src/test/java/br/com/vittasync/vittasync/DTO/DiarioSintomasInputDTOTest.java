@@ -1,16 +1,16 @@
 package br.com.vittasync.vittasync.DTO;
 
+
 import org.junit.jupiter.api.Test;
 import jakarta.validation.Validation;
 import jakarta.validation.Validator;
 import jakarta.validation.ValidatorFactory;
 import jakarta.validation.ConstraintViolation;
-
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Set;
-
 import static org.junit.jupiter.api.Assertions.*;
+
 
 class DiarioSintomasInputDTOTest {
 

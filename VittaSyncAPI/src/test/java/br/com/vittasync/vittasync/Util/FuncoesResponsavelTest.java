@@ -1,8 +1,9 @@
 package br.com.vittasync.vittasync.Util;
 
-import org.junit.jupiter.api.Test;
 
+import org.junit.jupiter.api.Test;
 import static org.assertj.core.api.Assertions.assertThat;
+
 
 class FuncoesResponsavelTest {
 
@@ -25,5 +26,10 @@ class FuncoesResponsavelTest {
                         FuncoesResponsavel.CONTATO_EMERGENCIA,
                         FuncoesResponsavel.TUTOR
                 );
+    }
+
+    @Test
+    void testInstancia() {
+        assertThat(new FuncoesResponsavel()).isNotNull();
     }
 }

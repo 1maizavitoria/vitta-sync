@@ -1,9 +1,11 @@
 package br.com.vittasync.vittasync.Service;
 
+
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import java.nio.charset.StandardCharsets;
 import java.security.Key;
@@ -13,7 +15,9 @@ import java.util.Date;
 @Service
 public class JwtService {
 
-    private final String SECRET_KEY = "mysupersecretkeymysupersecretkey123456";
+    @Value("${jwt.secret}")
+    private String SECRET_KEY;
+
     private final long EXPIRATION_TIME = 1000L * 60 * 60 * 24;
 
     private Key getSigningKey() {

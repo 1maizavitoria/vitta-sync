@@ -4,8 +4,9 @@ package br.com.vittasync.vittasync.Controller;
 import br.com.vittasync.vittasync.DTO.UsuarioInputDTO;
 import br.com.vittasync.vittasync.DTO.UsuarioOutputDTO;
 import br.com.vittasync.vittasync.DTO.UsuarioUpdateDTO;
+import br.com.vittasync.vittasync.Exception.AcessoNegadoException;
+import br.com.vittasync.vittasync.Exception.DadosInvalidosException;
 import br.com.vittasync.vittasync.Model.Usuario;
-import br.com.vittasync.vittasync.Service.JwtService;
 import br.com.vittasync.vittasync.Service.PermissaoService;
 import br.com.vittasync.vittasync.Service.UsuarioService;
 import br.com.vittasync.vittasync.Util.HashUtil;
@@ -19,12 +20,10 @@ import org.springframework.web.bind.annotation.*;
 public class UsuarioController {
 
     private final UsuarioService usuarioService;
-    private final JwtService jwtService;
     private final PermissaoService permissaoService;
 
-    public UsuarioController(UsuarioService usuarioService, JwtService jwtService, PermissaoService permissaoService) {
+    public UsuarioController(UsuarioService usuarioService, PermissaoService permissaoService) {
         this.usuarioService = usuarioService;
-        this.jwtService = jwtService;
         this.permissaoService = permissaoService;
     }
 
@@ -32,7 +31,7 @@ public class UsuarioController {
     public ResponseEntity<UsuarioOutputDTO> create(@Valid @RequestBody UsuarioInputDTO dto) {
 
         if ("saude".equalsIgnoreCase(dto.getTipo()) && (dto.getConselho() == null || dto.getConselho().isBlank())) {
-            throw new RuntimeException("Conselho é obrigatório para usuários do tipo saude");
+            throw new DadosInvalidosException("Conselho é obrigatório para usuários do tipo saude");
         }
 
         Usuario usuario = new Usuario();
@@ -53,58 +52,47 @@ public class UsuarioController {
     }
 
     @PutMapping("/editar/{cpf}")
-    public ResponseEntity<UsuarioOutputDTO> update(@PathVariable String cpf, @Valid @RequestBody UsuarioUpdateDTO dto, @RequestHeader("Authorization") String authHeader) {
-        String token = authHeader.replace("Bearer ", "");
-        String cpfToken = jwtService.extrairCpf(token);
-        Usuario usuarioLogado = usuarioService.searchByCpf(cpfToken);
+    public ResponseEntity<UsuarioOutputDTO> update(@PathVariable String cpf, @Valid @RequestBody UsuarioUpdateDTO dto) {
+        Usuario usuarioLogado = usuarioService.getUsuarioLogado();
         Usuario usuarioPaciente = usuarioService.searchByCpf(cpf);
-        boolean podeEditar = cpfToken.equals(cpf) ||
+        boolean podeEditar = usuarioLogado.getCpf().equals(cpf) ||
                 permissaoService.podeEditarPaciente(usuarioLogado.getId(), usuarioPaciente.getId());
 
         if (!podeEditar) {
-            return ResponseEntity.status(403).build();
+            throw new AcessoNegadoException("Usuário sem permissão para editar o paciente");
         }
 
-        try {
-            Usuario usuario = usuarioService.searchByCpf(cpf);
+        Usuario usuario = usuarioService.searchByCpf(cpf);
 
-            usuario.setNome(dto.getNome());
-            usuario.setEmail(dto.getEmail());
-            usuario.setTelefone(dto.getTelefone());
-            usuario.setAltura(dto.getAltura());
-            usuario.setFuncaoResponsavel(dto.getFuncaoResponsavel());
-            usuario.setDataNascimento(dto.getDataNascimento());
-            usuario.setTelefone(dto.getTelefone());
-            usuario.setPesoInicial(dto.getPesoInicial());
+        usuario.setNome(dto.getNome());
+        usuario.setEmail(dto.getEmail());
+        usuario.setTelefone(dto.getTelefone());
+        usuario.setAltura(dto.getAltura());
+        usuario.setFuncaoResponsavel(dto.getFuncaoResponsavel());
+        usuario.setDataNascimento(dto.getDataNascimento());
+        usuario.setTelefone(dto.getTelefone());
+        usuario.setPesoInicial(dto.getPesoInicial());
 
-            Usuario atualizado = usuarioService.update(usuario);
+        Usuario atualizado = usuarioService.update(usuario);
 
-            return ResponseEntity.ok(toOutputDTO(atualizado));
-        } catch (RuntimeException e) {
-            return ResponseEntity.notFound().build();
-        }
+        return ResponseEntity.ok(toOutputDTO(atualizado));
     }
 
     @GetMapping("/getUsuario/{cpf}")
-    public ResponseEntity<UsuarioOutputDTO> getByCpf(@PathVariable String cpf, @RequestHeader("Authorization") String authHeader) {
+    public ResponseEntity<UsuarioOutputDTO> getByCpf(@PathVariable String cpf) {
 
-        String token = authHeader.replace("Bearer ", "");
-        String cpfToken = jwtService.extrairCpf(token);
-
-        Usuario usuarioLogado = usuarioService.searchByCpf(cpfToken);
+        Usuario usuarioLogado = usuarioService.getUsuarioLogado();
 
         Usuario usuarioPaciente = usuarioService.searchByCpf(cpf);
 
         boolean podeVisualizar =
-                cpfToken.equals(cpf) ||
+                usuarioLogado.getCpf().equals(cpf) ||
                         permissaoService.podeVisualizarPaciente(
                                 usuarioLogado.getId(),
                                 usuarioPaciente.getId()
                         );
         if (!podeVisualizar) {
-            return ResponseEntity
-                    .status(403)
-                    .build();
+            throw new AcessoNegadoException("Usuário sem permissão para visualizar o paciente");
         }
 
         Usuario usuario = usuarioService.searchByCpf(cpf);
@@ -112,13 +100,12 @@ public class UsuarioController {
     }
 
     @DeleteMapping("/deletar/{cpf}")
-    public ResponseEntity<Void> delete(@PathVariable String cpf, @RequestHeader("Authorization") String authHeader) {
+    public ResponseEntity<Void> delete(@PathVariable String cpf) {
 
-        String token = authHeader.replace("Bearer ", "");
-        String cpfToken = jwtService.extrairCpf(token);
+        Usuario usuarioLogado = usuarioService.getUsuarioLogado();
 
-        if (!cpfToken.equals(cpf)) {
-            return ResponseEntity.status(403).build();
+        if (!usuarioLogado.getCpf().equals(cpf)) {
+            throw new AcessoNegadoException("Usuário só pode excluir a própria conta");
         }
 
         Usuario usuario = usuarioService.searchByCpf(cpf);

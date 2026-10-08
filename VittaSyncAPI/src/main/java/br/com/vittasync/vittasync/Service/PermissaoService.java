@@ -1,11 +1,12 @@
 package br.com.vittasync.vittasync.Service;
 
+
 import br.com.vittasync.vittasync.Model.Usuario;
 import br.com.vittasync.vittasync.Model.Vinculo;
 import br.com.vittasync.vittasync.Repository.UsuarioRepository;
 import br.com.vittasync.vittasync.Repository.VinculoRepository;
-
 import org.springframework.stereotype.Service;
+
 
 @Service
 public class PermissaoService {
@@ -47,7 +48,7 @@ public class PermissaoService {
 
     public boolean podeRemoverVinculo(Integer usuarioLogadoId, Vinculo vinculoAlvo) {
 
-        // paciente remove qualquer vínculo dele
+        //paciente remove qualquer vínculo dele
         if (usuarioLogadoId.equals(vinculoAlvo.getPacienteId())) {
             return true;
         }
@@ -58,12 +59,12 @@ public class PermissaoService {
             return false;
         }
 
-        // médico ou responsável removendo o PRÓPRIO vínculo
+        //médico ou responsável removendo o PRÓPRIO vínculo
         if (usuarioLogadoId.equals(vinculoAlvo.getUsuarioId())) {
             return true;
         }
 
-        // responsável removendo médicos do paciente
+        //responsável removendo médicos do paciente
         if (usuarioLogado.getTipo().equalsIgnoreCase("responsavel")
                 && vinculoAlvo.getTipo().equalsIgnoreCase("saude")) {
 

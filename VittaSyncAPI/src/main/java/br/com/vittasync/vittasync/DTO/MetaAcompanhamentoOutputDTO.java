@@ -68,4 +68,5 @@ public class MetaAcompanhamentoOutputDTO {
 
     public LocalDateTime getDataModificacao() { return dataModificacao; }
     public void setDataModificacao(LocalDateTime dataModificacao) { this.dataModificacao = dataModificacao; }
+    
 }

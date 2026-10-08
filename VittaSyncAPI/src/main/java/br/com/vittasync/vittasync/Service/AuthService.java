@@ -5,11 +5,15 @@ import br.com.vittasync.vittasync.Exception.DadosInvalidosException;
 import br.com.vittasync.vittasync.Model.CodigoVerificacao;
 import br.com.vittasync.vittasync.Model.Usuario;
 import br.com.vittasync.vittasync.Util.HashUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 
 @Service
 public class AuthService {
+
+    private static final Logger logger = LoggerFactory.getLogger(AuthService.class);
 
     private final UsuarioService usuarioService;
     private final CodigoVerificacaoService codigoService;
@@ -49,6 +53,8 @@ public class AuthService {
                         .equals(senhaHash)
         ) {
 
+            logger.warn("Tentativa de login com senha incorreta. Usuário id: {}", usuario.getId());
+
             throw new DadosInvalidosException(
                     "Dados inseridos inválidos"
             );
@@ -65,6 +71,8 @@ public class AuthService {
                 codigo.getCodigo(),
                 canal
         );
+
+        logger.info("Código de login enviado por {}. Usuário id: {}", canal, usuario.getId());
     }
 
     public String validarCodigoLogin(
@@ -86,6 +94,8 @@ public class AuthService {
                 );
 
         sessaoService.registrarToken(token);
+
+        logger.info("Login realizado. Usuário id: {}", usuario.getId());
 
         return token;
     }
@@ -130,5 +140,7 @@ public class AuthService {
         );
 
         usuarioService.update(usuario);
+
+        logger.info("Senha redefinida. Usuário id: {}", usuario.getId());
     }
 }

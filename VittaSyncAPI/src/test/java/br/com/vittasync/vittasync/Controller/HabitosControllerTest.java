@@ -1,5 +1,6 @@
 package br.com.vittasync.vittasync.Controller;
 
+
 import br.com.vittasync.vittasync.Model.Habitos;
 import br.com.vittasync.vittasync.Model.Usuario;
 import br.com.vittasync.vittasync.Service.*;
@@ -10,15 +11,14 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
-
 import java.time.LocalDate;
 import java.util.List;
-
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+
 
 @WebMvcTest(HabitosController.class)
 @AutoConfigureMockMvc(addFilters = false)
@@ -32,6 +32,8 @@ class HabitosControllerTest {
     @MockBean private PermissaoService permissaoService;
     @MockBean private SessaoService sessaoService;
     @MockBean private EventoPacienteService eventoPacienteService;
+    @MockBean private SinaisVitaisService sinaisVitaisService;
+    @MockBean private EstabilidadeClinicaService estabilidadeClinicaService;
 
     @Test
     void testCreateOk() throws Exception {
@@ -45,6 +47,7 @@ class HabitosControllerTest {
 
         when(jwtService.extrairCpf("token")).thenReturn("222");
         when(usuarioService.searchByCpf("222")).thenReturn(paciente);
+        when(usuarioService.getUsuarioLogado()).thenReturn(paciente);
         when(permissaoService.podeEditarPaciente(anyInt(), anyInt())).thenReturn(true);
         when(service.create(any(Habitos.class), anyInt())).thenReturn(habito);
 
@@ -67,6 +70,7 @@ class HabitosControllerTest {
 
         when(jwtService.extrairCpf("token")).thenReturn("222");
         when(usuarioService.searchByCpf("222")).thenReturn(paciente);
+        when(usuarioService.getUsuarioLogado()).thenReturn(paciente);
         when(permissaoService.podeEditarPaciente(anyInt(), anyInt())).thenReturn(true);
         when(service.update(anyInt(), any(Habitos.class), anyInt())).thenReturn(habito);
 
@@ -83,6 +87,7 @@ class HabitosControllerTest {
 
         when(jwtService.extrairCpf("token")).thenReturn("222");
         when(usuarioService.searchByCpf("222")).thenReturn(paciente);
+        when(usuarioService.getUsuarioLogado()).thenReturn(paciente);
         when(permissaoService.podeEditarPaciente(anyInt(), anyInt())).thenReturn(true);
         doNothing().when(service).delete(anyInt(), anyInt());
 
@@ -103,6 +108,7 @@ class HabitosControllerTest {
 
         when(jwtService.extrairCpf("token")).thenReturn("222");
         when(usuarioService.searchByCpf("222")).thenReturn(paciente);
+        when(usuarioService.getUsuarioLogado()).thenReturn(paciente);
         when(permissaoService.podeVisualizarPaciente(anyInt(), anyInt())).thenReturn(true);
         when(service.findByPacienteCpf("222")).thenReturn(List.of(habito));
 
@@ -118,6 +124,7 @@ class HabitosControllerTest {
 
         when(jwtService.extrairCpf("token")).thenReturn("123");
         when(usuarioService.searchByCpf("123")).thenReturn(usuarioLogado);
+        when(usuarioService.getUsuarioLogado()).thenReturn(usuarioLogado);
         when(usuarioService.searchByCpf("456")).thenReturn(usuarioPaciente);
         when(permissaoService.podeVisualizarPaciente(anyInt(), anyInt())).thenReturn(false);
 

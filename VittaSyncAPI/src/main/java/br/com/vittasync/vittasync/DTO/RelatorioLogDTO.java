@@ -1,10 +1,11 @@
 package br.com.vittasync.vittasync.DTO;
 
+
 import br.com.vittasync.vittasync.Model.RelatorioLog;
 import br.com.vittasync.vittasync.Model.Usuario;
-
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+
 
 public class RelatorioLogDTO {
     private Integer id;
@@ -13,10 +14,8 @@ public class RelatorioLogDTO {
     private LocalDate dataInicio;
     private LocalDate dataFim;
     private LocalDateTime dataExportacao;
-
     private Integer usuarioId;
     private String usuarioNome;
-
     private Integer pacienteId;
     private String pacienteNome;
 
@@ -71,4 +70,5 @@ public class RelatorioLogDTO {
 
     public String getPacienteNome() {return pacienteNome;}
     public void setPacienteNome(String pacienteNome) {this.pacienteNome = pacienteNome;}
+    
 }

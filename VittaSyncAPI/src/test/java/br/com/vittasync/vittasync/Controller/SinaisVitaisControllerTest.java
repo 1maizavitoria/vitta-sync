@@ -1,5 +1,6 @@
 package br.com.vittasync.vittasync.Controller;
 
+
 import br.com.vittasync.vittasync.Model.SinaisVitais;
 import br.com.vittasync.vittasync.Model.Usuario;
 import br.com.vittasync.vittasync.Service.SinaisVitaisService;
@@ -8,6 +9,8 @@ import br.com.vittasync.vittasync.Service.UsuarioService;
 import br.com.vittasync.vittasync.Service.PermissaoService;
 import br.com.vittasync.vittasync.Service.EventoPacienteService;
 import br.com.vittasync.vittasync.Service.SessaoService;
+import br.com.vittasync.vittasync.Service.HabitosService;
+import br.com.vittasync.vittasync.Service.EstabilidadeClinicaService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -15,14 +18,13 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
-
 import java.util.List;
-
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+
 
 @WebMvcTest(SinaisVitaisController.class)
 @AutoConfigureMockMvc(addFilters = false)
@@ -35,6 +37,8 @@ class SinaisVitaisControllerTest {
     @MockBean private UsuarioService usuarioService;
     @MockBean private PermissaoService permissaoService;
     @MockBean private EventoPacienteService eventoPacienteService;
+    @MockBean private HabitosService habitosService;
+    @MockBean private EstabilidadeClinicaService estabilidadeClinicaService;
     @MockBean private SessaoService sessaoService;
 
     @Test
@@ -44,6 +48,7 @@ class SinaisVitaisControllerTest {
 
         when(jwtService.extrairCpf("token")).thenReturn("222");
         when(usuarioService.searchByCpf("222")).thenReturn(paciente);
+        when(usuarioService.getUsuarioLogado()).thenReturn(paciente);
         when(permissaoService.podeEditarPaciente(anyInt(), anyInt())).thenReturn(true);
         when(service.create(any(SinaisVitais.class), anyInt())).thenReturn(vitais);
 
@@ -61,6 +66,7 @@ class SinaisVitaisControllerTest {
 
         when(jwtService.extrairCpf("token")).thenReturn("222");
         when(usuarioService.searchByCpf("222")).thenReturn(paciente);
+        when(usuarioService.getUsuarioLogado()).thenReturn(paciente);
         when(permissaoService.podeEditarPaciente(anyInt(), anyInt())).thenReturn(true);
         when(service.update(anyInt(), any(SinaisVitais.class), anyInt())).thenReturn(vitais);
 
@@ -78,6 +84,7 @@ class SinaisVitaisControllerTest {
 
         when(jwtService.extrairCpf("token")).thenReturn("222");
         when(usuarioService.searchByCpf("222")).thenReturn(paciente);
+        when(usuarioService.getUsuarioLogado()).thenReturn(paciente);
         when(permissaoService.podeVisualizarPaciente(anyInt(), anyInt())).thenReturn(true);
         when(service.findByPacienteCpf("222")).thenReturn(List.of(vitais));
 
@@ -92,6 +99,7 @@ class SinaisVitaisControllerTest {
 
         when(jwtService.extrairCpf("token")).thenReturn("222");
         when(usuarioService.searchByCpf("222")).thenReturn(paciente);
+        when(usuarioService.getUsuarioLogado()).thenReturn(paciente);
         when(permissaoService.podeEditarPaciente(anyInt(), anyInt())).thenReturn(true);
         doNothing().when(service).delete(anyInt(), anyInt());
 
@@ -107,6 +115,7 @@ class SinaisVitaisControllerTest {
 
         when(jwtService.extrairCpf("token")).thenReturn("123");
         when(usuarioService.searchByCpf("123")).thenReturn(usuarioLogado);
+        when(usuarioService.getUsuarioLogado()).thenReturn(usuarioLogado);
         when(usuarioService.searchByCpf("456")).thenReturn(usuarioPaciente);
         when(permissaoService.podeVisualizarPaciente(anyInt(), anyInt())).thenReturn(false);
 

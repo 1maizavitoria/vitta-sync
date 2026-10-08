@@ -1,6 +1,8 @@
 package br.com.vittasync.vittasync.Service;
 
+
 import br.com.vittasync.vittasync.Exception.RecursoNaoEncontradoException;
+import br.com.vittasync.vittasync.Model.ContatoEmergencia;
 import br.com.vittasync.vittasync.Model.Habitos;
 import br.com.vittasync.vittasync.Model.Usuario;
 import br.com.vittasync.vittasync.Repository.HabitosRepository;
@@ -8,13 +10,12 @@ import br.com.vittasync.vittasync.Util.EventoPrioridades;
 import br.com.vittasync.vittasync.Util.EventoTipos;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-
 import java.util.List;
 import java.util.Optional;
-
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.*;
+
 
 class HabitosServiceTest {
 
@@ -132,6 +133,68 @@ class HabitosServiceTest {
 
         assertThrows(RecursoNaoEncontradoException.class,
                 () -> service.delete(50, 99));
+    }
+
+    @Test
+    void testCreateComPoucoRepousoAlertaContatosPeloCanalDoHabito() {
+        Habitos habito = new Habitos();
+        habito.setPaciente(paciente);
+        habito.setHorasSono(4);
+        habito.setMinutosExercicio(0);
+        habito.setCanal("sms");
+
+        ContatoEmergencia contato = new ContatoEmergencia();
+        when(repository.save(habito)).thenReturn(habito);
+        when(contatoEmergenciaService.listar(99, paciente)).thenReturn(List.of(contato));
+
+        Habitos resultado = service.create(habito, 99);
+
+        assertThat(resultado.getRepouso()).isTrue();
+        assertThat(resultado.getIndiceRepouso()).isEqualTo(0.5);
+        verify(notificacaoService).enviarAlertaRepouso(contato, "sms");
+    }
+
+    @Test
+    void testCreateSemDadosCompletosNaoCalculaRepouso() {
+        Habitos habito = new Habitos();
+        habito.setPaciente(paciente);
+        habito.setHorasSono(8);
+
+        when(repository.save(habito)).thenReturn(habito);
+
+        Habitos resultado = service.create(habito, 99);
+
+        assertThat(resultado.getRepouso()).isFalse();
+        assertThat(resultado.getIndiceRepouso()).isEqualTo(0.0);
+        verifyNoInteractions(notificacaoService);
+    }
+
+    @Test
+    void testUpdateComPoucoRepousoAlertaPorEmailQuandoSemCanal() {
+        Habitos existente = new Habitos();
+        existente.setId(5);
+        existente.setPaciente(paciente);
+
+        Habitos novosDados = new Habitos();
+        novosDados.setHorasSono(5);
+        novosDados.setMinutosExercicio(10);
+
+        ContatoEmergencia contato = new ContatoEmergencia();
+        when(repository.findById(5)).thenReturn(Optional.of(existente));
+        when(repository.save(existente)).thenReturn(existente);
+        when(contatoEmergenciaService.listar(99, paciente)).thenReturn(List.of(contato));
+
+        Habitos atualizado = service.update(5, novosDados, 99);
+
+        assertThat(atualizado.getRepouso()).isTrue();
+        verify(notificacaoService).enviarAlertaRepouso(contato, "email");
+    }
+
+    @Test
+    void testFindByPacienteId() {
+        when(repository.findByPacienteId(1)).thenReturn(List.of(new Habitos()));
+
+        assertThat(service.findByPacienteId(1)).hasSize(1);
     }
 
     @Test

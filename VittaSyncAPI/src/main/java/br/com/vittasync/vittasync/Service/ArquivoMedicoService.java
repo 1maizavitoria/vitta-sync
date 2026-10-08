@@ -1,13 +1,14 @@
 package br.com.vittasync.vittasync.Service;
 
 
+import br.com.vittasync.vittasync.Exception.AcessoNegadoException;
+import br.com.vittasync.vittasync.Exception.RecursoNaoEncontradoException;
 import br.com.vittasync.vittasync.Model.ArquivoMedico;
 import br.com.vittasync.vittasync.Model.Usuario;
 import br.com.vittasync.vittasync.Repository.ArquivoMedicoRepository;
 import br.com.vittasync.vittasync.Util.EventoPrioridades;
 import br.com.vittasync.vittasync.Util.EventoTipos;
 import org.springframework.stereotype.Service;
-
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -68,13 +69,13 @@ public class ArquivoMedicoService {
     }
 
     public ArquivoMedico visualizar(Integer id) {
-        return repository.findById(id).orElseThrow(() -> new RuntimeException("Documento não encontrado"));
+        return repository.findById(id).orElseThrow(() -> new RecursoNaoEncontradoException("Documento não encontrado"));
     }
 
     public void deletar(Usuario medico, Integer id) {
-        ArquivoMedico doc = repository.findById(id).orElseThrow(() -> new RuntimeException("Documento não encontrado"));
+        ArquivoMedico doc = repository.findById(id).orElseThrow(() -> new RecursoNaoEncontradoException("Documento não encontrado"));
         if (!doc.getMedico().getId().equals(medico.getId())) {
-            throw new RuntimeException("Você não tem permissão para deletar este documento");
+            throw new AcessoNegadoException("Você não tem permissão para deletar este documento");
         }
         eventoPacienteService.criarEvento(
                 doc.getPaciente().getId(),

@@ -21,15 +21,16 @@ public class HabitosInputDTO {
     public HabitosInputDTO() {}
 
 
-    public Integer getHorasSono() { return horasSono; }
-    public void setHorasSono(Integer horasSono) { this.horasSono = horasSono; }
+    public Integer getHorasSono() { return horasSono;}
+    public void setHorasSono(Integer horasSono) { this.horasSono = horasSono;}
 
     public Integer getMinutosExercicio() { return minutosExercicio; }
-    public void setMinutosExercicio(Integer minutosExercicio) { this.minutosExercicio = minutosExercicio; }
+    public void setMinutosExercicio(Integer minutosExercicio) { this.minutosExercicio = minutosExercicio;}
 
     public LocalDate getDataReferencia() { return dataReferencia; }
-    public void setDataReferencia(LocalDate dataReferencia) { this.dataReferencia = dataReferencia; }
+    public void setDataReferencia(LocalDate dataReferencia) { this.dataReferencia = dataReferencia;}
 
     public String getCanal() { return canal; }
-    public void setCanal(String canal) { this.canal = canal; }
+    public void setCanal(String canal) { this.canal = canal;}
+
 }

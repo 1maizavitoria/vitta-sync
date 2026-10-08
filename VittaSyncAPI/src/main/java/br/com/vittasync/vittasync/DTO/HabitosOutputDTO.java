@@ -46,4 +46,5 @@ public class HabitosOutputDTO {
 
     public String getCanal() { return canal; }
     public void setCanal(String canal) { this.canal = canal; }
+    
 }

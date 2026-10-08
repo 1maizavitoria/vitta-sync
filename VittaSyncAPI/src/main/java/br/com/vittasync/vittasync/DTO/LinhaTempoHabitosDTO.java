@@ -28,12 +28,20 @@ public class LinhaTempoHabitosDTO {
     }
 
 
-    public Integer getId() { return id; }
-    public LocalDateTime getDataHora() { return dataHora; }
+    public Integer getId() {return id;}
+    
+    public LocalDateTime getDataHora() {return dataHora;}
+   
     public Integer getHorasSono() { return horasSono; }
-    public Integer getMinutosExercicio() { return minutosExercicio; }
-    public Double getIndiceRepouso() { return indiceRepouso; }
-    public Boolean getRepouso() { return repouso; }
-    public String getCanal() { return canal; }
-    public LocalDate getDataReferencia() { return dataReferencia; }
+    
+    public Integer getMinutosExercicio() {return minutosExercicio;}
+   
+    public Double getIndiceRepouso() {return indiceRepouso;}
+   
+    public Boolean getRepouso() {return repouso;}
+   
+    public String getCanal() {return canal;}
+   
+    public LocalDate getDataReferencia() {return dataReferencia;}
+    
 }

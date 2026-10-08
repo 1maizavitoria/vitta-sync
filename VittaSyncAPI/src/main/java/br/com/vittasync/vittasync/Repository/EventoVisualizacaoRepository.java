@@ -4,9 +4,9 @@ import br.com.vittasync.vittasync.Model.EventoPaciente;
 import br.com.vittasync.vittasync.Model.EventoVisualizacao;
 import br.com.vittasync.vittasync.Model.Usuario;
 import org.springframework.data.jpa.repository.JpaRepository;
-
 import java.util.List;
 import java.util.Optional;
+
 
 public interface EventoVisualizacaoRepository
         extends JpaRepository<EventoVisualizacao, Long> {

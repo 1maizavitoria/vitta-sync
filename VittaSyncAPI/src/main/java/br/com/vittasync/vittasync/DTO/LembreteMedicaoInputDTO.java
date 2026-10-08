@@ -12,6 +12,7 @@ public class LembreteMedicaoInputDTO {
     private Boolean enviarEmail;
     private Boolean enviarSms;
 
+
     public String getDiasSemana() { return diasSemana; }
     public void setDiasSemana(String diasSemana) { this.diasSemana = diasSemana; }
 
@@ -26,4 +27,5 @@ public class LembreteMedicaoInputDTO {
 
     public Boolean getEnviarSms() { return enviarSms; }
     public void setEnviarSms(Boolean enviarSms) { this.enviarSms = enviarSms; }
+    
 }
