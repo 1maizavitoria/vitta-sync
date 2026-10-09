@@ -11,6 +11,7 @@
     "front": "npm run dev",
     "back": "cd VittaSyncAPI && mvn spring-boot:run",
     "start-all": "concurrently \"npm run front\" \"npm run back\"",
+    "api:generate": "orval --config ./orval.config.js",
     "test-front": "vitest --coverage && mkdir reports\\frontend 2>nul && xcopy /E /I /Y coverage reports\\frontend",
     "test-back": "cd VittaSyncAPI && mvn clean test jacoco:report && mkdir ..\\reports\\backend 2>nul && xcopy /E /I /Y target\\site\\jacoco ..\\reports\\backend",
     "test-all": "concurrently \"npm run test-front\" \"npm run test-back\""
@@ -21,6 +22,7 @@
     "@mui/icons-material": "^7.3.9",
     "@mui/material": "^7.3.9",
     "@mui/x-date-pickers": "^8.27.2",
+    "@tanstack/react-query": "^5.104.1",
     "axios": "^1.13.6",
     "dayjs": "^1.11.20",
     "react": "^19.2.4",
@@ -45,6 +47,7 @@
     "globals": "^17.4.0",
     "jsdom": "^29.1.1",
     "npm-run-all": "^4.1.5",
+    "orval": "^8.40.0",
     "vite": "^8.0.1",
     "vitest": "^4.1.9"
   }

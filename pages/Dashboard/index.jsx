@@ -14,19 +14,19 @@ import {
     Typography
 } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
-import { useEffect, useMemo, useState } from "react";
-import SettingsOutlinedIcon from "@mui/icons-material/SettingsOutlined";
-
-import DashboardChart from "../../components/ui/DashboardChart";
-import ClinicalStability from "../../components/ui/ClinicalStability";
-import ClinicalTimeline from "../../components/ui/ClinicalTimeline";
-import PersonalBaseline from "../../components/ui/PersonalBaseline";
+import { useMemo, useState } from "react";
 import { usePatient } from "../../context/PatientContext";
-import { getDashboard } from "../../services/dashboardService";
 import { useI18n } from "../../src/i18n";
 import { useThemeMode } from "../../src/theme/ThemeModeProvider";
 import { useDashboardPreferences } from "../../src/features/dashboard/application/useDashboardPreferences";
 import { createLocalDashboardPreferencesRepository } from "../../src/features/dashboard/infrastructure/localDashboardPreferencesRepository";
+import { useDashboardQuery } from "../../src/features/dashboard/application/useDashboardQuery";
+
+import SettingsOutlinedIcon from "@mui/icons-material/SettingsOutlined";
+import DashboardChart from "../../components/ui/DashboardChart";
+import ClinicalStability from "../../components/ui/ClinicalStability";
+import ClinicalTimeline from "../../components/ui/ClinicalTimeline";
+import PersonalBaseline from "../../components/ui/PersonalBaseline";
 import DashboardCustomizationDialog from "../../src/features/dashboard/presentation/DashboardCustomizationDialog";
 
 const periods = [7, 30, 90];
@@ -54,6 +54,15 @@ function getDateRange(days) {
     const start = new Date();
     start.setDate(end.getDate() - (days - 1));
     return { inicio: toApiDate(start), fim: toApiDate(end) };
+}
+
+function getDashboardErrorKey(status, networkError) {
+    if (networkError) return "dashboard.errors.network";
+    if (status === 400) return "dashboard.errors.invalidRequest";
+    if (status === 403) return "dashboard.errors.forbidden";
+    if (status === 404) return "dashboard.errors.notFound";
+    if (status >= 500) return "dashboard.errors.server";
+    return "dashboard.loadError";
 }
 
 function getLatestValue(category, formatMeasurement, formatNumber) {
@@ -94,52 +103,14 @@ export default function Dashboard() {
     const dashboardPreferences = useDashboardPreferences(preferencesRepository);
     const [period, setPeriod] = useState(7);
     const [categoryFilter, setCategoryFilter] = useState("todas");
-    const [dashboard, setDashboard] = useState(null);
-    const [loading, setLoading] = useState(false);
-    const [error, setError] = useState(false);
     const dateRange = useMemo(() => getDateRange(period), [period]);
 
-    useEffect(() => {
-        if (!selectedPatient?.cpf) {
-            setDashboard(null);
-            return;
-        }
-
-        let active = true;
-
-        async function loadDashboard() {
-            setLoading(true);
-            setError(false);
-
-            try {
-                const data = await getDashboard({
-                    cpf: selectedPatient.cpf,
-                    ...dateRange,
-                    categorias: categoryFilter === "todas" ? undefined : categoryFilter
-                });
-
-                if (active) {
-                    setDashboard(data);
-                }
-            } catch (requestError) {
-                console.error(requestError);
-                if (active) {
-                    setDashboard(null);
-                    setError(true);
-                }
-            } finally {
-                if (active) {
-                    setLoading(false);
-                }
-            }
-        }
-
-        loadDashboard();
-
-        return () => {
-            active = false;
-        };
-    }, [selectedPatient?.cpf, dateRange, categoryFilter]);
+    const { dashboard, loading, error, errorStatus, networkError } = useDashboardQuery({
+        cpf: selectedPatient?.cpf,
+        ...dateRange,
+        categorias: categoryFilter === "todas" ? undefined : categoryFilter
+    });
+    const dashboardErrorKey = getDashboardErrorKey(errorStatus, networkError);
 
     const seriesNames = useMemo(() => ({
         sistolica: t("dashboard.series.sistolica"),
@@ -375,7 +346,7 @@ export default function Dashboard() {
                         </Box>
                     </Paper>
 
-                    {error && <Alert severity="error" sx={{ mb: 3 }}>{t("dashboard.loadError")}</Alert>}
+                    {error && <Alert severity="error" sx={{ mb: 3 }}>{t(dashboardErrorKey)}</Alert>}
 
                     {loading && (
                         <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", md: "repeat(3, 1fr)" }, gap: 2 }}>

@@ -306,6 +306,13 @@ const dictionaries = {
             lastDays: "Últimos {days} dias",
             latestValue: "Último valor do período",
             loadError: "Não foi possível carregar os dados do dashboard.",
+            errors: {
+                invalidRequest: "Os filtros informados são inválidos. Revise a seleção e tente novamente.",
+                forbidden: "Você não tem permissão para acessar os dados deste paciente.",
+                notFound: "O paciente selecionado não foi encontrado. Atualize a seleção.",
+                server: "O servidor encontrou um erro ao carregar o dashboard. Tente novamente em instantes.",
+                network: "Não foi possível conectar ao servidor. Verifique a conexão e tente novamente."
+            },
             emptyPeriod: "Nenhum registro encontrado neste período.",
             customization: {
                 open: "Personalizar Dashboard",
@@ -1139,6 +1146,13 @@ const dictionaries = {
             lastDays: "Last {days} days",
             latestValue: "Latest value in the period",
             loadError: "Dashboard data could not be loaded.",
+            errors: {
+                invalidRequest: "The selected filters are invalid. Review them and try again.",
+                forbidden: "You do not have permission to access this patient's data.",
+                notFound: "The selected patient was not found. Update the selection.",
+                server: "The server encountered an error while loading the dashboard. Try again shortly.",
+                network: "The server could not be reached. Check your connection and try again."
+            },
             emptyPeriod: "No records were found in this period.",
             customization: {
                 open: "Customize Dashboard",
@@ -1972,6 +1986,13 @@ const dictionaries = {
             lastDays: "Últimos {days} días",
             latestValue: "Último valor del período",
             loadError: "No fue posible cargar los datos del panel.",
+            errors: {
+                invalidRequest: "Los filtros seleccionados no son válidos. Revísalos e inténtalo nuevamente.",
+                forbidden: "No tienes permiso para acceder a los datos de este paciente.",
+                notFound: "No se encontró el paciente seleccionado. Actualiza la selección.",
+                server: "El servidor encontró un error al cargar el panel. Inténtalo nuevamente en unos instantes.",
+                network: "No fue posible conectarse al servidor. Verifica la conexión e inténtalo nuevamente."
+            },
             emptyPeriod: "No se encontraron registros en este período.",
             customization: {
                 open: "Personalizar panel",

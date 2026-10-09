@@ -29,3 +29,16 @@ api.interceptors.response.use(
 );
 
 export default api;
+
+export async function customInstance(config, options = {}) {
+    const response = await api({
+        ...config,
+        ...options,
+        headers: {
+            ...config.headers,
+            ...options.headers,
+        },
+    });
+
+    return response.data;
+}
