@@ -18,12 +18,27 @@ import { getMedicoStyle, getNomeFuncao, getResponsavelStyle } from "../../utils/
 import SymptomCard from "../ui/cards/SymptomCard";
 import { useI18n } from "../../src/i18n";
 import { useThemeMode } from "../../src/theme/ThemeModeProvider";
+import { classifyApiError } from "../../utils/api/classifyApiError";
 
 const emptyInputs = {
     symptom: "",
     intencity: "",
     date: null,
 };
+
+function getHealthErrorKey(error, fallbackKey) {
+    const errorType = classifyApiError(error).type;
+    const errorKeys = {
+        network: "healthTracker.errors.network",
+        invalidRequest: "healthTracker.errors.invalidRequest",
+        forbidden: "healthTracker.errors.forbidden",
+        notFound: "healthTracker.errors.notFound",
+        conflict: "healthTracker.errors.conflict",
+        server: "healthTracker.errors.server"
+    };
+
+    return errorKeys[errorType] || fallbackKey;
+}
 
 const iconButtonSx = {
     add: {
@@ -213,7 +228,7 @@ export function SymptomTracker() {
             closeForm();
         } catch (registerError) {
             console.error("Erro ao salvar sintomas:", registerError);
-            showAlert("error", t("healthTracker.symptoms.saveError"));
+            showAlert("error", t(getHealthErrorKey(registerError, "healthTracker.symptoms.saveError")));
         }
     }
 
@@ -227,6 +242,7 @@ export function SymptomTracker() {
             } catch (fetchError) {
                 console.error("Erro ao buscar sintomas:", fetchError);
                 setSymptoms([]);
+                showAlert("error", t(getHealthErrorKey(fetchError, "healthTracker.symptoms.loadError")));
             }
         }
 

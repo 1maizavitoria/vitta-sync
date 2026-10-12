@@ -56,13 +56,16 @@ function getDateRange(days) {
     return { inicio: toApiDate(start), fim: toApiDate(end) };
 }
 
-function getDashboardErrorKey(status, networkError) {
-    if (networkError) return "dashboard.errors.network";
-    if (status === 400) return "dashboard.errors.invalidRequest";
-    if (status === 403) return "dashboard.errors.forbidden";
-    if (status === 404) return "dashboard.errors.notFound";
-    if (status >= 500) return "dashboard.errors.server";
-    return "dashboard.loadError";
+function getDashboardErrorKey(errorType) {
+    const errorKeys = {
+        network: "dashboard.errors.network",
+        invalidRequest: "dashboard.errors.invalidRequest",
+        forbidden: "dashboard.errors.forbidden",
+        notFound: "dashboard.errors.notFound",
+        server: "dashboard.errors.server"
+    };
+
+    return errorKeys[errorType] || "dashboard.loadError";
 }
 
 function getLatestValue(category, formatMeasurement, formatNumber) {
@@ -105,12 +108,12 @@ export default function Dashboard() {
     const [categoryFilter, setCategoryFilter] = useState("todas");
     const dateRange = useMemo(() => getDateRange(period), [period]);
 
-    const { dashboard, loading, error, errorStatus, networkError } = useDashboardQuery({
+    const { dashboard, loading, error, errorType } = useDashboardQuery({
         cpf: selectedPatient?.cpf,
         ...dateRange,
         categorias: categoryFilter === "todas" ? undefined : categoryFilter
     });
-    const dashboardErrorKey = getDashboardErrorKey(errorStatus, networkError);
+    const dashboardErrorKey = getDashboardErrorKey(errorType);
 
     const seriesNames = useMemo(() => ({
         sistolica: t("dashboard.series.sistolica"),

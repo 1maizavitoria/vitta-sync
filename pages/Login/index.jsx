@@ -17,7 +17,17 @@ import { changePassword, login, validadeCode, validadeCodePassword } from "../..
 import { formatCPF, isValidCpf } from "../../utils/formatters/formatCPF";
 import { isValidEmail } from "../../utils/formatters/formatEmail";
 import { isTokenExpired } from "../../utils/auth/auth";
+import { classifyApiError } from "../../utils/api/classifyApiError";
 import { validatePassword } from "../../utils/validators/passwordValidator";
+
+const getLoginErrorKey = (error, fallbackKey) => {
+    const errorType = classifyApiError(error).type;
+
+    if (errorType === "network") return "messages.connectionError";
+    if (errorType === "server") return "messages.serverError";
+
+    return fallbackKey;
+};
 
 export default function Login() {
     const { showAlert } = useAlert();
@@ -102,7 +112,7 @@ export default function Login() {
                 showAlert("success", getChannelMessage(channel));
             })
             .catch((error) => {
-                showAlert("error", t("messages.invalidLogin"));
+                showAlert("error", t(getLoginErrorKey(error, "messages.invalidLogin")));
                 console.error(error);
             })
             .finally(() => {
@@ -135,7 +145,7 @@ export default function Login() {
             console.log(error);
             setErrorCode(true);
             setErrorLoginCode(true);
-            showAlert("error", t("messages.invalidCode"));
+            showAlert("error", t(getLoginErrorKey(error, "messages.invalidCode")));
         } finally {
             setLoadingValidateCode(false);
         }
@@ -151,13 +161,13 @@ export default function Login() {
         };
 
         try {
+            await login(data);
             showAlert("success", getChannelMessage(channel));
             setSeconds(10);
-            await login(data);
         } catch (error) {
             setErrorCPF(true);
             setErrorPassword(true);
-            showAlert("error", t("messages.invalidLogin"));
+            showAlert("error", t(getLoginErrorKey(error, "messages.invalidLogin")));
             console.error(error);
         }
     }
@@ -194,7 +204,7 @@ export default function Login() {
         } catch (error) {
             console.log(error);
             setForgotEmailError(true);
-            showAlert("error", t("messages.codeSendError"));
+            showAlert("error", t(getLoginErrorKey(error, "messages.codeSendError")));
             setForgotEmailConfirm(false);
         } finally {
             setLoadingForgotPassword(false);
@@ -245,7 +255,7 @@ export default function Login() {
         } catch (error) {
             console.log(error)
             setForgotError(true);
-            showAlert("error", t("messages.passwordChangeError"));
+            showAlert("error", t(getLoginErrorKey(error, "messages.passwordChangeError")));
         } finally {
             setLoadingChangePassword(false);
         }

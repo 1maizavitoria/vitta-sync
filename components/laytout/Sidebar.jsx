@@ -25,10 +25,21 @@ import FlagOutlinedIcon from "@mui/icons-material/FlagOutlined";
 import GroupsOutlinedIcon from "@mui/icons-material/GroupsOutlined";
 
 import { usePatient } from "../../context/PatientContext";
+import { useAlert } from "../../hooks/useAlert";
 import { logout } from "../../services/authService";
 import { getUnreadEventsCount } from "../../services/eventService";
 import { getUserByCpf } from "../../services/userService";
 import { useI18n } from "../../src/i18n";
+import { classifyApiError } from "../../utils/api/classifyApiError";
+
+function getSidebarErrorKey(error, fallbackKey) {
+    const errorType = classifyApiError(error).type;
+    const translatedErrors = ["network", "forbidden", "notFound", "server"];
+
+    return translatedErrors.includes(errorType)
+        ? `nav.errors.${errorType}`
+        : fallbackKey;
+}
 
 const menuItems = [
     { labelKey: "nav.group", icon: <GroupsOutlinedIcon />, path: "/links" },
@@ -52,6 +63,7 @@ export default function Sidebar({ open, setOpen }) {
     const vitta = theme.vitta;
     const isMobile = useMediaQuery(theme.breakpoints.down("md"));
     const { t } = useI18n();
+    const { showAlert } = useAlert();
     const [notificationCounts, setNotificationCounts] = useState({});
     const [userResponse, setUserResponse] = useState("");
 
@@ -215,11 +227,13 @@ export default function Sidebar({ open, setOpen }) {
     async function handleLogout() {
         try {
             await logout();
+        } catch (error) {
+            console.error("Erro ao encerrar sessão no servidor:", error);
+            showAlert("warning", t("nav.errors.logoutLocal"));
+        } finally {
             localStorage.removeItem("token");
             navigate("/login");
             closeMobileSidebar();
-        } catch (e) {
-            console.error("Erro ao fazer logout:", e);
         }
     }
 
@@ -235,6 +249,11 @@ export default function Sidebar({ open, setOpen }) {
             setNotificationCounts(counts);
         } catch (error) {
             console.error(error);
+            setNotificationCounts({});
+            showAlert(
+                "warning",
+                t(getSidebarErrorKey(error, "nav.errors.notifications"))
+            );
         }
     }, [patients]);
 
@@ -267,6 +286,10 @@ export default function Sidebar({ open, setOpen }) {
                 localStorage.setItem("altura", data.altura);
             } catch (error) {
                 console.error("Erro ao buscar usuários:", error);
+                showAlert(
+                    "error",
+                    t(getSidebarErrorKey(error, "nav.errors.user"))
+                );
             }
         }
 

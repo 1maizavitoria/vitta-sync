@@ -1,16 +1,11 @@
 import { useConsultar } from "../infrastructure/generated/dashboardApi";
+import { classifyApiError } from "../../../../utils/api/classifyApiError";
 
 const DASHBOARD_STALE_TIME = 60 * 1000;
 const DASHBOARD_CACHE_TIME = 5 * 60 * 1000;
 
 function shouldRetryDashboardRequest(failureCount, error) {
-    const status = error?.response?.status;
-
-    if (status && status < 500) {
-        return false;
-    }
-
-    return failureCount < 1;
+    return classifyApiError(error).retryable && failureCount < 1;
 }
 
 export function useDashboardQuery({ cpf, inicio, fim, categorias }) {
@@ -30,13 +25,14 @@ export function useDashboardQuery({ cpf, inicio, fim, categorias }) {
             }
         }
     );
+    const apiError = query.isError ? classifyApiError(query.error) : null;
 
     return {
         dashboard: query.data ?? null,
         loading: Boolean(cpf) && query.isPending,
         error: query.isError,
-        errorStatus: query.error?.response?.status ?? null,
-        networkError: query.isError && !query.error?.response,
+        errorType: apiError?.type ?? null,
+        errorStatus: apiError?.status ?? null,
         refreshing: query.isFetching && !query.isPending
     };
 }

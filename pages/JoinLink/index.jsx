@@ -21,11 +21,27 @@ import {
 import {
     useAlert
 } from "../../hooks/useAlert";
+import { useI18n } from "../../src/i18n";
+import { classifyApiError } from "../../utils/api/classifyApiError";
 
 import {
     funcoesGrupo,
     funcoesMedico
 } from "../../utils/validators/userFunction";
+
+function getJoinErrorKey(error) {
+    const errorType = classifyApiError(error).type;
+    const errorKeys = {
+        network: "patientHub.errors.network",
+        invalidRequest: "patientHub.alerts.invalidCode",
+        forbidden: "patientHub.errors.forbidden",
+        notFound: "patientHub.alerts.invalidCode",
+        conflict: "patientHub.alerts.alreadyLinked",
+        server: "patientHub.errors.server"
+    };
+
+    return errorKeys[errorType] || "patientHub.alerts.joinError";
+}
 
 export default function JoinLink() {
 
@@ -44,6 +60,7 @@ export default function JoinLink() {
 
     const { showAlert } =
         useAlert();
+    const { t } = useI18n();
 
     const userType = localStorage.getItem("tipo");
 
@@ -68,7 +85,7 @@ export default function JoinLink() {
 
             showAlert(
                 "error",
-                "Código inválido"
+                t("patientHub.alerts.invalidCode")
             );
 
             navigate("/");
@@ -103,18 +120,17 @@ export default function JoinLink() {
 
             await joinWithCode(code, funcaoSelecionada);
 
-            showAlert("success", "Vínculo criado com sucesso");
+            showAlert("success", t("patientHub.alerts.linkCreatedSuccess"));
 
             navigate("/links");
 
         } catch (error) {
 
-            console.log(error);
+            console.error(error);
 
             showAlert(
                 "error",
-                error?.response?.data
-                || "Erro ao criar vínculo"
+                t(getJoinErrorKey(error))
             );
         }
     }

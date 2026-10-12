@@ -29,6 +29,19 @@ import {
 } from "../../utils/validators/userFunction";
 import { useI18n } from "../../src/i18n";
 import { useThemeMode } from "../../src/theme/ThemeModeProvider";
+import { classifyApiError } from "../../utils/api/classifyApiError";
+
+function getGroupErrorKey(error, fallbackKey) {
+    const errorType = classifyApiError(error).type;
+    const errorKeys = {
+        network: "patientHub.errors.network",
+        forbidden: "patientHub.errors.forbidden",
+        notFound: "patientHub.errors.notFound",
+        server: "patientHub.errors.server"
+    };
+
+    return errorKeys[errorType] || fallbackKey;
+}
 
 export default function PatientHub() {
 
@@ -57,6 +70,7 @@ export default function PatientHub() {
     const [openRemoveDialog, setOpenRemoveDialog] = useState(false);
     const [selectedLinkId, setSelectedLinkId] = useState(null);
     const [loading, setLoading] = useState(false);
+    const [loadErrorKey, setLoadErrorKey] = useState(null);
 
     const [emailInput, setEmailInput] = useState("");
     const [emails, setEmails] = useState([]);
@@ -97,6 +111,7 @@ export default function PatientHub() {
         try {
 
             setLoading(true);
+            setLoadErrorKey(null);
 
             const data =
                 await getLinksByPatientId(selectedPatient?.id);
@@ -107,16 +122,16 @@ export default function PatientHub() {
 
             console.error(error);
 
-            showAlert(
-                "error",
-                t("patientHub.alerts.loadLinksError")
+            setLinks([]);
+            setLoadErrorKey(
+                getGroupErrorKey(error, "patientHub.alerts.loadLinksError")
             );
 
         } finally {
 
             setLoading(false);
         }
-    }, [selectedPatient?.id, showAlert, t]);
+    }, [selectedPatient?.id]);
 
     async function handleRemoveLink(id) {
         try {
@@ -147,7 +162,7 @@ export default function PatientHub() {
 
             showAlert(
                 "error",
-                t("patientHub.alerts.removeLinkError")
+                t(getGroupErrorKey(error, "patientHub.alerts.removeLinkError"))
             );
         }
     }
@@ -192,7 +207,7 @@ export default function PatientHub() {
 
             showAlert(
                 "error",
-                t("patientHub.alerts.generateCodeError")
+                t(getGroupErrorKey(error, "patientHub.alerts.generateCodeError"))
             );
         }
     }
@@ -268,7 +283,7 @@ export default function PatientHub() {
 
             showAlert(
                 "error",
-                t("patientHub.alerts.invalidCode")
+                t(getGroupErrorKey(error, "patientHub.alerts.invalidCode"))
             );
         }
     }
@@ -357,7 +372,7 @@ export default function PatientHub() {
 
             showAlert(
                 "error",
-                t("patientHub.alerts.sendInvitesError")
+                t(getGroupErrorKey(error, "patientHub.alerts.sendInvitesError"))
             );
 
         } finally {
@@ -821,6 +836,12 @@ export default function PatientHub() {
                         ))}
 
                     </Box>
+
+                ) : loadErrorKey ? (
+
+                    <Alert severity="error">
+                        {t(loadErrorKey)}
+                    </Alert>
 
                 ) : links.length === 0 ? (
 

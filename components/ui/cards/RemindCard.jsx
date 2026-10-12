@@ -15,6 +15,21 @@ import {
     FormControlLabel
 } from "@mui/material";
 import { useI18n } from "../../../src/i18n";
+import { classifyApiError } from "../../../utils/api/classifyApiError";
+
+function getHealthErrorKey(error, fallbackKey) {
+    const errorType = classifyApiError(error).type;
+    const errorKeys = {
+        network: "healthTracker.errors.network",
+        invalidRequest: "healthTracker.errors.invalidRequest",
+        forbidden: "healthTracker.errors.forbidden",
+        notFound: "healthTracker.errors.notFound",
+        conflict: "healthTracker.errors.conflict",
+        server: "healthTracker.errors.server"
+    };
+
+    return errorKeys[errorType] || fallbackKey;
+}
 
 const weekDays = [
     { label: "Dom", value: "Sunday" },
@@ -128,6 +143,7 @@ export default function ReminderCard() {
             setReminder(dataReminder);
         } catch (error) {
             console.error("Erro ao salvar lembrete:", error);
+            showAlert("error", t(getHealthErrorKey(error, "healthTracker.reminders.saveError")));
         }
 
         setOpen(false);
@@ -163,6 +179,7 @@ export default function ReminderCard() {
                     "Erro ao buscar lembrete:",
                     error
                 );
+                showAlert("error", t(getHealthErrorKey(error, "healthTracker.reminders.loadError")));
             }
         }
 
@@ -201,6 +218,7 @@ export default function ReminderCard() {
                 "Erro ao alternar lembrete:",
                 error
             );
+            showAlert("error", t(getHealthErrorKey(error, "healthTracker.reminders.toggleError")));
         }
     }
 

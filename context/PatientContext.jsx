@@ -8,6 +8,18 @@ import {
 import {
     getAvailablePatients
 } from "../services/linkService";
+import { useAlert } from "../hooks/useAlert";
+import { useI18n } from "../src/i18n";
+import { classifyApiError } from "../utils/api/classifyApiError";
+
+function getPatientContextErrorKey(error) {
+    const errorType = classifyApiError(error).type;
+    const translatedErrors = ["network", "forbidden", "notFound", "server"];
+
+    return translatedErrors.includes(errorType)
+        ? `patientContext.errors.${errorType}`
+        : "patientContext.errors.load";
+}
 
 const PatientContext =
     createContext();
@@ -22,6 +34,9 @@ export function usePatient() {
 export function PatientProvider({
     children
 }) {
+
+    const { showAlert } = useAlert();
+    const { t } = useI18n();
 
     const [
         selectedPatient,
@@ -73,8 +88,10 @@ export function PatientProvider({
             });
 
         } catch (error) {
-
             console.error(error);
+            setPatients([]);
+            setSelectedPatient(null);
+            showAlert("error", t(getPatientContextErrorKey(error)));
         }
     }
 

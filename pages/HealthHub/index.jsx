@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 
 import {
+    Alert,
     Avatar,
     Box,
     Button,
@@ -20,8 +21,10 @@ import UploadFileIcon from "@mui/icons-material/UploadFile";
 
 import InputUI from "../../components/ui/Input";
 import { usePatient } from "../../context/PatientContext";
+import { useAlert } from "../../hooks/useAlert";
 import { useI18n } from "../../src/i18n";
 import { useThemeMode } from "../../src/theme/ThemeModeProvider";
+import { classifyApiError } from "../../utils/api/classifyApiError";
 import {
     deleteDocument,
     downloadDocument,
@@ -41,11 +44,25 @@ function getInitials(name) {
     return `${parts[0][0]}${parts[parts.length - 1][0]}`.toUpperCase();
 }
 
+function getDocumentErrorKey(error, fallbackKey) {
+    const errorType = classifyApiError(error).type;
+    const errorKeys = {
+        network: "documents.errors.network",
+        invalidRequest: "documents.errors.invalidRequest",
+        forbidden: "documents.errors.forbidden",
+        notFound: "documents.errors.notFound",
+        server: "documents.errors.server"
+    };
+
+    return errorKeys[errorType] || fallbackKey;
+}
+
 export default function HealthHub() {
     const theme = useTheme();
     const vitta = theme.vitta;
     const isDark = theme.palette.mode === "dark";
     const { t, formatDateTime } = useI18n();
+    const { showAlert } = useAlert();
     const { accessibilityMode } = useThemeMode();
     const [dragging, setDragging] = useState(false);
     const [documents, setDocuments] = useState([]);
@@ -53,6 +70,7 @@ export default function HealthHub() {
     const [nomeArquivo, setNomeArquivo] = useState("");
     const [loading, setLoading] = useState(false);
     const [fileError, setFileError] = useState(false);
+    const [loadErrorKey, setLoadErrorKey] = useState(null);
 
     const cpfUsuario =
         localStorage.getItem("cpf") ||
@@ -86,16 +104,18 @@ export default function HealthHub() {
 
         setSelectedFile(null);
         setFileError(true);
-        alert(t("documents.upload.onlyPdf"));
+        showAlert("error", t("documents.upload.onlyPdf"));
     }
 
     async function loadDocuments() {
         try {
             setLoading(true);
+            setLoadErrorKey(null);
             const data = await getDoctorDocuments();
             setDocuments(data);
         } catch (error) {
             console.error("Erro ao carregar documentos:", error);
+            setLoadErrorKey(getDocumentErrorKey(error, "documents.errors.load"));
         } finally {
             setLoading(false);
         }
@@ -116,8 +136,10 @@ export default function HealthHub() {
             await uploadDocument(selectedPatient.cpf, formData);
             await loadDocuments();
             resetUpload();
+            showAlert("success", t("documents.feedback.uploadSuccess"));
         } catch (error) {
             console.error("Erro ao enviar documento:", error);
+            showAlert("error", t(getDocumentErrorKey(error, "documents.errors.upload")));
         } finally {
             setLoading(false);
         }
@@ -128,8 +150,19 @@ export default function HealthHub() {
             await deleteDocument(id);
             setDocuments((prev) => prev.filter((item) => item.id !== id));
             resetUpload();
+            showAlert("success", t("documents.feedback.deleteSuccess"));
         } catch (error) {
             console.error("Erro ao remover documento:", error);
+            showAlert("error", t(getDocumentErrorKey(error, "documents.errors.delete")));
+        }
+    }
+
+    async function handleDownload(id, originalName) {
+        try {
+            await downloadDocument(id, originalName);
+        } catch (error) {
+            console.error("Erro ao baixar documento:", error);
+            showAlert("error", t(getDocumentErrorKey(error, "documents.errors.download")));
         }
     }
 
@@ -432,7 +465,13 @@ export default function HealthHub() {
                 )}
             </Box>
 
-            {!loading && documents.length === 0 && (
+            {loadErrorKey && (
+                <Alert severity="error" sx={{ mb: 2 }}>
+                    {t(loadErrorKey)}
+                </Alert>
+            )}
+
+            {!loading && !loadErrorKey && documents.length === 0 && (
                 <Box
                     sx={{
                         width: "100%",
@@ -614,7 +653,7 @@ export default function HealthHub() {
 
                                         {accessibilityMode ? (
                                             <Button
-                                                onClick={() => downloadDocument(doc.id, doc.nomeOriginal)}
+                                                onClick={() => handleDownload(doc.id, doc.nomeOriginal)}
                                                 startIcon={<DownloadIcon />}
                                                 sx={{ minHeight: 48, fontWeight: 800, textTransform: "none" }}
                                             >
@@ -623,7 +662,7 @@ export default function HealthHub() {
                                         ) : (
                                             <Tooltip title={t("documents.upload.download")}>
                                                 <IconButton
-                                                    onClick={() => downloadDocument(doc.id, doc.nomeOriginal)}
+                                                    onClick={() => handleDownload(doc.id, doc.nomeOriginal)}
                                                     size="small"
                                                     aria-label={t("documents.upload.download")}
                                                     sx={{

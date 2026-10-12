@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 
 import {
+    Alert,
     Avatar,
     Box,
     Button,
@@ -22,8 +23,10 @@ import OpenInNewIcon from "@mui/icons-material/OpenInNew";
 import PictureAsPdfIcon from "@mui/icons-material/PictureAsPdf";
 
 import { usePatient } from "../../context/PatientContext";
+import { useAlert } from "../../hooks/useAlert";
 import { useI18n } from "../../src/i18n";
 import { useThemeMode } from "../../src/theme/ThemeModeProvider";
+import { classifyApiError } from "../../utils/api/classifyApiError";
 import {
     downloadDocument,
     getPatientDocuments,
@@ -61,17 +64,32 @@ function renderFileIcon(extension) {
     return <DescriptionIcon />;
 }
 
+function getDocumentErrorKey(error, fallbackKey) {
+    const errorType = classifyApiError(error).type;
+    const errorKeys = {
+        network: "documents.errors.network",
+        invalidRequest: "documents.errors.invalidRequest",
+        forbidden: "documents.errors.forbidden",
+        notFound: "documents.errors.notFound",
+        server: "documents.errors.server"
+    };
+
+    return errorKeys[errorType] || fallbackKey;
+}
+
 export default function SharedDocuments() {
     const theme = useTheme();
     const vitta = theme.vitta;
     const isDark = theme.palette.mode === "dark";
     const { t, formatDateTime } = useI18n();
+    const { showAlert } = useAlert();
     const { accessibilityMode } = useThemeMode();
     const [documents, setDocuments] = useState([]);
     const [loading, setLoading] = useState(false);
     const [openViewer, setOpenViewer] = useState(false);
     const [selectedDoc, setSelectedDoc] = useState(null);
     const [viewerUrl, setViewerUrl] = useState("");
+    const [loadErrorKey, setLoadErrorKey] = useState(null);
 
     const { selectedPatient } = usePatient();
     const userType = localStorage.getItem("tipo")?.toLowerCase();
@@ -104,6 +122,16 @@ export default function SharedDocuments() {
             setOpenViewer(true);
         } catch (error) {
             console.error("Erro ao visualizar documento:", error);
+            showAlert("error", t(getDocumentErrorKey(error, "documents.errors.view")));
+        }
+    }
+
+    async function handleDownload(id, originalName) {
+        try {
+            await downloadDocument(id, originalName);
+        } catch (error) {
+            console.error("Erro ao baixar documento:", error);
+            showAlert("error", t(getDocumentErrorKey(error, "documents.errors.download")));
         }
     }
 
@@ -113,11 +141,13 @@ export default function SharedDocuments() {
         async function load() {
             try {
                 setLoading(true);
+                setLoadErrorKey(null);
                 const data = await getPatientDocuments(selectedPatient.cpf);
                 setDocuments(data);
             } catch (error) {
                 console.error("Erro ao carregar documentos:", error);
                 setDocuments([]);
+                setLoadErrorKey(getDocumentErrorKey(error, "documents.errors.load"));
             } finally {
                 setLoading(false);
             }
@@ -175,7 +205,13 @@ export default function SharedDocuments() {
                 </Typography>
             )}
 
-            {!loading && documents.length === 0 && (
+            {loadErrorKey && (
+                <Alert severity="error" sx={{ mb: 2 }}>
+                    {t(loadErrorKey)}
+                </Alert>
+            )}
+
+            {!loading && !loadErrorKey && documents.length === 0 && (
                 <Box
                     sx={{
                         width: "100%",
@@ -325,7 +361,7 @@ export default function SharedDocuments() {
                                                     {t("documents.shared.view")}
                                                 </Button>
                                                 <Button
-                                                    onClick={() => downloadDocument(doc.id, doc.nomeOriginal)}
+                                                    onClick={() => handleDownload(doc.id, doc.nomeOriginal)}
                                                     startIcon={<DownloadIcon />}
                                                     sx={{ minHeight: 48, fontWeight: 800, textTransform: "none", flex: 1 }}
                                                 >
@@ -352,7 +388,7 @@ export default function SharedDocuments() {
 
                                                 <Tooltip title={t("documents.shared.download")}>
                                                     <IconButton
-                                                        onClick={() => downloadDocument(doc.id, doc.nomeOriginal)}
+                                                        onClick={() => handleDownload(doc.id, doc.nomeOriginal)}
                                                         size="small"
                                                         aria-label={t("documents.shared.download")}
                                                         sx={{

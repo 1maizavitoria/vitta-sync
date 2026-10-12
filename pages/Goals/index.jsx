@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import {
-    Box, Button, Card, CardActions, CardContent, Chip, CircularProgress,
+    Alert, Box, Button, Card, CardActions, CardContent, Chip, CircularProgress,
     IconButton, LinearProgress, MenuItem, Stack, Tooltip, Typography
 } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
@@ -21,6 +21,7 @@ import { useAlert } from "../../hooks/useAlert";
 import { useI18n } from "../../src/i18n";
 import { useThemeMode } from "../../src/theme/ThemeModeProvider";
 import { createGoal, deleteGoal, getGoals, updateGoal, updateGoalValue } from "../../services/goalService";
+import { classifyApiError } from "../../utils/api/classifyApiError";
 
 const indicatorConfig = {
     peso: { tipoDado: "sinais_vitais", unidade: "kg", direcao: "reduzir" },
@@ -29,6 +30,20 @@ const indicatorConfig = {
     personalizado: { tipoDado: "personalizado", unidade: "", direcao: "aumentar" }
 };
 const emptyForm = { nome: "", indicador: "personalizado", direcao: "aumentar", unidade: "", valorInicial: "", valorAtual: "", valorAlvo: "", dataLimite: "" };
+
+function getGoalErrorKey(error, fallbackKey) {
+    const errorType = classifyApiError(error).type;
+    const errorKeys = {
+        network: "goals.errors.network",
+        invalidRequest: "goals.errors.invalidRequest",
+        forbidden: "goals.errors.forbidden",
+        notFound: "goals.errors.notFound",
+        conflict: "goals.errors.conflict",
+        server: "goals.errors.server"
+    };
+
+    return errorKeys[errorType] || fallbackKey;
+}
 
 export default function Goals() {
     const theme = useTheme();
@@ -48,22 +63,29 @@ export default function Goals() {
     const [formAttempted, setFormAttempted] = useState(false);
     const [manualAttempted, setManualAttempted] = useState(false);
     const [goalToDelete, setGoalToDelete] = useState(null);
+    const [loadErrorKey, setLoadErrorKey] = useState(null);
 
     const cpf = selectedPatient?.cpf;
     const canSubmit = form.nome.trim() && form.indicador && Number(form.valorAlvo) > 0 && form.dataLimite;
 
     const loadGoals = useCallback(async () => {
-        if (!cpf) return setGoals([]);
+        if (!cpf) {
+            setGoals([]);
+            setLoadErrorKey(null);
+            return;
+        }
         try {
             setLoading(true);
+            setLoadErrorKey(null);
             setGoals(await getGoals(cpf));
         } catch (error) {
             console.error(error);
-            showAlert("error", t("goals.alerts.loadError"));
+            setGoals([]);
+            setLoadErrorKey(getGoalErrorKey(error, "goals.alerts.loadError"));
         } finally {
             setLoading(false);
         }
-    }, [cpf, showAlert, t]);
+    }, [cpf]);
 
     useEffect(() => { loadGoals(); }, [loadGoals]);
 
@@ -114,7 +136,7 @@ export default function Goals() {
             await loadGoals();
         } catch (error) {
             console.error(error);
-            showAlert("error", t("goals.alerts.saveError"));
+            showAlert("error", t(getGoalErrorKey(error, "goals.alerts.saveError")));
         } finally {
             setSaving(false);
         }
@@ -129,7 +151,7 @@ export default function Goals() {
             await loadGoals();
         } catch (error) {
             console.error(error);
-            showAlert("error", t("goals.alerts.actionError"));
+            showAlert("error", t(getGoalErrorKey(error, "goals.alerts.actionError")));
         }
     }
 
@@ -152,7 +174,7 @@ export default function Goals() {
             await loadGoals();
         } catch (error) {
             console.error(error);
-            showAlert("error", t("goals.alerts.actionError"));
+            showAlert("error", t(getGoalErrorKey(error, "goals.alerts.actionError")));
         } finally {
             setSaving(false);
         }
@@ -217,6 +239,8 @@ export default function Goals() {
                 <Typography color="text.secondary">{t("goals.selectPatient")}</Typography>
             ) : loading ? (
                 <Box display="flex" justifyContent="center" py={8}><CircularProgress /></Box>
+            ) : loadErrorKey ? (
+                <Alert severity="error">{t(loadErrorKey)}</Alert>
             ) : goals.length === 0 ? (
                 <Box textAlign="center" py={8}><FlagOutlinedIcon sx={{ fontSize: 52, color: "text.disabled" }} /><Typography variant="h6">{t("goals.empty")}</Typography><Typography color="text.secondary">{t("goals.emptyHint")}</Typography></Box>
             ) : (

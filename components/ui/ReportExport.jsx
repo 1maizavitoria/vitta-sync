@@ -13,6 +13,7 @@ import dayjs from "dayjs";
 import { useI18n } from "../../src/i18n";
 import { useThemeMode } from "../../src/theme/ThemeModeProvider";
 import { previewReport, downloadReport } from "../../services/reportService";
+import { classifyApiError } from "../../utils/api/classifyApiError";
 import DatePickerUI from "./DatePicker";
 
 const categories = ["SINAIS", "SINTOMAS", "HABITOS"];
@@ -243,10 +244,15 @@ export default function ReportExport({ cpf }) {
             }
         } catch (error) {
             if (controller.signal.aborted) return;
-            const status = error.response?.status;
+            const apiError = classifyApiError(error);
+            const { status } = apiError;
             if (status === 403 || status === 404 || status === 422) setPreview(null);
-            const key = status === 403 ? "forbidden" : status === 404 ? "patientMissing"
-                : status === 422 ? "empty" : status === 400 ? "invalidFilters" : "requestError";
+            const key = apiError.type === "forbidden" ? "forbidden"
+                : apiError.type === "notFound" ? "patientMissing"
+                    : status === 422 ? "empty"
+                        : apiError.type === "invalidRequest" ? "invalidFilters"
+                            : apiError.type === "network" ? "networkError"
+                                : apiError.type === "server" ? "serverError" : "requestError";
             setNotice({ severity: status === 422 ? "info" : "error", key });
         } finally {
             if (!controller.signal.aborted) setBusy(null);

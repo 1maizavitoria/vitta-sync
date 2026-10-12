@@ -17,8 +17,18 @@ import { useEffect, useMemo, useState } from "react";
 
 import { getClinicalTimeline } from "../../services/timelineService";
 import { useThemeMode } from "../../src/theme/ThemeModeProvider";
+import { classifyApiError } from "../../utils/api/classifyApiError";
 
 const filters = ["TODOS", "SINAL_VITAL", "HABITO", "SINTOMA"];
+
+function getTimelineErrorKey(error) {
+    const errorType = classifyApiError(error).type;
+    const translatedErrors = ["network", "forbidden", "notFound", "server"];
+
+    return translatedErrors.includes(errorType)
+        ? `dashboard.timeline.errors.${errorType}`
+        : "dashboard.timeline.loadError";
+}
 
 function getItemIcon(type) {
     if (type === "HABITO") return <BedtimeOutlinedIcon fontSize="small" />;
@@ -103,11 +113,12 @@ export default function ClinicalTimeline({
     const [items, setItems] = useState([]);
     const [filter, setFilter] = useState("TODOS");
     const [loading, setLoading] = useState(false);
-    const [error, setError] = useState(false);
+    const [errorKey, setErrorKey] = useState("");
 
     useEffect(() => {
         if (!cpf) {
             setItems([]);
+            setErrorKey("");
             return;
         }
 
@@ -115,7 +126,7 @@ export default function ClinicalTimeline({
 
         async function loadTimeline() {
             setLoading(true);
-            setError(false);
+            setErrorKey("");
 
             try {
                 const data = await getClinicalTimeline({ cpf, inicio, fim });
@@ -124,7 +135,7 @@ export default function ClinicalTimeline({
                 console.error(requestError);
                 if (active) {
                     setItems([]);
-                    setError(true);
+                    setErrorKey(getTimelineErrorKey(requestError));
                 }
             } finally {
                 if (active) setLoading(false);
@@ -211,7 +222,7 @@ export default function ClinicalTimeline({
                 </ToggleButtonGroup>
             </Box>
 
-            {error && <Alert severity="error">{t("dashboard.timeline.loadError")}</Alert>}
+            {errorKey && <Alert severity="error">{t(errorKey)}</Alert>}
 
             {loading ? (
                 <Stack spacing={2}>
@@ -219,9 +230,9 @@ export default function ClinicalTimeline({
                         <Skeleton key={item} variant="rounded" height={100} />
                     ))}
                 </Stack>
-            ) : !error && groupedDates.length === 0 ? (
+            ) : !errorKey && groupedDates.length === 0 ? (
                 <Alert severity="info">{t("dashboard.timeline.empty")}</Alert>
-            ) : !error && (
+            ) : !errorKey && (
                 <Stack spacing={3}>
                     {groupedDates.map((date) => (
                         <Box key={date}>

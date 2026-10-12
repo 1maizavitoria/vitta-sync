@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 
 import {
+    Alert,
     Box,
     Button,
     Checkbox,
@@ -36,6 +37,7 @@ import {
     getEmergencyContacts
 } from "../../../services/contactEmergencyService";
 import { formatPhone, isValidPhone } from "../../../utils/formatters/formatPhone";
+import { classifyApiError } from "../../../utils/api/classifyApiError";
 import DialogUI from "../Dialog";
 import InputUI from "../Input";
 import { useI18n } from "../../../src/i18n";
@@ -56,6 +58,15 @@ const emptyContact = {
     receberAlertaGeralCritico: true,
     canalEmail: true,
     canalSms: false
+};
+
+const getContactErrorKey = (error, fallbackKey) => {
+    const errorType = classifyApiError(error).type;
+    const translatedErrors = ["network", "invalidRequest", "forbidden", "notFound", "conflict", "server"];
+
+    return translatedErrors.includes(errorType)
+        ? `reports.emergencyContacts.errors.${errorType}`
+        : fallbackKey;
 };
 
 const alertGroups = [
@@ -223,6 +234,7 @@ export default function EmergencyContacts() {
 
     const [contacts, setContacts] = useState([]);
     const [loading, setLoading] = useState(false);
+    const [loadErrorKey, setLoadErrorKey] = useState("");
     const [adding, setAdding] = useState(false);
     const [formData, setFormData] = useState(emptyContact);
     const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
@@ -361,7 +373,7 @@ export default function EmergencyContacts() {
             showAlert("success", t("reports.emergencyContacts.saved"));
         } catch (error) {
             console.error(error);
-            showAlert("error", t("reports.emergencyContacts.saveError"));
+            showAlert("error", t(getContactErrorKey(error, "reports.emergencyContacts.saveError")));
         }
     }
 
@@ -379,7 +391,7 @@ export default function EmergencyContacts() {
             showAlert("success", t("reports.emergencyContacts.removed"));
         } catch (error) {
             console.error(error);
-            showAlert("error", t("reports.emergencyContacts.removeError"));
+            showAlert("error", t(getContactErrorKey(error, "reports.emergencyContacts.removeError")));
         } finally {
             setOpenDeleteDialog(false);
             setSelectedContactId(null);
@@ -408,7 +420,7 @@ export default function EmergencyContacts() {
             showAlert("success", t("reports.emergencyContacts.updated"));
         } catch (error) {
             console.error(error);
-            showAlert("error", t("reports.emergencyContacts.editError"));
+            showAlert("error", t(getContactErrorKey(error, "reports.emergencyContacts.editError")));
         }
     }
 
@@ -418,10 +430,13 @@ export default function EmergencyContacts() {
         async function fetchContacts() {
             try {
                 setLoading(true);
+                setLoadErrorKey("");
                 const data = await getEmergencyContacts(selectedPatient.cpf);
                 setContacts(data);
             } catch (error) {
                 console.error(error);
+                setContacts([]);
+                setLoadErrorKey(getContactErrorKey(error, "reports.emergencyContacts.loadError"));
             } finally {
                 setLoading(false);
             }
@@ -527,6 +542,12 @@ export default function EmergencyContacts() {
                 <Typography color="text.secondary">
                     {t("reports.emergencyContacts.loading")}
                 </Typography>
+            )}
+
+            {!loading && loadErrorKey && (
+                <Alert severity="error" sx={{ mb: 2 }}>
+                    {t(loadErrorKey)}
+                </Alert>
             )}
 
             <Box
@@ -875,7 +896,7 @@ export default function EmergencyContacts() {
                 })}
             </Box>
 
-            {!loading && contacts.length === 0 && !adding && (
+            {!loading && !loadErrorKey && contacts.length === 0 && !adding && (
                 <Box
                     sx={{
                         width: "100%",

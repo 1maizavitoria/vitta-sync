@@ -7,9 +7,20 @@ import NotificationsActiveOutlinedIcon from "@mui/icons-material/NotificationsAc
 
 import EventCard from "../../components/ui/cards/EventCard";
 import { usePatient } from "../../context/PatientContext";
+import { useAlert } from "../../hooks/useAlert";
 import { useI18n } from "../../src/i18n";
 import { useThemeMode } from "../../src/theme/ThemeModeProvider";
 import { getPatientEvents, markEventsAsRead } from "../../services/eventService";
+import { classifyApiError } from "../../utils/api/classifyApiError";
+
+const getActivityErrorKey = (error, fallbackKey) => {
+    const errorType = classifyApiError(error).type;
+    const translatedErrors = ["network", "forbidden", "notFound", "server"];
+
+    return translatedErrors.includes(errorType)
+        ? `activity.errors.${errorType}`
+        : fallbackKey;
+};
 
 export default function Activity() {
     const theme = useTheme();
@@ -17,9 +28,11 @@ export default function Activity() {
     const isDark = theme.palette.mode === "dark";
     const { selectedPatient } = usePatient();
     const { t } = useI18n();
+    const { showAlert } = useAlert();
     const { accessibilityMode } = useThemeMode();
     const [events, setEvents] = useState([]);
     const [loading, setLoading] = useState(false);
+    const [loadErrorKey, setLoadErrorKey] = useState("");
 
     const userType = localStorage.getItem("tipo")?.toLowerCase();
     const isPatientUser = userType === "paciente";
@@ -35,24 +48,31 @@ export default function Activity() {
     const loadEvents = useCallback(async () => {
         if (!selectedPatient?.id) {
             setEvents([]);
+            setLoadErrorKey("");
             return;
         }
 
         try {
             setLoading(true);
+            setLoadErrorKey("");
 
             const data = await getPatientEvents(selectedPatient.id);
-
-            await markEventsAsRead(selectedPatient.id);
-
-            window.dispatchEvent(
-                new Event("notificationsUpdated")
-            );
-
             setEvents(data);
-        } catch (error) {
-            console.error("Erro ao carregar atividades:", error);
+
+            try {
+                await markEventsAsRead(selectedPatient.id);
+                window.dispatchEvent(new Event("notificationsUpdated"));
+            } catch (markReadError) {
+                console.error("Erro ao marcar atividades como lidas:", markReadError);
+                showAlert(
+                    "error",
+                    t(getActivityErrorKey(markReadError, "activity.errors.markRead"))
+                );
+            }
+        } catch (loadError) {
+            console.error("Erro ao carregar atividades:", loadError);
             setEvents([]);
+            setLoadErrorKey(getActivityErrorKey(loadError, "activity.errors.load"));
         } finally {
             setLoading(false);
         }
@@ -222,6 +242,10 @@ export default function Activity() {
                             />
                         ))}
                     </Box>
+                ) : loadErrorKey ? (
+                    <Alert severity="error">
+                        {t(loadErrorKey)}
+                    </Alert>
                 ) : events.length === 0 ? (
                     <Box
                         sx={{

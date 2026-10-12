@@ -20,7 +20,19 @@ import { formatPhone, isValidPhone } from "../../utils/formatters/formatPhone";
 import { isValidEmail } from "../../utils/formatters/formatEmail";
 import { getDateLimit, isUnder18 } from "../../utils/validators/dateValidator";
 import { isTokenExpired } from "../../utils/auth/auth";
+import { classifyApiError } from "../../utils/api/classifyApiError";
 import { validatePassword } from "../../utils/validators/passwordValidator";
+
+const getRegisterErrorKey = (error) => {
+    const errorType = classifyApiError(error).type;
+
+    if (errorType === "conflict") return "messages.duplicatedUser";
+    if (errorType === "invalidRequest") return "messages.invalidRegistration";
+    if (errorType === "network") return "messages.connectionError";
+    if (errorType === "server") return "messages.serverError";
+
+    return "messages.registerError";
+};
 
 export default function Register() {
     const { showAlert } = useAlert();
@@ -255,20 +267,19 @@ export default function Register() {
         };
 
         try {
-            const response = await createUser(data);
+            await createUser(data);
 
-            console.log("Usuário criado:", response);
             showAlert("success", t("messages.registerSuccess"));
             navigate("/login");
         } catch (error) {
-            console.log("Erro que retorna do backend: ", error.response?.data?.value);
-            if (error.response?.data?.value === "duplicateEmail") {
-                showAlert("error", t("messages.duplicatedUser"));
+            const errorType = classifyApiError(error).type;
+
+            if (errorType === "conflict") {
                 setErrorEmail(true);
                 setErrorCPF(true);
-                return;
             }
-            showAlert("error", t("messages.registerError"));
+
+            showAlert("error", t(getRegisterErrorKey(error)));
         } finally {
             setLoading(false);
         }

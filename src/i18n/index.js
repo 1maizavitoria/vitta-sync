@@ -40,7 +40,25 @@ const dictionaries = {
             logout: "Sair",
             userType: "Tipo de usuário",
             openSidebar: "Abrir menu",
-            closeSidebar: "Fechar menu"
+            closeSidebar: "Fechar menu",
+            errors: {
+                network: "Não foi possível conectar ao servidor. Verifique a conexão e tente novamente.",
+                forbidden: "Você não tem permissão para acessar estas informações.",
+                notFound: "As informações solicitadas não foram encontradas.",
+                server: "O servidor encontrou um erro ao atualizar a navegação. Tente novamente em instantes.",
+                user: "Não foi possível carregar os dados do usuário.",
+                notifications: "Não foi possível atualizar as notificações.",
+                logoutLocal: "Não foi possível encerrar a sessão no servidor, mas você saiu deste dispositivo."
+            }
+        },
+        patientContext: {
+            errors: {
+                network: "Não foi possível conectar ao servidor para carregar os pacientes.",
+                forbidden: "Você não tem permissão para acessar os pacientes vinculados.",
+                notFound: "Não foi possível localizar os pacientes vinculados.",
+                server: "O servidor encontrou um erro ao carregar os pacientes. Tente novamente em instantes.",
+                load: "Não foi possível carregar os pacientes."
+            }
         },
         goals: {
             title: "Metas de acompanhamento", description: "Defina objetivos e acompanhe a evolução do paciente.", patient: "Paciente", new: "Nova meta", selectPatient: "Selecione um paciente para visualizar suas metas.", empty: "Nenhuma meta cadastrada", emptyHint: "Crie a primeira meta de acompanhamento.", progress: "Progresso", limitUsed: "Limite utilizado", limitExceeded: "Limite ultrapassado em", current: "Valor atual", target: "Valor-alvo", deadline: "Prazo", complete: "Concluir", updateValue: "Registrar avanço", manualTitle: "Registrar avanço", manualAmount: "Valor realizado agora", manualNewValue: "Novo acumulado", edit: "Editar", delete: "Excluir", deleteTitle: "Excluir meta", deleteConfirm: "Deseja realmente excluir esta meta?",
@@ -49,7 +67,8 @@ const dictionaries = {
             directions: { aumentar: "Aumentar", reduzir: "Reduzir", reachMinimum: "Alcançar pelo menos", doNotExceed: "Não ultrapassar" },
             status: { em_andamento: "Em andamento", concluido: "Concluída", concluido_atrasado: "Concluída com atraso", nao_atingida: "Não atingida" },
             form: { createTitle: "Nova meta", editTitle: "Editar meta", name: "Nome", nameExample: "Ex.: Reduzir peso", nameRequired: "Informe um nome para a meta", type: "Tipo de dado", indicator: "Indicador", direction: "Objetivo", unit: "Unidade", unitExample: "Ex.: kg, minutos ou copos", initialValue: "Valor inicial", target: "Valor-alvo", targetExample: "Ex.: 80", targetRequired: "Informe um valor-alvo maior que zero", deadline: "Data-limite", deadlineRequired: "Informe uma data-limite", manualExample: "Ex.: 1", manualRequired: "Informe um avanço maior que zero", cancel: "Cancelar", save: "Salvar", saving: "Salvando..." },
-            alerts: { loadError: "Não foi possível carregar as metas.", createSuccess: "Meta criada com sucesso.", updateSuccess: "Meta atualizada com sucesso.", valueSuccess: "Progresso atualizado com sucesso.", completeSuccess: "Meta concluída com sucesso.", deleteSuccess: "Meta excluída com sucesso.", saveError: "Não foi possível salvar a meta.", actionError: "Não foi possível realizar esta ação." }
+            alerts: { loadError: "Não foi possível carregar as metas.", createSuccess: "Meta criada com sucesso.", updateSuccess: "Meta atualizada com sucesso.", valueSuccess: "Progresso atualizado com sucesso.", completeSuccess: "Meta concluída com sucesso.", deleteSuccess: "Meta excluída com sucesso.", saveError: "Não foi possível salvar a meta.", actionError: "Não foi possível realizar esta ação." },
+            errors: { network: "Não foi possível conectar ao servidor. Verifique a conexão e tente novamente.", invalidRequest: "Os dados da meta são inválidos. Revise as informações e tente novamente.", forbidden: "Você não tem permissão para realizar esta ação com a meta.", notFound: "A meta ou o paciente informado não foi encontrado.", conflict: "A meta não pode ser alterada no estado atual.", server: "O servidor encontrou um erro ao processar a meta. Tente novamente em instantes." }
         },
         theme: {
             light: "Modo claro",
@@ -223,11 +242,19 @@ const dictionaries = {
                 selectRole: "Selecione uma função no grupo",
                 linkCreatedSuccess: "Vínculo criado com sucesso",
                 invalidCode: "Código inválido",
+                alreadyLinked: "Você já possui este vínculo",
+                joinError: "Não foi possível criar o vínculo",
                 invalidEmail: "Informe um email válido",
                 emailAlreadyAdded: "Email já adicionado",
                 addAtLeastOneEmail: "Adicione pelo menos um email",
                 invitesSentSuccess: "Convites enviados com sucesso",
                 sendInvitesError: "Erro ao enviar convites"
+            },
+            errors: {
+                network: "Não foi possível conectar ao servidor. Verifique a conexão e tente novamente.",
+                forbidden: "Você não tem permissão para realizar esta ação no grupo.",
+                notFound: "O vínculo ou paciente informado não foi encontrado.",
+                server: "O servidor encontrou um erro ao processar a ação do grupo. Tente novamente em instantes."
             },
             groupTitle: "Grupo de",
             groupSubtitle: "Pessoas que acompanham o paciente",
@@ -347,6 +374,12 @@ const dictionaries = {
                 description: "Sinais vitais, hábitos e sintomas organizados pela data de referência.",
                 time: "Horário",
                 loadError: "Não foi possível carregar a linha do tempo clínica.",
+                errors: {
+                    network: "Não foi possível conectar ao servidor. Verifique a conexão e tente novamente.",
+                    forbidden: "Você não tem permissão para acessar a linha do tempo deste paciente.",
+                    notFound: "O paciente ou a linha do tempo clínica não foi encontrado.",
+                    server: "O servidor encontrou um erro ao carregar a linha do tempo. Tente novamente em instantes."
+                },
                 empty: "Nenhum registro encontrado para este filtro e período.",
                 filters: {
                     todos: "Todos",
@@ -421,6 +454,14 @@ const dictionaries = {
             }
         },
         healthTracker: {
+            errors: {
+                network: "Não foi possível conectar ao servidor. Verifique a conexão e tente novamente.",
+                invalidRequest: "Os dados informados são inválidos. Revise os campos e tente novamente.",
+                forbidden: "Você não tem permissão para realizar esta ação nos registros de saúde.",
+                notFound: "O registro ou paciente informado não foi encontrado.",
+                conflict: "O registro não pode ser alterado no estado atual.",
+                server: "O servidor encontrou um erro ao processar o registro. Tente novamente em instantes."
+            },
             title: "Acompanhamento de saúde",
             description: "Registre sinais vitais, hábitos e sintomas em um fluxo simples.",
             selectedPatient: "Paciente",
@@ -463,7 +504,8 @@ const dictionaries = {
                 no: "Não",
                 registered: "Hábitos registrados com sucesso",
                 edited: "Hábitos editados com sucesso",
-                saveError: "Erro ao salvar hábitos"
+                saveError: "Erro ao salvar hábitos",
+                loadError: "Erro ao carregar hábitos"
             },
             symptoms: {
                 title: "Sintomas",
@@ -477,7 +519,8 @@ const dictionaries = {
                 invalidIntensity: "Intensidade deve estar em um valor válido (1-10)",
                 registered: "Sintomas registrados com sucesso",
                 edited: "Sintomas editados com sucesso",
-                saveError: "Erro ao salvar sintomas"
+                saveError: "Erro ao salvar sintomas",
+                loadError: "Erro ao carregar sintomas"
             },
             vitals: {
                 title: "Sinais vitais",
@@ -501,7 +544,8 @@ const dictionaries = {
                 invalidWeight: "Peso inválido",
                 registered: "Sinais vitais registrados com sucesso",
                 edited: "Sinais vitais editados com sucesso",
-                saveError: "Erro ao salvar sinais vitais"
+                saveError: "Erro ao salvar sinais vitais",
+                loadError: "Erro ao carregar sinais vitais"
             },
             reminders: {
                 title: "Lembretes",
@@ -514,6 +558,9 @@ const dictionaries = {
                 both: "Ambos",
                 measurement: "Fazer medição",
                 chooseDayAndTime: "Escolha um dia e horário para o lembrete.",
+                saveError: "Não foi possível salvar o lembrete.",
+                loadError: "Não foi possível carregar o lembrete.",
+                toggleError: "Não foi possível alterar o status do lembrete.",
                 days: {
                     MONDAY: "Seg",
                     TUESDAY: "Ter",
@@ -553,6 +600,14 @@ const dictionaries = {
             emptyTitle: "Sem atividades",
             emptyDescriptionPatient: "Quando houver novas atualizações sobre você, elas aparecerão aqui.",
             emptyDescriptionLinkedPatient: "Quando houver novas atualizações do paciente selecionado, elas aparecerão aqui.",
+            errors: {
+                network: "Não foi possível conectar ao servidor. Verifique a conexão e tente novamente.",
+                forbidden: "Você não tem permissão para acessar as atividades deste paciente.",
+                notFound: "O paciente ou o histórico de atividades não foi encontrado.",
+                server: "O servidor encontrou um erro ao processar as atividades. Tente novamente em instantes.",
+                load: "Não foi possível carregar as atividades.",
+                markRead: "As atividades foram carregadas, mas não foi possível marcá-las como lidas."
+            },
             priorities: {
                 critico: "Crítico",
                 alta: "Alta",
@@ -716,6 +771,22 @@ const dictionaries = {
                 remove: "Remover",
                 download: "Baixar"
             },
+            feedback: {
+                uploadSuccess: "Documento enviado com sucesso.",
+                deleteSuccess: "Documento removido com sucesso."
+            },
+            errors: {
+                load: "Não foi possível carregar os documentos.",
+                view: "Não foi possível visualizar o documento.",
+                upload: "Não foi possível enviar o documento.",
+                delete: "Não foi possível remover o documento.",
+                download: "Não foi possível baixar o documento.",
+                invalidRequest: "Os dados do documento são inválidos. Revise as informações e tente novamente.",
+                forbidden: "Você não tem permissão para realizar esta operação com documentos.",
+                notFound: "O documento ou paciente informado não foi encontrado.",
+                server: "O servidor encontrou um erro ao processar o documento. Tente novamente em instantes.",
+                network: "Não foi possível conectar ao servidor. Verifique a conexão e tente novamente."
+            },
             shared: {
                 title: "Documentos médicos",
                 patientDescription: "Documentos enviados pelos profissionais que acompanham você.",
@@ -758,6 +829,8 @@ const dictionaries = {
                 selectPatient: "Selecione um paciente para exportar o relatório.", downloadStarted: "Download iniciado.",
                 forbidden: "Você não tem permissão para acessar os dados deste paciente.", patientMissing: "Paciente não encontrado. Atualize a seleção.",
                 invalidFilters: "Confira o período, as categorias e o formato selecionados.", requestError: "Não foi possível gerar o relatório. Tente novamente.",
+                networkError: "Não foi possível conectar ao servidor. Verifique a conexão e tente novamente.",
+                serverError: "O servidor encontrou um erro ao gerar o relatório. Tente novamente em instantes.",
             },
             description: "Consulte e mantenha os dados essenciais organizados.",
             chips: {
@@ -795,6 +868,15 @@ const dictionaries = {
                 deleteError: "Erro ao deletar conta",
                 updated: "Dados atualizados com sucesso",
                 saveError: "Erro ao salvar dados",
+                loadError: "Não foi possível carregar os dados do perfil.",
+                errors: {
+                    network: "Não foi possível conectar ao servidor. Verifique a conexão e tente novamente.",
+                    invalidRequest: "Os dados do perfil são inválidos. Revise as informações e tente novamente.",
+                    forbidden: "Você não tem permissão para realizar esta ação no perfil.",
+                    notFound: "O usuário informado não foi encontrado.",
+                    conflict: "Os dados do perfil entram em conflito com um cadastro existente.",
+                    server: "O servidor encontrou um erro ao processar o perfil. Tente novamente em instantes."
+                },
                 adultRequired: "precisa ser maior de idade"
             },
             emergencyContacts: {
@@ -829,7 +911,16 @@ const dictionaries = {
                 removed: "Contato removido",
                 removeError: "Erro ao remover contato",
                 updated: "Contato atualizado",
-                editError: "Erro ao editar contato"
+                editError: "Erro ao editar contato",
+                loadError: "Não foi possível carregar os contatos de emergência.",
+                errors: {
+                    network: "Não foi possível conectar ao servidor. Verifique a conexão e tente novamente.",
+                    invalidRequest: "Os dados do contato são inválidos. Revise as informações e tente novamente.",
+                    forbidden: "Você não tem permissão para realizar esta ação nos contatos.",
+                    notFound: "O contato ou paciente informado não foi encontrado.",
+                    conflict: "Este contato não pode ser alterado no estado atual.",
+                    server: "O servidor encontrou um erro ao processar o contato. Tente novamente em instantes."
+                }
             }
         },
         messages: {
@@ -845,6 +936,8 @@ const dictionaries = {
             invalidEmail: "Email inválido",
             fillEmail: "Preencha o email",
             codeSendError: "Erro ao enviar o código",
+            connectionError: "Não foi possível conectar ao servidor. Verifique a conexão e tente novamente.",
+            serverError: "O servidor encontrou um erro ao processar a solicitação. Tente novamente em instantes.",
             passwordRules: "Verifique as regras de senha",
             passwordChanged: "Senha alterada com sucesso",
             passwordChangeError: "Erro ao trocar senha",
@@ -856,6 +949,7 @@ const dictionaries = {
             adultRequired: "precisa ser maior de idade",
             registerSuccess: "Cadastro realizado com sucesso",
             duplicatedUser: "CPF ou Email já cadastrados",
+            invalidRegistration: "Os dados do cadastro são inválidos. Revise as informações e tente novamente.",
             registerError: "Erro ao cadastrar usuário"
         }
     },
@@ -881,7 +975,25 @@ const dictionaries = {
             logout: "Sign out",
             userType: "User type",
             openSidebar: "Open menu",
-            closeSidebar: "Close menu"
+            closeSidebar: "Close menu",
+            errors: {
+                network: "Unable to connect to the server. Check your connection and try again.",
+                forbidden: "You do not have permission to access this information.",
+                notFound: "The requested information was not found.",
+                server: "The server encountered an error while updating navigation. Try again shortly.",
+                user: "The user data could not be loaded.",
+                notifications: "Notifications could not be updated.",
+                logoutLocal: "The session could not be closed on the server, but you signed out on this device."
+            }
+        },
+        patientContext: {
+            errors: {
+                network: "Unable to connect to the server to load patients.",
+                forbidden: "You do not have permission to access linked patients.",
+                notFound: "The linked patients could not be found.",
+                server: "The server encountered an error while loading patients. Try again shortly.",
+                load: "Patients could not be loaded."
+            }
         },
         goals: {
             title: "Tracking goals", description: "Set objectives and track the patient's progress.", patient: "Patient", new: "New goal", selectPatient: "Select a patient to view their goals.", empty: "No goals yet", emptyHint: "Create the first tracking goal.", progress: "Progress", limitUsed: "Limit used", limitExceeded: "Limit exceeded by", current: "Current value", target: "Target value", deadline: "Deadline", complete: "Complete", updateValue: "Log progress", manualTitle: "Log progress", manualAmount: "Amount completed now", manualNewValue: "New total", edit: "Edit", delete: "Delete", deleteTitle: "Delete goal", deleteConfirm: "Do you really want to delete this goal?",
@@ -890,7 +1002,8 @@ const dictionaries = {
             directions: { aumentar: "Increase", reduzir: "Reduce", reachMinimum: "Reach at least", doNotExceed: "Do not exceed" },
             status: { em_andamento: "In progress", concluido: "Completed", concluido_atrasado: "Completed late", nao_atingida: "Not achieved" },
             form: { createTitle: "New goal", editTitle: "Edit goal", name: "Name", nameExample: "E.g.: Reduce weight", nameRequired: "Enter a name for the goal", type: "Data type", indicator: "Indicator", direction: "Objective", unit: "Unit", unitExample: "E.g.: kg, minutes or glasses", initialValue: "Initial value", target: "Target value", targetExample: "E.g.: 80", targetRequired: "Enter a target value greater than zero", deadline: "Deadline", deadlineRequired: "Enter a deadline", manualExample: "E.g.: 1", manualRequired: "Enter progress greater than zero", cancel: "Cancel", save: "Save", saving: "Saving..." },
-            alerts: { loadError: "Goals could not be loaded.", createSuccess: "Goal created successfully.", updateSuccess: "Goal updated successfully.", valueSuccess: "Progress updated successfully.", completeSuccess: "Goal completed successfully.", deleteSuccess: "Goal deleted successfully.", saveError: "Goal could not be saved.", actionError: "This action could not be completed." }
+            alerts: { loadError: "Goals could not be loaded.", createSuccess: "Goal created successfully.", updateSuccess: "Goal updated successfully.", valueSuccess: "Progress updated successfully.", completeSuccess: "Goal completed successfully.", deleteSuccess: "Goal deleted successfully.", saveError: "Goal could not be saved.", actionError: "This action could not be completed." },
+            errors: { network: "The server could not be reached. Check your connection and try again.", invalidRequest: "The goal data is invalid. Review the information and try again.", forbidden: "You do not have permission to perform this goal action.", notFound: "The specified goal or patient was not found.", conflict: "The goal cannot be changed in its current state.", server: "The server encountered an error while processing the goal. Try again shortly." }
         },
         theme: {
             light: "Light mode",
@@ -1063,11 +1176,19 @@ const dictionaries = {
                 selectRole: "Select a group role",
                 linkCreatedSuccess: "Link created successfully",
                 invalidCode: "Invalid code",
+                alreadyLinked: "You already have this link",
+                joinError: "The link could not be created",
                 invalidEmail: "Enter a valid email",
                 emailAlreadyAdded: "Email already added",
                 addAtLeastOneEmail: "Add at least one email",
                 invitesSentSuccess: "Invites sent successfully",
                 sendInvitesError: "Error sending invites"
+            },
+            errors: {
+                network: "The server could not be reached. Check your connection and try again.",
+                forbidden: "You do not have permission to perform this group action.",
+                notFound: "The specified link or patient was not found.",
+                server: "The server encountered an error while processing the group action. Try again shortly."
             },
             groupTitle: "Group of",
             groupSubtitle: "People who follow the patient",
@@ -1187,6 +1308,12 @@ const dictionaries = {
                 description: "Vital signs, habits, and symptoms organized by reference date.",
                 time: "Time",
                 loadError: "The clinical timeline could not be loaded.",
+                errors: {
+                    network: "Unable to connect to the server. Check your connection and try again.",
+                    forbidden: "You do not have permission to access this patient's clinical timeline.",
+                    notFound: "The patient or clinical timeline was not found.",
+                    server: "The server encountered an error while loading the timeline. Try again shortly."
+                },
                 empty: "No records were found for this filter and period.",
                 filters: {
                     todos: "All",
@@ -1261,6 +1388,14 @@ const dictionaries = {
             }
         },
         healthTracker: {
+            errors: {
+                network: "The server could not be reached. Check your connection and try again.",
+                invalidRequest: "The provided data is invalid. Review the fields and try again.",
+                forbidden: "You do not have permission to perform this action on health records.",
+                notFound: "The specified record or patient was not found.",
+                conflict: "The record cannot be changed in its current state.",
+                server: "The server encountered an error while processing the record. Try again shortly."
+            },
             title: "Health tracking",
             description: "Record vital signs, habits and symptoms in a simple flow.",
             selectedPatient: "Patient",
@@ -1303,7 +1438,8 @@ const dictionaries = {
                 no: "No",
                 registered: "Habits recorded successfully",
                 edited: "Habits edited successfully",
-                saveError: "Error saving habits"
+                saveError: "Error saving habits",
+                loadError: "Error loading habits"
             },
             symptoms: {
                 title: "Symptoms",
@@ -1317,7 +1453,8 @@ const dictionaries = {
                 invalidIntensity: "Intensity must be a valid value (1-10)",
                 registered: "Symptoms recorded successfully",
                 edited: "Symptoms edited successfully",
-                saveError: "Error saving symptoms"
+                saveError: "Error saving symptoms",
+                loadError: "Error loading symptoms"
             },
             vitals: {
                 title: "Vital signs",
@@ -1341,7 +1478,8 @@ const dictionaries = {
                 invalidWeight: "Invalid weight",
                 registered: "Vital signs recorded successfully",
                 edited: "Vital signs edited successfully",
-                saveError: "Error saving vital signs"
+                saveError: "Error saving vital signs",
+                loadError: "Error loading vital signs"
             },
             reminders: {
                 title: "Reminders",
@@ -1354,6 +1492,9 @@ const dictionaries = {
                 both: "Both",
                 measurement: "Take measurement",
                 chooseDayAndTime: "Choose a day and time for the reminder.",
+                saveError: "The reminder could not be saved.",
+                loadError: "The reminder could not be loaded.",
+                toggleError: "The reminder status could not be changed.",
                 days: {
                     MONDAY: "Mon",
                     TUESDAY: "Tue",
@@ -1393,6 +1534,14 @@ const dictionaries = {
             emptyTitle: "No activity",
             emptyDescriptionPatient: "When there are new updates about you, they will appear here.",
             emptyDescriptionLinkedPatient: "When there are new updates for the selected patient, they will appear here.",
+            errors: {
+                network: "Unable to connect to the server. Check your connection and try again.",
+                forbidden: "You do not have permission to access this patient's activities.",
+                notFound: "The patient or activity history was not found.",
+                server: "The server encountered an error while processing the activities. Try again shortly.",
+                load: "Unable to load activities.",
+                markRead: "Activities were loaded, but they could not be marked as read."
+            },
             priorities: {
                 critico: "Critical",
                 alta: "High",
@@ -1556,6 +1705,22 @@ const dictionaries = {
                 remove: "Remove",
                 download: "Download"
             },
+            feedback: {
+                uploadSuccess: "Document uploaded successfully.",
+                deleteSuccess: "Document removed successfully."
+            },
+            errors: {
+                load: "Documents could not be loaded.",
+                view: "The document could not be opened.",
+                upload: "The document could not be uploaded.",
+                delete: "The document could not be removed.",
+                download: "The document could not be downloaded.",
+                invalidRequest: "The document data is invalid. Review the information and try again.",
+                forbidden: "You do not have permission to perform this document operation.",
+                notFound: "The specified document or patient was not found.",
+                server: "The server encountered an error while processing the document. Try again shortly.",
+                network: "The server could not be reached. Check your connection and try again."
+            },
             shared: {
                 title: "Medical documents",
                 patientDescription: "Documents sent by the professionals who follow you.",
@@ -1598,6 +1763,8 @@ const dictionaries = {
                 selectPatient: "Select a patient to export the report.", downloadStarted: "Download started.",
                 forbidden: "You do not have permission to access this patient's data.", patientMissing: "Patient not found. Update your selection.",
                 invalidFilters: "Check the selected period, categories and format.", requestError: "Unable to generate the report. Please try again.",
+                networkError: "Unable to connect to the server. Check your connection and try again.",
+                serverError: "The server encountered an error while generating the report. Try again shortly.",
             },
             description: "View and keep essential data organized.",
             chips: {
@@ -1635,6 +1802,15 @@ const dictionaries = {
                 deleteError: "Error deleting account",
                 updated: "Data updated successfully",
                 saveError: "Error saving data",
+                loadError: "The profile data could not be loaded.",
+                errors: {
+                    network: "Unable to connect to the server. Check your connection and try again.",
+                    invalidRequest: "The profile data is invalid. Review the information and try again.",
+                    forbidden: "You do not have permission to perform this profile action.",
+                    notFound: "The specified user was not found.",
+                    conflict: "The profile data conflicts with an existing account.",
+                    server: "The server encountered an error while processing the profile. Try again shortly."
+                },
                 adultRequired: "must be of legal age"
             },
             emergencyContacts: {
@@ -1669,7 +1845,16 @@ const dictionaries = {
                 removed: "Contact removed",
                 removeError: "Error removing contact",
                 updated: "Contact updated",
-                editError: "Error editing contact"
+                editError: "Error editing contact",
+                loadError: "Emergency contacts could not be loaded.",
+                errors: {
+                    network: "Unable to connect to the server. Check your connection and try again.",
+                    invalidRequest: "The contact data is invalid. Review the information and try again.",
+                    forbidden: "You do not have permission to perform this contact action.",
+                    notFound: "The specified contact or patient was not found.",
+                    conflict: "This contact cannot be changed in its current state.",
+                    server: "The server encountered an error while processing the contact. Try again shortly."
+                }
             }
         },
         messages: {
@@ -1685,6 +1870,8 @@ const dictionaries = {
             invalidEmail: "Invalid email",
             fillEmail: "Fill in the email",
             codeSendError: "Error sending the code",
+            connectionError: "Unable to connect to the server. Check your connection and try again.",
+            serverError: "The server encountered an error while processing the request. Try again shortly.",
             passwordRules: "Check the password rules",
             passwordChanged: "Password changed successfully",
             passwordChangeError: "Error changing password",
@@ -1696,6 +1883,7 @@ const dictionaries = {
             adultRequired: "must be an adult",
             registerSuccess: "Registration completed successfully",
             duplicatedUser: "CPF or Email already registered",
+            invalidRegistration: "The registration data is invalid. Review the information and try again.",
             registerError: "Error creating user"
         }
     },
@@ -1721,7 +1909,25 @@ const dictionaries = {
             logout: "Salir",
             userType: "Tipo de usuario",
             openSidebar: "Abrir menú",
-            closeSidebar: "Cerrar menú"
+            closeSidebar: "Cerrar menú",
+            errors: {
+                network: "No fue posible conectarse al servidor. Verifica la conexión e inténtalo nuevamente.",
+                forbidden: "No tienes permiso para acceder a esta información.",
+                notFound: "No se encontró la información solicitada.",
+                server: "El servidor encontró un error al actualizar la navegación. Inténtalo nuevamente en unos instantes.",
+                user: "No fue posible cargar los datos del usuario.",
+                notifications: "No fue posible actualizar las notificaciones.",
+                logoutLocal: "No fue posible cerrar la sesión en el servidor, pero saliste de este dispositivo."
+            }
+        },
+        patientContext: {
+            errors: {
+                network: "No fue posible conectarse al servidor para cargar los pacientes.",
+                forbidden: "No tienes permiso para acceder a los pacientes vinculados.",
+                notFound: "No fue posible localizar los pacientes vinculados.",
+                server: "El servidor encontró un error al cargar los pacientes. Inténtalo nuevamente en unos instantes.",
+                load: "No fue posible cargar los pacientes."
+            }
         },
         goals: {
             title: "Metas de seguimiento", description: "Define objetivos y acompaña la evolución del paciente.", patient: "Paciente", new: "Nueva meta", selectPatient: "Selecciona un paciente para ver sus metas.", empty: "No hay metas registradas", emptyHint: "Crea la primera meta de seguimiento.", progress: "Progreso", limitUsed: "Límite utilizado", limitExceeded: "Límite superado por", current: "Valor actual", target: "Valor objetivo", deadline: "Fecha límite", complete: "Completar", updateValue: "Registrar avance", manualTitle: "Registrar avance", manualAmount: "Valor realizado ahora", manualNewValue: "Nuevo acumulado", edit: "Editar", delete: "Eliminar", deleteTitle: "Eliminar meta", deleteConfirm: "¿Realmente deseas eliminar esta meta?",
@@ -1730,7 +1936,8 @@ const dictionaries = {
             directions: { aumentar: "Aumentar", reduzir: "Reducir", reachMinimum: "Alcanzar al menos", doNotExceed: "No superar" },
             status: { em_andamento: "En progreso", concluido: "Completada", concluido_atrasado: "Completada con retraso", nao_atingida: "No alcanzada" },
             form: { createTitle: "Nueva meta", editTitle: "Editar meta", name: "Nombre", nameExample: "Ej.: Reducir peso", nameRequired: "Introduce un nombre para la meta", type: "Tipo de dato", indicator: "Indicador", direction: "Objetivo", unit: "Unidad", unitExample: "Ej.: kg, minutos o vasos", initialValue: "Valor inicial", target: "Valor objetivo", targetExample: "Ej.: 80", targetRequired: "Introduce un valor objetivo mayor que cero", deadline: "Fecha límite", deadlineRequired: "Introduce una fecha límite", manualExample: "Ej.: 1", manualRequired: "Introduce un avance mayor que cero", cancel: "Cancelar", save: "Guardar", saving: "Guardando..." },
-            alerts: { loadError: "No se pudieron cargar las metas.", createSuccess: "Meta creada correctamente.", updateSuccess: "Meta actualizada correctamente.", valueSuccess: "Progreso actualizado correctamente.", completeSuccess: "Meta completada correctamente.", deleteSuccess: "Meta eliminada correctamente.", saveError: "No se pudo guardar la meta.", actionError: "No se pudo realizar esta acción." }
+            alerts: { loadError: "No se pudieron cargar las metas.", createSuccess: "Meta creada correctamente.", updateSuccess: "Meta actualizada correctamente.", valueSuccess: "Progreso actualizado correctamente.", completeSuccess: "Meta completada correctamente.", deleteSuccess: "Meta eliminada correctamente.", saveError: "No se pudo guardar la meta.", actionError: "No se pudo realizar esta acción." },
+            errors: { network: "No fue posible conectarse al servidor. Verifica la conexión e inténtalo nuevamente.", invalidRequest: "Los datos de la meta no son válidos. Revisa la información e inténtalo nuevamente.", forbidden: "No tienes permiso para realizar esta acción con la meta.", notFound: "No se encontró la meta o el paciente indicado.", conflict: "La meta no puede modificarse en su estado actual.", server: "El servidor encontró un error al procesar la meta. Inténtalo nuevamente en unos instantes." }
         },
         theme: {
             light: "Modo claro",
@@ -1903,11 +2110,19 @@ const dictionaries = {
                 selectRole: "Selecciona una función en el grupo",
                 linkCreatedSuccess: "Vínculo creado con éxito",
                 invalidCode: "Código inválido",
+                alreadyLinked: "Ya tienes este vínculo",
+                joinError: "No fue posible crear el vínculo",
                 invalidEmail: "Introduce un email válido",
                 emailAlreadyAdded: "Email ya agregado",
                 addAtLeastOneEmail: "Agrega al menos un email",
                 invitesSentSuccess: "Invitaciones enviadas con éxito",
                 sendInvitesError: "Error al enviar invitaciones"
+            },
+            errors: {
+                network: "No fue posible conectarse al servidor. Verifica la conexión e inténtalo nuevamente.",
+                forbidden: "No tienes permiso para realizar esta acción en el grupo.",
+                notFound: "No se encontró el vínculo o paciente indicado.",
+                server: "El servidor encontró un error al procesar la acción del grupo. Inténtalo nuevamente en unos instantes."
             },
             groupTitle: "Grupo de",
             groupSubtitle: "Personas que acompañan al paciente",
@@ -2027,6 +2242,12 @@ const dictionaries = {
                 description: "Signos vitales, hábitos y síntomas organizados por fecha de referencia.",
                 time: "Horario",
                 loadError: "No fue posible cargar la línea de tiempo clínica.",
+                errors: {
+                    network: "No fue posible conectarse al servidor. Verifica la conexión e inténtalo nuevamente.",
+                    forbidden: "No tienes permiso para acceder a la línea de tiempo de este paciente.",
+                    notFound: "No se encontró el paciente o la línea de tiempo clínica.",
+                    server: "El servidor encontró un error al cargar la línea de tiempo. Inténtalo nuevamente en unos instantes."
+                },
                 empty: "No se encontraron registros para este filtro y período.",
                 filters: {
                     todos: "Todos",
@@ -2101,6 +2322,14 @@ const dictionaries = {
             }
         },
         healthTracker: {
+            errors: {
+                network: "No fue posible conectarse al servidor. Verifica la conexión e inténtalo nuevamente.",
+                invalidRequest: "Los datos informados no son válidos. Revisa los campos e inténtalo nuevamente.",
+                forbidden: "No tienes permiso para realizar esta acción en los registros de salud.",
+                notFound: "No se encontró el registro o paciente indicado.",
+                conflict: "El registro no puede modificarse en su estado actual.",
+                server: "El servidor encontró un error al procesar el registro. Inténtalo nuevamente en unos instantes."
+            },
             title: "Seguimiento de salud",
             description: "Registra signos vitales, hábitos y síntomas en un flujo simple.",
             selectedPatient: "Paciente",
@@ -2143,7 +2372,8 @@ const dictionaries = {
                 no: "No",
                 registered: "Hábitos registrados con éxito",
                 edited: "Hábitos editados con éxito",
-                saveError: "Error al guardar hábitos"
+                saveError: "Error al guardar hábitos",
+                loadError: "Error al cargar hábitos"
             },
             symptoms: {
                 title: "Síntomas",
@@ -2157,7 +2387,8 @@ const dictionaries = {
                 invalidIntensity: "La intensidad debe ser un valor válido (1-10)",
                 registered: "Síntomas registrados con éxito",
                 edited: "Síntomas editados con éxito",
-                saveError: "Error al guardar síntomas"
+                saveError: "Error al guardar síntomas",
+                loadError: "Error al cargar síntomas"
             },
             vitals: {
                 title: "Signos vitales",
@@ -2181,7 +2412,8 @@ const dictionaries = {
                 invalidWeight: "Peso inválido",
                 registered: "Signos vitales registrados con éxito",
                 edited: "Signos vitales editados con éxito",
-                saveError: "Error al guardar signos vitales"
+                saveError: "Error al guardar signos vitales",
+                loadError: "Error al cargar signos vitales"
             },
             reminders: {
                 title: "Recordatorios",
@@ -2194,6 +2426,9 @@ const dictionaries = {
                 both: "Ambos",
                 measurement: "Hacer medición",
                 chooseDayAndTime: "Elige un día y horario para el recordatorio.",
+                saveError: "No fue posible guardar el recordatorio.",
+                loadError: "No fue posible cargar el recordatorio.",
+                toggleError: "No fue posible cambiar el estado del recordatorio.",
                 days: {
                     MONDAY: "Lun",
                     TUESDAY: "Mar",
@@ -2233,6 +2468,14 @@ const dictionaries = {
             emptyTitle: "Sin actividades",
             emptyDescriptionPatient: "Cuando haya nuevas actualizaciones sobre ti, aparecerán aquí.",
             emptyDescriptionLinkedPatient: "Cuando haya nuevas actualizaciones del paciente seleccionado, aparecerán aquí.",
+            errors: {
+                network: "No fue posible conectarse al servidor. Verifica la conexión e inténtalo nuevamente.",
+                forbidden: "No tienes permiso para acceder a las actividades de este paciente.",
+                notFound: "No se encontró el paciente o el historial de actividades.",
+                server: "El servidor encontró un error al procesar las actividades. Inténtalo nuevamente en unos instantes.",
+                load: "No fue posible cargar las actividades.",
+                markRead: "Las actividades se cargaron, pero no fue posible marcarlas como leídas."
+            },
             priorities: {
                 critico: "Crítico",
                 alta: "Alta",
@@ -2396,6 +2639,22 @@ const dictionaries = {
                 remove: "Eliminar",
                 download: "Descargar"
             },
+            feedback: {
+                uploadSuccess: "Documento enviado correctamente.",
+                deleteSuccess: "Documento eliminado correctamente."
+            },
+            errors: {
+                load: "No fue posible cargar los documentos.",
+                view: "No fue posible visualizar el documento.",
+                upload: "No fue posible enviar el documento.",
+                delete: "No fue posible eliminar el documento.",
+                download: "No fue posible descargar el documento.",
+                invalidRequest: "Los datos del documento no son válidos. Revisa la información e inténtalo nuevamente.",
+                forbidden: "No tienes permiso para realizar esta operación con documentos.",
+                notFound: "No se encontró el documento o paciente indicado.",
+                server: "El servidor encontró un error al procesar el documento. Inténtalo nuevamente en unos instantes.",
+                network: "No fue posible conectarse al servidor. Verifica la conexión e inténtalo nuevamente."
+            },
             shared: {
                 title: "Documentos médicos",
                 patientDescription: "Documentos enviados por los profesionales que te acompañan.",
@@ -2438,6 +2697,8 @@ const dictionaries = {
                 selectPatient: "Selecciona un paciente para exportar el informe.", downloadStarted: "Descarga iniciada.",
                 forbidden: "No tienes permiso para acceder a los datos de este paciente.", patientMissing: "Paciente no encontrado. Actualiza la selección.",
                 invalidFilters: "Revisa el período, las categorías y el formato seleccionados.", requestError: "No se pudo generar el informe. Inténtalo de nuevo.",
+                networkError: "No fue posible conectarse al servidor. Verifica la conexión e inténtalo nuevamente.",
+                serverError: "El servidor encontró un error al generar el informe. Inténtalo nuevamente en unos instantes.",
             },
             description: "Consulta y mantén los datos esenciales organizados.",
             chips: {
@@ -2475,6 +2736,15 @@ const dictionaries = {
                 deleteError: "Error al eliminar cuenta",
                 updated: "Datos actualizados con éxito",
                 saveError: "Error al guardar datos",
+                loadError: "No fue posible cargar los datos del perfil.",
+                errors: {
+                    network: "No fue posible conectarse al servidor. Verifica la conexión e inténtalo nuevamente.",
+                    invalidRequest: "Los datos del perfil no son válidos. Revisa la información e inténtalo nuevamente.",
+                    forbidden: "No tienes permiso para realizar esta acción en el perfil.",
+                    notFound: "No se encontró el usuario indicado.",
+                    conflict: "Los datos del perfil entran en conflicto con una cuenta existente.",
+                    server: "El servidor encontró un error al procesar el perfil. Inténtalo nuevamente en unos instantes."
+                },
                 adultRequired: "debe ser mayor de edad"
             },
             emergencyContacts: {
@@ -2509,7 +2779,16 @@ const dictionaries = {
                 removed: "Contacto eliminado",
                 removeError: "Error al eliminar contacto",
                 updated: "Contacto actualizado",
-                editError: "Error al editar contacto"
+                editError: "Error al editar contacto",
+                loadError: "No fue posible cargar los contactos de emergencia.",
+                errors: {
+                    network: "No fue posible conectarse al servidor. Verifica la conexión e inténtalo nuevamente.",
+                    invalidRequest: "Los datos del contacto no son válidos. Revisa la información e inténtalo nuevamente.",
+                    forbidden: "No tienes permiso para realizar esta acción en los contactos.",
+                    notFound: "No se encontró el contacto o paciente indicado.",
+                    conflict: "Este contacto no puede modificarse en su estado actual.",
+                    server: "El servidor encontró un error al procesar el contacto. Inténtalo nuevamente en unos instantes."
+                }
             }
         },
         messages: {
@@ -2525,6 +2804,8 @@ const dictionaries = {
             invalidEmail: "Email inválido",
             fillEmail: "Completa el email",
             codeSendError: "Error al enviar el código",
+            connectionError: "No fue posible conectarse al servidor. Verifica la conexión e inténtalo nuevamente.",
+            serverError: "El servidor encontró un error al procesar la solicitud. Inténtalo nuevamente en unos instantes.",
             passwordRules: "Verifica las reglas de contraseña",
             passwordChanged: "Contraseña cambiada con éxito",
             passwordChangeError: "Error al cambiar contraseña",
@@ -2536,6 +2817,7 @@ const dictionaries = {
             adultRequired: "debe ser mayor de edad",
             registerSuccess: "Registro completado con éxito",
             duplicatedUser: "CPF o Email ya registrados",
+            invalidRegistration: "Los datos del registro no son válidos. Revisa la información e inténtalo nuevamente.",
             registerError: "Error al registrar usuario"
         }
     }

@@ -18,6 +18,7 @@ import { getMedicoStyle, getNomeFuncao, getResponsavelStyle } from "../../utils/
 import HabitCard from "../ui/cards/HabitCard";
 import { useI18n } from "../../src/i18n";
 import { useThemeMode } from "../../src/theme/ThemeModeProvider";
+import { classifyApiError } from "../../utils/api/classifyApiError";
 
 const emptyInputs = {
     timeExercise: "",
@@ -25,6 +26,20 @@ const emptyInputs = {
     date: null,
     channel: "email",
 };
+
+function getHealthErrorKey(error, fallbackKey) {
+    const errorType = classifyApiError(error).type;
+    const errorKeys = {
+        network: "healthTracker.errors.network",
+        invalidRequest: "healthTracker.errors.invalidRequest",
+        forbidden: "healthTracker.errors.forbidden",
+        notFound: "healthTracker.errors.notFound",
+        conflict: "healthTracker.errors.conflict",
+        server: "healthTracker.errors.server"
+    };
+
+    return errorKeys[errorType] || fallbackKey;
+}
 
 function isEmptyInput(value) {
     return value == null || String(value).trim() === "";
@@ -235,7 +250,7 @@ export function HabitTracker() {
             closeForm();
         } catch (registerError) {
             console.error("Erro ao salvar hábitos:", registerError);
-            showAlert("error", t("healthTracker.habits.saveError"));
+            showAlert("error", t(getHealthErrorKey(registerError, "healthTracker.habits.saveError")));
         }
     }
 
@@ -249,6 +264,7 @@ export function HabitTracker() {
             } catch (fetchError) {
                 console.error("Erro ao buscar hábitos:", fetchError);
                 setHabit([]);
+                showAlert("error", t(getHealthErrorKey(fetchError, "healthTracker.habits.loadError")));
             }
         }
 

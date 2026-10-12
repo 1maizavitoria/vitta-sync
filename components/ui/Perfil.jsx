@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 
-import { Box, Button, Grid, IconButton, InputAdornment, Paper, Tooltip, Typography } from "@mui/material";
+import { Alert, Box, Button, Grid, IconButton, InputAdornment, Paper, Tooltip, Typography } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
 
 import CheckIcon from "@mui/icons-material/Check";
@@ -16,6 +16,7 @@ import { deleteUser, editUser, getUserByCpf } from "../../services/userService";
 import { isValidEmail } from "../../utils/formatters/formatEmail";
 import { formatPhone, isValidPhone } from "../../utils/formatters/formatPhone";
 import { getDateLimit, isUnder18 } from "../../utils/validators/dateValidator";
+import { classifyApiError } from "../../utils/api/classifyApiError";
 import DatePickerUI from "./DatePicker";
 import DialogUI from "./Dialog";
 import InputUI from "./Input";
@@ -33,6 +34,15 @@ const emptyForm = {
     pesoInicial: "",
     altura: "",
     funcaoResponsavel: ""
+};
+
+const getProfileErrorKey = (error, fallbackKey) => {
+    const errorType = classifyApiError(error).type;
+    const translatedErrors = ["network", "invalidRequest", "forbidden", "notFound", "conflict", "server"];
+
+    return translatedErrors.includes(errorType)
+        ? `reports.profile.errors.${errorType}`
+        : fallbackKey;
 };
 
 const iconButtonSx = {
@@ -84,6 +94,7 @@ export default function Perfil({ view = "patient" }) {
     const [errorHeight, setErrorHeight] = useState(false);
     const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
     const [formData, setFormData] = useState(emptyForm);
+    const [loadErrorKey, setLoadErrorKey] = useState("");
 
     const userType = localStorage.getItem("tipo")?.toLowerCase();
     const loggedCpf = localStorage.getItem("CPF");
@@ -292,7 +303,7 @@ export default function Perfil({ view = "patient" }) {
             showAlert("success", t("reports.profile.updated"));
         } catch (saveError) {
             setEditing(true);
-            showAlert("error", t("reports.profile.saveError"));
+            showAlert("error", t(getProfileErrorKey(saveError, "reports.profile.saveError")));
             console.error("Erro ao salvar dados:", saveError);
         }
     }
@@ -303,7 +314,7 @@ export default function Perfil({ view = "patient" }) {
             setDeleteDialogOpen(false);
             showAlert("success", t("reports.profile.accountDeleted"));
         } catch (deleteError) {
-            showAlert("error", t("reports.profile.deleteError"));
+            showAlert("error", t(getProfileErrorKey(deleteError, "reports.profile.deleteError")));
             console.error(deleteError);
             return;
         }
@@ -320,6 +331,7 @@ export default function Perfil({ view = "patient" }) {
 
         async function fetchUser() {
             try {
+                setLoadErrorKey("");
                 const data = await getUserByCpf({
                     CPF: targetCpf
                 });
@@ -338,6 +350,8 @@ export default function Perfil({ view = "patient" }) {
                 });
             } catch (fetchError) {
                 console.error(fetchError);
+                setFormData(emptyForm);
+                setLoadErrorKey(getProfileErrorKey(fetchError, "reports.profile.loadError"));
             }
         }
 
@@ -479,7 +493,13 @@ export default function Perfil({ view = "patient" }) {
                 )}
             </Box>
 
-            <Grid container spacing={2}>
+            {loadErrorKey && (
+                <Alert severity="error" sx={{ mb: 2 }}>
+                    {t(loadErrorKey)}
+                </Alert>
+            )}
+
+            <Grid container spacing={2} sx={{ display: loadErrorKey ? "none" : "flex" }}>
                 <Grid item xs={12} md={6}>
                     <InputUI
                         label={t("reports.profile.name")}
