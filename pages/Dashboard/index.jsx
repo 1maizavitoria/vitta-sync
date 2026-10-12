@@ -14,13 +14,12 @@ import {
     Typography
 } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
 import { usePatient } from "../../context/PatientContext";
 import { useI18n } from "../../src/i18n";
 import { useThemeMode } from "../../src/theme/ThemeModeProvider";
-import { useDashboardPreferences } from "../../src/features/dashboard/application/useDashboardPreferences";
 import { createLocalDashboardPreferencesRepository } from "../../src/features/dashboard/infrastructure/localDashboardPreferencesRepository";
-import { useDashboardQuery } from "../../src/features/dashboard/application/useDashboardQuery";
+import { useDashboardController } from "../../src/features/dashboard/presentation/useDashboardController";
 
 import SettingsOutlinedIcon from "@mui/icons-material/SettingsOutlined";
 import DashboardChart from "../../components/ui/DashboardChart";
@@ -41,20 +40,6 @@ const categoryCodes = [
     "sono",
     "exercicio"
 ];
-
-function toApiDate(date) {
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, "0");
-    const day = String(date.getDate()).padStart(2, "0");
-    return `${year}-${month}-${day}`;
-}
-
-function getDateRange(days) {
-    const end = new Date();
-    const start = new Date();
-    start.setDate(end.getDate() - (days - 1));
-    return { inicio: toApiDate(start), fim: toApiDate(end) };
-}
 
 function getDashboardErrorKey(errorType) {
     const errorKeys = {
@@ -103,15 +88,20 @@ export default function Dashboard() {
         () => createLocalDashboardPreferencesRepository(loggedUserCpf),
         [loggedUserCpf]
     );
-    const dashboardPreferences = useDashboardPreferences(preferencesRepository);
-    const [period, setPeriod] = useState(7);
-    const [categoryFilter, setCategoryFilter] = useState("todas");
-    const dateRange = useMemo(() => getDateRange(period), [period]);
-
-    const { dashboard, loading, error, errorType } = useDashboardQuery({
+    const {
+        dashboard,
+        loading,
+        error,
+        errorType,
+        dashboardPreferences,
+        period,
+        setPeriod,
+        categoryFilter,
+        setCategoryFilter,
+        dateRange
+    } = useDashboardController({
         cpf: selectedPatient?.cpf,
-        ...dateRange,
-        categorias: categoryFilter === "todas" ? undefined : categoryFilter
+        preferencesRepository
     });
     const dashboardErrorKey = getDashboardErrorKey(errorType);
 
