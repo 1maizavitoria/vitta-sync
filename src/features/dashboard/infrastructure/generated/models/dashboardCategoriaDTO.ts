@@ -7,9 +7,16 @@
  */
 import type { DashboardSerieDTO } from './dashboardSerieDTO';
 
+/**
+ * Categoria do dashboard com as suas séries de medições
+ */
 export interface DashboardCategoriaDTO {
+  /** Código da categoria */
   codigo?: string;
+  /** Nome de exibição da categoria */
   nome?: string;
+  /** Unidade de medida da categoria */
   unidade?: string;
+  /** Séries da categoria, a pressão tem duas: sistólica e diastólica */
   series?: DashboardSerieDTO[];
 }

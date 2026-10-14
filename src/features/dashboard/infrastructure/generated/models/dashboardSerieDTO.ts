@@ -7,8 +7,14 @@
  */
 import type { DashboardPontoDTO } from './dashboardPontoDTO';
 
+/**
+ * Série de medições de uma categoria do dashboard
+ */
 export interface DashboardSerieDTO {
+  /** Código da série */
   codigo?: string;
+  /** Nome de exibição da série */
   nome?: string;
+  /** Medições da série em ordem cronológica */
   pontos?: DashboardPontoDTO[];
 }

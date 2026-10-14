@@ -7,7 +7,16 @@
  */
 
 export type ConsultarParams = {
+/**
+ * Data inicial do período (yyyy-MM-dd), padrão: 6 dias antes da data final
+ */
 inicio?: string;
+/**
+ * Data final do período (yyyy-MM-dd), padrão: hoje
+ */
 fim?: string;
+/**
+ * Categorias separadas por vírgula, sem informar retorna todas: pressao, frequencia_cardiaca, frequencia_respiratoria, temperatura, saturacao, peso, sono, exercicio
+ */
 categorias?: string;
 };

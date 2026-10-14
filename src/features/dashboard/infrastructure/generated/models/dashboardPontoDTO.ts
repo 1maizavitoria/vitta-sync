@@ -6,7 +6,12 @@
  * OpenAPI spec version: 1.0
  */
 
+/**
+ * Medição de uma série do dashboard
+ */
 export interface DashboardPontoDTO {
+  /** Data e hora da medição */
   data?: string;
+  /** Valor medido na unidade da categoria */
   valor?: number;
 }

@@ -5,19 +5,38 @@
  * Documentação da API VittaSync
  * OpenAPI spec version: 1.0
  */
+import type { LinhaBaseDTOComparacao } from './linhaBaseDTOComparacao';
+import type { LinhaBaseDTOSinal } from './linhaBaseDTOSinal';
+import type { LinhaBaseDTOSituacao } from './linhaBaseDTOSituacao';
 
+/**
+ * Linha de base personalizada de um sinal vital, formada após 14 dias seguidos com registro
+ */
 export interface LinhaBaseDTO {
-  sinal?: string;
-  situacao?: string;
+  /** Código do sinal vital */
+  sinal?: LinhaBaseDTOSinal;
+  /** Situação da referência */
+  situacao?: LinhaBaseDTOSituacao;
+  /** Dias seguidos com registro, de 0 a 14 */
   diasRegistrados?: number;
+  /** Dias seguidos necessários para formar a referência */
   diasNecessarios?: number;
+  /** Primeiro dia do período usado na referência, nulo se ainda em formação */
   dataInicio?: string;
+  /** Último dia do período usado na referência, nulo se ainda em formação */
   dataFim?: string;
+  /** Média das 14 médias diárias */
   media?: number;
+  /** Desvio padrão amostral das 14 médias diárias */
   desvioPadrao?: number;
+  /** Limite inferior da faixa (média menos dois desvios padrão), nulo sem variação */
   limiteInferior?: number;
+  /** Limite superior da faixa (média mais dois desvios padrão), nulo sem variação */
   limiteSuperior?: number;
+  /** Valor da medição mais recente do sinal */
   ultimoValor?: number;
+  /** Data e hora da medição mais recente do sinal */
   dataUltimoValor?: string;
-  comparacao?: string;
+  /** Posição da medição mais recente em relação à faixa, nula se a medição formou a referência ou se não há faixa */
+  comparacao?: LinhaBaseDTOComparacao;
 }

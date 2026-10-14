@@ -6,15 +6,34 @@
  * OpenAPI spec version: 1.0
  */
 import type { DashboardCategoriaDTO } from './dashboardCategoriaDTO';
+import type { DashboardResponseDTOEventosPorTipoItem } from './dashboardResponseDTOEventosPorTipoItem';
+import type { DashboardResponseDTOResumoDiarioItem } from './dashboardResponseDTOResumoDiarioItem';
+import type { DashboardResponseDTOResumoHabitosItem } from './dashboardResponseDTOResumoHabitosItem';
 import type { EstabilidadeClinicaDTO } from './estabilidadeClinicaDTO';
 import type { LinhaBaseDTO } from './linhaBaseDTO';
 
+/**
+ * Dados do dashboard do paciente no período consultado
+ */
 export interface DashboardResponseDTO {
+  /** CPF do paciente */
   pacienteCpf?: string;
+  /** Nome do paciente */
   pacienteNome?: string;
+  /** Data inicial do período consultado */
   inicio?: string;
+  /** Data final do período consultado */
   fim?: string;
+  /** Séries de medições de cada categoria escolhida */
   categorias?: DashboardCategoriaDTO[];
+  /** Índices de estabilidade clínica de cada sinal vital, do sono, do exercício e o geral */
   estabilidadeClinica?: EstabilidadeClinicaDTO[];
+  /** Linha de base personalizada dos 7 sinais vitais, independente dos filtros */
   linhasBase?: LinhaBaseDTO[];
+  /** Médias diárias dos sinais vitais calculadas pelo banco, uma linha por dia com: dia, mediaPeso, mediaFcBpm, mediaFrRpm, mediaPaSistolica, mediaPaDiastolica, mediaTempCelcius, mediaSpo2Porcento e medicoes */
+  resumoDiario?: DashboardResponseDTOResumoDiarioItem[];
+  /** Resumo diário dos hábitos calculado pelo banco, uma linha por dia com: dia, mediaHorasSono, totalMinutosExercicio e registros */
+  resumoHabitos?: DashboardResponseDTOResumoHabitosItem[];
+  /** Quantidade de eventos do paciente no período agrupada por tipo, do mais frequente para o menos */
+  eventosPorTipo?: DashboardResponseDTOEventosPorTipoItem[];
 }

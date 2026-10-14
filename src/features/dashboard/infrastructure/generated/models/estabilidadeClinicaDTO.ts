@@ -5,11 +5,21 @@
  * Documentação da API VittaSync
  * OpenAPI spec version: 1.0
  */
+import type { EstabilidadeClinicaDTOCategoria } from './estabilidadeClinicaDTOCategoria';
+import type { EstabilidadeClinicaDTOTipo } from './estabilidadeClinicaDTOTipo';
 
+/**
+ * Índice de estabilidade clínica de um fator ou o índice geral
+ */
 export interface EstabilidadeClinicaDTO {
-  tipo?: string;
+  /** Fator avaliado */
+  tipo?: EstabilidadeClinicaDTOTipo;
+  /** Índice de 3 (crítico) a 9 (saudável), nulo quando há menos de 3 registros */
   indice?: number;
-  categoria?: string;
+  /** Classificação do índice */
+  categoria?: EstabilidadeClinicaDTOCategoria;
+  /** Peso do fator no cálculo do índice geral */
   peso?: number;
+  /** Data e hora do cálculo */
   dataCalculo?: string;
 }

@@ -17,7 +17,7 @@ export default defineConfig({
             },
             filters: {
                 mode: "include",
-                tags: ["dashboard-controller"],
+                tags: ["Dashboard"],
             },
         },
         output: {
