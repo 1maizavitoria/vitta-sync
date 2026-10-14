@@ -1,16 +1,28 @@
 package br.com.vittasync.vittasync.DTO;
 
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import java.time.LocalTime;
 
 
+@Schema(description = "Dados do lembrete de medição do paciente")
 public class LembreteMedicaoInputDTO {
 
+    @Schema(description = "Dias da semana em inglês separados por vírgula", example = "MONDAY,WEDNESDAY,FRIDAY")
     private String diasSemana;
+
+    @Schema(description = "Horário do envio (HH:mm:ss)", type = "string", example = "08:00:00")
     private LocalTime horario;
+
+    @Schema(description = "Indica se o lembrete fica ativo", example = "true")
     private boolean ativo;
+
+    @Schema(description = "Enviar o lembrete por e-mail", example = "true")
     private Boolean enviarEmail;
+
+    @Schema(description = "Enviar o lembrete por SMS", example = "false")
     private Boolean enviarSms;
+
 
 
     public String getDiasSemana() { return diasSemana; }

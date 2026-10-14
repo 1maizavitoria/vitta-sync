@@ -47,60 +47,45 @@ public class LembreteMedicaoScheduler {
                         .truncatedTo(ChronoUnit.MINUTES);
 
         List<LembreteMedicao> lembretes =
-                service.searchLembreteAtivo();
+                service.searchLembretesDoMinuto(dia, horaAtual);
 
         for (LembreteMedicao lembrete : lembretes) {
 
-            LocalTime horarioLembrete =
-                    lembrete.getHorario()
-                            .truncatedTo(ChronoUnit.MINUTES);
+            Usuario usuario =
+                    lembrete.getUsuario();
+
+            String mensagem =
+                    "Este é um lembrete para "
+                            + "registrar suas medições "
+                            + "de saúde na plataforma "
+                            + "VittaSync.";
+
+            logger.info("Enviando lembrete de medição id: {} para usuário id: {}", lembrete.getId(), usuario.getId());
 
             if (
-                    lembrete.isAtivo()
-
-                            && lembrete.getDiasSemana()
-                            .toUpperCase()
-                            .contains(dia.name())
-
-                            && horarioLembrete.equals(horaAtual)
+                    Boolean.TRUE.equals(
+                            lembrete.getEnviarEmail()
+                    )
             ) {
 
-                Usuario usuario =
-                        lembrete.getUsuario();
+                notificacaoService.enviarLembrete(
+                        usuario,
+                        mensagem,
+                        "email"
+                );
+            }
 
-                String mensagem =
-                        "Este é um lembrete para "
-                                + "registrar suas medições "
-                                + "de saúde na plataforma "
-                                + "VittaSync.";
+            if (
+                    Boolean.TRUE.equals(
+                            lembrete.getEnviarSms()
+                    )
+            ) {
 
-                logger.info("Enviando lembrete de medição id: {} para usuário id: {}", lembrete.getId(), usuario.getId());
-
-                if (
-                        Boolean.TRUE.equals(
-                                lembrete.getEnviarEmail()
-                        )
-                ) {
-
-                    notificacaoService.enviarLembrete(
-                            usuario,
-                            mensagem,
-                            "email"
-                    );
-                }
-
-                if (
-                        Boolean.TRUE.equals(
-                                lembrete.getEnviarSms()
-                        )
-                ) {
-
-                    notificacaoService.enviarLembrete(
-                            usuario,
-                            mensagem,
-                            "sms"
-                    );
-                }
+                notificacaoService.enviarLembrete(
+                        usuario,
+                        mensagem,
+                        "sms"
+                );
             }
         }
     }

@@ -10,6 +10,11 @@ import br.com.vittasync.vittasync.Model.Usuario;
 import br.com.vittasync.vittasync.Service.PermissaoService;
 import br.com.vittasync.vittasync.Service.UsuarioService;
 import br.com.vittasync.vittasync.Util.HashUtil;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -17,6 +22,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/usuario")
+@Tag(name = "Usuários", description = "Cadastro, edição, consulta e exclusão de contas dos tipos paciente, responsável e profissional de saúde")
 public class UsuarioController {
 
     private final UsuarioService usuarioService;
@@ -27,6 +33,16 @@ public class UsuarioController {
         this.permissaoService = permissaoService;
     }
 
+    @Operation(
+            summary = "Cadastrar usuário",
+            description = "Cadastra uma nova conta, a data de cadastro é preenchida automaticamente pelo servidor, "
+                    + "o conselho é obrigatório para o tipo ''saude''. Endpoint público que não exige token."
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Usuário cadastrado com sucesso"),
+            @ApiResponse(responseCode = "400", description = "Dados inválidos"),
+            @ApiResponse(responseCode = "409", description = "CPF ou e-mail já cadastrado")
+    })
     @PostMapping("/cadastrar")
     public ResponseEntity<UsuarioOutputDTO> create(@Valid @RequestBody UsuarioInputDTO dto) {
 
@@ -51,8 +67,20 @@ public class UsuarioController {
         return ResponseEntity.ok(toOutputDTO(criado));
     }
 
+    @Operation(
+            summary = "Editar usuário",
+            description = "Atualiza os dados não únicos de perfil do usuário, CPF, tipo. "
+                    + "Permitido ao próprio usuário e aos responsáveis vinculados quando o usuário é paciente."
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Usuário atualizado com sucesso"),
+            @ApiResponse(responseCode = "400", description = "Dados inválidos"),
+            @ApiResponse(responseCode = "403", description = "Usuário sem permissão para alterar os dados do paciente"),
+            @ApiResponse(responseCode = "404", description = "Usuário não encontrado")
+    })
     @PutMapping("/editar/{cpf}")
-    public ResponseEntity<UsuarioOutputDTO> update(@PathVariable String cpf, @Valid @RequestBody UsuarioUpdateDTO dto) {
+    public ResponseEntity<UsuarioOutputDTO> update(@Parameter(description = "CPF do usuário (apenas números)")
+                                                   @PathVariable String cpf, @Valid @RequestBody UsuarioUpdateDTO dto) {
         Usuario usuarioLogado = usuarioService.getUsuarioLogado();
         Usuario usuarioPaciente = usuarioService.searchByCpf(cpf);
         boolean podeEditar = usuarioLogado.getCpf().equals(cpf) ||
@@ -78,8 +106,19 @@ public class UsuarioController {
         return ResponseEntity.ok(toOutputDTO(atualizado));
     }
 
+    @Operation(
+            summary = "Consultar usuário",
+            description = "Retorna os dados de perfil do usuário. "
+                    + "Permitido ao próprio usuário e a todos os usuários vinculados a ele quando é paciente (responsáveis e profissionais de saúde)."
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Dados do usuário"),
+            @ApiResponse(responseCode = "403", description = "Usuário sem permissão para visualizar o paciente"),
+            @ApiResponse(responseCode = "404", description = "Usuário não encontrado")
+    })
     @GetMapping("/getUsuario/{cpf}")
-    public ResponseEntity<UsuarioOutputDTO> getByCpf(@PathVariable String cpf) {
+    public ResponseEntity<UsuarioOutputDTO> getByCpf(@Parameter(description = "CPF do usuário (apenas números)")
+                                                     @PathVariable String cpf) {
 
         Usuario usuarioLogado = usuarioService.getUsuarioLogado();
 
@@ -99,8 +138,19 @@ public class UsuarioController {
         return ResponseEntity.ok(toOutputDTO(usuario));
     }
 
+    @Operation(
+            summary = "Excluir conta",
+            description = "Exclui a conta do usuário logado e encerra as suas sessões. "
+                    + "Permitido apenas ao próprio usuário."
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Conta excluída com sucesso"),
+            @ApiResponse(responseCode = "403", description = "Usuário só pode excluir a própria conta"),
+            @ApiResponse(responseCode = "404", description = "Usuário não encontrado")
+    })
     @DeleteMapping("/deletar/{cpf}")
-    public ResponseEntity<Void> delete(@PathVariable String cpf) {
+    public ResponseEntity<Void> delete(@Parameter(description = "CPF do usuário (apenas números)")
+                                       @PathVariable String cpf) {
 
         Usuario usuarioLogado = usuarioService.getUsuarioLogado();
 

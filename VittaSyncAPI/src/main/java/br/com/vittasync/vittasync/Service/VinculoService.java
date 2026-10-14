@@ -178,6 +178,18 @@ public class VinculoService {
 
     }
 
+    public void enviarConviteEmail(String email, String codigo, Integer usuarioLogadoId) {
+
+        ConviteVinculo convite = conviteRepository.findByCodigo(codigo).orElseThrow(() -> new RecursoNaoEncontradoException("Convite não encontrado"));
+
+        if (!convite.getPacienteId().equals(usuarioLogadoId)) {
+
+            throw new AcessoNegadoException("Somente o paciente que gerou o convite pode enviá-lo");
+        }
+
+        enviarConviteEmail(email, codigo);
+    }
+
     public void enviarConviteEmail(String email, String codigo) {
 
         ConviteVinculo convite = conviteRepository.findByCodigo(codigo).orElseThrow(() -> new RecursoNaoEncontradoException("Convite não encontrado"));

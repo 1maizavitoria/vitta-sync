@@ -2,6 +2,7 @@ package br.com.vittasync.vittasync.Service;
 
 
 import br.com.vittasync.vittasync.DTO.MetaAcompanhamentoInputDTO;
+import br.com.vittasync.vittasync.Exception.DadosInvalidosException;
 import br.com.vittasync.vittasync.Exception.RecursoNaoEncontradoException;
 import br.com.vittasync.vittasync.Model.Habitos;
 import br.com.vittasync.vittasync.Model.MetaAcompanhamento;
@@ -132,7 +133,7 @@ class MetaAcompanhamentoServiceTest {
 
     @Test
     void testCreateIndicadorInvalido() {
-        assertThrows(IllegalArgumentException.class,
+        assertThrows(DadosInvalidosException.class,
                 () -> service.create(dto("outro", "aumentar", 0.0, 0.0, 10.0), paciente, 99));
     }
 
@@ -237,7 +238,7 @@ class MetaAcompanhamentoServiceTest {
         MetaAcompanhamento existente = meta(1L, "peso", "reduzir", 90.0, 90.0, 80.0, LocalDate.now());
         when(repository.findById(1L)).thenReturn(Optional.of(existente));
 
-        assertThrows(IllegalArgumentException.class, () -> service.atualizarValorManual(1L, 1, 5.0, 99));
+        assertThrows(DadosInvalidosException.class, () -> service.atualizarValorManual(1L, 1, 5.0, 99));
     }
 
     @Test
@@ -245,7 +246,7 @@ class MetaAcompanhamentoServiceTest {
         MetaAcompanhamento existente = meta(1L, "personalizado", "aumentar", 0.0, 0.0, 10.0, LocalDate.now());
         when(repository.findById(1L)).thenReturn(Optional.of(existente));
 
-        assertThrows(IllegalArgumentException.class, () -> service.atualizarValorManual(1L, 1, null, 99));
+        assertThrows(DadosInvalidosException.class, () -> service.atualizarValorManual(1L, 1, null, 99));
     }
 
     @Test

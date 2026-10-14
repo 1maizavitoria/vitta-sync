@@ -85,6 +85,8 @@ CREATE TABLE LembreteMedicao (
     enviar_email BOOLEAN DEFAULT TRUE,
     enviar_sms BOOLEAN DEFAULT FALSE,
     ativo BOOLEAN NOT NULL DEFAULT TRUE,
+    CONSTRAINT uk_lembrete_usuario UNIQUE (usuario_id),
+    INDEX idx_lembrete_ativo_horario (ativo, horario),
     CONSTRAINT fk_usuario_lembrete FOREIGN KEY (usuario_id) REFERENCES Usuario(id) ON DELETE CASCADE
 );
 
@@ -96,6 +98,7 @@ CREATE TABLE DiarioSintomas (
     data_referencia DATE NOT NULL,
     data_registro TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     data_modificacao TIMESTAMP NULL,
+    INDEX idx_sintomas_paciente_data (paciente_id, data_referencia),
     FOREIGN KEY (paciente_id) REFERENCES Usuario(id)
 );
 
@@ -106,7 +109,7 @@ CREATE TABLE Vinculo (
     tipo VARCHAR(20) NOT NULL,
     funcao VARCHAR(50),
     criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    UNIQUE (paciente_id, usuario_id),
+    CONSTRAINT uk_vinculo_paciente_usuario UNIQUE (paciente_id, usuario_id),
     FOREIGN KEY (paciente_id) REFERENCES Usuario(id),
     FOREIGN KEY (usuario_id) REFERENCES Usuario(id)
 );
@@ -166,6 +169,7 @@ CREATE TABLE EventoPaciente (
     prioridade VARCHAR(20) DEFAULT 'normal',
     visualizado BOOLEAN DEFAULT FALSE,
     criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    INDEX idx_evento_paciente_criado (paciente_id, criado_em),
     CONSTRAINT fk_evento_paciente FOREIGN KEY (paciente_id) REFERENCES Usuario(id) ON DELETE CASCADE,
     CONSTRAINT fk_evento_usuario FOREIGN KEY (usuario_id) REFERENCES Usuario(id) ON DELETE SET NULL
 );
@@ -223,6 +227,43 @@ CREATE TABLE LinhaBase (
     CONSTRAINT uk_linha_base_paciente_sinal UNIQUE (paciente_id, sinal),
     CONSTRAINT fk_linha_base_paciente FOREIGN KEY (paciente_id) REFERENCES Usuario(id) ON DELETE CASCADE
 );
+
+DELIMITER $$
+CREATE PROCEDURE sp_lembretes_do_minuto(IN p_dia VARCHAR(20), IN p_hora TIME)
+BEGIN
+    SELECT *
+    FROM LembreteMedicao
+    WHERE ativo = TRUE
+      AND horario >= p_hora
+      AND horario < ADDTIME(p_hora, '00:01:00')
+      AND UPPER(dias_semana) LIKE CONCAT('%', p_dia, '%');
+END$$
+
+CREATE PROCEDURE sp_medias_estabilidade(IN p_paciente_id INT)
+BEGIN
+    SELECT
+        COUNT(s.fc_bpm), AVG(s.fc_bpm),
+        COUNT(s.fr_rpm), AVG(s.fr_rpm),
+        COUNT(s.pa_sistolica), AVG(s.pa_sistolica),
+        COUNT(s.pa_diastolica), AVG(s.pa_diastolica),
+        COUNT(s.temp_celcius), AVG(s.temp_celcius),
+        COUNT(s.spo2_porcento), AVG(s.spo2_porcento),
+        COUNT(s.peso), AVG(s.peso),
+        (SELECT COUNT(horas_sono) FROM Habitos WHERE paciente_id = p_paciente_id),
+        (SELECT AVG(horas_sono) FROM Habitos WHERE paciente_id = p_paciente_id),
+        (SELECT COUNT(minutos_exercicio) FROM Habitos WHERE paciente_id = p_paciente_id),
+        (SELECT COUNT(*) FROM Habitos WHERE paciente_id = p_paciente_id AND minutos_exercicio = 0),
+        (SELECT AVG(minutos_exercicio) FROM Habitos WHERE paciente_id = p_paciente_id)
+    FROM SinaisVitais s
+    WHERE s.paciente_id = p_paciente_id;
+END$$
+DELIMITER ;
+
+SHOW INDEX FROM LembreteMedicao;
+SHOW INDEX FROM DiarioSintomas;
+SHOW INDEX FROM EventoPaciente;
+SHOW INDEX FROM Vinculo;
+SHOW INDEX FROM evento_visualizacao;
 
 SHOW TABLES;
 

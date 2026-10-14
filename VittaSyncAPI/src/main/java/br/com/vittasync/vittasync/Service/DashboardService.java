@@ -12,10 +12,12 @@ import br.com.vittasync.vittasync.Model.Habitos;
 import br.com.vittasync.vittasync.Model.LinhaBase;
 import br.com.vittasync.vittasync.Model.SinaisVitais;
 import br.com.vittasync.vittasync.Model.Usuario;
+import br.com.vittasync.vittasync.Repository.EventoPacienteRepository;
 import br.com.vittasync.vittasync.Repository.HabitosRepository;
 import br.com.vittasync.vittasync.Repository.LinhaBaseRepository;
 import br.com.vittasync.vittasync.Repository.SinaisVitaisRepository;
 import org.springframework.stereotype.Service;
+import java.sql.Timestamp;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -41,19 +43,22 @@ public class DashboardService {
     private final EstabilidadeClinicaService estabilidadeClinicaService;
     private final LinhaBaseService linhaBaseService;
     private final LinhaBaseRepository linhaBaseRepository;
+    private final EventoPacienteRepository eventoPacienteRepository;
 
     public DashboardService(
             SinaisVitaisRepository sinaisVitaisRepository,
             HabitosRepository habitosRepository,
             EstabilidadeClinicaService estabilidadeClinicaService,
             LinhaBaseService linhaBaseService,
-            LinhaBaseRepository linhaBaseRepository
+            LinhaBaseRepository linhaBaseRepository,
+            EventoPacienteRepository eventoPacienteRepository
     ) {
         this.sinaisVitaisRepository = sinaisVitaisRepository;
         this.habitosRepository = habitosRepository;
         this.estabilidadeClinicaService = estabilidadeClinicaService;
         this.linhaBaseService = linhaBaseService;
         this.linhaBaseRepository = linhaBaseRepository;
+        this.eventoPacienteRepository = eventoPacienteRepository;
     }
 
     public DashboardResponseDTO consultar(
@@ -95,6 +100,24 @@ public class DashboardService {
         List<EstabilidadeClinicaDTO> estabilidadeClinica =
                 estabilidadeClinicaService.calcularIndices(paciente.getId(), sinais, habitos);
 
+        List<Map<String, Object>> resumoDiario = sinaisVitaisRepository.buscarResumoDiario(
+                paciente.getId(),
+                inicio.atStartOfDay(),
+                fim.atTime(LocalTime.MAX)
+        );
+
+        List<Map<String, Object>> resumoHabitos = habitosRepository.buscarResumoDiario(
+                paciente.getId(),
+                inicio,
+                fim
+        );
+
+        List<Map<String, Object>> eventosPorTipo = eventoPacienteRepository.contarPorTipo(
+                paciente.getId(),
+                Timestamp.valueOf(inicio.atStartOfDay()),
+                Timestamp.valueOf(fim.atTime(LocalTime.MAX))
+        );
+
         return new DashboardResponseDTO(
                 paciente.getCpf(),
                 paciente.getNome(),
@@ -102,7 +125,10 @@ public class DashboardService {
                 fim,
                 categoriasResposta,
                 estabilidadeClinica,
-                montarLinhaBase(paciente.getId())
+                montarLinhaBase(paciente.getId()),
+                resumoDiario,
+                resumoHabitos,
+                eventosPorTipo
         );
     }
 

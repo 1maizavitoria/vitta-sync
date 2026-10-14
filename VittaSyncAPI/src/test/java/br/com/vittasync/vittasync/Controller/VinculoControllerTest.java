@@ -69,7 +69,9 @@ class VinculoControllerTest {
 
     @Test
     void testEnviarEmailOk() throws Exception {
-        doNothing().when(service).enviarConviteEmail(any(), any());
+        Usuario usuario = new Usuario(); usuario.setId(1);
+        when(usuarioService.getUsuarioLogado()).thenReturn(usuario);
+        doNothing().when(service).enviarConviteEmail(any(), any(), any());
 
         mockMvc.perform(post("/vinculos/enviar-email")
                         .contentType(MediaType.APPLICATION_JSON)

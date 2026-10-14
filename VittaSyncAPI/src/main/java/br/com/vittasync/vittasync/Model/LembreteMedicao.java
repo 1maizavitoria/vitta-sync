@@ -6,7 +6,11 @@ import java.time.LocalTime;
 
 
 @Entity
-@Table(name = "LembreteMedicao")
+@Table(
+        name = "LembreteMedicao",
+        uniqueConstraints = @UniqueConstraint(name = "uk_lembrete_usuario", columnNames = "usuario_id"),
+        indexes = @Index(name = "idx_lembrete_ativo_horario", columnList = "ativo, horario")
+)
 public class LembreteMedicao {
 
     @Id

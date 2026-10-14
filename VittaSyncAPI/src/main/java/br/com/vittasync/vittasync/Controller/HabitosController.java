@@ -8,6 +8,11 @@ import br.com.vittasync.vittasync.Model.Habitos;
 import br.com.vittasync.vittasync.Model.Usuario;
 import br.com.vittasync.vittasync.Model.SinaisVitais;
 import br.com.vittasync.vittasync.Service.*;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
@@ -16,6 +21,7 @@ import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/habitos")
+@Tag(name = "Hábitos", description = "Cadastro, edição, exclusão e consulta dos hábitos diários do paciente: horas de sono e minutos de exercício")
 public class HabitosController {
 
     private final HabitosService service;
@@ -42,8 +48,21 @@ public class HabitosController {
     }
 
 
+    @Operation(
+            summary = "Cadastrar hábitos",
+            description = "Cadastra as horas de sono e os minutos de exercício do paciente em um dia, a data do registro e o índice de repouso "
+                    + "são calculados automaticamente pelo servidor. Quando o índice indica necessidade de repouso, os contatos de emergência são avisados pelo canal escolhido, "
+                    + "também gera alertas de sono crítico (menos de 4 horas) e sedentarismo (menos de 10 minutos) e recalcula a estabilidade clínica. "
+                    + "Permitido ao próprio paciente e aos responsáveis vinculados."
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Hábitos cadastrados com sucesso"),
+            @ApiResponse(responseCode = "403", description = "Usuário sem permissão para alterar os dados do paciente"),
+            @ApiResponse(responseCode = "404", description = "Paciente não encontrado")
+    })
     @PostMapping("/cadastrar/{cpf}")
-    public ResponseEntity<HabitosOutputDTO> create(@PathVariable String cpf,
+    public ResponseEntity<HabitosOutputDTO> create(@Parameter(description = "CPF do paciente (apenas números)")
+                                                   @PathVariable String cpf,
                                                    @RequestBody HabitosInputDTO dto) {
 
         Usuario paciente = usuarioService.searchByCpf(cpf);
@@ -70,8 +89,21 @@ public class HabitosController {
     }
 
 
+    @Operation(
+            summary = "Editar hábitos",
+            description = "Substitui os dados de um registro de hábitos, a estabilidade clínica é recalculada junto do índice de repouso, a data de modificação "
+                    + "é preenchida automaticamente pelo servidor. "
+                    + "Permitido ao próprio paciente e aos responsáveis vinculados."
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Hábitos atualizados com sucesso"),
+            @ApiResponse(responseCode = "403", description = "Usuário sem permissão para alterar os dados do paciente"),
+            @ApiResponse(responseCode = "404", description = "Paciente ou hábitos não encontrados")
+    })
     @PutMapping("/editar/{id}/{cpf}")
-    public ResponseEntity<HabitosOutputDTO> update(@PathVariable Integer id,
+    public ResponseEntity<HabitosOutputDTO> update(@Parameter(description = "ID do registro de hábitos")
+                                                   @PathVariable Integer id,
+                                                   @Parameter(description = "CPF do paciente (apenas números)")
                                                    @PathVariable String cpf,
                                                    @RequestBody HabitosInputDTO dto) {
 
@@ -98,8 +130,20 @@ public class HabitosController {
     }
 
 
+    @Operation(
+            summary = "Excluir hábitos",
+            description = "Exclui um registro de hábitos do paciente e registra o evento na linha do tempo do paciente. "
+                    + "Permitido ao próprio paciente e aos responsáveis vinculados."
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "204", description = "Hábitos excluídos com sucesso"),
+            @ApiResponse(responseCode = "403", description = "Usuário sem permissão para alterar os dados do paciente"),
+            @ApiResponse(responseCode = "404", description = "Paciente ou hábitos não encontrados")
+    })
     @DeleteMapping("/deletar/{id}/{cpf}")
-    public ResponseEntity<Void> delete(@PathVariable Integer id,
+    public ResponseEntity<Void> delete(@Parameter(description = "ID do registro de hábitos")
+                                       @PathVariable Integer id,
+                                       @Parameter(description = "CPF do paciente (apenas números)")
                                        @PathVariable String cpf) {
         Usuario usuarioLogado = usuarioService.getUsuarioLogado();
         Usuario paciente = usuarioService.searchByCpf(cpf);
@@ -113,8 +157,19 @@ public class HabitosController {
     }
 
 
+    @Operation(
+            summary = "Listar hábitos do paciente",
+            description = "Retorna todos os registros de hábitos do paciente. "
+                    + "Permitido ao próprio paciente e a todos os usuários vinculados a ele (responsáveis e profissionais de saúde)."
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Lista de hábitos do paciente"),
+            @ApiResponse(responseCode = "403", description = "Usuário sem permissão para visualizar o paciente"),
+            @ApiResponse(responseCode = "404", description = "Paciente não encontrado")
+    })
     @GetMapping("/getHabitos/{cpf}")
-    public ResponseEntity<List<HabitosOutputDTO>> list(@PathVariable String cpf) {
+    public ResponseEntity<List<HabitosOutputDTO>> list(@Parameter(description = "CPF do paciente (apenas números)")
+                                                       @PathVariable String cpf) {
         Usuario usuarioLogado = usuarioService.getUsuarioLogado();
         Usuario paciente = usuarioService.searchByCpf(cpf);
 

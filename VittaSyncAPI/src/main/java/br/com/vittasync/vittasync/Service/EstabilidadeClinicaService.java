@@ -10,6 +10,8 @@ import br.com.vittasync.vittasync.Repository.EstabilidadeClinicaRepository;
 import br.com.vittasync.vittasync.Repository.ContatoEmergenciaRepository;
 import br.com.vittasync.vittasync.Repository.HabitosRepository;
 import br.com.vittasync.vittasync.Repository.SinaisVitaisRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -25,6 +27,10 @@ public class EstabilidadeClinicaService {
     private final NotificacaoService notificacaoService;
     private final SinaisVitaisRepository sinaisVitaisRepository;
     private final HabitosRepository habitosRepository;
+
+    private static final Logger logger = LoggerFactory.getLogger(EstabilidadeClinicaService.class);
+
+    private boolean usarProcedure = true;
 
     private static final int minimoRegistros = 3;
     private static final int minimoFatoresIndiceGeral = 3;
@@ -59,11 +65,34 @@ public class EstabilidadeClinicaService {
         return calcularIndices(pacienteId, sinais, habitos);
     }
 
+    public void verificarMudancaEstabilidade(Integer pacienteId) {
+        List<EstabilidadeClinicaDTO> indices = null;
+
+        if (usarProcedure) {
+            try {
+                indices = calcularIndicesPorMedias(estabilidadeClinicaRepository.buscarMediasEstabilidade(pacienteId).get(0));
+            } catch (RuntimeException e) {
+                usarProcedure = false;
+                logger.warn("Procedure sp_medias_estabilidade indisponível, os índices serão calculados no Java");
+            }
+        }
+
+        if (indices == null) {
+            indices = calcularIndices(pacienteId,
+                    sinaisVitaisRepository.findByPacienteId(pacienteId),
+                    habitosRepository.findByPacienteId(pacienteId));
+        }
+
+        registrarMudanca(pacienteId, indices);
+    }
+
     public void verificarMudancaEstabilidade(Integer pacienteId,
                                              List<SinaisVitais> sinais,
                                              List<Habitos> habitos) {
-        List<EstabilidadeClinicaDTO> indices = calcularIndices(pacienteId, sinais, habitos);
+        registrarMudanca(pacienteId, calcularIndices(pacienteId, sinais, habitos));
+    }
 
+    private void registrarMudanca(Integer pacienteId, List<EstabilidadeClinicaDTO> indices) {
         EstabilidadeClinicaDTO geralNovo = indices.stream()
                 .filter(i -> "geral".equals(i.getTipo()))
                 .findFirst()
@@ -102,6 +131,36 @@ public class EstabilidadeClinicaService {
         indices.add(calcularIndiceSono(habitos));
         indices.add(calcularIndiceExercicio(habitos));
 
+        return adicionarIndiceGeral(indices);
+    }
+
+    private List<EstabilidadeClinicaDTO> calcularIndicesPorMedias(Object[] m) {
+        List<EstabilidadeClinicaDTO> indices = new ArrayList<>();
+
+        indices.add(calcularIndiceSinal("fc_bpm", quantidade(m[0]), media(m[1]), 1.0));
+        indices.add(calcularIndiceSinal("fr_rpm", quantidade(m[2]), media(m[3]), 1.0));
+        indices.add(combinarPressao(
+                calcularIndiceSinal("pa_sistolica", quantidade(m[4]), media(m[5]), 1.0),
+                calcularIndiceSinal("pa_diastolica", quantidade(m[6]), media(m[7]), 1.0),
+                1.0));
+        indices.add(calcularIndiceSinal("temp_celcius", quantidade(m[8]), media(m[9]), 1.0));
+        indices.add(calcularIndiceSinal("spo2", quantidade(m[10]), media(m[11]), 1.0));
+        indices.add(calcularIndiceSinal("peso", quantidade(m[12]), media(m[13]), 1.0));
+        indices.add(calcularIndiceSono(quantidade(m[14]), media(m[15])));
+        indices.add(calcularIndiceExercicio(quantidade(m[16]), quantidade(m[17]), media(m[18])));
+
+        return adicionarIndiceGeral(indices);
+    }
+
+    private long quantidade(Object valor) {
+        return valor == null ? 0 : ((Number) valor).longValue();
+    }
+
+    private Double media(Object valor) {
+        return valor == null ? null : ((Number) valor).doubleValue();
+    }
+
+    private List<EstabilidadeClinicaDTO> adicionarIndiceGeral(List<EstabilidadeClinicaDTO> indices) {
         Integer indiceGeral = calcularIndiceGeral(indices);
         EstabilidadeClinicaDTO geral = new EstabilidadeClinicaDTO(
                 "geral",
@@ -206,6 +265,12 @@ public class EstabilidadeClinicaService {
                 peso
         );
 
+        return combinarPressao(sistolica, diastolica, peso);
+    }
+
+    private EstabilidadeClinicaDTO combinarPressao(EstabilidadeClinicaDTO sistolica,
+                                                   EstabilidadeClinicaDTO diastolica,
+                                                   double peso) {
         if (sistolica.getIndice() == null || diastolica.getIndice() == null) {
             return new EstabilidadeClinicaDTO("pressao", null, "n/a", peso, LocalDateTime.now());
         }
@@ -215,17 +280,15 @@ public class EstabilidadeClinicaService {
     }
 
     private EstabilidadeClinicaDTO calcularIndiceSinal(String tipo, List<? extends Number> valores, double peso) {
-        if (valores.stream().filter(v -> v != null).count() < minimoRegistros) {
-            return new EstabilidadeClinicaDTO(tipo, null, "n/a", peso, LocalDateTime.now());
-        }
+        List<? extends Number> preenchidos = valores.stream().filter(v -> v != null).toList();
+        Double media = preenchidos.isEmpty() ? null
+                : preenchidos.stream().mapToDouble(Number::doubleValue).average().getAsDouble();
 
-        double media = valores.stream()
-                .filter(v -> v != null)
-                .mapToDouble(Number::doubleValue)
-                .average()
-                .orElse(Double.NaN);
+        return calcularIndiceSinal(tipo, preenchidos.size(), media, peso);
+    }
 
-        if (Double.isNaN(media)) {
+    private EstabilidadeClinicaDTO calcularIndiceSinal(String tipo, long quantidade, Double media, double peso) {
+        if (quantidade < minimoRegistros || media == null) {
             return new EstabilidadeClinicaDTO(tipo, null, "n/a", peso, LocalDateTime.now());
         }
 
@@ -234,17 +297,14 @@ public class EstabilidadeClinicaService {
     }
 
     private EstabilidadeClinicaDTO calcularIndiceSono(List<Habitos> habitos) {
-        if (habitos.stream().filter(h -> h.getHorasSono() != null).count() < minimoRegistros) {
-            return new EstabilidadeClinicaDTO("sono", null, "n/a", 1.0, LocalDateTime.now());
-        }
+        List<Integer> horas = habitos.stream().map(Habitos::getHorasSono).filter(h -> h != null).toList();
+        Double media = horas.isEmpty() ? null : horas.stream().mapToDouble(Integer::doubleValue).average().getAsDouble();
 
-        double mediaSono = habitos.stream()
-                .filter(h -> h.getHorasSono() != null)
-                .mapToDouble(Habitos::getHorasSono)
-                .average()
-                .orElse(Double.NaN);
+        return calcularIndiceSono(horas.size(), media);
+    }
 
-        if (Double.isNaN(mediaSono)) {
+    private EstabilidadeClinicaDTO calcularIndiceSono(long quantidade, Double mediaSono) {
+        if (quantidade < minimoRegistros || mediaSono == null) {
             return new EstabilidadeClinicaDTO("sono", null, "n/a", 1.0, LocalDateTime.now());
         }
 
@@ -255,22 +315,15 @@ public class EstabilidadeClinicaService {
     }
 
     private EstabilidadeClinicaDTO calcularIndiceExercicio(List<Habitos> habitos) {
-        if (habitos.stream().filter(h -> h.getMinutosExercicio() != null).count() < minimoRegistros) {
-            return new EstabilidadeClinicaDTO("exercicio", null, "n/a", 1.0, LocalDateTime.now());
-        }
+        List<Integer> minutos = habitos.stream().map(Habitos::getMinutosExercicio).filter(m -> m != null).toList();
+        long diasSemExercicio = minutos.stream().filter(m -> m == 0).count();
+        Double media = minutos.isEmpty() ? null : minutos.stream().mapToDouble(Integer::doubleValue).average().getAsDouble();
 
-        long diasSemExercicio = habitos.stream()
-                .filter(h -> h.getMinutosExercicio() != null)
-                .filter(h -> h.getMinutosExercicio() == 0)
-                .count();
+        return calcularIndiceExercicio(minutos.size(), diasSemExercicio, media);
+    }
 
-        double mediaExercicio = habitos.stream()
-                .filter(h -> h.getMinutosExercicio() != null)
-                .mapToDouble(Habitos::getMinutosExercicio)
-                .average()
-                .orElse(Double.NaN);
-
-        if (Double.isNaN(mediaExercicio)) {
+    private EstabilidadeClinicaDTO calcularIndiceExercicio(long quantidade, long diasSemExercicio, Double mediaExercicio) {
+        if (quantidade < minimoRegistros || mediaExercicio == null) {
             return new EstabilidadeClinicaDTO("exercicio", null, "n/a", 1.0, LocalDateTime.now());
         }
 

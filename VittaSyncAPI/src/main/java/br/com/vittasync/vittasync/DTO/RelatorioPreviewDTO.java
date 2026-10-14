@@ -1,21 +1,41 @@
 package br.com.vittasync.vittasync.DTO;
 
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import java.util.List;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 
+@Schema(description = "Dados do relatório para pré-visualização")
 public class RelatorioPreviewDTO {
+    @Schema(description = "Data inicial do período", example = "2026-10-01")
     private LocalDate dataInicio;
+
+    @Schema(description = "Data final do período", example = "2026-10-13")
     private LocalDate dataFim;
+
+    @Schema(description = "Data e hora em que o relatório foi gerado", example = "2026-10-13T21:30:00")
     private LocalDateTime dataEmissao;
+
+    @Schema(description = "Categorias incluídas no relatório", example = "[\"SINAIS\", \"HABITOS\"]")
     private List<String> categorias;
+
+    @Schema(description = "Resumo estatístico dos sinais vitais e hábitos do período")
     private RelatorioResumoDTO resumo;
+
+    @Schema(description = "Dados básicos do paciente")
     private RelatorioPacienteResumoDTO paciente;
+
+    @Schema(description = "Sinais vitais do período")
     private List<LinhaTempoSinaisVitaisDTO> sinaisVitais;
+
+    @Schema(description = "Hábitos do período")
     private List<LinhaTempoHabitosDTO> habitos;
+
+    @Schema(description = "Sintomas do período")
     private List<LinhaTempoSintomasDTO> sintomas;
+
 
     public RelatorioPreviewDTO(RelatorioPacienteResumoDTO paciente,
                                List<LinhaTempoSinaisVitaisDTO> sinaisVitais,
@@ -55,10 +75,12 @@ public class RelatorioPreviewDTO {
     public RelatorioResumoDTO getResumo() { return resumo; }
     public void setResumo(RelatorioResumoDTO resumo) { this.resumo = resumo; }
     
+    @Schema(description = "Indica que não há registros no período para as categorias escolhidas", example = "false")
     public boolean isSemRegistros() {
         return sinaisVitais.isEmpty() && habitos.isEmpty() && sintomas.isEmpty();
     }
 
+    @Schema(description = "Mensagem exibida quando não há registros, nula quando há", example = "Nenhum registro encontrado para os filtros selecionados.")
     public String getMensagem() {
         return isSemRegistros() ? "Nenhum registro encontrado para os filtros selecionados." : null;
     }

@@ -9,6 +9,11 @@ import br.com.vittasync.vittasync.Model.Usuario;
 import br.com.vittasync.vittasync.Service.ContatoEmergenciaService;
 import br.com.vittasync.vittasync.Service.UsuarioService;
 import br.com.vittasync.vittasync.Service.PermissaoService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
@@ -17,6 +22,8 @@ import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/contatoemergencia")
+@Tag(name = "Contatos de emergência", description = "Cadastro, consulta, edição e exclusão dos contatos de emergência do paciente "
+        + "e escolha de quais alertas cada contato recebe e por qual canal: e-mail, SMS ou ambos")
 public class ContatoEmergenciaController {
 
     private final ContatoEmergenciaService service;
@@ -31,8 +38,21 @@ public class ContatoEmergenciaController {
         this.permissaoService = permissaoService;
     }
 
+    @Operation(
+            summary = "Cadastrar contato de emergência",
+            description = "Cadastra um contato de emergência para o paciente, com os alertas que ele deve receber "
+                    + "(sinais vitais, hábitos e estabilidade geral por nível) e os canais de envio, cada paciente pode ter "
+                    + "no máximo 3 contatos. Permitido ao próprio paciente e aos responsáveis vinculados."
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Contato cadastrado com sucesso"),
+            @ApiResponse(responseCode = "400", description = "Limite de 3 contatos de emergência atingido"),
+            @ApiResponse(responseCode = "403", description = "Usuário sem permissão para alterar os dados do paciente"),
+            @ApiResponse(responseCode = "404", description = "Paciente não encontrado")
+    })
     @PostMapping("/cadastrar/{cpf}")
-    public ResponseEntity<ContatoEmergenciaOutputDTO> cadastrar(@PathVariable String cpf,
+    public ResponseEntity<ContatoEmergenciaOutputDTO> cadastrar(@Parameter(description = "CPF do paciente (apenas números)")
+                                                                @PathVariable String cpf,
                                                                 @RequestBody ContatoEmergenciaInputDTO dto) {
         Usuario paciente = usuarioService.searchByCpf(cpf);
         Usuario usuarioLogado = usuarioService.getUsuarioLogado();
@@ -62,8 +82,19 @@ public class ContatoEmergenciaController {
         return ResponseEntity.ok(toOutputDTO(salvo));
     }
 
+    @Operation(
+            summary = "Listar contatos de emergência do paciente",
+            description = "Retorna todos os contatos de emergência cadastrados para o paciente, com as preferências de alerta de cada um. "
+                    + "Permitido ao próprio paciente e a todos os usuários vinculados a ele (responsáveis e profissionais de saúde)."
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Lista de contatos de emergência do paciente"),
+            @ApiResponse(responseCode = "403", description = "Usuário sem permissão para visualizar o paciente"),
+            @ApiResponse(responseCode = "404", description = "Paciente não encontrado")
+    })
     @GetMapping("/listar/{cpf}")
-    public ResponseEntity<List<ContatoEmergenciaOutputDTO>> listar(@PathVariable String cpf) {
+    public ResponseEntity<List<ContatoEmergenciaOutputDTO>> listar(@Parameter(description = "CPF do paciente (apenas números)")
+                                                                   @PathVariable String cpf) {
         Usuario paciente = usuarioService.searchByCpf(cpf);
         Usuario usuarioLogado = usuarioService.getUsuarioLogado();
 
@@ -75,8 +106,20 @@ public class ContatoEmergenciaController {
         return ResponseEntity.ok(contatos.stream().map(this::toOutputDTO).collect(Collectors.toList()));
     }
 
+    @Operation(
+            summary = "Editar contato de emergência",
+            description = "Substitui os dados e as preferências de alerta de um contato de emergência já cadastrado, "
+                    + "a data de modificação é preenchida automaticamente pelo servidor. Permitido ao próprio paciente e aos responsáveis vinculados."
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Contato atualizado com sucesso"),
+            @ApiResponse(responseCode = "403", description = "Usuário sem permissão para alterar os dados do paciente"),
+            @ApiResponse(responseCode = "404", description = "Paciente ou contato não encontrados")
+    })
     @PutMapping("/editar/{id}/{cpf}")
-    public ResponseEntity<ContatoEmergenciaOutputDTO> editar(@PathVariable Integer id,
+    public ResponseEntity<ContatoEmergenciaOutputDTO> editar(@Parameter(description = "ID do contato de emergência")
+                                                             @PathVariable Integer id,
+                                                             @Parameter(description = "CPF do paciente (apenas números)")
                                                              @PathVariable String cpf,
                                                              @RequestBody ContatoEmergenciaInputDTO dto) {
         Usuario paciente = usuarioService.searchByCpf(cpf);
@@ -108,8 +151,20 @@ public class ContatoEmergenciaController {
         return ResponseEntity.ok(toOutputDTO(atualizado));
     }
 
+    @Operation(
+            summary = "Excluir contato de emergência",
+            description = "Exclui um contato de emergência do paciente, que deixa de receber os alertas. "
+                    + "Permitido ao próprio paciente e aos responsáveis vinculados."
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "204", description = "Contato excluído com sucesso"),
+            @ApiResponse(responseCode = "403", description = "Usuário sem permissão para alterar os dados do paciente"),
+            @ApiResponse(responseCode = "404", description = "Paciente ou contato não encontrados")
+    })
     @DeleteMapping("/deletar/{id}/{cpf}")
-    public ResponseEntity<Void> deletar(@PathVariable Integer id,
+    public ResponseEntity<Void> deletar(@Parameter(description = "ID do contato de emergência")
+                                        @PathVariable Integer id,
+                                        @Parameter(description = "CPF do paciente (apenas números)")
                                         @PathVariable String cpf) {
         Usuario paciente = usuarioService.searchByCpf(cpf);
         Usuario usuarioLogado = usuarioService.getUsuarioLogado();

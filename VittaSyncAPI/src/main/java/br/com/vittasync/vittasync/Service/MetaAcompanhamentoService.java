@@ -2,6 +2,7 @@ package br.com.vittasync.vittasync.Service;
 
 
 import br.com.vittasync.vittasync.DTO.MetaAcompanhamentoInputDTO;
+import br.com.vittasync.vittasync.Exception.DadosInvalidosException;
 import br.com.vittasync.vittasync.Exception.RecursoNaoEncontradoException;
 import br.com.vittasync.vittasync.Model.MetaAcompanhamento;
 import br.com.vittasync.vittasync.Model.Usuario;
@@ -108,9 +109,9 @@ public class MetaAcompanhamentoService {
     ) {
         MetaAcompanhamento meta = buscarMetaDoPaciente(id, pacienteId);
         if (!"personalizado".equalsIgnoreCase(meta.getIndicador())) {
-            throw new IllegalArgumentException("Somente metas personalizadas aceitam atualização manual");
+            throw new DadosInvalidosException("Somente metas personalizadas aceitam atualização manual");
         }
-        if (valorAtual == null) throw new IllegalArgumentException("O valor atual é obrigatório");
+        if (valorAtual == null) throw new DadosInvalidosException("O valor atual é obrigatório");
         meta.setValorAtual(valorAtual);
         meta.setProgresso(calcularProgresso(meta));
         meta.setDataModificacao(LocalDateTime.now());
@@ -230,7 +231,7 @@ public class MetaAcompanhamentoService {
                     .map(registro -> registro.getMinutosExercicio() == null ? null : registro.getMinutosExercicio().doubleValue())
                     .orElse(meta.getValorAtual());
             case "personalizado" -> meta.getValorAtual();
-            default -> throw new IllegalArgumentException("Indicador de meta inválido");
+            default -> throw new DadosInvalidosException("Indicador de meta inválido");
         };
     }
 

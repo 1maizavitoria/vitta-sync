@@ -6,7 +6,10 @@ import java.sql.Timestamp;
 
 
 @Entity
-@Table(name = "Vinculo")
+@Table(
+        name = "Vinculo",
+        uniqueConstraints = @UniqueConstraint(name = "uk_vinculo_paciente_usuario", columnNames = {"paciente_id", "usuario_id"})
+)
 public class Vinculo {
 
     @Id

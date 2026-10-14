@@ -1,15 +1,25 @@
 package br.com.vittasync.vittasync.DTO;
 
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import java.sql.Timestamp;
 
 
+@Schema(description = "Dados básicos do paciente")
 public class PacienteResumoDTO {
 
+    @Schema(description = "ID do paciente", example = "3")
     private Integer id;
+
+    @Schema(description = "Nome do paciente", example = "Maria Souza")
     private String nome;
+
+    @Schema(description = "E-mail do paciente", example = "maria.souza@email.com")
     private String email;
+
+    @Schema(description = "CPF do paciente", example = "52998224725")
     private String cpf;
+
 
     public PacienteResumoDTO() {
     }

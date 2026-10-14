@@ -33,7 +33,7 @@ class LembreteMedicaoSchedulerTest {
         lembrete.setEnviarEmail(true);
         lembrete.setEnviarSms(true);
 
-        when(service.searchLembreteAtivo()).thenReturn(List.of(lembrete));
+        when(service.searchLembretesDoMinuto(agora.getDayOfWeek(), horaAtual)).thenReturn(List.of(lembrete));
         LembreteMedicaoScheduler scheduler = new LembreteMedicaoScheduler(service, notificacaoService);
         scheduler.enviarLembretes();
         verify(notificacaoService, times(1)).enviarLembrete(usuario,

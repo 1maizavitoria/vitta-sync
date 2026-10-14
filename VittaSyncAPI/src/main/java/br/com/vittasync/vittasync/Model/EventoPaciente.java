@@ -6,7 +6,10 @@ import java.sql.Timestamp;
 
 
 @Entity
-@Table(name = "EventoPaciente")
+@Table(
+        name = "EventoPaciente",
+        indexes = @Index(name = "idx_evento_paciente_criado", columnList = "paciente_id, criado_em")
+)
 public class EventoPaciente {
 
     @Id
