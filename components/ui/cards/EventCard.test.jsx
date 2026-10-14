@@ -1,28 +1,17 @@
 import { describe, it, expect, afterEach } from 'vitest';
 import { render, screen, cleanup } from '@testing-library/react';
 import '@testing-library/jest-dom/vitest';
-import { ThemeProvider, createTheme } from '@mui/material/styles';
 import { LanguageProvider } from '../../../src/i18n';
+import { VittaThemeProvider } from '../../../src/theme/ThemeModeProvider';
 import EventCard from './EventCard';
-
-const theme = createTheme({
-    palette: {
-        mode: 'light'
-    },
-    vitta: {
-        border: '#d1d5db',
-        borderStrong: '#0f766e',
-        shadow: '0 12px 24px rgba(0, 0, 0, 0.12)'
-    }
-});
 
 function renderWithProviders(component) {
     return render(
-        <ThemeProvider theme={theme}>
+        <VittaThemeProvider>
             <LanguageProvider>
                 {component}
             </LanguageProvider>
-        </ThemeProvider>
+        </VittaThemeProvider>
     );
 }
 
