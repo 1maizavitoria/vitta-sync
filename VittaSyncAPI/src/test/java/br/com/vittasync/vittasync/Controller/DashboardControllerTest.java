@@ -51,7 +51,8 @@ class DashboardControllerTest {
         LocalDate fim = LocalDate.of(2026, 1, 7);
         when(permissaoService.podeVisualizarPaciente(1, 2)).thenReturn(true);
         when(dashboardService.consultar(paciente, inicio, fim, "peso")).thenReturn(
-                new DashboardResponseDTO("222", "Paciente", inicio, fim, List.of(), List.of(), List.of()));
+                new DashboardResponseDTO("222", "Paciente", inicio, fim, List.of(), List.of(), List.of(),
+                        List.of(), List.of(), List.of()));
 
         mockMvc.perform(get("/dashboard/pacientes/222")
                         .param("inicio", "2026-01-01")

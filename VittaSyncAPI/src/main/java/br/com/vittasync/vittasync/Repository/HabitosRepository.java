@@ -8,6 +8,7 @@ import org.springframework.data.repository.query.Param;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 
@@ -18,6 +19,15 @@ public interface HabitosRepository extends JpaRepository<Habitos, Integer> {
             + "AND (:fim IS NULL OR h.dataReferencia <= :fim) "
             + "ORDER BY h.dataReferencia ASC, h.id ASC")
     List<Habitos> buscarParaRelatorio(@Param("pacienteId") Integer pacienteId,
+            @Param("inicio") LocalDate inicio, @Param("fim") LocalDate fim);
+
+    @Query("SELECT new map(h.dataReferencia AS dia, ROUND(AVG(h.horasSono), 1) AS mediaHorasSono, "
+            + "SUM(h.minutosExercicio) AS totalMinutosExercicio, COUNT(h) AS registros) "
+            + "FROM Habitos h WHERE h.paciente.id = :pacienteId "
+            + "AND h.dataReferencia BETWEEN :inicio AND :fim "
+            + "GROUP BY h.dataReferencia "
+            + "ORDER BY h.dataReferencia")
+    List<Map<String, Object>> buscarResumoDiario(@Param("pacienteId") Integer pacienteId,
             @Param("inicio") LocalDate inicio, @Param("fim") LocalDate fim);
 
     List<Habitos> findByPacienteCpf(String cpf);

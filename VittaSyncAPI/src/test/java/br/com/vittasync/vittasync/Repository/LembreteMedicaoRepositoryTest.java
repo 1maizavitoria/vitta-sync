@@ -8,6 +8,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -16,6 +17,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 
 @DataJpaTest
@@ -62,14 +64,28 @@ class LembreteMedicaoRepositoryTest {
     @Test
     void testFindByUsuarioAndAtivoTrue() {
         Usuario usuario = criarUsuario("Paciente Teste", "PACIENTE");
+        Usuario inativo = criarUsuario("Paciente Inativo", "PACIENTE");
 
         criarLembrete(usuario, true, "segunda,terca", LocalTime.of(8, 0));
-        criarLembrete(usuario, false, "quarta", LocalTime.of(10, 0));
+        criarLembrete(inativo, false, "quarta", LocalTime.of(10, 0));
 
         Optional<LembreteMedicao> resultado = lembreteMedicaoRepository.findByUsuarioAndAtivoTrue(usuario);
 
         assertThat(resultado).isPresent();
         assertThat(resultado.get().isAtivo()).isTrue();
+        assertThat(lembreteMedicaoRepository.findByUsuarioAndAtivoTrue(inativo)).isNotPresent();
+    }
+
+    @Test
+    void testNaoPermiteDoisLembretesParaOMesmoPaciente() {
+        Usuario usuario = criarUsuario("Paciente Unico", "PACIENTE");
+
+        criarLembrete(usuario, true, "segunda", LocalTime.of(8, 0));
+
+        assertThrows(DataIntegrityViolationException.class, () -> {
+            criarLembrete(usuario, true, "terca", LocalTime.of(9, 0));
+            lembreteMedicaoRepository.flush();
+        });
     }
 
     @Test

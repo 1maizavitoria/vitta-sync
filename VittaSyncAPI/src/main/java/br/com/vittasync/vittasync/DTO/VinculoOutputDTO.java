@@ -1,23 +1,32 @@
 package br.com.vittasync.vittasync.DTO;
 
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import java.sql.Timestamp;
 
 
+@Schema(description = "Vínculo entre o paciente e um responsável ou profissional de saúde")
 public class VinculoOutputDTO {
 
+    @Schema(description = "ID do vínculo", example = "6")
     private Long id;
 
+    @Schema(description = "Nome do outro usuário do vínculo", example = "Carlos Souza")
     private String nome;
 
+    @Schema(description = "E-mail do outro usuário do vínculo", example = "carlos.souza@email.com")
     private String email;
 
+    @Schema(description = "Tipo do usuário vinculado ao paciente", example = "responsavel", allowableValues = {"responsavel", "saude"})
     private String tipo;
 
+    @Schema(description = "Registro no conselho profissional, preenchido apenas para profissionais de saúde", example = "CRM-PR 12345")
     private String conselho;
 
+    @Schema(description = "Função do usuário vinculado em relação ao paciente", example = "cuidador")
     private String funcao;
 
+    @Schema(description = "Data e hora em que o vínculo foi criado", example = "2026-10-01T10:20:00")
     private Timestamp criadoEm;
 
 

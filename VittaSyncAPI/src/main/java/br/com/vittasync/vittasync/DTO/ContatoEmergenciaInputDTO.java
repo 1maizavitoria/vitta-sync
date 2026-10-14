@@ -1,33 +1,59 @@
 package br.com.vittasync.vittasync.DTO;
 
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 
 
+@Schema(description = "Dados de um contato de emergência e das suas preferências de alerta")
 public class ContatoEmergenciaInputDTO {
 
+    @Schema(description = "Nome do contato", example = "Carlos Oliveira")
     @NotBlank(message = "Nome é obrigatório")
     private String nome;
 
+    @Schema(description = "Telefone com DDD (apenas números)", example = "41987654321")
     @NotBlank(message = "Telefone é obrigatório")
     @Pattern(regexp = "\\d{10,11}", message = "Telefone deve ter DDD e número")
     private String telefone;
 
+    @Schema(description = "E-mail do contato", example = "carlos.oliveira@email.com")
     @NotBlank(message = "Email é obrigatório")
     private String email;
 
 
+    @Schema(description = "Receber alerta quando os sinais vitais estiverem saudáveis", example = "false")
     private Boolean receberAlertaSinaisVitaisSaudavel = false;
+
+    @Schema(description = "Receber alerta quando os sinais vitais estiverem moderados", example = "false")
     private Boolean receberAlertaSinaisVitaisModerado = false;
+
+    @Schema(description = "Receber alerta quando os sinais vitais estiverem críticos", example = "true")
     private Boolean receberAlertaSinaisVitaisCritico = true;
+
+    @Schema(description = "Receber alerta quando os hábitos estiverem saudáveis", example = "false")
     private Boolean receberAlertaHabitosSaudavel = false;
+
+    @Schema(description = "Receber alerta quando os hábitos estiverem moderados", example = "true")
     private Boolean receberAlertaHabitosModerado = true;
+
+    @Schema(description = "Receber alerta quando os hábitos estiverem críticos", example = "true")
     private Boolean receberAlertaHabitosCritico = true;
+
+    @Schema(description = "Receber alerta quando a estabilidade geral estiver saudável", example = "false")
     private Boolean receberAlertaGeralSaudavel = false;
+
+    @Schema(description = "Receber alerta quando a estabilidade geral estiver moderada", example = "false")
     private Boolean receberAlertaGeralModerado = false;
+
+    @Schema(description = "Receber alerta quando a estabilidade geral estiver crítica", example = "true")
     private Boolean receberAlertaGeralCritico = true;
+
+    @Schema(description = "Enviar os alertas por e-mail", example = "true")
     private Boolean canalEmail = true;
+
+    @Schema(description = "Enviar os alertas por SMS", example = "false")
     private Boolean canalSms = false;
 
 

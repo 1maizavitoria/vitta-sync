@@ -1,34 +1,46 @@
 package br.com.vittasync.vittasync.DTO;
 
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.*;
 import java.time.LocalDateTime;
 
 
+@Schema(description = "Dados de uma medição de sinais vitais")
 public class SinaisVitaisInputDTO {
 
+    @Schema(description = "Peso em quilogramas", example = "72.4")
     @NotNull(message = "Peso é obrigatório")
     private Double peso;
 
+    @Schema(description = "Frequência cardíaca em batimentos por minuto", example = "78")
     @NotNull(message = "Frequência cardíaca é obrigatória")
     private Integer fcBpm;
 
+    @Schema(description = "Frequência respiratória em respirações por minuto", example = "16")
     @NotNull(message = "Frequência respiratória é obrigatória")
     private Integer frRpm;
 
+    @Schema(description = "Pressão arterial sistólica em mmHg", example = "122")
     @NotNull(message = "Pressão sistólica é obrigatória")
     private Integer paSistolica;
 
+    @Schema(description = "Pressão arterial diastólica em mmHg", example = "81")
     @NotNull(message = "Pressão diastólica é obrigatória")
     private Integer paDiastolica;
 
+    @Schema(description = "Temperatura corporal em graus Celsius", example = "36.6")
     @NotNull(message = "Temperatura é obrigatória")
     private Double tempCelcius;
 
+    @Schema(description = "Saturação de oxigênio no sangue em porcentagem", example = "97")
     @NotNull(message = "Saturação O2 é obrigatória")
     private Integer spo2Porcento;
 
+    @Schema(hidden = true)
     private LocalDateTime dataRegistro;
+
+    @Schema(hidden = true)
     private LocalDateTime dataModificacao;
 
     public SinaisVitaisInputDTO() {}

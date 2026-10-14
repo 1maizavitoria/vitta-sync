@@ -1,14 +1,24 @@
 package br.com.vittasync.vittasync.DTO;
 
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import java.util.List;
 
 
+@Schema(description = "Linha do tempo do paciente no período")
 public class LinhaTempoResponseDTO {
+    @Schema(description = "Sinais vitais do período")
     private List<LinhaTempoSinaisVitaisDTO> sinaisVitais;
+
+    @Schema(description = "Hábitos do período")
     private List<LinhaTempoHabitosDTO> habitos;
+
+    @Schema(description = "Sintomas do período")
     private List<LinhaTempoSintomasDTO> sintomas;
+
+    @Schema(description = "Todos os registros juntos, do mais recente ao mais antigo")
     private List<LinhaTempoItemDTO> itens;
+
 
     public LinhaTempoResponseDTO(List<LinhaTempoSinaisVitaisDTO> sinaisVitais,
                                  List<LinhaTempoHabitosDTO> habitos,

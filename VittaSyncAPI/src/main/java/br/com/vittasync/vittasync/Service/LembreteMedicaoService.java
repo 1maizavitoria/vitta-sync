@@ -6,7 +6,12 @@ import br.com.vittasync.vittasync.Model.Usuario;
 import br.com.vittasync.vittasync.Repository.LembreteMedicaoRepository;
 import br.com.vittasync.vittasync.Util.EventoPrioridades;
 import br.com.vittasync.vittasync.Util.EventoTipos;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import java.time.DayOfWeek;
+import java.time.LocalTime;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Optional;
 
@@ -16,6 +21,10 @@ public class LembreteMedicaoService {
 
     private final LembreteMedicaoRepository repository;
     private final EventoPacienteService eventoPacienteService;
+
+    private static final Logger logger = LoggerFactory.getLogger(LembreteMedicaoService.class);
+
+    private boolean usarProcedure = true;
 
     public LembreteMedicaoService(
             LembreteMedicaoRepository repository,
@@ -65,6 +74,22 @@ public class LembreteMedicaoService {
 
     public List<LembreteMedicao> searchLembreteAtivo() {
         return repository.findByAtivoTrue();
+    }
+
+    public List<LembreteMedicao> searchLembretesDoMinuto(DayOfWeek dia, LocalTime hora) {
+        if (usarProcedure) {
+            try {
+                return repository.buscarLembretesDoMinuto(dia.name(), hora);
+            } catch (RuntimeException e) {
+                usarProcedure = false;
+                logger.warn("Procedure sp_lembretes_do_minuto indisponível, os lembretes serão filtrados no Java");
+            }
+        }
+
+        return repository.findByAtivoTrue().stream()
+                .filter(lembrete -> lembrete.getDiasSemana().toUpperCase().contains(dia.name()))
+                .filter(lembrete -> lembrete.getHorario().truncatedTo(ChronoUnit.MINUTES).equals(hora))
+                .toList();
     }
 
     public Optional<LembreteMedicao> ativar(Usuario usuario) {

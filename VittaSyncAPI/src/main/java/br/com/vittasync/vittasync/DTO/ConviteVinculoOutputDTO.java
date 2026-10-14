@@ -1,14 +1,19 @@
 package br.com.vittasync.vittasync.DTO;
 
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import java.sql.Timestamp;
 
+@Schema(description = "Código de convite gerado pelo paciente")
 public class ConviteVinculoOutputDTO {
 
+    @Schema(description = "Código de convite", example = "A3F9C1")
     private String codigo;
 
+    @Schema(description = "Link de entrada com o código", example = "http://localhost:5173/entrar?codigo=A3F9C1")
     private String link;
 
+    @Schema(description = "Data e hora em que o código expira", example = "2026-10-14T21:30:00")
     private Timestamp expiraEm;
 
 

@@ -222,6 +222,27 @@ class VinculoServiceTest {
     }
 
     @Test
+    void testEnviarConviteEmailPeloPacienteDoConvite() {
+        when(conviteRepository.findByCodigo("ABC123")).thenReturn(Optional.of(convite(true, LocalDateTime.now().plusHours(1))));
+        when(usuarioRepository.findById(1)).thenReturn(Optional.of(paciente));
+        when(usuarioRepository.findByEmail("resp@teste.com")).thenReturn(Optional.of(responsavel));
+
+        service.enviarConviteEmail("resp@teste.com", "ABC123", 1);
+
+        verify(emailService).enviarConviteVinculo("resp@teste.com", "Responsável", "Paciente", "ABC123",
+                "http://localhost:5173/entrar?codigo=ABC123");
+    }
+
+    @Test
+    void testEnviarConviteEmailDeOutroPaciente() {
+        when(conviteRepository.findByCodigo("ABC123")).thenReturn(Optional.of(convite(true, LocalDateTime.now().plusHours(1))));
+
+        assertThrows(AcessoNegadoException.class, () -> service.enviarConviteEmail("resp@teste.com", "ABC123", 99));
+
+        verifyNoInteractions(emailService);
+    }
+
+    @Test
     void testEnviarConviteEmailValidacoes() {
         when(conviteRepository.findByCodigo("X")).thenReturn(Optional.empty());
         assertThrows(RecursoNaoEncontradoException.class, () -> service.enviarConviteEmail("a@a.com", "X"));

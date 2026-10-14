@@ -9,15 +9,19 @@ import br.com.vittasync.vittasync.Model.Habitos;
 import br.com.vittasync.vittasync.Model.LinhaBase;
 import br.com.vittasync.vittasync.Model.SinaisVitais;
 import br.com.vittasync.vittasync.Model.Usuario;
+import br.com.vittasync.vittasync.Repository.EventoPacienteRepository;
 import br.com.vittasync.vittasync.Repository.HabitosRepository;
 import br.com.vittasync.vittasync.Repository.LinhaBaseRepository;
 import br.com.vittasync.vittasync.Repository.SinaisVitaisRepository;
 import br.com.vittasync.vittasync.Repository.UsuarioRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import java.sql.Timestamp;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.List;
+import java.util.Map;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.*;
@@ -30,6 +34,7 @@ class DashboardServiceTest {
     private HabitosRepository habitosRepository;
     private EstabilidadeClinicaService estabilidadeClinicaService;
     private LinhaBaseRepository linhaBaseRepository;
+    private EventoPacienteRepository eventoPacienteRepository;
     private DashboardService service;
 
     private Usuario paciente;
@@ -46,8 +51,10 @@ class DashboardServiceTest {
         LinhaBaseService linhaBaseService = new LinhaBaseService(linhaBaseRepository, sinaisVitaisRepository,
                 mock(UsuarioRepository.class));
 
+        eventoPacienteRepository = mock(EventoPacienteRepository.class);
+
         service = new DashboardService(sinaisVitaisRepository, habitosRepository, estabilidadeClinicaService,
-                linhaBaseService, linhaBaseRepository);
+                linhaBaseService, linhaBaseRepository, eventoPacienteRepository);
 
         paciente = new Usuario();
         paciente.setId(1);
@@ -123,6 +130,28 @@ class DashboardServiceTest {
         assertThat(peso.getDiasRegistrados()).isEqualTo(1);
         assertThat(peso.getUltimoValor()).isEqualTo(70.0);
         assertThat(peso.getComparacao()).isNull();
+    }
+
+    @Test
+    void testConsultarRetornaResumosAgrupadosDoBanco() {
+        LocalDate fim = LocalDate.of(2026, 1, 7);
+        LocalDate inicio = LocalDate.of(2026, 1, 1);
+        Map<String, Object> diaSinais = Map.of("dia", fim, "mediaFcBpm", 75.0, "medicoes", 2L);
+        Map<String, Object> diaHabitos = Map.of("dia", fim, "mediaHorasSono", 7.0, "registros", 1L);
+        Map<String, Object> eventos = Map.of("tipo", "sinais_vitais_criados", "quantidade", 2L);
+
+        when(linhaBaseRepository.findByPacienteId(1)).thenReturn(List.of());
+        when(sinaisVitaisRepository.buscarResumoDiario(1, inicio.atStartOfDay(), fim.atTime(LocalTime.MAX)))
+                .thenReturn(List.of(diaSinais));
+        when(habitosRepository.buscarResumoDiario(1, inicio, fim)).thenReturn(List.of(diaHabitos));
+        when(eventoPacienteRepository.contarPorTipo(1, Timestamp.valueOf(inicio.atStartOfDay()),
+                Timestamp.valueOf(fim.atTime(LocalTime.MAX)))).thenReturn(List.of(eventos));
+
+        DashboardResponseDTO resposta = service.consultar(paciente, inicio, fim, "peso");
+
+        assertThat(resposta.getResumoDiario()).containsExactly(diaSinais);
+        assertThat(resposta.getResumoHabitos()).containsExactly(diaHabitos);
+        assertThat(resposta.getEventosPorTipo()).containsExactly(eventos);
     }
 
     @Test

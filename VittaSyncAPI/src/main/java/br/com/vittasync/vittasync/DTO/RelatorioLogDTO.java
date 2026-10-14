@@ -1,23 +1,45 @@
 package br.com.vittasync.vittasync.DTO;
 
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import br.com.vittasync.vittasync.Model.RelatorioLog;
 import br.com.vittasync.vittasync.Model.Usuario;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 
+@Schema(description = "Registro de uma exportação de relatório")
 public class RelatorioLogDTO {
+    @Schema(description = "ID da exportação", example = "9")
     private Integer id;
+
+    @Schema(description = "Formato exportado", example = "PDF", allowableValues = {"PDF", "CSV"})
     private String formato;
+
+    @Schema(description = "Categorias exportadas separadas por vírgula", example = "SINAIS,HABITOS")
     private String categorias;
+
+    @Schema(description = "Data inicial do período exportado", example = "2026-10-01")
     private LocalDate dataInicio;
+
+    @Schema(description = "Data final do período exportado", example = "2026-10-13")
     private LocalDate dataFim;
+
+    @Schema(description = "Data e hora da exportação", example = "2026-10-13T21:30:00")
     private LocalDateTime dataExportacao;
+
+    @Schema(description = "ID do usuário que exportou", example = "5")
     private Integer usuarioId;
+
+    @Schema(description = "Nome do usuário que exportou", example = "Carlos Souza")
     private String usuarioNome;
+
+    @Schema(description = "ID do paciente", example = "3")
     private Integer pacienteId;
+
+    @Schema(description = "Nome do paciente", example = "Maria Souza")
     private String pacienteNome;
+
 
     public RelatorioLogDTO(RelatorioLog relatorio) {
         this.id = relatorio.getId();

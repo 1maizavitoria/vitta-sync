@@ -8,6 +8,8 @@ import br.com.vittasync.vittasync.Util.EventoPrioridades;
 import br.com.vittasync.vittasync.Util.EventoTipos;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import java.time.DayOfWeek;
+import java.time.LocalTime;
 import java.util.List;
 import java.util.Optional;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -80,6 +82,42 @@ class LembreteMedicaoServiceTest {
 
         assertThat(ativos).hasSize(1);
         verify(repository).findByAtivoTrue();
+    }
+
+    @Test
+    void testSearchLembretesDoMinutoUsaProcedure() {
+        LembreteMedicao lembrete = new LembreteMedicao();
+        when(repository.buscarLembretesDoMinuto("MONDAY", LocalTime.of(8, 0))).thenReturn(List.of(lembrete));
+
+        List<LembreteMedicao> lembretes = service.searchLembretesDoMinuto(DayOfWeek.MONDAY, LocalTime.of(8, 0));
+
+        assertThat(lembretes).containsExactly(lembrete);
+        verify(repository, never()).findByAtivoTrue();
+    }
+
+    @Test
+    void testSearchLembretesDoMinutoSemProcedureFiltraNoJava() {
+        LembreteMedicao certo = new LembreteMedicao();
+        certo.setDiasSemana("MONDAY,FRIDAY");
+        certo.setHorario(LocalTime.of(8, 0, 30));
+
+        LembreteMedicao outroDia = new LembreteMedicao();
+        outroDia.setDiasSemana("TUESDAY");
+        outroDia.setHorario(LocalTime.of(8, 0));
+
+        LembreteMedicao outroHorario = new LembreteMedicao();
+        outroHorario.setDiasSemana("monday");
+        outroHorario.setHorario(LocalTime.of(9, 0));
+
+        when(repository.buscarLembretesDoMinuto(anyString(), any())).thenThrow(new RuntimeException("procedure inexistente"));
+        when(repository.findByAtivoTrue()).thenReturn(List.of(certo, outroDia, outroHorario));
+
+        List<LembreteMedicao> primeira = service.searchLembretesDoMinuto(DayOfWeek.MONDAY, LocalTime.of(8, 0));
+        List<LembreteMedicao> segunda = service.searchLembretesDoMinuto(DayOfWeek.MONDAY, LocalTime.of(8, 0));
+
+        assertThat(primeira).containsExactly(certo);
+        assertThat(segunda).containsExactly(certo);
+        verify(repository, times(1)).buscarLembretesDoMinuto(anyString(), any());
     }
 
     @Test

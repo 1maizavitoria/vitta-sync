@@ -13,6 +13,7 @@ import br.com.vittasync.vittasync.Repository.SinaisVitaisRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -247,5 +248,63 @@ class EstabilidadeClinicaServiceTest {
                 new EstabilidadeClinicaDTO("sono", 3, "critico", 1.0, LocalDateTime.now())));
 
         verifyNoInteractions(notificacaoService);
+    }
+
+    @Test
+    void testVerificarMudancaUsaMediasDaProcedure() {
+        Object[] medias = new Object[]{
+                3L, new BigDecimal("80.0000"),
+                3L, new BigDecimal("16.0000"),
+                3L, new BigDecimal("110.0000"),
+                3L, new BigDecimal("70.0000"),
+                3L, 36.5,
+                3L, new BigDecimal("98.0000"),
+                3L, 70.0,
+                3L, new BigDecimal("8.0000"),
+                3L, 0L, new BigDecimal("70.0000")
+        };
+        List<Object[]> linhas = new ArrayList<>();
+        linhas.add(medias);
+        when(estabilidadeClinicaRepository.buscarMediasEstabilidade(1)).thenReturn(linhas);
+        when(estabilidadeClinicaRepository.findUltimaCategoriaGeral(1)).thenReturn(null);
+        when(contatoEmergenciaRepository.findByPacienteIdOrderByDataRegistroAsc(1)).thenReturn(List.of());
+
+        service.verificarMudancaEstabilidade(1);
+
+        ArgumentCaptor<EstabilidadeClinica> captor = ArgumentCaptor.forClass(EstabilidadeClinica.class);
+        verify(estabilidadeClinicaRepository).save(captor.capture());
+        assertThat(captor.getValue().getCategoria()).isEqualTo("saudavel");
+        verify(sinaisVitaisRepository, never()).findByPacienteId(anyInt());
+        verify(habitosRepository, never()).findByPacienteId(anyInt());
+    }
+
+    @Test
+    void testVerificarMudancaComMediasVaziasDaProcedure() {
+        List<Object[]> linhas = new ArrayList<>();
+        linhas.add(new Object[]{0L, null, 0L, null, 0L, null, 0L, null, 0L, null, 0L, null, 0L, null,
+                0L, null, 0L, null, null});
+        when(estabilidadeClinicaRepository.buscarMediasEstabilidade(1)).thenReturn(linhas);
+        when(estabilidadeClinicaRepository.findUltimaCategoriaGeral(1)).thenReturn("n/a");
+
+        service.verificarMudancaEstabilidade(1);
+
+        verify(estabilidadeClinicaRepository, never()).save(any());
+    }
+
+    @Test
+    void testVerificarMudancaSemProcedureCalculaNoJava() {
+        when(estabilidadeClinicaRepository.buscarMediasEstabilidade(anyInt())).thenThrow(new RuntimeException("procedure inexistente"));
+        when(sinaisVitaisRepository.findByPacienteId(1)).thenReturn(repetir(sinais(130, 35, 150, 110, 40.0, 85)));
+        when(habitosRepository.findByPacienteId(1)).thenReturn(List.of());
+        when(estabilidadeClinicaRepository.findUltimaCategoriaGeral(1)).thenReturn("saudavel");
+        when(contatoEmergenciaRepository.findByPacienteIdOrderByDataRegistroAsc(1)).thenReturn(List.of());
+
+        service.verificarMudancaEstabilidade(1);
+        service.verificarMudancaEstabilidade(1);
+
+        ArgumentCaptor<EstabilidadeClinica> captor = ArgumentCaptor.forClass(EstabilidadeClinica.class);
+        verify(estabilidadeClinicaRepository, times(2)).save(captor.capture());
+        assertThat(captor.getValue().getCategoria()).isEqualTo("critico");
+        verify(estabilidadeClinicaRepository, times(1)).buscarMediasEstabilidade(1);
     }
 }

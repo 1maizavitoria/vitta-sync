@@ -8,6 +8,11 @@ import br.com.vittasync.vittasync.Model.Usuario;
 import br.com.vittasync.vittasync.Service.RelatorioService;
 import br.com.vittasync.vittasync.Service.UsuarioService;
 import br.com.vittasync.vittasync.Service.PermissaoService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -22,6 +27,8 @@ import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/relatorio")
+@Tag(name = "Relatórios", description = "Exportação em PDF ou CSV dos sinais vitais, hábitos e sintomas do paciente, com pré-visualização antes de baixar o arquivo"
+        + "e histórico das exportações")
 public class RelatorioController {
 
     private final RelatorioService relatorioService;
@@ -36,8 +43,23 @@ public class RelatorioController {
         this.permissaoService = permissaoService;
     }
 
+    @Operation(
+            summary = "Exportar relatório do paciente",
+            description = "Gera o relatório do paciente com as categorias e o período escolhidos, caso ''preview'' seja true retorna os dados "
+                    + "em JSON para pré-visualização, se for false retorna o arquivo PDF ou CSV para download e registra a exportação no histórico, "
+                    + "sem datas informadas considera todos os registros. "
+                    + "Permitido ao próprio paciente e a todos os usuários vinculados a ele (responsáveis e profissionais de saúde)."
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Pré-visualização em JSON ou arquivo do relatório"),
+            @ApiResponse(responseCode = "400", description = "Formato, categoria, datas ou JSON inválidos"),
+            @ApiResponse(responseCode = "403", description = "Usuário sem permissão para visualizar o paciente"),
+            @ApiResponse(responseCode = "404", description = "Paciente não encontrado"),
+            @ApiResponse(responseCode = "422", description = "Nenhum registro encontrado para os filtros selecionados")
+    })
     @PostMapping("/exportar/{cpf}")
-    public ResponseEntity<?> exportarRelatorio(@PathVariable String cpf,
+    public ResponseEntity<?> exportarRelatorio(@Parameter(description = "CPF do paciente (apenas números)")
+                                               @PathVariable String cpf,
                                                @Valid @RequestBody RelatorioFiltroDTO filtros) {
         Usuario usuarioLogado = usuarioService.getUsuarioLogado();
         Usuario paciente = usuarioService.searchByCpf(cpf);
@@ -95,8 +117,19 @@ public class RelatorioController {
                 "message", "Confira o JSON: use datas válidas no formato yyyy-MM-dd e preview como booleano."));
     }
 
+    @Operation(
+            summary = "Listar exportações do paciente",
+            description = "Retorna o histórico de relatórios exportados do paciente com formato, categorias, período e quem exportou. "
+                    + "Permitido ao próprio paciente e a todos os usuários vinculados a ele (responsáveis e profissionais de saúde)."
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Histórico de exportações do paciente"),
+            @ApiResponse(responseCode = "403", description = "Usuário sem permissão para visualizar o paciente"),
+            @ApiResponse(responseCode = "404", description = "Paciente não encontrado")
+    })
     @GetMapping("/getRelatorioExportacaoLog/{cpf}")
-    public ResponseEntity<List<RelatorioLogDTO>> getRelatorioExportacaoLog(@PathVariable String cpf) {
+    public ResponseEntity<List<RelatorioLogDTO>> getRelatorioExportacaoLog(@Parameter(description = "CPF do paciente (apenas números)")
+                                                                           @PathVariable String cpf) {
         Usuario usuarioLogado = usuarioService.getUsuarioLogado();
         Usuario paciente = usuarioService.searchByCpf(cpf);
 

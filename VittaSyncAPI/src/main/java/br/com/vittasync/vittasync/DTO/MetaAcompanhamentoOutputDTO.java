@@ -1,27 +1,59 @@
 package br.com.vittasync.vittasync.DTO;
 
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 
+@Schema(description = "Meta de acompanhamento do paciente")
 public class MetaAcompanhamentoOutputDTO {
 
+    @Schema(description = "ID da meta", example = "7")
     private Long id;
+
+    @Schema(description = "Nome da meta", example = "Perder peso até o fim do ano")
     private String nome;
+
+    @Schema(description = "Origem dos dados da meta", example = "sinais_vitais", allowableValues = {"sinais_vitais", "habitos", "personalizado"})
     private String tipoDado;
+
+    @Schema(description = "Indicador acompanhado pela meta", example = "peso", allowableValues = {"peso", "horas_sono", "minutos_exercicio", "personalizado"})
     private String indicador;
+
+    @Schema(description = "Se o objetivo é aumentar ou reduzir o valor", example = "reduzir", allowableValues = {"aumentar", "reduzir"})
     private String direcao;
+
+    @Schema(description = "Valor no início da meta", example = "80.0")
     private Double valorInicial;
+
+    @Schema(description = "Valor atual", example = "78.5")
     private Double valorAtual;
+
+    @Schema(description = "Unidade do valor", example = "kg")
     private String unidade;
+
+    @Schema(description = "Valor que se deseja alcançar", example = "75.0")
     private Double valorAlvo;
+
+    @Schema(description = "Progresso da meta em porcentagem", example = "30.0")
     private Double progresso;
+
+    @Schema(description = "Situação da meta", example = "em_andamento", allowableValues = {"em_andamento", "concluido", "concluido_atrasado", "nao_atingida"})
     private String status;
+
+    @Schema(description = "Data e hora em que a meta foi cadastrada", example = "2026-10-01T10:20:00")
     private LocalDateTime dataCriacao;
+
+    @Schema(description = "Prazo da meta", example = "2026-12-31")
     private LocalDate dataLimite;
+
+    @Schema(description = "Data e hora da conclusão, nula enquanto a meta está em andamento", example = "2026-12-20T18:00:00")
     private LocalDateTime dataConclusao;
+
+    @Schema(description = "Data e hora da última edição, nula se a meta nunca foi editada", example = "2026-10-13T21:02:10")
     private LocalDateTime dataModificacao;
+
 
 
     public Long getId() { return id; }

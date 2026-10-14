@@ -9,6 +9,11 @@ import br.com.vittasync.vittasync.Model.DiarioSintomas;
 import br.com.vittasync.vittasync.Model.Usuario;
 import br.com.vittasync.vittasync.Service.DiarioSintomasService;
 import br.com.vittasync.vittasync.Service.UsuarioService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -17,6 +22,8 @@ import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/diariosintomas")
+@Tag(name = "Diário de sintomas", description = "Cadastro, edição, exclusão e consulta dos sintomas relatados pelo paciente "
+        + "com intensidade da dor de 1 a 10")
 public class DiarioSintomasController {
 
     private final DiarioSintomasService service;
@@ -33,8 +40,20 @@ public class DiarioSintomasController {
         this.permissaoService = permissaoService;
     }
 
+    @Operation(
+            summary = "Cadastrar sintoma",
+            description = "Cadastra um sintoma do paciente com nome, intensidade da dor e o dia em que ocorreu, "
+                    + "a data do registro é automaticamente definida pelo servidor. Após salvar, o sistema analisa alertas de dor "
+                    + "intensa ou crítica. Permitido ao próprio paciente e aos responsáveis vinculados."
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Sintoma cadastrado com sucesso"),
+            @ApiResponse(responseCode = "403", description = "Usuário sem permissão para alterar os dados do paciente"),
+            @ApiResponse(responseCode = "404", description = "Paciente não encontrado")
+    })
     @PostMapping("/cadastrar/{cpf}")
-    public ResponseEntity<DiarioSintomasOutputDTO> create(@PathVariable String cpf,
+    public ResponseEntity<DiarioSintomasOutputDTO> create(@Parameter(description = "CPF do paciente (apenas números)")
+                                                          @PathVariable String cpf,
                                                           @RequestBody DiarioSintomasInputDTO dto) {
         Usuario usuarioLogado =
                 usuarioService.getUsuarioLogado();
@@ -61,8 +80,20 @@ public class DiarioSintomasController {
         return ResponseEntity.ok(toOutputDTO(salvo));
     }
 
+    @Operation(
+            summary = "Editar sintoma",
+            description = "Substitui os dados de um sintoma já cadastrado, a data de modificação é preenchida automaticamente pelo servidor. "
+                    + "Permitido ao próprio paciente e aos responsáveis vinculados."
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Sintoma atualizado com sucesso"),
+            @ApiResponse(responseCode = "403", description = "Usuário sem permissão para alterar os dados do paciente"),
+            @ApiResponse(responseCode = "404", description = "Paciente ou sintoma não encontrados")
+    })
     @PutMapping("/editar/{id}/{cpf}")
-    public ResponseEntity<DiarioSintomasOutputDTO> update(@PathVariable Integer id,
+    public ResponseEntity<DiarioSintomasOutputDTO> update(@Parameter(description = "ID do sintoma")
+                                                          @PathVariable Integer id,
+                                                          @Parameter(description = "CPF do paciente (apenas números)")
                                                           @PathVariable String cpf,
                                                           @RequestBody DiarioSintomasInputDTO dto) {
         Usuario usuarioLogado =
@@ -90,8 +121,20 @@ public class DiarioSintomasController {
         return ResponseEntity.ok(toOutputDTO(atualizado));
     }
 
+    @Operation(
+            summary = "Excluir sintoma",
+            description = "Exclui um sintoma do paciente e registra o evento na linha do tempo do paciente. "
+                    + "Permitido ao próprio paciente e aos responsáveis vinculados."
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "204", description = "Sintoma excluído com sucesso"),
+            @ApiResponse(responseCode = "403", description = "Usuário sem permissão para alterar os dados do paciente"),
+            @ApiResponse(responseCode = "404", description = "Paciente ou sintoma não encontrados")
+    })
     @DeleteMapping("/deletar/{id}/{cpf}")
-    public ResponseEntity<Void> delete(@PathVariable Integer id,
+    public ResponseEntity<Void> delete(@Parameter(description = "ID do sintoma")
+                                       @PathVariable Integer id,
+                                       @Parameter(description = "CPF do paciente (apenas números)")
                                        @PathVariable String cpf) {
         Usuario usuarioLogado =
                 usuarioService.getUsuarioLogado();
@@ -112,8 +155,19 @@ public class DiarioSintomasController {
         return ResponseEntity.noContent().build();
     }
 
+    @Operation(
+            summary = "Listar sintomas do paciente",
+            description = "Retorna todos os sintomas cadastrados do paciente. "
+                    + "Permitido ao próprio paciente e a todos os usuários vinculados a ele (responsáveis e profissionais de saúde)."
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Lista de sintomas do paciente"),
+            @ApiResponse(responseCode = "403", description = "Usuário sem permissão para visualizar o paciente"),
+            @ApiResponse(responseCode = "404", description = "Paciente não encontrado")
+    })
     @GetMapping("/getSintomas/{cpf}")
-    public ResponseEntity<List<DiarioSintomasOutputDTO>> list(@PathVariable String cpf) {
+    public ResponseEntity<List<DiarioSintomasOutputDTO>> list(@Parameter(description = "CPF do paciente (apenas números)")
+                                                              @PathVariable String cpf) {
         Usuario usuarioLogado =
                 usuarioService.getUsuarioLogado();
 

@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 import static org.junit.jupiter.api.Assertions.*;
 
 
@@ -49,8 +50,17 @@ class DashboardDTOsTest {
         LinhaBaseDTO linhaBase = new LinhaBaseDTO("peso", "em_formacao", 3, 14,
                 null, null, null, null, null, null, 70.0, LocalDateTime.now(), null);
 
+        Map<String, Object> resumoSinais = Map.of("dia", fim, "mediaFcBpm", 75.0, "medicoes", 2L);
+        Map<String, Object> resumoHabitos = Map.of("dia", fim, "mediaHorasSono", 7.0, "registros", 1L);
+        Map<String, Object> eventos = Map.of("tipo", "sinais_vitais_criados", "quantidade", 2L);
+
         DashboardResponseDTO dto = new DashboardResponseDTO("123", "Paciente", inicio, fim,
-                List.of(categoria), List.of(estabilidade), List.of(linhaBase));
+                List.of(categoria), List.of(estabilidade), List.of(linhaBase),
+                List.of(resumoSinais), List.of(resumoHabitos), List.of(eventos));
+
+        assertEquals(List.of(resumoSinais), dto.getResumoDiario());
+        assertEquals(List.of(resumoHabitos), dto.getResumoHabitos());
+        assertEquals(List.of(eventos), dto.getEventosPorTipo());
 
         assertEquals("123", dto.getPacienteCpf());
         assertEquals("Paciente", dto.getPacienteNome());
@@ -95,13 +105,5 @@ class DashboardDTOsTest {
         assertEquals(90, dto.getUltimoValor());
         assertEquals(ultimaMedicao, dto.getDataUltimoValor());
         assertEquals("acima", dto.getComparacao());
-    }
-
-    @Test
-    void testGerarConviteDTO() {
-        GerarConviteDTO dto = new GerarConviteDTO();
-        dto.setPacienteId(5);
-
-        assertEquals(5, dto.getPacienteId());
     }
 }

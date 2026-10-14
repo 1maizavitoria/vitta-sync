@@ -6,7 +6,10 @@ import java.time.LocalDateTime;
 
 
 @Entity
-@Table(name = "SinaisVitais")
+@Table(
+        name = "SinaisVitais",
+        indexes = @Index(name = "idx_sinais_paciente_data", columnList = "paciente_id, data_registro")
+)
 public class SinaisVitais {
 
     @Id
