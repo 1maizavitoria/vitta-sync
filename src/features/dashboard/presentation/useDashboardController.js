@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
 
+import { useClinicalTimelineQuery } from "../application/useClinicalTimelineQuery";
 import { useDashboardPreferences } from "../application/useDashboardPreferences";
 import { useDashboardQuery } from "../application/useDashboardQuery";
 
@@ -32,14 +33,18 @@ export function useDashboardController({ cpf, preferencesRepository }) {
         ...dateRange,
         categorias: categoryFilter === "todas" ? undefined : categoryFilter
     });
+    const clinicalTimelineQuery = useClinicalTimelineQuery({
+        cpf,
+        ...dateRange
+    });
 
     return {
         ...dashboardQuery,
+        clinicalTimeline: clinicalTimelineQuery,
         dashboardPreferences,
         period,
         setPeriod,
         categoryFilter,
-        setCategoryFilter,
-        dateRange
+        setCategoryFilter
     };
 }

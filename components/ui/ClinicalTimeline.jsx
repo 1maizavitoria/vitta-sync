@@ -13,16 +13,13 @@ import BedtimeOutlinedIcon from "@mui/icons-material/BedtimeOutlined";
 import HealingOutlinedIcon from "@mui/icons-material/HealingOutlined";
 import MonitorHeartOutlinedIcon from "@mui/icons-material/MonitorHeartOutlined";
 import { useTheme } from "@mui/material/styles";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 
-import { getClinicalTimeline } from "../../services/timelineService";
 import { useThemeMode } from "../../src/theme/ThemeModeProvider";
-import { classifyApiError } from "../../utils/api/classifyApiError";
 
 const filters = ["TODOS", "SINAL_VITAL", "HABITO", "SINTOMA"];
 
-function getTimelineErrorKey(error) {
-    const errorType = classifyApiError(error).type;
+function getTimelineErrorKey(errorType) {
     const translatedErrors = ["network", "forbidden", "notFound", "server"];
 
     return translatedErrors.includes(errorType)
@@ -99,9 +96,9 @@ function formatTime(value, locale) {
 }
 
 export default function ClinicalTimeline({
-    cpf,
-    inicio,
-    fim,
+    items,
+    loading,
+    errorType,
     formatDate,
     formatMeasurement,
     formatNumber,
@@ -110,44 +107,8 @@ export default function ClinicalTimeline({
 }) {
     const theme = useTheme();
     const { accessibilityMode } = useThemeMode();
-    const [items, setItems] = useState([]);
     const [filter, setFilter] = useState("TODOS");
-    const [loading, setLoading] = useState(false);
-    const [errorKey, setErrorKey] = useState("");
-
-    useEffect(() => {
-        if (!cpf) {
-            setItems([]);
-            setErrorKey("");
-            return;
-        }
-
-        let active = true;
-
-        async function loadTimeline() {
-            setLoading(true);
-            setErrorKey("");
-
-            try {
-                const data = await getClinicalTimeline({ cpf, inicio, fim });
-                if (active) setItems(data?.itens || []);
-            } catch (requestError) {
-                console.error(requestError);
-                if (active) {
-                    setItems([]);
-                    setErrorKey(getTimelineErrorKey(requestError));
-                }
-            } finally {
-                if (active) setLoading(false);
-            }
-        }
-
-        loadTimeline();
-
-        return () => {
-            active = false;
-        };
-    }, [cpf, inicio, fim]);
+    const errorKey = errorType ? getTimelineErrorKey(errorType) : "";
 
     const groups = useMemo(() => {
         const filteredItems = filter === "TODOS"

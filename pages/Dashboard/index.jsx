@@ -93,12 +93,12 @@ export default function Dashboard() {
         loading,
         error,
         errorType,
+        clinicalTimeline,
         dashboardPreferences,
         period,
         setPeriod,
         categoryFilter,
-        setCategoryFilter,
-        dateRange
+        setCategoryFilter
     } = useDashboardController({
         cpf: selectedPatient?.cpf,
         preferencesRepository
@@ -186,9 +186,9 @@ export default function Dashboard() {
         ),
         timeline: (
             <ClinicalTimeline
-                cpf={selectedPatient?.cpf}
-                inicio={dateRange.inicio}
-                fim={dateRange.fim}
+                items={clinicalTimeline.items}
+                loading={clinicalTimeline.loading}
+                errorType={clinicalTimeline.errorType}
                 formatDate={formatDate}
                 formatMeasurement={formatMeasurement}
                 formatNumber={formatNumber}
