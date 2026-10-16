@@ -3,6 +3,7 @@ export const DASHBOARD_WIDGETS = [
     { id: "baseline", labelKey: "dashboard.customization.widgets.baseline" },
     { id: "latestValues", labelKey: "dashboard.customization.widgets.latestValues" },
     { id: "charts", labelKey: "dashboard.customization.widgets.charts" },
+    { id: "aggregatedSummary", labelKey: "dashboard.customization.widgets.aggregatedSummary" },
     { id: "timeline", labelKey: "dashboard.customization.widgets.timeline" }
 ];
 

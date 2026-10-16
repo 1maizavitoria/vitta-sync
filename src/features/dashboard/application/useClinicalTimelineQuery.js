@@ -10,11 +10,11 @@ function shouldRetryTimelineRequest(failureCount, error) {
     return classifyApiError(error).retryable && failureCount < 1;
 }
 
-export function useClinicalTimelineQuery({ cpf, inicio, fim }) {
+export function useClinicalTimelineQuery({ cpf, inicio, fim, enabled = true }) {
     const query = useQuery({
         queryKey: ["clinical-timeline", cpf, inicio, fim],
         queryFn: ({ signal }) => getClinicalTimeline({ cpf, inicio, fim, signal }),
-        enabled: Boolean(cpf),
+        enabled: Boolean(cpf) && enabled,
         staleTime: TIMELINE_STALE_TIME,
         gcTime: TIMELINE_CACHE_TIME,
         retry: shouldRetryTimelineRequest
@@ -23,7 +23,7 @@ export function useClinicalTimelineQuery({ cpf, inicio, fim }) {
 
     return {
         items: query.data?.itens ?? [],
-        loading: Boolean(cpf) && query.isPending,
+        loading: Boolean(cpf) && enabled && query.isPending,
         error: query.isError,
         errorType: apiError?.type ?? null,
         errorStatus: apiError?.status ?? null,

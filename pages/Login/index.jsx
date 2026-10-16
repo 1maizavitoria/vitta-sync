@@ -161,9 +161,10 @@ export default function Login() {
         };
 
         try {
-            await login(data);
-            showAlert("success", getChannelMessage(channel));
             setSeconds(10);
+            showAlert("success", getChannelMessage(channel));
+            await login(data);
+
         } catch (error) {
             setErrorCPF(true);
             setErrorPassword(true);

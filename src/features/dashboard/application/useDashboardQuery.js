@@ -8,7 +8,7 @@ function shouldRetryDashboardRequest(failureCount, error) {
     return classifyApiError(error).retryable && failureCount < 1;
 }
 
-export function useDashboardQuery({ cpf, inicio, fim, categorias }) {
+export function useDashboardQuery({ cpf, inicio, fim, categorias, enabled = true }) {
     const query = useConsultar(
         cpf || "",
         {
@@ -18,7 +18,7 @@ export function useDashboardQuery({ cpf, inicio, fim, categorias }) {
         },
         {
             query: {
-                enabled: Boolean(cpf),
+                enabled: Boolean(cpf) && enabled,
                 staleTime: DASHBOARD_STALE_TIME,
                 gcTime: DASHBOARD_CACHE_TIME,
                 retry: shouldRetryDashboardRequest
@@ -29,7 +29,7 @@ export function useDashboardQuery({ cpf, inicio, fim, categorias }) {
 
     return {
         dashboard: query.data ?? null,
-        loading: Boolean(cpf) && query.isPending,
+        loading: Boolean(cpf) && enabled && query.isPending,
         error: query.isError,
         errorType: apiError?.type ?? null,
         errorStatus: apiError?.status ?? null,
