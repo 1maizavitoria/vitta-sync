@@ -331,6 +331,10 @@ const dictionaries = {
             selectPatient: "Selecione um paciente vinculado para visualizar o dashboard.",
             category: "Categoria",
             lastDays: "Últimos {days} dias",
+            customPeriod: "Personalizado",
+            startDate: "Data inicial",
+            endDate: "Data final",
+            invalidDateRange: "Informe um período válido, com a data inicial anterior ou igual à final e sem datas futuras.",
             latestValue: "Último valor do período",
             loadError: "Não foi possível carregar os dados do dashboard.",
             errors: {
@@ -358,8 +362,28 @@ const dictionaries = {
                     baseline: "Linha de base personalizada",
                     latestValues: "Valores mais recentes",
                     charts: "Gráficos de evolução",
+                    aggregatedSummary: "Resumos do período",
                     timeline: "Linha do tempo clínica"
                 }
+            },
+            aggregatedSummary: {
+                title: "Resumos do período",
+                description: "Médias e contagens agrupadas pelo banco de dados para o período selecionado.",
+                vitalsTitle: "Médias diárias dos sinais vitais",
+                habitsTitle: "Resumo diário de hábitos",
+                eventsTitle: "Eventos por tipo",
+                empty: "Nenhum dado agregado encontrado neste período.",
+                measurements: "Medições",
+                heartRate: "Frequência cardíaca média",
+                respiratoryRate: "Frequência respiratória média",
+                pressure: "Pressão arterial média",
+                temperature: "Temperatura média",
+                saturation: "Saturação média",
+                weight: "Peso médio",
+                records: "Registros",
+                sleep: "Sono médio",
+                exercise: "Exercício total",
+                occurrences: "Ocorrências"
             },
             chartSummary: {
                 title: "Resumo textual do gráfico",
@@ -1265,6 +1289,10 @@ const dictionaries = {
             selectPatient: "Select a linked patient to view the dashboard.",
             category: "Category",
             lastDays: "Last {days} days",
+            customPeriod: "Custom",
+            startDate: "Start date",
+            endDate: "End date",
+            invalidDateRange: "Enter a valid period with the start date on or before the end date and no future dates.",
             latestValue: "Latest value in the period",
             loadError: "Dashboard data could not be loaded.",
             errors: {
@@ -1292,8 +1320,28 @@ const dictionaries = {
                     baseline: "Personal baseline",
                     latestValues: "Latest values",
                     charts: "Trend charts",
+                    aggregatedSummary: "Period summaries",
                     timeline: "Clinical timeline"
                 }
+            },
+            aggregatedSummary: {
+                title: "Period summaries",
+                description: "Averages and counts grouped by the database for the selected period.",
+                vitalsTitle: "Daily vital sign averages",
+                habitsTitle: "Daily habit summary",
+                eventsTitle: "Events by type",
+                empty: "No aggregated data was found for this period.",
+                measurements: "Measurements",
+                heartRate: "Average heart rate",
+                respiratoryRate: "Average respiratory rate",
+                pressure: "Average blood pressure",
+                temperature: "Average temperature",
+                saturation: "Average oxygen saturation",
+                weight: "Average weight",
+                records: "Records",
+                sleep: "Average sleep",
+                exercise: "Total exercise",
+                occurrences: "Occurrences"
             },
             chartSummary: {
                 title: "Chart text summary",
@@ -2199,6 +2247,10 @@ const dictionaries = {
             selectPatient: "Selecciona un paciente vinculado para visualizar el panel.",
             category: "Categoría",
             lastDays: "Últimos {days} días",
+            customPeriod: "Personalizado",
+            startDate: "Fecha inicial",
+            endDate: "Fecha final",
+            invalidDateRange: "Introduce un período válido, con la fecha inicial anterior o igual a la final y sin fechas futuras.",
             latestValue: "Último valor del período",
             loadError: "No fue posible cargar los datos del panel.",
             errors: {
@@ -2226,8 +2278,28 @@ const dictionaries = {
                     baseline: "Línea de base personalizada",
                     latestValues: "Valores más recientes",
                     charts: "Gráficos de evolución",
+                    aggregatedSummary: "Resúmenes del período",
                     timeline: "Línea de tiempo clínica"
                 }
+            },
+            aggregatedSummary: {
+                title: "Resúmenes del período",
+                description: "Promedios y recuentos agrupados por la base de datos para el período seleccionado.",
+                vitalsTitle: "Promedios diarios de los signos vitales",
+                habitsTitle: "Resumen diario de hábitos",
+                eventsTitle: "Eventos por tipo",
+                empty: "No se encontraron datos agregados en este período.",
+                measurements: "Mediciones",
+                heartRate: "Frecuencia cardíaca promedio",
+                respiratoryRate: "Frecuencia respiratoria promedio",
+                pressure: "Presión arterial promedio",
+                temperature: "Temperatura promedio",
+                saturation: "Saturación promedio",
+                weight: "Peso promedio",
+                records: "Registros",
+                sleep: "Sueño promedio",
+                exercise: "Ejercicio total",
+                occurrences: "Ocurrencias"
             },
             chartSummary: {
                 title: "Resumen textual del gráfico",
