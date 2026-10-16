@@ -22,13 +22,15 @@ import { createLocalDashboardPreferencesRepository } from "../../src/features/da
 import { useDashboardController } from "../../src/features/dashboard/presentation/useDashboardController";
 
 import SettingsOutlinedIcon from "@mui/icons-material/SettingsOutlined";
+import DashboardAggregatedSummary from "../../components/ui/DashboardAggregatedSummary";
 import DashboardChart from "../../components/ui/DashboardChart";
 import ClinicalStability from "../../components/ui/ClinicalStability";
 import ClinicalTimeline from "../../components/ui/ClinicalTimeline";
+import DatePickerUI from "../../components/ui/DatePicker";
 import PersonalBaseline from "../../components/ui/PersonalBaseline";
 import DashboardCustomizationDialog from "../../src/features/dashboard/presentation/DashboardCustomizationDialog";
 
-const periods = [7, 30, 90];
+const periods = [7, 30, 90, "custom"];
 const categoryCodes = [
     "todas",
     "pressao",
@@ -96,7 +98,11 @@ export default function Dashboard() {
         clinicalTimeline,
         dashboardPreferences,
         period,
+        periodDays,
         setPeriod,
+        customDateRange,
+        updateCustomDateRange,
+        dateRangeValid,
         categoryFilter,
         setCategoryFilter
     } = useDashboardController({
@@ -120,11 +126,14 @@ export default function Dashboard() {
     const categories = dashboard?.categorias || [];
     const clinicalStability = dashboard?.estabilidadeClinica || [];
     const baselines = dashboard?.linhasBase || [];
+    const dailyVitals = dashboard?.resumoDiario || [];
+    const dailyHabits = dashboard?.resumoHabitos || [];
+    const eventsByType = dashboard?.eventosPorTipo || [];
     const widgetRegistry = {
         stability: (
             <ClinicalStability
                 items={clinicalStability}
-                period={period}
+                period={periodDays}
                 t={t}
                 formatNumber={formatNumber}
             />
@@ -183,6 +192,17 @@ export default function Dashboard() {
                     />
                 ))}
             </Box>
+        ),
+        aggregatedSummary: (
+            <DashboardAggregatedSummary
+                dailyVitals={dailyVitals}
+                dailyHabits={dailyHabits}
+                eventsByType={eventsByType}
+                formatDate={formatDate}
+                formatMeasurement={formatMeasurement}
+                formatNumber={formatNumber}
+                t={t}
+            />
         ),
         timeline: (
             <ClinicalTimeline
@@ -271,6 +291,7 @@ export default function Dashboard() {
                             borderColor: theme.vitta.border,
                             boxShadow: theme.vitta.shadow,
                             display: "flex",
+                            flexWrap: "wrap",
                             alignItems: { xs: "stretch", md: "center" },
                             justifyContent: "space-between",
                             flexDirection: { xs: "column", md: "row" },
@@ -296,7 +317,9 @@ export default function Dashboard() {
                         >
                             {periods.map((days) => (
                                 <ToggleButton key={days} value={days} sx={{ fontWeight: 700 }}>
-                                    {t("dashboard.lastDays").replace("{days}", days)}
+                                    {days === "custom"
+                                        ? t("dashboard.customPeriod")
+                                        : t("dashboard.lastDays").replace("{days}", days)}
                                 </ToggleButton>
                             ))}
                         </ToggleButtonGroup>
@@ -337,6 +360,36 @@ export default function Dashboard() {
                                 {t("dashboard.customization.open")}
                             </Button>
                         </Box>
+
+                        {period === "custom" && (
+                            <Box sx={{ width: "100%" }}>
+                                <Box
+                                    sx={{
+                                        display: "grid",
+                                        gridTemplateColumns: { xs: "minmax(0, 1fr)", sm: "repeat(2, minmax(0, 1fr))" },
+                                        gap: 2
+                                    }}
+                                >
+                                    <DatePickerUI
+                                        label={t("dashboard.startDate")}
+                                        value={customDateRange.inicio}
+                                        error={!dateRangeValid}
+                                        onChange={(value) => updateCustomDateRange("inicio", value)}
+                                    />
+                                    <DatePickerUI
+                                        label={t("dashboard.endDate")}
+                                        value={customDateRange.fim}
+                                        error={!dateRangeValid}
+                                        onChange={(value) => updateCustomDateRange("fim", value)}
+                                    />
+                                </Box>
+                                {!dateRangeValid && (
+                                    <Typography color="error" variant={accessibilityMode ? "body2" : "caption"}>
+                                        {t("dashboard.invalidDateRange")}
+                                    </Typography>
+                                )}
+                            </Box>
+                        )}
                     </Paper>
 
                     {error && <Alert severity="error" sx={{ mb: 3 }}>{t(dashboardErrorKey)}</Alert>}
@@ -365,6 +418,7 @@ export default function Dashboard() {
                         {dashboardPreferences.layout.widgets
                             .filter((widget) => widget.visible)
                             .map((widget) => {
+                                if (!dateRangeValid) return null;
                                 if (widget.id !== "timeline" && (loading || error)) return null;
                                 if (widget.id === "baseline" && ["sono", "exercicio"].includes(categoryFilter)) return null;
 
