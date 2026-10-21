@@ -6,6 +6,7 @@ import br.com.vittasync.vittasync.Exception.RecursoNaoEncontradoException;
 import br.com.vittasync.vittasync.Model.Usuario;
 import br.com.vittasync.vittasync.Repository.SessaoTokenRepository;
 import br.com.vittasync.vittasync.Repository.UsuarioRepository;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 
@@ -19,64 +20,70 @@ public class UsuarioService {
 
     public UsuarioService(UsuarioRepository usuarioRepository,
                           SessaoTokenRepository tokenRepo,
-<span class="fc" id="L22">                          JwtService jwtService) {</span>
-<span class="fc" id="L23">        this.usuarioRepository = usuarioRepository;</span>
-<span class="fc" id="L24">        this.tokenRepo = tokenRepo;</span>
-<span class="fc" id="L25">        this.jwtService = jwtService;</span>
-<span class="fc" id="L26">    }</span>
+<span class="fc" id="L23">                          JwtService jwtService) {</span>
+<span class="fc" id="L24">        this.usuarioRepository = usuarioRepository;</span>
+<span class="fc" id="L25">        this.tokenRepo = tokenRepo;</span>
+<span class="fc" id="L26">        this.jwtService = jwtService;</span>
+<span class="fc" id="L27">    }</span>
 
     public Usuario create(Usuario usuario) {
-<span class="fc bfc" id="L29" title="All 2 branches covered.">        if (usuarioRepository.existsByCpf(usuario.getCpf())) {</span>
-<span class="fc" id="L30">            throw new UsuarioJaCadastradoException(&quot;Usuário já cadastrado&quot;);</span>
+<span class="fc bfc" id="L30" title="All 2 branches covered.">        if (usuarioRepository.existsByCpf(usuario.getCpf())) {</span>
+<span class="fc" id="L31">            throw new UsuarioJaCadastradoException(&quot;Usuário já cadastrado&quot;);</span>
         }
-<span class="fc bfc" id="L32" title="All 2 branches covered.">        if (usuarioRepository.existsByEmail(usuario.getEmail())) {</span>
-<span class="fc" id="L33">            throw new UsuarioJaCadastradoException(&quot;Usuário já cadastrado&quot;);</span>
+<span class="fc bfc" id="L33" title="All 2 branches covered.">        if (usuarioRepository.existsByEmail(usuario.getEmail())) {</span>
+<span class="fc" id="L34">            throw new UsuarioJaCadastradoException(&quot;Usuário já cadastrado&quot;);</span>
         }
-<span class="fc" id="L35">        usuario.setDataCadastro(LocalDateTime.now());</span>
-<span class="fc" id="L36">        return usuarioRepository.save(usuario);</span>
+<span class="fc" id="L36">        usuario.setDataCadastro(LocalDateTime.now());</span>
+<span class="fc" id="L37">        return usuarioRepository.save(usuario);</span>
     }
 
     public Usuario searchByEmail(String email) {
-<span class="fc" id="L40">        return usuarioRepository.findByEmail(email)</span>
-<span class="fc" id="L41">                .orElseThrow(() -&gt; new RecursoNaoEncontradoException(&quot;Usuário não encontrado&quot;));</span>
+<span class="fc" id="L41">        return usuarioRepository.findByEmail(email)</span>
+<span class="fc" id="L42">                .orElseThrow(() -&gt; new RecursoNaoEncontradoException(&quot;Usuário não encontrado&quot;));</span>
     }
 
     public Usuario searchByCpf(String cpf) {
-<span class="fc" id="L45">        return usuarioRepository.findByCpf(cpf)</span>
-<span class="fc" id="L46">                .orElseThrow(() -&gt; new RecursoNaoEncontradoException(&quot;Usuário não encontrado&quot;));</span>
+<span class="fc" id="L46">        return usuarioRepository.findByCpf(cpf)</span>
+<span class="fc" id="L47">                .orElseThrow(() -&gt; new RecursoNaoEncontradoException(&quot;Usuário não encontrado&quot;));</span>
+    }
+
+    // o JwtFilter já validou o token e guardou o CPF no SecurityContext, então não precisa ler o token de novo
+    public Usuario getUsuarioLogado() {
+<span class="nc" id="L52">        String cpf = SecurityContextHolder.getContext().getAuthentication().getName();</span>
+<span class="nc" id="L53">        return searchByCpf(cpf);</span>
     }
 
     public Usuario searchById(Integer id) {
-<span class="fc" id="L50">        return usuarioRepository.findById(id)</span>
-<span class="fc" id="L51">                .orElseThrow(() -&gt;</span>
-<span class="fc" id="L52">                        new RecursoNaoEncontradoException(</span>
+<span class="fc" id="L57">        return usuarioRepository.findById(id)</span>
+<span class="fc" id="L58">                .orElseThrow(() -&gt;</span>
+<span class="fc" id="L59">                        new RecursoNaoEncontradoException(</span>
                                 &quot;Usuário não encontrado&quot;
                         )
                 );
     }
 
     public Usuario update(Usuario usuario) {
-<span class="fc" id="L59">        return usuarioRepository.save(usuario);</span>
+<span class="fc" id="L66">        return usuarioRepository.save(usuario);</span>
     }
 
     public void delete(Integer id) {
-<span class="fc" id="L63">        Usuario usuario = usuarioRepository.findById(id)</span>
-<span class="fc" id="L64">                .orElseThrow(() -&gt; new RecursoNaoEncontradoException(&quot;Usuário não encontrado&quot;));</span>
+<span class="fc" id="L70">        Usuario usuario = usuarioRepository.findById(id)</span>
+<span class="fc" id="L71">                .orElseThrow(() -&gt; new RecursoNaoEncontradoException(&quot;Usuário não encontrado&quot;));</span>
 
-<span class="fc" id="L66">        tokenRepo.findAll().stream()</span>
-<span class="fc" id="L67">                .filter(t -&gt; {</span>
+<span class="fc" id="L73">        tokenRepo.findAll().stream()</span>
+<span class="fc" id="L74">                .filter(t -&gt; {</span>
                     try {
-<span class="fc" id="L69">                        return jwtService.extrairCpf(t.getToken()).equals(usuario.getCpf());</span>
-<span class="nc" id="L70">                    } catch (Exception e) {</span>
-<span class="nc" id="L71">                        return false;</span>
+<span class="fc" id="L76">                        return jwtService.extrairCpf(t.getToken()).equals(usuario.getCpf());</span>
+<span class="nc" id="L77">                    } catch (Exception e) {</span>
+<span class="nc" id="L78">                        return false;</span>
                     }
                 })
-<span class="fc" id="L74">                .forEach(t -&gt; {</span>
-<span class="fc" id="L75">                    t.setAtivo(false);</span>
-<span class="fc" id="L76">                    tokenRepo.save(t);</span>
-<span class="fc" id="L77">                });</span>
+<span class="fc" id="L81">                .forEach(t -&gt; {</span>
+<span class="fc" id="L82">                    t.setAtivo(false);</span>
+<span class="fc" id="L83">                    tokenRepo.save(t);</span>
+<span class="fc" id="L84">                });</span>
 
-<span class="fc" id="L79">        usuarioRepository.deleteById(id);</span>
-<span class="fc" id="L80">    }</span>
+<span class="fc" id="L86">        usuarioRepository.deleteById(id);</span>
+<span class="fc" id="L87">    }</span>
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.15.202606040825</span></div></body></html>

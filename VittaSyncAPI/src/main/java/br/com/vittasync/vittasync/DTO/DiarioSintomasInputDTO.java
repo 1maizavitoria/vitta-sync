@@ -23,7 +23,7 @@ public class DiarioSintomasInputDTO {
     @NotNull(message = "Data de referência é obrigatória")
     private LocalDate dataReferencia;
 
-    @Schema(hidden = true)
+
     private LocalDateTime dataRegistro;
 
     @Schema(hidden = true)

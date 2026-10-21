@@ -1,0 +1,180 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="pt"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>LinhaBaseService.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report"></a> &gt; <a href="index.source.html" class="el_package">br.com.vittasync.vittasync.Service</a> &gt; <span class="el_source">LinhaBaseService.java</span></div><h1>LinhaBaseService.java</h1><pre class="source lang-java linenums">package br.com.vittasync.vittasync.Service;
+
+
+import br.com.vittasync.vittasync.Model.LinhaBase;
+import br.com.vittasync.vittasync.Model.SinaisVitais;
+import br.com.vittasync.vittasync.Repository.LinhaBaseRepository;
+import br.com.vittasync.vittasync.Repository.SinaisVitaisRepository;
+import br.com.vittasync.vittasync.Repository.UsuarioRepository;
+import br.com.vittasync.vittasync.Exception.RecursoNaoEncontradoException;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.*;
+
+
+@Service
+public class LinhaBaseService {
+
+    private final LinhaBaseRepository linhaBaseRepository;
+    private final SinaisVitaisRepository sinaisVitaisRepository;
+    private final UsuarioRepository usuarioRepository;
+
+<span class="fc" id="L24">    public static final List&lt;String&gt; SINAIS = List.of(</span>
+            &quot;peso&quot;,
+            &quot;frequencia_cardiaca&quot;,
+            &quot;frequencia_respiratoria&quot;,
+            &quot;pressao_sistolica&quot;,
+            &quot;pressao_diastolica&quot;,
+            &quot;temperatura&quot;,
+            &quot;saturacao&quot;
+    );
+
+    public static final int diasNecessarios = 14;
+    private static final int desviosPadraoFaixa = 2;
+
+    public LinhaBaseService(
+            LinhaBaseRepository linhaBaseRepository,
+            SinaisVitaisRepository sinaisVitaisRepository,
+            UsuarioRepository usuarioRepository
+<span class="fc" id="L41">    ) {</span>
+<span class="fc" id="L42">        this.linhaBaseRepository = linhaBaseRepository;</span>
+<span class="fc" id="L43">        this.sinaisVitaisRepository = sinaisVitaisRepository;</span>
+<span class="fc" id="L44">        this.usuarioRepository = usuarioRepository;</span>
+<span class="fc" id="L45">    }</span>
+
+
+    @Transactional
+    public void atualizarLinhasBase(Integer pacienteId) {
+        // Serializa a formação por paciente, inclusive quando ainda não existe referência.
+<span class="fc" id="L51">        usuarioRepository.buscarPorIdComBloqueio(pacienteId)</span>
+<span class="fc" id="L52">                .orElseThrow(() -&gt; new RecursoNaoEncontradoException(&quot;Paciente não encontrado&quot;));</span>
+<span class="fc" id="L53">        List&lt;SinaisVitais&gt; sinais = sinaisVitaisRepository.findByPacienteIdOrderByDataRegistroAsc(pacienteId);</span>
+
+<span class="fc bfc" id="L55" title="All 2 branches covered.">        for (String sinal : SINAIS) {</span>
+<span class="fc bfc" id="L56" title="All 2 branches covered.">            if (linhaBaseRepository.existsByPacienteIdAndSinal(pacienteId, sinal)) continue;</span>
+
+<span class="fc" id="L58">            TreeMap&lt;LocalDate, Double&gt; mediasDiarias = calcularMediasDiarias(sinais, sinal);</span>
+<span class="fc" id="L59">            List&lt;LocalDate&gt; periodo = buscarPrimeiraSequenciaCompleta(mediasDiarias);</span>
+<span class="fc bfc" id="L60" title="All 2 branches covered.">            if (periodo != null) {</span>
+<span class="fc" id="L61">                formarLinhaBase(pacienteId, sinal, periodo, mediasDiarias);</span>
+            }
+<span class="fc" id="L63">        }</span>
+<span class="fc" id="L64">    }</span>
+
+    public int calcularProgresso(Integer pacienteId, String sinal) {
+<span class="fc" id="L67">        List&lt;SinaisVitais&gt; sinais = sinaisVitaisRepository.findByPacienteIdOrderByDataRegistroAsc(pacienteId);</span>
+<span class="fc" id="L68">        TreeMap&lt;LocalDate, Double&gt; mediasDiarias = calcularMediasDiarias(sinais, sinal);</span>
+
+<span class="fc" id="L70">        LocalDate hoje = LocalDate.now();</span>
+<span class="fc bfc" id="L71" title="All 2 branches covered.">        LocalDate dia = mediasDiarias.containsKey(hoje) ? hoje : hoje.minusDays(1);</span>
+
+<span class="fc" id="L73">        int dias = 0;</span>
+<span class="fc bfc" id="L74" title="All 4 branches covered.">        while (mediasDiarias.containsKey(dia) &amp;&amp; dias &lt; diasNecessarios) {</span>
+<span class="fc" id="L75">            dias++;</span>
+<span class="fc" id="L76">            dia = dia.minusDays(1);</span>
+        }
+<span class="fc" id="L78">        return dias;</span>
+    }
+
+    public String comparar(LinhaBase linhaBase, Number valor) {
+<span class="fc bfc" id="L82" title="All 4 branches covered.">        if (linhaBase == null || valor == null</span>
+<span class="fc bfc" id="L83" title="All 4 branches covered.">                || linhaBase.getLimiteInferior() == null || linhaBase.getLimiteSuperior() == null) {</span>
+<span class="fc" id="L84">            return null;</span>
+        }
+
+<span class="fc" id="L87">        double numero = valor.doubleValue();</span>
+<span class="fc bfc" id="L88" title="All 2 branches covered.">        if (numero &lt; linhaBase.getLimiteInferior()) return &quot;abaixo&quot;;</span>
+<span class="fc bfc" id="L89" title="All 2 branches covered.">        if (numero &gt; linhaBase.getLimiteSuperior()) return &quot;acima&quot;;</span>
+<span class="fc" id="L90">        return &quot;dentro&quot;;</span>
+    }
+
+    public Number valorSinal(SinaisVitais sinais, String sinal) {
+<span class="fc bfc" id="L94" title="All 8 branches covered.">        return switch (sinal) {</span>
+<span class="fc" id="L95">            case &quot;peso&quot; -&gt; sinais.getPeso();</span>
+<span class="fc" id="L96">            case &quot;frequencia_cardiaca&quot; -&gt; sinais.getFcBpm();</span>
+<span class="fc" id="L97">            case &quot;frequencia_respiratoria&quot; -&gt; sinais.getFrRpm();</span>
+<span class="fc" id="L98">            case &quot;pressao_sistolica&quot; -&gt; sinais.getPaSistolica();</span>
+<span class="fc" id="L99">            case &quot;pressao_diastolica&quot; -&gt; sinais.getPaDiastolica();</span>
+<span class="fc" id="L100">            case &quot;temperatura&quot; -&gt; sinais.getTempCelcius();</span>
+<span class="fc" id="L101">            case &quot;saturacao&quot; -&gt; sinais.getSpo2Porcento();</span>
+<span class="fc" id="L102">            default -&gt; null;</span>
+        };
+    }
+
+    private TreeMap&lt;LocalDate, Double&gt; calcularMediasDiarias(List&lt;SinaisVitais&gt; sinais, String sinal) {
+<span class="fc" id="L107">        Map&lt;LocalDate, List&lt;Double&gt;&gt; valoresPorDia = new HashMap&lt;&gt;();</span>
+
+<span class="fc bfc" id="L109" title="All 2 branches covered.">        for (SinaisVitais registro : sinais) {</span>
+<span class="fc" id="L110">            Number valor = valorSinal(registro, sinal);</span>
+<span class="fc bfc" id="L111" title="All 4 branches covered.">            if (valor == null || registro.getDataRegistro() == null) continue;</span>
+
+<span class="fc" id="L113">            valoresPorDia</span>
+<span class="fc" id="L114">                    .computeIfAbsent(registro.getDataRegistro().toLocalDate(), k -&gt; new ArrayList&lt;&gt;())</span>
+<span class="fc" id="L115">                    .add(valor.doubleValue());</span>
+<span class="fc" id="L116">        }</span>
+
+<span class="fc" id="L118">        TreeMap&lt;LocalDate, Double&gt; mediasDiarias = new TreeMap&lt;&gt;();</span>
+<span class="fc bfc" id="L119" title="All 2 branches covered.">        for (var entry : valoresPorDia.entrySet()) {</span>
+<span class="fc" id="L120">            mediasDiarias.put(entry.getKey(), calcularMedia(entry.getValue()));</span>
+<span class="fc" id="L121">        }</span>
+<span class="fc" id="L122">        return mediasDiarias;</span>
+    }
+
+    private List&lt;LocalDate&gt; buscarPrimeiraSequenciaCompleta(TreeMap&lt;LocalDate, Double&gt; mediasDiarias) {
+<span class="fc" id="L126">        List&lt;LocalDate&gt; sequencia = new ArrayList&lt;&gt;();</span>
+
+<span class="fc bfc" id="L128" title="All 2 branches covered.">        for (LocalDate dia : mediasDiarias.keySet()) {</span>
+<span class="fc bfc" id="L129" title="All 4 branches covered.">            if (!sequencia.isEmpty() &amp;&amp; !dia.equals(sequencia.get(sequencia.size() - 1).plusDays(1))) {</span>
+<span class="fc" id="L130">                sequencia.clear();</span>
+            }
+<span class="fc" id="L132">            sequencia.add(dia);</span>
+
+<span class="fc bfc" id="L134" title="All 2 branches covered.">            if (sequencia.size() == diasNecessarios) return sequencia;</span>
+<span class="fc" id="L135">        }</span>
+<span class="fc" id="L136">        return null;</span>
+    }
+
+    private void formarLinhaBase(Integer pacienteId,
+                                 String sinal,
+                                 List&lt;LocalDate&gt; periodo,
+                                 TreeMap&lt;LocalDate, Double&gt; mediasDiarias) {
+<span class="fc" id="L143">        List&lt;Double&gt; valores = periodo.stream().map(mediasDiarias::get).toList();</span>
+
+<span class="fc" id="L145">        double media = calcularMedia(valores);</span>
+<span class="fc" id="L146">        double desvioPadrao = calcularDesvioPadraoAmostral(valores, media);</span>
+
+<span class="fc" id="L148">        LinhaBase linhaBase = new LinhaBase();</span>
+<span class="fc" id="L149">        linhaBase.setPacienteId(pacienteId);</span>
+<span class="fc" id="L150">        linhaBase.setSinal(sinal);</span>
+<span class="fc" id="L151">        linhaBase.setDataInicio(periodo.get(0));</span>
+<span class="fc" id="L152">        linhaBase.setDataFim(periodo.get(periodo.size() - 1));</span>
+<span class="fc" id="L153">        linhaBase.setMedia(media);</span>
+<span class="fc" id="L154">        linhaBase.setDesvioPadrao(desvioPadrao);</span>
+
+<span class="fc bfc" id="L156" title="All 2 branches covered.">        if (desvioPadrao &gt; 0) {</span>
+<span class="fc" id="L157">            linhaBase.setLimiteInferior(media - desviosPadraoFaixa * desvioPadrao);</span>
+<span class="fc" id="L158">            linhaBase.setLimiteSuperior(media + desviosPadraoFaixa * desvioPadrao);</span>
+        }
+
+<span class="fc" id="L161">        linhaBase.setDataFormacao(LocalDateTime.now());</span>
+<span class="fc" id="L162">        linhaBaseRepository.save(linhaBase);</span>
+<span class="fc" id="L163">    }</span>
+
+    private double calcularMedia(List&lt;Double&gt; valores) {
+<span class="fc" id="L166">        return valores.stream().mapToDouble(Double::doubleValue).average().orElse(0);</span>
+    }
+
+    private double calcularDesvioPadraoAmostral(List&lt;Double&gt; valores, double media) {
+<span class="fc" id="L170">        double menor = Collections.min(valores);</span>
+<span class="fc" id="L171">        double maior = Collections.max(valores);</span>
+        //ulp mede precisão do double na escala (não é tolerância clínica)
+<span class="fc" id="L173">        double toleranciaNumerica = 8 * Math.ulp(Math.max(Math.abs(menor), Math.abs(maior)));</span>
+<span class="fc bfc" id="L174" title="All 2 branches covered.">        if (maior - menor &lt;= toleranciaNumerica) return 0;</span>
+
+<span class="fc" id="L176">        double somaQuadrados = valores.stream().mapToDouble(v -&gt; Math.pow(v - media, 2)).sum();</span>
+<span class="fc" id="L177">        return Math.sqrt(somaQuadrados / (valores.size() - 1));</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.15.202606040825</span></div></body></html>

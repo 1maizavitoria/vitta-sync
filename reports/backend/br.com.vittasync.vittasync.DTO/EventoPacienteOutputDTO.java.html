@@ -1,107 +1,86 @@
 <?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="pt"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>EventoPacienteOutputDTO.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report"></a> &gt; <a href="index.source.html" class="el_package">br.com.vittasync.vittasync.DTO</a> &gt; <span class="el_source">EventoPacienteOutputDTO.java</span></div><h1>EventoPacienteOutputDTO.java</h1><pre class="source lang-java linenums">package br.com.vittasync.vittasync.DTO;
 
+
+import io.swagger.v3.oas.annotations.media.Schema;
 import java.sql.Timestamp;
 
-<span class="fc" id="L5">public class EventoPacienteOutputDTO {</span>
 
+@Schema(description = &quot;Evento registrado na linha de notificações do paciente&quot;)
+<span class="fc" id="L9">public class EventoPacienteOutputDTO {</span>
+
+    @Schema(description = &quot;ID do evento&quot;, example = &quot;154&quot;)
     private Long id;
+
+    @Schema(description = &quot;ID do paciente&quot;, example = &quot;3&quot;)
     private Integer pacienteId;
+
+    @Schema(description = &quot;ID do usuário que realizou a ação&quot;, example = &quot;5&quot;)
     private Integer usuarioId;
+
+    @Schema(description = &quot;Código do tipo do evento usado pelo front&quot;, example = &quot;VITAL_SIGNS_CREATED&quot;)
     private String tipoEvento;
+
+    @Schema(description = &quot;Título do evento&quot;, example = &quot;Sinais vitais registrados&quot;)
     private String titulo;
+
+    @Schema(description = &quot;Descrição do evento&quot;, example = &quot;Novos sinais vitais foram registrados&quot;)
     private String descricao;
+
+    @Schema(description = &quot;Dados extras do evento em JSON&quot;, example = &quot;{\&quot;patientName\&quot;: \&quot;Maria Souza\&quot;}&quot;)
+    private String metadata;
+
+    @Schema(description = &quot;Indica se o evento já foi visualizado&quot;, example = &quot;false&quot;)
     private Boolean visualizado;
+
+    @Schema(description = &quot;Data e hora em que o evento foi criado&quot;, example = &quot;2026-10-13T20:15:42&quot;)
     private Timestamp criadoEm;
+
+    @Schema(description = &quot;Prioridade do evento&quot;, example = &quot;normal&quot;, allowableValues = {&quot;normal&quot;, &quot;alta&quot;, &quot;critico&quot;})
     private String prioridade;
+
+    @Schema(description = &quot;Nome do usuário que realizou a ação&quot;, example = &quot;Carlos Souza&quot;)
     private String usuarioNome;
+
+    @Schema(description = &quot;Tipo do usuário que realizou a ação&quot;, example = &quot;responsavel&quot;, allowableValues = {&quot;paciente&quot;, &quot;responsavel&quot;, &quot;saude&quot;})
     private String usuarioTipo;
 
-    public Long getId() {
-<span class="fc" id="L20">        return id;</span>
-    }
 
-    public void setId(Long id) {
-<span class="fc" id="L24">        this.id = id;</span>
-<span class="fc" id="L25">    }</span>
 
-    public Integer getPacienteId() {
-<span class="fc" id="L28">        return pacienteId;</span>
-    }
+<span class="fc" id="L49">    public Long getId() {return id;}</span>
+<span class="fc" id="L50">    public void setId(Long id) {this.id = id;}</span>
 
-    public void setPacienteId(Integer pacienteId) {
-<span class="fc" id="L32">        this.pacienteId = pacienteId;</span>
-<span class="fc" id="L33">    }</span>
+<span class="fc" id="L52">    public Integer getPacienteId() {return pacienteId;}</span>
+<span class="fc" id="L53">    public void setPacienteId(Integer pacienteId) {this.pacienteId = pacienteId;}</span>
+    
+<span class="fc" id="L55">    public Integer getUsuarioId() {return usuarioId;}</span>
+<span class="fc" id="L56">    public void setUsuarioId(Integer usuarioId) {this.usuarioId = usuarioId;}</span>
 
-    public Integer getUsuarioId() {
-<span class="fc" id="L36">        return usuarioId;</span>
-    }
+<span class="fc" id="L58">    public String getTipoEvento() {return tipoEvento;}</span>
+<span class="fc" id="L59">    public void setTipoEvento(String tipoEvento) {this.tipoEvento = tipoEvento;}</span>
 
-    public void setUsuarioId(Integer usuarioId) {
-<span class="fc" id="L40">        this.usuarioId = usuarioId;</span>
-<span class="fc" id="L41">    }</span>
+<span class="fc" id="L61">    public String getTitulo() {return titulo;}</span>
+<span class="fc" id="L62">    public void setTitulo(String titulo) {this.titulo = titulo;}</span>
 
-    public String getTipoEvento() {
-<span class="fc" id="L44">        return tipoEvento;</span>
-    }
+<span class="fc" id="L64">    public String getDescricao() {return descricao;}</span>
+<span class="fc" id="L65">    public void setDescricao(String descricao) {this.descricao = descricao;}</span>
 
-    public void setTipoEvento(String tipoEvento) {
-<span class="fc" id="L48">        this.tipoEvento = tipoEvento;</span>
-<span class="fc" id="L49">    }</span>
+<span class="fc" id="L67">    public String getMetadata() {return metadata;}</span>
+<span class="fc" id="L68">    public void setMetadata(String metadata) {this.metadata = metadata;}</span>
 
-    public String getTitulo() {
-<span class="fc" id="L52">        return titulo;</span>
-    }
+<span class="fc" id="L70">    public Boolean getVisualizado() {return visualizado;}</span>
+<span class="fc" id="L71">    public void setVisualizado(Boolean visualizado) {this.visualizado = visualizado;}</span>
 
-    public void setTitulo(String titulo) {
-<span class="fc" id="L56">        this.titulo = titulo;</span>
-<span class="fc" id="L57">    }</span>
+<span class="fc" id="L73">    public Timestamp getCriadoEm() {return criadoEm;}</span>
+<span class="fc" id="L74">    public void setCriadoEm(Timestamp criadoEm) {this.criadoEm = criadoEm;}</span>
+    
+<span class="fc" id="L76">    public String getPrioridade() {return prioridade;}</span>
+<span class="fc" id="L77">    public void setPrioridade(String prioridade) {this.prioridade = prioridade;}</span>
 
-    public String getDescricao() {
-<span class="fc" id="L60">        return descricao;</span>
-    }
+<span class="fc" id="L79">    public String getUsuarioNome() {return usuarioNome;}</span>
+<span class="fc" id="L80">    public void setUsuarioNome(String usuarioNome) {this.usuarioNome = usuarioNome;}</span>
 
-    public void setDescricao(String descricao) {
-<span class="fc" id="L64">        this.descricao = descricao;</span>
-<span class="fc" id="L65">    }</span>
+<span class="fc" id="L82">    public String getUsuarioTipo() {return usuarioTipo;}</span>
+<span class="fc" id="L83">    public void setUsuarioTipo(String usuarioTipo) {this.usuarioTipo = usuarioTipo;}</span>
 
-    public Boolean getVisualizado() {
-<span class="fc" id="L68">        return visualizado;</span>
-    }
-
-    public void setVisualizado(Boolean visualizado) {
-<span class="fc" id="L72">        this.visualizado = visualizado;</span>
-<span class="fc" id="L73">    }</span>
-
-    public Timestamp getCriadoEm() {
-<span class="fc" id="L76">        return criadoEm;</span>
-    }
-
-    public void setCriadoEm(Timestamp criadoEm) {
-<span class="fc" id="L80">        this.criadoEm = criadoEm;</span>
-<span class="fc" id="L81">    }</span>
-
-    public String getPrioridade() {
-<span class="fc" id="L84">        return prioridade;</span>
-    }
-
-    public void setPrioridade(String prioridade) {
-<span class="fc" id="L88">        this.prioridade = prioridade;</span>
-<span class="fc" id="L89">    }</span>
-
-    public String getUsuarioNome() {
-<span class="fc" id="L92">        return usuarioNome;</span>
-    }
-
-    public void setUsuarioNome(String usuarioNome) {
-<span class="fc" id="L96">        this.usuarioNome = usuarioNome;</span>
-<span class="fc" id="L97">    }</span>
-
-    public String getUsuarioTipo() {
-<span class="fc" id="L100">        return usuarioTipo;</span>
-    }
-
-    public void setUsuarioTipo(String usuarioTipo) {
-<span class="fc" id="L104">        this.usuarioTipo = usuarioTipo;</span>
-<span class="fc" id="L105">    }</span>
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.15.202606040825</span></div></body></html>

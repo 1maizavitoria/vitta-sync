@@ -1,37 +1,71 @@
 <?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="pt"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>HabitosOutputDTO.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report"></a> &gt; <a href="index.source.html" class="el_package">br.com.vittasync.vittasync.DTO</a> &gt; <span class="el_source">HabitosOutputDTO.java</span></div><h1>HabitosOutputDTO.java</h1><pre class="source lang-java linenums">package br.com.vittasync.vittasync.DTO;
 
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 
+@Schema(description = &quot;Registro de hábitos do paciente&quot;)
 public class HabitosOutputDTO {
 
+    @Schema(description = &quot;ID do registro de hábitos&quot;, example = &quot;12&quot;)
     private Integer id;
+
+    @Schema(description = &quot;Horas de sono no dia&quot;, example = &quot;7&quot;)
     private Integer horasSono;
+
+    @Schema(description = &quot;Minutos de exercício no dia&quot;, example = &quot;30&quot;)
     private Integer minutosExercicio;
+
+    @Schema(description = &quot;Dia a que os hábitos se referem&quot;, example = &quot;2026-10-13&quot;)
     private LocalDate dataReferencia;
+
+    @Schema(description = &quot;Data e hora em que os hábitos foram cadastrados&quot;, example = &quot;2026-10-13T20:15:42&quot;)
     private LocalDateTime dataRegistro;
+
+    @Schema(description = &quot;Data e hora da última edição, nula se o registro nunca foi editado&quot;, example = &quot;2026-10-13T21:02:10&quot;)
     private LocalDateTime dataModificacao;
 
-<span class="fc" id="L17">    public HabitosOutputDTO() {}</span>
+    @Schema(description = &quot;Soma do índice de sono (horas / 8) com o de exercício (minutos / 30, até 1)&quot;, example = &quot;1.875&quot;)
+    private Double indiceRepouso;
 
-<span class="fc" id="L19">    public Integer getId() { return id; }</span>
-<span class="fc" id="L20">    public void setId(Integer id) { this.id = id; }</span>
+    @Schema(description = &quot;Indica necessidade de repouso, verdadeiro quando o índice é menor que 1.5&quot;, example = &quot;false&quot;)
+    private Boolean repouso;
 
-<span class="fc" id="L22">    public Integer getHorasSono() { return horasSono; }</span>
-<span class="fc" id="L23">    public void setHorasSono(Integer horasSono) { this.horasSono = horasSono; }</span>
+    @Schema(description = &quot;Canal do alerta de repouso&quot;, example = &quot;email&quot;, allowableValues = {&quot;email&quot;, &quot;sms&quot;})
+    private String canal;
 
-<span class="fc" id="L25">    public Integer getMinutosExercicio() { return minutosExercicio; }</span>
-<span class="fc" id="L26">    public void setMinutosExercicio(Integer minutosExercicio) { this.minutosExercicio = minutosExercicio; }</span>
 
-<span class="fc" id="L28">    public LocalDate getDataReferencia() { return dataReferencia; }</span>
-<span class="fc" id="L29">    public void setDataReferencia(LocalDate dataReferencia) { this.dataReferencia = dataReferencia; }</span>
+<span class="fc" id="L40">    public HabitosOutputDTO() {}</span>
 
-<span class="fc" id="L31">    public LocalDateTime getDataRegistro() { return dataRegistro; }</span>
-<span class="fc" id="L32">    public void setDataRegistro(LocalDateTime dataRegistro) { this.dataRegistro = dataRegistro; }</span>
 
-<span class="fc" id="L34">    public LocalDateTime getDataModificacao() { return dataModificacao; }</span>
-<span class="fc" id="L35">    public void setDataModificacao(LocalDateTime dataModificacao) { this.dataModificacao = dataModificacao; }</span>
+<span class="fc" id="L43">    public Integer getId() { return id; }</span>
+<span class="fc" id="L44">    public void setId(Integer id) { this.id = id; }</span>
+
+<span class="fc" id="L46">    public Integer getHorasSono() { return horasSono; }</span>
+<span class="fc" id="L47">    public void setHorasSono(Integer horasSono) { this.horasSono = horasSono; }</span>
+
+<span class="fc" id="L49">    public Integer getMinutosExercicio() { return minutosExercicio; }</span>
+<span class="fc" id="L50">    public void setMinutosExercicio(Integer minutosExercicio) { this.minutosExercicio = minutosExercicio; }</span>
+
+<span class="fc" id="L52">    public LocalDate getDataReferencia() { return dataReferencia; }</span>
+<span class="fc" id="L53">    public void setDataReferencia(LocalDate dataReferencia) { this.dataReferencia = dataReferencia; }</span>
+
+<span class="fc" id="L55">    public LocalDateTime getDataRegistro() { return dataRegistro; }</span>
+<span class="fc" id="L56">    public void setDataRegistro(LocalDateTime dataRegistro) { this.dataRegistro = dataRegistro; }</span>
+
+<span class="fc" id="L58">    public LocalDateTime getDataModificacao() { return dataModificacao; }</span>
+<span class="fc" id="L59">    public void setDataModificacao(LocalDateTime dataModificacao) { this.dataModificacao = dataModificacao; }</span>
+
+<span class="fc" id="L61">    public Double getIndiceRepouso() { return indiceRepouso; }</span>
+<span class="fc" id="L62">    public void setIndiceRepouso(Double indiceRepouso) { this.indiceRepouso = indiceRepouso; }</span>
+
+<span class="fc" id="L64">    public Boolean getRepouso() { return repouso; }</span>
+<span class="fc" id="L65">    public void setRepouso(Boolean repouso) { this.repouso = repouso; }</span>
+
+<span class="fc" id="L67">    public String getCanal() { return canal; }</span>
+<span class="fc" id="L68">    public void setCanal(String canal) { this.canal = canal; }</span>
+    
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.15.202606040825</span></div></body></html>

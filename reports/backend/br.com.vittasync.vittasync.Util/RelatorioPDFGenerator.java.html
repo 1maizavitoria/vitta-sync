@@ -1,0 +1,150 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="pt"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>RelatorioPDFGenerator.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report"></a> &gt; <a href="index.source.html" class="el_package">br.com.vittasync.vittasync.Util</a> &gt; <span class="el_source">RelatorioPDFGenerator.java</span></div><h1>RelatorioPDFGenerator.java</h1><pre class="source lang-java linenums">package br.com.vittasync.vittasync.Util;
+
+
+import br.com.vittasync.vittasync.DTO.RelatorioPreviewDTO;
+import br.com.vittasync.vittasync.DTO.RelatorioResumoDTO;
+import com.itextpdf.kernel.pdf.PdfDocument;
+import com.itextpdf.kernel.pdf.PdfWriter;
+import com.itextpdf.layout.Document;
+import com.itextpdf.layout.element.AreaBreak;
+import com.itextpdf.layout.element.Image;
+import com.itextpdf.layout.element.Paragraph;
+import com.itextpdf.layout.element.Table;
+import com.itextpdf.layout.properties.AreaBreakType;
+import com.itextpdf.io.image.ImageDataFactory;
+import org.jfree.chart.ChartFactory;
+import org.jfree.chart.JFreeChart;
+import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer;
+import org.jfree.data.time.FixedMillisecond;
+import org.jfree.data.time.TimeSeries;
+import org.jfree.data.time.TimeSeriesCollection;
+import javax.imageio.ImageIO;
+import java.io.ByteArrayOutputStream;
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
+import java.util.Locale;
+
+
+<span class="fc" id="L29">public class RelatorioPDFGenerator {</span>
+<span class="fc" id="L30">    private static final DateTimeFormatter DATA = DateTimeFormatter.ofPattern(&quot;dd/MM/yyyy&quot;);</span>
+<span class="fc" id="L31">    private static final DateTimeFormatter EMISSAO = DateTimeFormatter.ofPattern(&quot;dd/MM/yyyy HH:mm&quot;);</span>
+<span class="fc" id="L32">    private static final Locale PT_BR = Locale.forLanguageTag(&quot;pt-BR&quot;);</span>
+
+    public byte[] gerarRelatorio(RelatorioPreviewDTO preview) throws Exception {
+<span class="fc" id="L35">        ByteArrayOutputStream saida = new ByteArrayOutputStream();</span>
+<span class="fc" id="L36">        try (Document documento = new Document(new PdfDocument(new PdfWriter(saida)))) {</span>
+<span class="fc" id="L37">            documento.setFontSize(10);</span>
+<span class="fc" id="L38">            documento.add(new Paragraph(&quot;VITTASYNC - RELATÓRIO DE ACOMPANHAMENTO&quot;).setBold().setFontSize(16));</span>
+<span class="fc" id="L39">            documento.add(new Paragraph(&quot;Paciente: &quot; + texto(preview.getPaciente().getNome())</span>
+<span class="fc" id="L40">                    + &quot;\nNascimento: &quot; + data(preview.getPaciente().getDataNascimento())</span>
+<span class="fc" id="L41">                    + &quot;\nPeríodo: &quot; + periodo(preview)</span>
+<span class="fc" id="L42">                    + &quot;\nEmitido em: &quot; + preview.getDataEmissao().format(EMISSAO)));</span>
+
+<span class="fc bfc" id="L44" title="All 2 branches covered.">            if (preview.getCategorias().contains(&quot;SINAIS&quot;)) adicionarSinais(documento, preview);</span>
+<span class="fc bfc" id="L45" title="All 2 branches covered.">            if (preview.getCategorias().contains(&quot;SINTOMAS&quot;)) adicionarSintomas(documento, preview);</span>
+<span class="fc bfc" id="L46" title="All 2 branches covered.">            if (preview.getCategorias().contains(&quot;HABITOS&quot;)) adicionarHabitos(documento, preview);</span>
+
+<span class="fc" id="L48">            documento.add(new Paragraph(&quot;Valores ausentes não são considerados como zero. &quot;</span>
+<span class="fc" id="L49">                    + &quot;Este relatório consolida registros do VittaSync e não substitui avaliação médica.&quot;).setFontSize(8));</span>
+
+<span class="fc bfc" id="L51" title="All 2 branches covered.">            if (preview.getCategorias().contains(&quot;SINAIS&quot;) &amp;&amp; preview.getResumo().sinaisVitais().stream()</span>
+<span class="fc bfc" id="L52" title="All 4 branches covered.">                    .anyMatch(i -&gt; !i.evolucaoDiaria().isEmpty())) {</span>
+<span class="fc" id="L53">                documento.add(new AreaBreak(AreaBreakType.NEXT_PAGE));</span>
+<span class="fc" id="L54">                titulo(documento, &quot;Evolução dos sinais vitais&quot;);</span>
+<span class="fc" id="L55">                documento.add(new Paragraph(&quot;Médias diárias. Dias sem medições não têm valor atribuído.&quot;).setFontSize(9));</span>
+<span class="fc bfc" id="L56" title="All 2 branches covered.">                for (RelatorioResumoDTO.Indicador indicador : preview.getResumo().sinaisVitais()) {</span>
+<span class="fc bfc" id="L57" title="All 2 branches covered.">                    if (!indicador.evolucaoDiaria().isEmpty()) adicionarGrafico(documento, indicador);</span>
+<span class="fc" id="L58">                }</span>
+            }
+        }
+<span class="fc" id="L61">        return saida.toByteArray();</span>
+    }
+
+    private void adicionarSinais(Document documento, RelatorioPreviewDTO preview) {
+<span class="fc" id="L65">        titulo(documento, &quot;Resumo dos sinais vitais&quot;);</span>
+<span class="fc" id="L66">        Table tabela = new Table(new float[]{3, 1, 1, 1, 1}).useAllAvailableWidth();</span>
+<span class="fc bfc" id="L67" title="All 2 branches covered.">        for (String coluna : new String[]{&quot;Indicador&quot;, &quot;Média&quot;, &quot;Mínimo&quot;, &quot;Máximo&quot;, &quot;Medições&quot;}) {</span>
+<span class="fc" id="L68">            tabela.addHeaderCell(coluna);</span>
+        }
+<span class="fc bfc" id="L70" title="All 2 branches covered.">        for (RelatorioResumoDTO.Indicador indicador : preview.getResumo().sinaisVitais()) {</span>
+<span class="fc" id="L71">            tabela.addCell(indicador.nome() + &quot; (&quot; + indicador.unidade() + &quot;)&quot;);</span>
+<span class="fc" id="L72">            tabela.addCell(numero(indicador.media()));</span>
+<span class="fc" id="L73">            tabela.addCell(numero(indicador.minimo()));</span>
+<span class="fc" id="L74">            tabela.addCell(numero(indicador.maximo()));</span>
+<span class="fc" id="L75">            tabela.addCell(Long.toString(indicador.quantidade()));</span>
+<span class="fc" id="L76">        }</span>
+<span class="fc" id="L77">        documento.add(tabela);</span>
+<span class="fc" id="L78">        documento.add(new Paragraph(&quot;Médias calculadas por medição disponível. '-' indica ausência de valor.&quot;).setFontSize(8));</span>
+<span class="fc" id="L79">    }</span>
+
+    private void adicionarSintomas(Document documento, RelatorioPreviewDTO preview) {
+<span class="fc" id="L82">        titulo(documento, &quot;Sintomas&quot;);</span>
+<span class="fc bfc" id="L83" title="All 2 branches covered.">        if (preview.getSintomas().isEmpty()) {</span>
+<span class="fc" id="L84">            documento.add(new Paragraph(&quot;Sem registros de sintomas no período.&quot;));</span>
+<span class="fc" id="L85">            return;</span>
+        }
+<span class="fc" id="L87">        Table tabela = new Table(new float[]{1, 3, 1}).useAllAvailableWidth();</span>
+<span class="fc" id="L88">        tabela.addHeaderCell(&quot;Ocorrência&quot;);</span>
+<span class="fc" id="L89">        tabela.addHeaderCell(&quot;Sintoma&quot;);</span>
+<span class="fc" id="L90">        tabela.addHeaderCell(&quot;Dor (1-10)&quot;);</span>
+<span class="fc" id="L91">        preview.getSintomas().forEach(s -&gt; {</span>
+<span class="fc" id="L92">            tabela.addCell(data(s.getDataReferencia()));</span>
+<span class="fc" id="L93">            tabela.addCell(texto(s.getSintoma()));</span>
+<span class="fc bfc" id="L94" title="All 2 branches covered.">            tabela.addCell(s.getIntensidadeDor() == null ? &quot;-&quot; : s.getIntensidadeDor().toString());</span>
+<span class="fc" id="L95">        });</span>
+<span class="fc" id="L96">        documento.add(tabela);</span>
+<span class="fc" id="L97">    }</span>
+
+    private void adicionarHabitos(Document documento, RelatorioPreviewDTO preview) {
+<span class="fc" id="L100">        titulo(documento, &quot;Hábitos&quot;);</span>
+<span class="fc" id="L101">        RelatorioResumoDTO.Habitos habitos = preview.getResumo().habitos();</span>
+<span class="fc" id="L102">        Table tabela = new Table(2).useAllAvailableWidth();</span>
+<span class="fc" id="L103">        tabela.addCell(&quot;Sono médio (horas/noite)&quot;);</span>
+<span class="fc" id="L104">        tabela.addCell(numero(habitos.mediaHorasSono()));</span>
+<span class="fc" id="L105">        tabela.addCell(&quot;Dias com registro de sono&quot;);</span>
+<span class="fc" id="L106">        tabela.addCell(Long.toString(habitos.diasComSono()));</span>
+<span class="fc" id="L107">        tabela.addCell(&quot;Atividade física total (minutos)&quot;);</span>
+<span class="fc bfc" id="L108" title="All 2 branches covered.">        tabela.addCell(habitos.totalMinutosExercicio() == null ? &quot;-&quot; : habitos.totalMinutosExercicio().toString());</span>
+<span class="fc" id="L109">        tabela.addCell(&quot;Dias com registro de atividade física&quot;);</span>
+<span class="fc" id="L110">        tabela.addCell(Long.toString(habitos.diasComExercicio()));</span>
+<span class="fc" id="L111">        documento.add(tabela);</span>
+<span class="fc" id="L112">        documento.add(new Paragraph(&quot;Sono: média das médias diárias registradas. &quot;</span>
+<span class="fc" id="L113">                + &quot;Atividade física: soma dos minutos registrados. Resumo por data de referência.&quot;).setFontSize(8));</span>
+<span class="fc" id="L114">    }</span>
+
+    private void adicionarGrafico(Document documento, RelatorioResumoDTO.Indicador indicador) throws Exception {
+<span class="fc" id="L117">        TimeSeries serie = new TimeSeries(indicador.nome());</span>
+<span class="fc" id="L118">        LocalDate anterior = null;</span>
+<span class="fc bfc" id="L119" title="All 2 branches covered.">        for (RelatorioResumoDTO.PontoDiario ponto : indicador.evolucaoDiaria()) {</span>
+<span class="fc bfc" id="L120" title="All 4 branches covered.">            if (anterior != null &amp;&amp; ponto.data().isAfter(anterior.plusDays(1))) {</span>
+<span class="fc" id="L121">                serie.add(dia(anterior.plusDays(1)), (Number) null);</span>
+            }
+<span class="fc" id="L123">            serie.add(dia(ponto.data()), ponto.media());</span>
+<span class="fc" id="L124">            anterior = ponto.data();</span>
+<span class="fc" id="L125">        }</span>
+<span class="fc" id="L126">        JFreeChart grafico = ChartFactory.createTimeSeriesChart(indicador.nome(), &quot;Data&quot;,</span>
+<span class="fc" id="L127">                indicador.unidade(), new TimeSeriesCollection(serie), false, false, false);</span>
+<span class="fc" id="L128">        grafico.getXYPlot().setRenderer(new XYLineAndShapeRenderer(true, true));</span>
+<span class="fc" id="L129">        ByteArrayOutputStream imagem = new ByteArrayOutputStream();</span>
+<span class="fc" id="L130">        ImageIO.write(grafico.createBufferedImage(1000, 380), &quot;PNG&quot;, imagem);</span>
+<span class="fc" id="L131">        documento.add(new Image(ImageDataFactory.create(imagem.toByteArray())).setWidth(500).setHeight(190));</span>
+<span class="fc" id="L132">    }</span>
+
+    private FixedMillisecond dia(LocalDate data) {
+<span class="fc" id="L135">        return new FixedMillisecond(data.atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli());</span>
+    }
+    private void titulo(Document documento, String titulo) {
+<span class="fc" id="L138">        documento.add(new Paragraph(titulo).setBold().setFontSize(12).setKeepWithNext(true));</span>
+<span class="fc" id="L139">    }</span>
+<span class="fc bfc" id="L140" title="All 2 branches covered.">    private String numero(Double valor) { return valor == null ? &quot;-&quot; : String.format(PT_BR, &quot;%.1f&quot;, valor); }</span>
+<span class="fc bfc" id="L141" title="All 4 branches covered.">    private String texto(String valor) { return valor == null || valor.isBlank() ? &quot;Sem registro&quot; : valor; }</span>
+<span class="fc bfc" id="L142" title="All 2 branches covered.">    private String data(LocalDate valor) { return valor == null ? &quot;Sem registro&quot; : valor.format(DATA); }</span>
+    private String periodo(RelatorioPreviewDTO preview) {
+<span class="fc bfc" id="L144" title="All 4 branches covered.">        if (preview.getDataInicio() == null &amp;&amp; preview.getDataFim() == null) return &quot;Todos os registros&quot;;</span>
+<span class="fc bfc" id="L145" title="All 2 branches covered.">        if (preview.getDataInicio() == null) return &quot;Até &quot; + data(preview.getDataFim());</span>
+<span class="fc bfc" id="L146" title="All 2 branches covered.">        if (preview.getDataFim() == null) return &quot;A partir de &quot; + data(preview.getDataInicio());</span>
+<span class="fc" id="L147">        return data(preview.getDataInicio()) + &quot; a &quot; + data(preview.getDataFim());</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.15.202606040825</span></div></body></html>

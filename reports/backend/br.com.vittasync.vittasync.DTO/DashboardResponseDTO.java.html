@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="pt"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>DashboardResponseDTO.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report"></a> &gt; <a href="index.source.html" class="el_package">br.com.vittasync.vittasync.DTO</a> &gt; <span class="el_source">DashboardResponseDTO.java</span></div><h1>DashboardResponseDTO.java</h1><pre class="source lang-java linenums">package br.com.vittasync.vittasync.DTO;
+
+
+import io.swagger.v3.oas.annotations.media.Schema;
+import java.time.LocalDate;
+import java.util.List;
+import java.util.Map;
+
+
+@Schema(description = &quot;Dados do dashboard do paciente no período consultado&quot;)
+public class DashboardResponseDTO {
+
+    @Schema(description = &quot;CPF do paciente&quot;, example = &quot;52998224725&quot;)
+    private String pacienteCpf;
+
+    @Schema(description = &quot;Nome do paciente&quot;, example = &quot;Maria Oliveira&quot;)
+    private String pacienteNome;
+
+    @Schema(description = &quot;Data inicial do período consultado&quot;, example = &quot;2026-10-07&quot;)
+    private LocalDate inicio;
+
+    @Schema(description = &quot;Data final do período consultado&quot;, example = &quot;2026-10-13&quot;)
+    private LocalDate fim;
+
+    @Schema(description = &quot;Séries de medições de cada categoria escolhida&quot;)
+    private List&lt;DashboardCategoriaDTO&gt; categorias;
+
+    @Schema(description = &quot;Índices de estabilidade clínica de cada sinal vital, do sono, do exercício e o geral&quot;)
+    private List&lt;EstabilidadeClinicaDTO&gt; estabilidadeClinica;
+
+    @Schema(description = &quot;Linha de base personalizada dos 7 sinais vitais, independente dos filtros&quot;)
+    private List&lt;LinhaBaseDTO&gt; linhasBase;
+
+    @Schema(description = &quot;Médias diárias dos sinais vitais calculadas pelo banco, uma linha por dia com: dia, mediaPeso, &quot;
+            + &quot;mediaFcBpm, mediaFrRpm, mediaPaSistolica, mediaPaDiastolica, mediaTempCelcius, mediaSpo2Porcento e medicoes&quot;,
+            example = &quot;[{\&quot;dia\&quot;: \&quot;2026-10-12\&quot;, \&quot;mediaPeso\&quot;: 72.3, \&quot;mediaFcBpm\&quot;: 75.0, \&quot;mediaFrRpm\&quot;: 16.0, &quot;
+                    + &quot;\&quot;mediaPaSistolica\&quot;: 121.5, \&quot;mediaPaDiastolica\&quot;: 80.0, \&quot;mediaTempCelcius\&quot;: 36.6, &quot;
+                    + &quot;\&quot;mediaSpo2Porcento\&quot;: 97.0, \&quot;medicoes\&quot;: 2}]&quot;)
+    private List&lt;Map&lt;String, Object&gt;&gt; resumoDiario;
+
+    @Schema(description = &quot;Resumo diário dos hábitos calculado pelo banco, uma linha por dia com: dia, mediaHorasSono, &quot;
+            + &quot;totalMinutosExercicio e registros&quot;,
+            example = &quot;[{\&quot;dia\&quot;: \&quot;2026-10-12\&quot;, \&quot;mediaHorasSono\&quot;: 7.5, \&quot;totalMinutosExercicio\&quot;: 40, \&quot;registros\&quot;: 1}]&quot;)
+    private List&lt;Map&lt;String, Object&gt;&gt; resumoHabitos;
+
+    @Schema(description = &quot;Quantidade de eventos do paciente no período agrupada por tipo, do mais frequente para o menos&quot;,
+            example = &quot;[{\&quot;tipo\&quot;: \&quot;sinais_vitais_criados\&quot;, \&quot;quantidade\&quot;: 5}, {\&quot;tipo\&quot;: \&quot;febre_detectada\&quot;, \&quot;quantidade\&quot;: 1}]&quot;)
+    private List&lt;Map&lt;String, Object&gt;&gt; eventosPorTipo;
+
+    public DashboardResponseDTO(
+            String pacienteCpf,
+            String pacienteNome,
+            LocalDate inicio,
+            LocalDate fim,
+            List&lt;DashboardCategoriaDTO&gt; categorias,
+            List&lt;EstabilidadeClinicaDTO&gt; estabilidadeClinica,
+            List&lt;LinhaBaseDTO&gt; linhasBase,
+            List&lt;Map&lt;String, Object&gt;&gt; resumoDiario,
+            List&lt;Map&lt;String, Object&gt;&gt; resumoHabitos,
+            List&lt;Map&lt;String, Object&gt;&gt; eventosPorTipo
+<span class="fc" id="L61">    ) {</span>
+<span class="fc" id="L62">        this.pacienteCpf = pacienteCpf;</span>
+<span class="fc" id="L63">        this.pacienteNome = pacienteNome;</span>
+<span class="fc" id="L64">        this.inicio = inicio;</span>
+<span class="fc" id="L65">        this.fim = fim;</span>
+<span class="fc" id="L66">        this.categorias = categorias;</span>
+<span class="fc" id="L67">        this.estabilidadeClinica = estabilidadeClinica;</span>
+<span class="fc" id="L68">        this.linhasBase = linhasBase;</span>
+<span class="fc" id="L69">        this.resumoDiario = resumoDiario;</span>
+<span class="fc" id="L70">        this.resumoHabitos = resumoHabitos;</span>
+<span class="fc" id="L71">        this.eventosPorTipo = eventosPorTipo;</span>
+<span class="fc" id="L72">    }</span>
+
+<span class="fc" id="L74">    public String getPacienteCpf() {return pacienteCpf;}</span>
+
+<span class="fc" id="L76">    public String getPacienteNome() {return pacienteNome;}</span>
+
+<span class="fc" id="L78">    public LocalDate getInicio() {return inicio;}</span>
+
+<span class="fc" id="L80">    public LocalDate getFim() {return fim;}</span>
+
+<span class="fc" id="L82">    public List&lt;DashboardCategoriaDTO&gt; getCategorias() {return categorias;}</span>
+
+<span class="fc" id="L84">    public List&lt;EstabilidadeClinicaDTO&gt; getEstabilidadeClinica() {return estabilidadeClinica;}</span>
+
+<span class="fc" id="L86">    public List&lt;LinhaBaseDTO&gt; getLinhasBase() {return linhasBase;}</span>
+
+<span class="fc" id="L88">    public List&lt;Map&lt;String, Object&gt;&gt; getResumoDiario() {return resumoDiario;}</span>
+
+<span class="fc" id="L90">    public List&lt;Map&lt;String, Object&gt;&gt; getResumoHabitos() {return resumoHabitos;}</span>
+
+<span class="fc" id="L92">    public List&lt;Map&lt;String, Object&gt;&gt; getEventosPorTipo() {return eventosPorTipo;}</span>
+    
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.15.202606040825</span></div></body></html>

@@ -44,36 +44,29 @@ public class SecurityConfig {
                                 &quot;/swagger-ui.html&quot;
 <span class="fc" id="L45">                        ).permitAll()</span>
 
-<span class="fc" id="L47">                        .requestMatchers(&quot;/usuario/editar/**&quot;).authenticated()</span>
-<span class="fc" id="L48">                        .requestMatchers(&quot;/usuario/getUsuario/**&quot;).authenticated()</span>
-<span class="fc" id="L49">                        .requestMatchers(&quot;/usuario/deletar/**&quot;).authenticated()</span>
-<span class="fc" id="L50">                        .requestMatchers(&quot;/sessao/logout&quot;).authenticated()</span>
-<span class="fc" id="L51">                        .requestMatchers(&quot;/sinaisvitais/**&quot;).authenticated()</span>
-<span class="fc" id="L52">                        .requestMatchers(&quot;/habitos/**&quot;).authenticated()</span>
-<span class="fc" id="L53">                        .requestMatchers(&quot;/contatoemergencia/**&quot;).authenticated()</span>
-
-<span class="fc" id="L55">                        .anyRequest().authenticated()</span>
+                        // resto = token válido
+<span class="fc" id="L48">                        .anyRequest().authenticated()</span>
                 )
-<span class="fc" id="L57">                .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);</span>
+<span class="fc" id="L50">                .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);</span>
 
-<span class="fc" id="L59">        return http.build();</span>
+<span class="fc" id="L52">        return http.build();</span>
     }
 
     @Bean
     public OpenAPI customOpenAPI() {
-<span class="fc" id="L64">        return new OpenAPI()</span>
-<span class="fc" id="L65">                .info(new Info()</span>
-<span class="fc" id="L66">                        .title(&quot;VittaSync API&quot;)</span>
-<span class="fc" id="L67">                        .version(&quot;1.0&quot;)</span>
-<span class="fc" id="L68">                        .description(&quot;Documentação da API VittaSync&quot;))</span>
-<span class="fc" id="L69">                .addSecurityItem(new SecurityRequirement().addList(&quot;bearerAuth&quot;))</span>
-<span class="fc" id="L70">                .components(new io.swagger.v3.oas.models.Components()</span>
-<span class="fc" id="L71">                        .addSecuritySchemes(&quot;bearerAuth&quot;,</span>
+<span class="fc" id="L57">        return new OpenAPI()</span>
+<span class="fc" id="L58">                .info(new Info()</span>
+<span class="fc" id="L59">                        .title(&quot;VittaSync API&quot;)</span>
+<span class="fc" id="L60">                        .version(&quot;1.0&quot;)</span>
+<span class="fc" id="L61">                        .description(&quot;Documentação da API VittaSync&quot;))</span>
+<span class="fc" id="L62">                .addSecurityItem(new SecurityRequirement().addList(&quot;bearerAuth&quot;))</span>
+<span class="fc" id="L63">                .components(new io.swagger.v3.oas.models.Components()</span>
+<span class="fc" id="L64">                        .addSecuritySchemes(&quot;bearerAuth&quot;,</span>
                                 new SecurityScheme()
-<span class="fc" id="L73">                                        .name(&quot;Authorization&quot;)</span>
-<span class="fc" id="L74">                                        .type(SecurityScheme.Type.HTTP)</span>
-<span class="fc" id="L75">                                        .scheme(&quot;bearer&quot;)</span>
-<span class="fc" id="L76">                                        .bearerFormat(&quot;JWT&quot;)));</span>
+<span class="fc" id="L66">                                        .name(&quot;Authorization&quot;)</span>
+<span class="fc" id="L67">                                        .type(SecurityScheme.Type.HTTP)</span>
+<span class="fc" id="L68">                                        .scheme(&quot;bearer&quot;)</span>
+<span class="fc" id="L69">                                        .bearerFormat(&quot;JWT&quot;)));</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.15.202606040825</span></div></body></html>

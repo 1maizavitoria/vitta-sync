@@ -4,11 +4,17 @@
 import br.com.vittasync.vittasync.DTO.UsuarioInputDTO;
 import br.com.vittasync.vittasync.DTO.UsuarioOutputDTO;
 import br.com.vittasync.vittasync.DTO.UsuarioUpdateDTO;
+import br.com.vittasync.vittasync.Exception.AcessoNegadoException;
+import br.com.vittasync.vittasync.Exception.DadosInvalidosException;
 import br.com.vittasync.vittasync.Model.Usuario;
-import br.com.vittasync.vittasync.Service.JwtService;
 import br.com.vittasync.vittasync.Service.PermissaoService;
 import br.com.vittasync.vittasync.Service.UsuarioService;
 import br.com.vittasync.vittasync.Util.HashUtil;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -16,130 +22,161 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping(&quot;/usuario&quot;)
+@Tag(name = &quot;Usuários&quot;, description = &quot;Cadastro, edição, consulta e exclusão de contas dos tipos paciente, responsável e profissional de saúde&quot;)
 public class UsuarioController {
 
     private final UsuarioService usuarioService;
-    private final JwtService jwtService;
     private final PermissaoService permissaoService;
 
-<span class="fc" id="L25">    public UsuarioController(UsuarioService usuarioService, JwtService jwtService, PermissaoService permissaoService) {</span>
-<span class="fc" id="L26">        this.usuarioService = usuarioService;</span>
-<span class="fc" id="L27">        this.jwtService = jwtService;</span>
-<span class="fc" id="L28">        this.permissaoService = permissaoService;</span>
-<span class="fc" id="L29">    }</span>
+<span class="fc" id="L31">    public UsuarioController(UsuarioService usuarioService, PermissaoService permissaoService) {</span>
+<span class="fc" id="L32">        this.usuarioService = usuarioService;</span>
+<span class="fc" id="L33">        this.permissaoService = permissaoService;</span>
+<span class="fc" id="L34">    }</span>
 
+    @Operation(
+            summary = &quot;Cadastrar usuário&quot;,
+            description = &quot;Cadastra uma nova conta, a data de cadastro é preenchida automaticamente pelo servidor, &quot;
+                    + &quot;o conselho é obrigatório para o tipo ''saude''. Endpoint público que não exige token.&quot;
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = &quot;200&quot;, description = &quot;Usuário cadastrado com sucesso&quot;),
+            @ApiResponse(responseCode = &quot;400&quot;, description = &quot;Dados inválidos&quot;),
+            @ApiResponse(responseCode = &quot;409&quot;, description = &quot;CPF ou e-mail já cadastrado&quot;)
+    })
     @PostMapping(&quot;/cadastrar&quot;)
     public ResponseEntity&lt;UsuarioOutputDTO&gt; create(@Valid @RequestBody UsuarioInputDTO dto) {
 
-<span class="pc bpc" id="L34" title="5 of 6 branches missed.">        if (&quot;saude&quot;.equalsIgnoreCase(dto.getTipo()) &amp;&amp; (dto.getConselho() == null || dto.getConselho().isBlank())) {</span>
-<span class="nc" id="L35">            throw new RuntimeException(&quot;Conselho é obrigatório para usuários do tipo saude&quot;);</span>
+<span class="pc bpc" id="L49" title="5 of 6 branches missed.">        if (&quot;saude&quot;.equalsIgnoreCase(dto.getTipo()) &amp;&amp; (dto.getConselho() == null || dto.getConselho().isBlank())) {</span>
+<span class="nc" id="L50">            throw new DadosInvalidosException(&quot;Conselho é obrigatório para usuários do tipo saude&quot;);</span>
         }
 
-<span class="fc" id="L38">        Usuario usuario = new Usuario();</span>
-<span class="fc" id="L39">        usuario.setCpf(dto.getCpf());</span>
-<span class="fc" id="L40">        usuario.setNome(dto.getNome());</span>
-<span class="fc" id="L41">        usuario.setEmail(dto.getEmail());</span>
-<span class="fc" id="L42">        usuario.setTelefone(dto.getTelefone());</span>
-<span class="fc" id="L43">        usuario.setPesoInicial(dto.getPesoInicial());</span>
-<span class="fc" id="L44">        usuario.setAltura(dto.getAltura());</span>
-<span class="fc" id="L45">        usuario.setFuncaoResponsavel(dto.getFuncaoResponsavel());</span>
-<span class="fc" id="L46">        usuario.setSenha(HashUtil.hashSenha(dto.getSenha()));</span>
-<span class="fc" id="L47">        usuario.setTipo(dto.getTipo());</span>
-<span class="fc" id="L48">        usuario.setConselho(dto.getConselho());</span>
-<span class="fc" id="L49">        usuario.setDataNascimento(dto.getDataNascimento());</span>
+<span class="fc" id="L53">        Usuario usuario = new Usuario();</span>
+<span class="fc" id="L54">        usuario.setCpf(dto.getCpf());</span>
+<span class="fc" id="L55">        usuario.setNome(dto.getNome());</span>
+<span class="fc" id="L56">        usuario.setEmail(dto.getEmail());</span>
+<span class="fc" id="L57">        usuario.setTelefone(dto.getTelefone());</span>
+<span class="fc" id="L58">        usuario.setPesoInicial(dto.getPesoInicial());</span>
+<span class="fc" id="L59">        usuario.setAltura(dto.getAltura());</span>
+<span class="fc" id="L60">        usuario.setFuncaoResponsavel(dto.getFuncaoResponsavel());</span>
+<span class="fc" id="L61">        usuario.setSenha(HashUtil.hashSenha(dto.getSenha()));</span>
+<span class="fc" id="L62">        usuario.setTipo(dto.getTipo());</span>
+<span class="fc" id="L63">        usuario.setConselho(dto.getConselho());</span>
+<span class="fc" id="L64">        usuario.setDataNascimento(dto.getDataNascimento());</span>
 
-<span class="fc" id="L51">        Usuario criado = usuarioService.create(usuario);</span>
-<span class="fc" id="L52">        return ResponseEntity.ok(toOutputDTO(criado));</span>
+<span class="fc" id="L66">        Usuario criado = usuarioService.create(usuario);</span>
+<span class="fc" id="L67">        return ResponseEntity.ok(toOutputDTO(criado));</span>
     }
 
+    @Operation(
+            summary = &quot;Editar usuário&quot;,
+            description = &quot;Atualiza os dados não únicos de perfil do usuário, CPF, tipo. &quot;
+                    + &quot;Permitido ao próprio usuário e aos responsáveis vinculados quando o usuário é paciente.&quot;
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = &quot;200&quot;, description = &quot;Usuário atualizado com sucesso&quot;),
+            @ApiResponse(responseCode = &quot;400&quot;, description = &quot;Dados inválidos&quot;),
+            @ApiResponse(responseCode = &quot;403&quot;, description = &quot;Usuário sem permissão para alterar os dados do paciente&quot;),
+            @ApiResponse(responseCode = &quot;404&quot;, description = &quot;Usuário não encontrado&quot;)
+    })
     @PutMapping(&quot;/editar/{cpf}&quot;)
-    public ResponseEntity&lt;UsuarioOutputDTO&gt; update(@PathVariable String cpf, @Valid @RequestBody UsuarioUpdateDTO dto, @RequestHeader(&quot;Authorization&quot;) String authHeader) {
-<span class="fc" id="L57">        String token = authHeader.replace(&quot;Bearer &quot;, &quot;&quot;);</span>
-<span class="fc" id="L58">        String cpfToken = jwtService.extrairCpf(token);</span>
-<span class="fc" id="L59">        Usuario usuarioLogado = usuarioService.searchByCpf(cpfToken);</span>
-<span class="fc" id="L60">        Usuario usuarioPaciente = usuarioService.searchByCpf(cpf);</span>
-<span class="pc bpc" id="L61" title="1 of 2 branches missed.">        boolean podeEditar = cpfToken.equals(cpf) ||</span>
-<span class="pc bnc" id="L62" title="All 2 branches missed.">                permissaoService.podeEditarPaciente(usuarioLogado.getId(), usuarioPaciente.getId());</span>
+    public ResponseEntity&lt;UsuarioOutputDTO&gt; update(@Parameter(description = &quot;CPF do usuário (apenas números)&quot;)
+                                                   @PathVariable String cpf, @Valid @RequestBody UsuarioUpdateDTO dto) {
+<span class="fc" id="L84">        Usuario usuarioLogado = usuarioService.getUsuarioLogado();</span>
+<span class="fc" id="L85">        Usuario usuarioPaciente = usuarioService.searchByCpf(cpf);</span>
+<span class="pc bpc" id="L86" title="1 of 2 branches missed.">        boolean podeEditar = usuarioLogado.getCpf().equals(cpf) ||</span>
+<span class="pc bnc" id="L87" title="All 2 branches missed.">                permissaoService.podeEditarPaciente(usuarioLogado.getId(), usuarioPaciente.getId());</span>
 
-<span class="pc bpc" id="L64" title="1 of 2 branches missed.">        if (!podeEditar) {</span>
-<span class="nc" id="L65">            return ResponseEntity.status(403).build();</span>
+<span class="pc bpc" id="L89" title="1 of 2 branches missed.">        if (!podeEditar) {</span>
+<span class="nc" id="L90">            throw new AcessoNegadoException(&quot;Usuário sem permissão para editar o paciente&quot;);</span>
         }
 
-        try {
-<span class="fc" id="L69">            Usuario usuario = usuarioService.searchByCpf(cpf);</span>
+<span class="fc" id="L93">        Usuario usuario = usuarioService.searchByCpf(cpf);</span>
 
-<span class="fc" id="L71">            usuario.setNome(dto.getNome());</span>
-<span class="fc" id="L72">            usuario.setEmail(dto.getEmail());</span>
-<span class="fc" id="L73">            usuario.setTelefone(dto.getTelefone());</span>
-<span class="fc" id="L74">            usuario.setAltura(dto.getAltura());</span>
-<span class="fc" id="L75">            usuario.setFuncaoResponsavel(dto.getFuncaoResponsavel());</span>
-<span class="fc" id="L76">            usuario.setDataNascimento(dto.getDataNascimento());</span>
-<span class="fc" id="L77">            usuario.setTelefone(dto.getTelefone());</span>
-<span class="fc" id="L78">            usuario.setPesoInicial(dto.getPesoInicial());</span>
+<span class="fc" id="L95">        usuario.setNome(dto.getNome());</span>
+<span class="fc" id="L96">        usuario.setEmail(dto.getEmail());</span>
+<span class="fc" id="L97">        usuario.setTelefone(dto.getTelefone());</span>
+<span class="fc" id="L98">        usuario.setAltura(dto.getAltura());</span>
+<span class="fc" id="L99">        usuario.setFuncaoResponsavel(dto.getFuncaoResponsavel());</span>
+<span class="fc" id="L100">        usuario.setDataNascimento(dto.getDataNascimento());</span>
+<span class="fc" id="L101">        usuario.setTelefone(dto.getTelefone());</span>
+<span class="fc" id="L102">        usuario.setPesoInicial(dto.getPesoInicial());</span>
 
-<span class="fc" id="L80">            Usuario atualizado = usuarioService.update(usuario);</span>
+<span class="fc" id="L104">        Usuario atualizado = usuarioService.update(usuario);</span>
 
-<span class="fc" id="L82">            return ResponseEntity.ok(toOutputDTO(atualizado));</span>
-<span class="nc" id="L83">        } catch (RuntimeException e) {</span>
-<span class="nc" id="L84">            return ResponseEntity.notFound().build();</span>
-        }
+<span class="fc" id="L106">        return ResponseEntity.ok(toOutputDTO(atualizado));</span>
     }
 
+    @Operation(
+            summary = &quot;Consultar usuário&quot;,
+            description = &quot;Retorna os dados de perfil do usuário. &quot;
+                    + &quot;Permitido ao próprio usuário e a todos os usuários vinculados a ele quando é paciente (responsáveis e profissionais de saúde).&quot;
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = &quot;200&quot;, description = &quot;Dados do usuário&quot;),
+            @ApiResponse(responseCode = &quot;403&quot;, description = &quot;Usuário sem permissão para visualizar o paciente&quot;),
+            @ApiResponse(responseCode = &quot;404&quot;, description = &quot;Usuário não encontrado&quot;)
+    })
     @GetMapping(&quot;/getUsuario/{cpf}&quot;)
-    public ResponseEntity&lt;UsuarioOutputDTO&gt; getByCpf(@PathVariable String cpf, @RequestHeader(&quot;Authorization&quot;) String authHeader) {
+    public ResponseEntity&lt;UsuarioOutputDTO&gt; getByCpf(@Parameter(description = &quot;CPF do usuário (apenas números)&quot;)
+                                                     @PathVariable String cpf) {
 
-<span class="fc" id="L91">        String token = authHeader.replace(&quot;Bearer &quot;, &quot;&quot;);</span>
-<span class="fc" id="L92">        String cpfToken = jwtService.extrairCpf(token);</span>
+<span class="fc" id="L123">        Usuario usuarioLogado = usuarioService.getUsuarioLogado();</span>
 
-<span class="fc" id="L94">        Usuario usuarioLogado = usuarioService.searchByCpf(cpfToken);</span>
+<span class="fc" id="L125">        Usuario usuarioPaciente = usuarioService.searchByCpf(cpf);</span>
 
-<span class="fc" id="L96">        Usuario usuarioPaciente = usuarioService.searchByCpf(cpf);</span>
-
-<span class="fc" id="L98">        boolean podeVisualizar =</span>
-<span class="pc bpc" id="L99" title="1 of 2 branches missed.">                cpfToken.equals(cpf) ||</span>
-<span class="pc bnc" id="L100" title="All 2 branches missed.">                        permissaoService.podeVisualizarPaciente(</span>
-<span class="nc" id="L101">                                usuarioLogado.getId(),</span>
-<span class="nc" id="L102">                                usuarioPaciente.getId()</span>
+<span class="fc" id="L127">        boolean podeVisualizar =</span>
+<span class="pc bpc" id="L128" title="1 of 2 branches missed.">                usuarioLogado.getCpf().equals(cpf) ||</span>
+<span class="pc bnc" id="L129" title="All 2 branches missed.">                        permissaoService.podeVisualizarPaciente(</span>
+<span class="nc" id="L130">                                usuarioLogado.getId(),</span>
+<span class="nc" id="L131">                                usuarioPaciente.getId()</span>
                         );
-<span class="pc bpc" id="L104" title="1 of 2 branches missed.">        if (!podeVisualizar) {</span>
-<span class="nc" id="L105">            return ResponseEntity</span>
-<span class="nc" id="L106">                    .status(403)</span>
-<span class="nc" id="L107">                    .build();</span>
+<span class="pc bpc" id="L133" title="1 of 2 branches missed.">        if (!podeVisualizar) {</span>
+<span class="nc" id="L134">            throw new AcessoNegadoException(&quot;Usuário sem permissão para visualizar o paciente&quot;);</span>
         }
 
-<span class="fc" id="L110">        Usuario usuario = usuarioService.searchByCpf(cpf);</span>
-<span class="fc" id="L111">        return ResponseEntity.ok(toOutputDTO(usuario));</span>
+<span class="fc" id="L137">        Usuario usuario = usuarioService.searchByCpf(cpf);</span>
+<span class="fc" id="L138">        return ResponseEntity.ok(toOutputDTO(usuario));</span>
     }
 
+    @Operation(
+            summary = &quot;Excluir conta&quot;,
+            description = &quot;Exclui a conta do usuário logado e encerra as suas sessões. &quot;
+                    + &quot;Permitido apenas ao próprio usuário.&quot;
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = &quot;200&quot;, description = &quot;Conta excluída com sucesso&quot;),
+            @ApiResponse(responseCode = &quot;403&quot;, description = &quot;Usuário só pode excluir a própria conta&quot;),
+            @ApiResponse(responseCode = &quot;404&quot;, description = &quot;Usuário não encontrado&quot;)
+    })
     @DeleteMapping(&quot;/deletar/{cpf}&quot;)
-    public ResponseEntity&lt;Void&gt; delete(@PathVariable String cpf, @RequestHeader(&quot;Authorization&quot;) String authHeader) {
+    public ResponseEntity&lt;Void&gt; delete(@Parameter(description = &quot;CPF do usuário (apenas números)&quot;)
+                                       @PathVariable String cpf) {
 
-<span class="fc" id="L117">        String token = authHeader.replace(&quot;Bearer &quot;, &quot;&quot;);</span>
-<span class="fc" id="L118">        String cpfToken = jwtService.extrairCpf(token);</span>
+<span class="fc" id="L155">        Usuario usuarioLogado = usuarioService.getUsuarioLogado();</span>
 
-<span class="pc bpc" id="L120" title="1 of 2 branches missed.">        if (!cpfToken.equals(cpf)) {</span>
-<span class="nc" id="L121">            return ResponseEntity.status(403).build();</span>
+<span class="pc bpc" id="L157" title="1 of 2 branches missed.">        if (!usuarioLogado.getCpf().equals(cpf)) {</span>
+<span class="nc" id="L158">            throw new AcessoNegadoException(&quot;Usuário só pode excluir a própria conta&quot;);</span>
         }
 
-<span class="fc" id="L124">        Usuario usuario = usuarioService.searchByCpf(cpf);</span>
-<span class="fc" id="L125">        usuarioService.delete(usuario.getId());</span>
-<span class="fc" id="L126">        return ResponseEntity.ok().build();</span>
+<span class="fc" id="L161">        Usuario usuario = usuarioService.searchByCpf(cpf);</span>
+<span class="fc" id="L162">        usuarioService.delete(usuario.getId());</span>
+<span class="fc" id="L163">        return ResponseEntity.ok().build();</span>
     }
 
     private UsuarioOutputDTO toOutputDTO(Usuario usuario) {
-<span class="fc" id="L130">        UsuarioOutputDTO out = new UsuarioOutputDTO();</span>
-<span class="fc" id="L131">        out.setCpf(usuario.getCpf());</span>
-<span class="fc" id="L132">        out.setNome(usuario.getNome());</span>
-<span class="fc" id="L133">        out.setEmail(usuario.getEmail());</span>
-<span class="fc" id="L134">        out.setTelefone(usuario.getTelefone());</span>
-<span class="fc" id="L135">        out.setPesoInicial(usuario.getPesoInicial());</span>
-<span class="fc" id="L136">        out.setAltura(usuario.getAltura());</span>
-<span class="fc" id="L137">        out.setFuncaoResponsavel(usuario.getFuncaoResponsavel());</span>
-<span class="fc" id="L138">        out.setTipo(usuario.getTipo());</span>
-<span class="fc" id="L139">        out.setConselho(usuario.getConselho());</span>
-<span class="fc" id="L140">        out.setDataNascimento(usuario.getDataNascimento());</span>
-<span class="fc" id="L141">        out.setDataCadastro(usuario.getDataCadastro());</span>
-<span class="fc" id="L142">        return out;</span>
+<span class="fc" id="L167">        UsuarioOutputDTO out = new UsuarioOutputDTO();</span>
+<span class="fc" id="L168">        out.setCpf(usuario.getCpf());</span>
+<span class="fc" id="L169">        out.setNome(usuario.getNome());</span>
+<span class="fc" id="L170">        out.setEmail(usuario.getEmail());</span>
+<span class="fc" id="L171">        out.setTelefone(usuario.getTelefone());</span>
+<span class="fc" id="L172">        out.setPesoInicial(usuario.getPesoInicial());</span>
+<span class="fc" id="L173">        out.setAltura(usuario.getAltura());</span>
+<span class="fc" id="L174">        out.setFuncaoResponsavel(usuario.getFuncaoResponsavel());</span>
+<span class="fc" id="L175">        out.setTipo(usuario.getTipo());</span>
+<span class="fc" id="L176">        out.setConselho(usuario.getConselho());</span>
+<span class="fc" id="L177">        out.setDataNascimento(usuario.getDataNascimento());</span>
+<span class="fc" id="L178">        out.setDataCadastro(usuario.getDataCadastro());</span>
+<span class="fc" id="L179">        return out;</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.15.202606040825</span></div></body></html>

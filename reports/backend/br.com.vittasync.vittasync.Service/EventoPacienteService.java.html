@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="pt"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>EventoPacienteService.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report"></a> &gt; <a href="index.source.html" class="el_package">br.com.vittasync.vittasync.Service</a> &gt; <span class="el_source">EventoPacienteService.java</span></div><h1>EventoPacienteService.java</h1><pre class="source lang-java linenums">package br.com.vittasync.vittasync.Service;
 
+
 import br.com.vittasync.vittasync.Exception.RecursoNaoEncontradoException;
 import br.com.vittasync.vittasync.Model.EventoPaciente;
 import br.com.vittasync.vittasync.Model.EventoVisualizacao;
@@ -10,10 +11,15 @@ import br.com.vittasync.vittasync.Repository.EventoVisualizacaoRepository;
 import br.com.vittasync.vittasync.Repository.UsuarioRepository;
 import br.com.vittasync.vittasync.Repository.VinculoRepository;
 import org.springframework.stereotype.Service;
-
+import org.springframework.transaction.annotation.Transactional;
+import br.com.vittasync.vittasync.Util.EventoTipos;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.StringJoiner;
+import java.util.LinkedHashSet;
+import java.util.Set;
+
 
 @Service
 public class EventoPacienteService {
@@ -27,13 +33,14 @@ public class EventoPacienteService {
             EventoPacienteRepository repository,
             VinculoRepository vinculoRepository,
             UsuarioRepository usuarioRepository,
-<span class="fc" id="L30">            EventoVisualizacaoRepository eventoVisualizacaoRepository) {</span>
-<span class="fc" id="L31">        this.repository = repository;</span>
-<span class="fc" id="L32">        this.vinculoRepository = vinculoRepository;</span>
-<span class="fc" id="L33">        this.usuarioRepository = usuarioRepository;</span>
-<span class="fc" id="L34">        this.eventoVisualizacaoRepository = eventoVisualizacaoRepository;</span>
-<span class="fc" id="L35">    }</span>
+<span class="fc" id="L36">            EventoVisualizacaoRepository eventoVisualizacaoRepository) {</span>
+<span class="fc" id="L37">        this.repository = repository;</span>
+<span class="fc" id="L38">        this.vinculoRepository = vinculoRepository;</span>
+<span class="fc" id="L39">        this.usuarioRepository = usuarioRepository;</span>
+<span class="fc" id="L40">        this.eventoVisualizacaoRepository = eventoVisualizacaoRepository;</span>
+<span class="fc" id="L41">    }</span>
 
+    @Transactional
     public void criarEvento(
             Integer pacienteId,
             Integer usuarioId,
@@ -42,73 +49,133 @@ public class EventoPacienteService {
             String descricao,
             String prioridade
     ) {
+<span class="fc" id="L52">        criarEvento(</span>
+                pacienteId,
+                usuarioId,
+                tipoEvento,
+                titulo,
+                descricao,
+                null,
+                prioridade
+        );
+<span class="fc" id="L61">    }</span>
 
-<span class="fc" id="L46">        EventoPaciente evento =</span>
+    @Transactional
+    public void criarEvento(
+            Integer pacienteId,
+            Integer usuarioId,
+            String tipoEvento,
+            String titulo,
+            String descricao,
+            String metadata,
+            String prioridade
+    ) {
+
+<span class="fc" id="L74">        EventoPaciente evento =</span>
                 new EventoPaciente();
 
-<span class="fc" id="L49">        evento.setPacienteId(pacienteId);</span>
-<span class="fc" id="L50">        evento.setUsuarioId(usuarioId);</span>
-<span class="fc" id="L51">        evento.setTipoEvento(tipoEvento);</span>
-<span class="fc" id="L52">        evento.setTitulo(titulo);</span>
-<span class="fc" id="L53">        evento.setDescricao(descricao);</span>
-<span class="fc" id="L54">        evento.setVisualizado(false);</span>
-<span class="fc" id="L55">        evento.setPrioridade(prioridade);</span>
+<span class="fc" id="L77">        evento.setPacienteId(pacienteId);</span>
+<span class="fc" id="L78">        evento.setUsuarioId(usuarioId);</span>
+<span class="fc" id="L79">        evento.setTipoEvento(tipoEvento);</span>
+<span class="fc" id="L80">        evento.setTitulo(titulo);</span>
+<span class="fc" id="L81">        evento.setDescricao(descricao);</span>
+<span class="fc" id="L82">        evento.setMetadata(metadata);</span>
+<span class="fc" id="L83">        evento.setVisualizado(false);</span>
+<span class="fc" id="L84">        evento.setPrioridade(prioridade);</span>
 
-<span class="fc" id="L57">        evento.setCriadoEm(</span>
-<span class="fc" id="L58">                Timestamp.valueOf(</span>
-<span class="fc" id="L59">                        LocalDateTime.now()</span>
+<span class="fc" id="L86">        evento.setCriadoEm(</span>
+<span class="fc" id="L87">                Timestamp.valueOf(</span>
+<span class="fc" id="L88">                        LocalDateTime.now()</span>
                 )
         );
 
-<span class="fc" id="L63">        EventoPaciente eventoSalvo = repository.save(evento);</span>
+<span class="fc" id="L92">        EventoPaciente eventoSalvo = repository.save(evento);</span>
 
-<span class="fc" id="L65">        List&lt;Vinculo&gt; vinculos =</span>
-<span class="fc" id="L66">                vinculoRepository.findByPacienteId(</span>
+<span class="fc" id="L94">        List&lt;Vinculo&gt; vinculos =</span>
+<span class="fc" id="L95">                vinculoRepository.findByPacienteId(</span>
                         pacienteId
                 );
 
-<span class="fc bfc" id="L70" title="All 2 branches covered.">        for (Vinculo vinculo : vinculos) {</span>
+<span class="fc" id="L99">        Set&lt;Integer&gt; destinatarios = new LinkedHashSet&lt;&gt;();</span>
+<span class="fc bfc" id="L100" title="All 2 branches covered.">        for (Vinculo vinculo : vinculos) {</span>
+<span class="fc" id="L101">            destinatarios.add(vinculo.getUsuarioId());</span>
+<span class="fc" id="L102">        }</span>
+<span class="pc bpc" id="L103" title="1 of 2 branches missed.">        if (EventoTipos.DESVIO_LINHA_BASE.equals(tipoEvento)) {</span>
+            // O autor também recebe quando é o paciente ou um membro vinculado.
+<span class="nc" id="L105">            destinatarios.add(pacienteId);</span>
+        } else {
+<span class="fc" id="L107">            destinatarios.remove(usuarioId);</span>
+        }
 
-<span class="fc" id="L72">            if (</span>
-<span class="fc" id="L73">                    vinculo.getUsuarioId()</span>
-<span class="pc bpc" id="L74" title="1 of 2 branches missed.">                            .equals(usuarioId)</span>
-            ) {
-<span class="nc" id="L76">                continue;</span>
+<span class="fc bfc" id="L110" title="All 2 branches covered.">        for (Integer destinatarioId : destinatarios) {</span>
+
+<span class="fc" id="L112">            Usuario usuario =</span>
+<span class="fc" id="L113">                    usuarioRepository.findById(</span>
+                            destinatarioId
+<span class="fc" id="L115">                    ).orElse(null);</span>
+
+<span class="pc bpc" id="L117" title="1 of 2 branches missed.">            if (usuario == null) {</span>
+<span class="nc" id="L118">                continue;</span>
             }
 
-<span class="fc" id="L79">            Usuario usuario =</span>
-<span class="fc" id="L80">                    usuarioRepository.findById(</span>
-<span class="fc" id="L81">                            vinculo.getUsuarioId()</span>
-<span class="fc" id="L82">                    ).orElse(null);</span>
-
-<span class="pc bpc" id="L84" title="1 of 2 branches missed.">            if (usuario == null) {</span>
-<span class="nc" id="L85">                continue;</span>
-            }
-
-<span class="fc" id="L88">            EventoVisualizacao visualizacao =</span>
+<span class="fc" id="L121">            EventoVisualizacao visualizacao =</span>
                     new EventoVisualizacao();
 
-<span class="fc" id="L91">            visualizacao.setEventoPaciente(</span>
+<span class="fc" id="L124">            visualizacao.setEventoPaciente(</span>
                     eventoSalvo
             );
 
-<span class="fc" id="L95">            visualizacao.setUsuario(</span>
+<span class="fc" id="L128">            visualizacao.setUsuario(</span>
                     usuario
             );
 
-<span class="fc" id="L99">            visualizacao.setVisualizado(false);</span>
+<span class="fc" id="L132">            visualizacao.setVisualizado(false);</span>
 
-<span class="fc" id="L101">            eventoVisualizacaoRepository.save(</span>
+<span class="fc" id="L134">            eventoVisualizacaoRepository.save(</span>
                     visualizacao
             );
-<span class="fc" id="L104">        }</span>
+<span class="fc" id="L137">        }</span>
 
-<span class="fc" id="L106">    }</span>
+<span class="fc" id="L139">    }</span>
+
+    public static String metadata(String... entries) {
+<span class="pc bpc" id="L142" title="2 of 4 branches missed.">        if (entries == null || entries.length == 0) {</span>
+<span class="nc" id="L143">            return null;</span>
+        }
+
+<span class="fc" id="L146">        StringJoiner joiner = new StringJoiner(&quot;,&quot;, &quot;{&quot;, &quot;}&quot;);</span>
+
+<span class="fc bfc" id="L148" title="All 2 branches covered.">        for (int index = 0; index + 1 &lt; entries.length; index += 2) {</span>
+<span class="fc" id="L149">            String key = entries[index];</span>
+<span class="fc" id="L150">            String value = entries[index + 1];</span>
+
+<span class="pc bpc" id="L152" title="1 of 4 branches missed.">            if (key == null || value == null) {</span>
+<span class="fc" id="L153">                continue;</span>
+            }
+
+<span class="fc" id="L156">            joiner.add(</span>
+                    &quot;\&quot;&quot;
+<span class="fc" id="L158">                            + escapeJson(key)</span>
+                            + &quot;\&quot;:\&quot;&quot;
+<span class="fc" id="L160">                            + escapeJson(value)</span>
+                            + &quot;\&quot;&quot;
+            );
+        }
+
+<span class="fc" id="L165">        String result = joiner.toString();</span>
+<span class="fc bfc" id="L166" title="All 2 branches covered.">        return &quot;{}&quot;.equals(result) ? null : result;</span>
+    }
+
+    private static String escapeJson(String value) {
+<span class="fc" id="L170">        return value</span>
+<span class="fc" id="L171">                .replace(&quot;\\&quot;, &quot;\\\\&quot;)</span>
+<span class="fc" id="L172">                .replace(&quot;\&quot;&quot;, &quot;\\\&quot;&quot;);</span>
+    }
 
     public List&lt;EventoPaciente&gt; listarPorPaciente(Integer pacienteId) {
 
-<span class="fc" id="L110">        return repository</span>
-<span class="fc" id="L111">                .findByPacienteIdOrderByCriadoEmDesc(</span>
+<span class="fc" id="L177">        return repository</span>
+<span class="fc" id="L178">                .findByPacienteIdOrderByCriadoEmDesc(</span>
                         pacienteId
                 );
     }
@@ -118,57 +185,57 @@ public class EventoPacienteService {
             Integer usuarioId
     ) {
 
-<span class="fc" id="L121">        Usuario usuario =</span>
-<span class="fc" id="L122">                usuarioRepository.findById(</span>
+<span class="fc" id="L188">        Usuario usuario =</span>
+<span class="fc" id="L189">                usuarioRepository.findById(</span>
                         usuarioId
-<span class="fc" id="L124">                ).orElseThrow(() -&gt;</span>
-<span class="fc" id="L125">                        new RecursoNaoEncontradoException(</span>
+<span class="fc" id="L191">                ).orElseThrow(() -&gt;</span>
+<span class="fc" id="L192">                        new RecursoNaoEncontradoException(</span>
                                 &quot;Usuário não encontrado&quot;
                         )
                 );
 
-<span class="fc" id="L130">        List&lt;EventoVisualizacao&gt; visualizacoes =</span>
+<span class="fc" id="L197">        List&lt;EventoVisualizacao&gt; visualizacoes =</span>
                 eventoVisualizacaoRepository
-<span class="fc" id="L132">                        .findByUsuarioAndVisualizadoFalseAndEventoPacientePacienteId(</span>
+<span class="fc" id="L199">                        .findByUsuarioAndVisualizadoFalseAndEventoPacientePacienteId(</span>
                                 usuario,
                                 pacienteId
                         );
 
         for (
                 EventoVisualizacao visualizacao
-<span class="fc bfc" id="L139" title="All 2 branches covered.">                : visualizacoes</span>
+<span class="fc bfc" id="L206" title="All 2 branches covered.">                : visualizacoes</span>
         ) {
 
-<span class="fc" id="L142">            visualizacao.setVisualizado(</span>
-<span class="fc" id="L143">                    true</span>
+<span class="fc" id="L209">            visualizacao.setVisualizado(</span>
+<span class="fc" id="L210">                    true</span>
             );
 
-<span class="fc" id="L146">            visualizacao.setVisualizadoEm(</span>
-<span class="fc" id="L147">                    LocalDateTime.now()</span>
+<span class="fc" id="L213">            visualizacao.setVisualizadoEm(</span>
+<span class="fc" id="L214">                    LocalDateTime.now()</span>
             );
-<span class="fc" id="L149">        }</span>
+<span class="fc" id="L216">        }</span>
 
-<span class="fc" id="L151">        eventoVisualizacaoRepository.saveAll(</span>
+<span class="fc" id="L218">        eventoVisualizacaoRepository.saveAll(</span>
                 visualizacoes
         );
-<span class="fc" id="L154">    }</span>
+<span class="fc" id="L221">    }</span>
 
     public Long contarNaoVisualizados(
             Integer pacienteId,
             Integer usuarioId
     ) {
 
-<span class="fc" id="L161">        Usuario usuario =</span>
-<span class="fc" id="L162">                usuarioRepository.findById(</span>
+<span class="fc" id="L228">        Usuario usuario =</span>
+<span class="fc" id="L229">                usuarioRepository.findById(</span>
                         usuarioId
-<span class="fc" id="L164">                ).orElseThrow(() -&gt;</span>
-<span class="fc" id="L165">                        new RecursoNaoEncontradoException(</span>
+<span class="fc" id="L231">                ).orElseThrow(() -&gt;</span>
+<span class="fc" id="L232">                        new RecursoNaoEncontradoException(</span>
                                 &quot;Usuário não encontrado&quot;
                         )
                 );
 
-<span class="fc" id="L170">        return eventoVisualizacaoRepository</span>
-<span class="fc" id="L171">                .countByUsuarioAndVisualizadoFalseAndEventoPacientePacienteId(</span>
+<span class="fc" id="L237">        return eventoVisualizacaoRepository</span>
+<span class="fc" id="L238">                .countByUsuarioAndVisualizadoFalseAndEventoPacientePacienteId(</span>
                         usuario,
                         pacienteId
                 );

@@ -2,129 +2,183 @@
 
 
 import br.com.vittasync.vittasync.DTO.*;
-import br.com.vittasync.vittasync.Exception.RecursoNaoEncontradoException;
-import br.com.vittasync.vittasync.Repository.VinculoRepository;
-
+import br.com.vittasync.vittasync.Exception.AcessoNegadoException;
 import br.com.vittasync.vittasync.Model.Usuario;
 import br.com.vittasync.vittasync.Model.Vinculo;
-
 import br.com.vittasync.vittasync.Service.*;
-
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
 import java.util.List;
+
 
 @RestController
 @RequestMapping(&quot;/vinculos&quot;)
+@Tag(name = &quot;Vínculos&quot;, description = &quot;Convites e vínculos entre o paciente e os responsáveis ou profissionais de saúde &quot;
+        + &quot;que podem acompanhar os seus dados&quot;)
 public class VinculoController {
 
     private final VinculoService service;
-    private final JwtService jwtService;
     private final UsuarioService usuarioService;
     private final PermissaoService permissaoService;
-    private final VinculoRepository vinculoRepository;
 
     public VinculoController(
             VinculoService service,
-            JwtService jwtService,
             UsuarioService usuarioService,
-            PermissaoService permissaoService,
-            VinculoRepository vinculoRepository
-<span class="fc" id="L34">    ) {</span>
-<span class="fc" id="L35">        this.service = service;</span>
-<span class="fc" id="L36">        this.jwtService = jwtService;</span>
-<span class="fc" id="L37">        this.usuarioService = usuarioService;</span>
-<span class="fc" id="L38">        this.permissaoService = permissaoService;</span>
-<span class="fc" id="L39">        this.vinculoRepository = vinculoRepository;</span>
-<span class="fc" id="L40">    }</span>
+            PermissaoService permissaoService
+<span class="fc" id="L33">    ) {</span>
+<span class="fc" id="L34">        this.service = service;</span>
+<span class="fc" id="L35">        this.usuarioService = usuarioService;</span>
+<span class="fc" id="L36">        this.permissaoService = permissaoService;</span>
+<span class="fc" id="L37">    }</span>
 
+    @Operation(
+            summary = &quot;Gerar código de convite&quot;,
+            description = &quot;Gera um código de convite de 6 caracteres e o link de entrada, válidos por 24 horas, &quot;
+                    + &quot;para que um responsável ou profissional de saúde se vincule ao paciente. Permitido apenas ao paciente.&quot;
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = &quot;200&quot;, description = &quot;Código de convite gerado com sucesso&quot;),
+            @ApiResponse(responseCode = &quot;403&quot;, description = &quot;Somente pacientes podem gerar vínculo&quot;)
+    })
     @PostMapping(&quot;/gerar&quot;)
-    public ResponseEntity&lt;ConviteVinculoOutputDTO&gt; gerarCodigo(@RequestHeader(&quot;Authorization&quot;) String authHeader) {
+    public ResponseEntity&lt;ConviteVinculoOutputDTO&gt; gerarCodigo() {
 
-<span class="fc" id="L45">        String token = authHeader.replace(&quot;Bearer &quot;, &quot;&quot;);</span>
+<span class="fc" id="L51">        Usuario usuario = usuarioService.getUsuarioLogado();</span>
 
-<span class="fc" id="L47">        String cpf = jwtService.extrairCpf(token);</span>
+<span class="fc" id="L53">        ConviteVinculoOutputDTO output = service.gerarCodigo(usuario.getId());</span>
 
-<span class="fc" id="L49">        Usuario usuario = usuarioService.searchByCpf(cpf);</span>
-
-<span class="fc" id="L51">        ConviteVinculoOutputDTO output = service.gerarCodigo(usuario.getId());</span>
-
-<span class="fc" id="L53">        return ResponseEntity.ok(output);</span>
+<span class="fc" id="L55">        return ResponseEntity.ok(output);</span>
     }
 
+    @Operation(
+            summary = &quot;Entrar com código de convite&quot;,
+            description = &quot;Cria o vínculo do usuário logado com o paciente dono do código, informando a função conforme o tipo do usuário, &quot;
+                    + &quot;e retorna os dados básicos do paciente. Permitido aos responsáveis e profissionais de saúde.&quot;
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = &quot;200&quot;, description = &quot;Vínculo criado com sucesso&quot;),
+            @ApiResponse(responseCode = &quot;400&quot;, description = &quot;Função inválida, código inativo ou expirado, ou vínculo já existente&quot;),
+            @ApiResponse(responseCode = &quot;403&quot;, description = &quot;Paciente não pode entrar com código&quot;),
+            @ApiResponse(responseCode = &quot;404&quot;, description = &quot;Código inválido&quot;)
+    })
     @PostMapping(&quot;/entrar&quot;)
-    public ResponseEntity&lt;PacienteResumoDTO&gt; entrarComCodigo(@RequestHeader(&quot;Authorization&quot;) String authHeader, @RequestBody VinculoInputDTO dto) {
+    public ResponseEntity&lt;PacienteResumoDTO&gt; entrarComCodigo(@RequestBody VinculoInputDTO dto) {
 
-<span class="fc" id="L59">        String token = authHeader.replace(&quot;Bearer &quot;, &quot;&quot;);</span>
+<span class="fc" id="L72">        Usuario usuario = usuarioService.getUsuarioLogado();</span>
 
-<span class="fc" id="L61">        String cpf = jwtService.extrairCpf(token);</span>
-
-<span class="fc" id="L63">        Usuario usuario = usuarioService.searchByCpf(cpf);</span>
-
-<span class="fc" id="L65">        PacienteResumoDTO paciente =</span>
-<span class="fc" id="L66">                service.entrarComCodigo(</span>
-<span class="fc" id="L67">                        dto.getCodigo(),</span>
-<span class="fc" id="L68">                        dto.getFuncao(),</span>
-<span class="fc" id="L69">                        usuario.getId()</span>
+<span class="fc" id="L74">        PacienteResumoDTO paciente =</span>
+<span class="fc" id="L75">                service.entrarComCodigo(</span>
+<span class="fc" id="L76">                        dto.getCodigo(),</span>
+<span class="fc" id="L77">                        dto.getFuncao(),</span>
+<span class="fc" id="L78">                        usuario.getId()</span>
                 );
 
-<span class="fc" id="L72">        return ResponseEntity.ok(paciente);</span>
+<span class="fc" id="L81">        return ResponseEntity.ok(paciente);</span>
     }
 
+    @Operation(
+            summary = &quot;Enviar convite por e-mail&quot;,
+            description = &quot;Envia o código de convite por e-mail para um responsável ou profissional de saúde já cadastrado no sistema. &quot;
+                    + &quot;Permitido apenas ao paciente que gerou o convite.&quot;
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = &quot;200&quot;, description = &quot;Convite enviado com sucesso&quot;),
+            @ApiResponse(responseCode = &quot;400&quot;, description = &quot;Convite inativo ou expirado, ou e-mail pertence a um paciente&quot;),
+            @ApiResponse(responseCode = &quot;403&quot;, description = &quot;Somente o paciente que gerou o convite pode enviá-lo&quot;),
+            @ApiResponse(responseCode = &quot;404&quot;, description = &quot;Convite ou usuário não encontrados&quot;)
+    })
     @PostMapping(&quot;/enviar-email&quot;)
     public ResponseEntity&lt;Void&gt; enviarEmail(@RequestBody EnviarConviteDTO dto) {
 
-<span class="fc" id="L78">        service.enviarConviteEmail(dto.getEmail(), dto.getCodigo());</span>
+<span class="fc" id="L98">        Usuario usuario = usuarioService.getUsuarioLogado();</span>
 
-<span class="fc" id="L80">        return ResponseEntity.ok().build();</span>
+<span class="fc" id="L100">        service.enviarConviteEmail(dto.getEmail(), dto.getCodigo(), usuario.getId());</span>
+
+<span class="fc" id="L102">        return ResponseEntity.ok().build();</span>
     }
 
+    @Operation(
+            summary = &quot;Excluir vínculo&quot;,
+            description = &quot;Exclui um vínculo e registra o evento na linha do tempo do paciente. &quot;
+                    + &quot;Permitido ao paciente, que pode excluir qualquer vínculo dele, e ao próprio usuário vinculado.&quot;
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = &quot;204&quot;, description = &quot;Vínculo excluído com sucesso&quot;),
+            @ApiResponse(responseCode = &quot;403&quot;, description = &quot;Usuário sem permissão para remover o vínculo&quot;),
+            @ApiResponse(responseCode = &quot;404&quot;, description = &quot;Vínculo não encontrado&quot;)
+    })
     @DeleteMapping(&quot;/{id}&quot;)
-    public ResponseEntity&lt;Void&gt; removerVinculo(@PathVariable Long id, @RequestHeader(&quot;Authorization&quot;) String authHeader) {
+    public ResponseEntity&lt;Void&gt; removerVinculo(@Parameter(description = &quot;ID do vínculo&quot;)
+                                               @PathVariable Long id) {
 
-<span class="fc" id="L86">        String token = authHeader.replace(&quot;Bearer &quot;, &quot;&quot;);</span>
+<span class="fc" id="L119">        Usuario usuarioLogado = usuarioService.getUsuarioLogado();</span>
 
-<span class="fc" id="L88">        String cpfDoToken = jwtService.extrairCpf(token);</span>
+<span class="fc" id="L121">        Vinculo vinculo = service.buscarPorId(id);</span>
 
-<span class="fc" id="L90">        Usuario usuarioLogado = usuarioService.searchByCpf(cpfDoToken);</span>
-
-<span class="pc" id="L92">        Vinculo vinculo = vinculoRepository.findById(id).orElseThrow(() -&gt; new RecursoNaoEncontradoException(&quot;Vínculo não encontrado&quot;));</span>
-
-<span class="pc bpc" id="L94" title="1 of 2 branches missed.">        if (!permissaoService.podeRemoverVinculo(usuarioLogado.getId(), vinculo)) {</span>
-<span class="nc" id="L95">            return ResponseEntity.status(403).build();</span>
+<span class="pc bpc" id="L123" title="1 of 2 branches missed.">        if (!permissaoService.podeRemoverVinculo(usuarioLogado.getId(), vinculo)) {</span>
+<span class="nc" id="L124">            throw new AcessoNegadoException(&quot;Usuário sem permissão para remover o vínculo&quot;);</span>
         }
 
-<span class="fc" id="L98">        service.removerVinculo(id, usuarioLogado.getId());</span>
+<span class="fc" id="L127">        service.removerVinculo(id, usuarioLogado.getId());</span>
 
-<span class="fc" id="L100">        return ResponseEntity.noContent().build();</span>
+<span class="fc" id="L129">        return ResponseEntity.noContent().build();</span>
     }
 
+    @Operation(
+            summary = &quot;Listar vínculos do usuário logado&quot;,
+            description = &quot;Para o paciente retorna os responsáveis e profissionais de saúde vinculados a ele, &quot;
+                    + &quot;para os demais retorna os pacientes aos quais o usuário está vinculado.&quot;
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = &quot;200&quot;, description = &quot;Lista de vínculos do usuário logado&quot;)
+    })
     @GetMapping()
-    public ResponseEntity&lt;List&lt;VinculoOutputDTO&gt;&gt; listar(@RequestHeader(&quot;Authorization&quot;) String authHeader) {
+    public ResponseEntity&lt;List&lt;VinculoOutputDTO&gt;&gt; listar() {
 
-<span class="fc" id="L106">        String token = authHeader.replace(&quot;Bearer &quot;, &quot;&quot;);</span>
+<span class="fc" id="L143">        Usuario usuario = usuarioService.getUsuarioLogado();</span>
 
-<span class="fc" id="L108">        String cpf = jwtService.extrairCpf(token);</span>
-
-<span class="fc" id="L110">        Usuario usuario = usuarioService.searchByCpf(cpf);</span>
-
-<span class="fc" id="L112">        return ResponseEntity.ok(service.listar(usuario.getId()));</span>
+<span class="fc" id="L145">        return ResponseEntity.ok(service.listar(usuario.getId()));</span>
     }
 
+    @Operation(
+            summary = &quot;Listar pacientes acessíveis&quot;,
+            description = &quot;Retorna os pacientes que o usuário logado pode acompanhar (para o paciente retorna apenas ele mesmo).&quot;
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = &quot;200&quot;, description = &quot;Lista de pacientes acessíveis ao usuário logado&quot;)
+    })
     @GetMapping(&quot;/pacientes&quot;)
-    public ResponseEntity&lt;List&lt;PacienteResumoDTO&gt;&gt; listarPacientes(@RequestHeader(&quot;Authorization&quot;) String authHeader) {
+    public ResponseEntity&lt;List&lt;PacienteResumoDTO&gt;&gt; listarPacientes() {
 
-<span class="fc" id="L118">        String token = authHeader.replace(&quot;Bearer &quot;, &quot;&quot;);</span>
-<span class="fc" id="L119">        String cpf = jwtService.extrairCpf(token);</span>
-<span class="fc" id="L120">        Usuario usuario = usuarioService.searchByCpf(cpf);</span>
-<span class="fc" id="L121">        return ResponseEntity.ok(service.listarPacientesDoUsuario(usuario.getId()));</span>
+<span class="fc" id="L158">        Usuario usuario = usuarioService.getUsuarioLogado();</span>
+<span class="fc" id="L159">        return ResponseEntity.ok(service.listarPacientesDoUsuario(usuario.getId()));</span>
     }
 
+    @Operation(
+            summary = &quot;Listar vínculos do paciente&quot;,
+            description = &quot;Retorna os responsáveis e profissionais de saúde vinculados ao paciente. &quot;
+                    + &quot;Permitido ao próprio paciente e a todos os usuários vinculados a ele (responsáveis e profissionais de saúde).&quot;
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = &quot;200&quot;, description = &quot;Lista de vínculos do paciente&quot;),
+            @ApiResponse(responseCode = &quot;403&quot;, description = &quot;Usuário sem permissão para visualizar o paciente&quot;)
+    })
     @GetMapping(&quot;/paciente/{id}&quot;)
-    public ResponseEntity&lt;List&lt;VinculoOutputDTO&gt;&gt; listarPorPaciente(@PathVariable Integer id) {
+    public ResponseEntity&lt;List&lt;VinculoOutputDTO&gt;&gt; listarPorPaciente(@Parameter(description = &quot;ID do paciente&quot;)
+                                                                    @PathVariable Integer id) {
 
-<span class="fc" id="L127">        return ResponseEntity.ok(service.listarPorPaciente(id));</span>
+<span class="fc" id="L175">        Usuario usuarioLogado = usuarioService.getUsuarioLogado();</span>
+
+<span class="pc bpc" id="L177" title="1 of 2 branches missed.">        if (!permissaoService.podeVisualizarPaciente(usuarioLogado.getId(), id)) {</span>
+<span class="nc" id="L178">            throw new AcessoNegadoException(&quot;Usuário sem permissão para visualizar o paciente&quot;);</span>
+        }
+
+<span class="fc" id="L181">        return ResponseEntity.ok(service.listarPorPaciente(id));</span>
     }
 
 

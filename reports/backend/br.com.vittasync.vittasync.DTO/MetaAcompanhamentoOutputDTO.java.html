@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="pt"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>MetaAcompanhamentoOutputDTO.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report"></a> &gt; <a href="index.source.html" class="el_package">br.com.vittasync.vittasync.DTO</a> &gt; <span class="el_source">MetaAcompanhamentoOutputDTO.java</span></div><h1>MetaAcompanhamentoOutputDTO.java</h1><pre class="source lang-java linenums">package br.com.vittasync.vittasync.DTO;
+
+
+import io.swagger.v3.oas.annotations.media.Schema;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+
+
+@Schema(description = &quot;Meta de acompanhamento do paciente&quot;)
+<span class="fc" id="L10">public class MetaAcompanhamentoOutputDTO {</span>
+
+    @Schema(description = &quot;ID da meta&quot;, example = &quot;7&quot;)
+    private Long id;
+
+    @Schema(description = &quot;Nome da meta&quot;, example = &quot;Perder peso até o fim do ano&quot;)
+    private String nome;
+
+    @Schema(description = &quot;Origem dos dados da meta&quot;, example = &quot;sinais_vitais&quot;, allowableValues = {&quot;sinais_vitais&quot;, &quot;habitos&quot;, &quot;personalizado&quot;})
+    private String tipoDado;
+
+    @Schema(description = &quot;Indicador acompanhado pela meta&quot;, example = &quot;peso&quot;, allowableValues = {&quot;peso&quot;, &quot;horas_sono&quot;, &quot;minutos_exercicio&quot;, &quot;personalizado&quot;})
+    private String indicador;
+
+    @Schema(description = &quot;Se o objetivo é aumentar ou reduzir o valor&quot;, example = &quot;reduzir&quot;, allowableValues = {&quot;aumentar&quot;, &quot;reduzir&quot;})
+    private String direcao;
+
+    @Schema(description = &quot;Valor no início da meta&quot;, example = &quot;80.0&quot;)
+    private Double valorInicial;
+
+    @Schema(description = &quot;Valor atual&quot;, example = &quot;78.5&quot;)
+    private Double valorAtual;
+
+    @Schema(description = &quot;Unidade do valor&quot;, example = &quot;kg&quot;)
+    private String unidade;
+
+    @Schema(description = &quot;Valor que se deseja alcançar&quot;, example = &quot;75.0&quot;)
+    private Double valorAlvo;
+
+    @Schema(description = &quot;Progresso da meta em porcentagem&quot;, example = &quot;30.0&quot;)
+    private Double progresso;
+
+    @Schema(description = &quot;Situação da meta&quot;, example = &quot;em_andamento&quot;, allowableValues = {&quot;em_andamento&quot;, &quot;concluido&quot;, &quot;concluido_atrasado&quot;, &quot;nao_atingida&quot;})
+    private String status;
+
+    @Schema(description = &quot;Data e hora em que a meta foi cadastrada&quot;, example = &quot;2026-10-01T10:20:00&quot;)
+    private LocalDateTime dataCriacao;
+
+    @Schema(description = &quot;Prazo da meta&quot;, example = &quot;2026-12-31&quot;)
+    private LocalDate dataLimite;
+
+    @Schema(description = &quot;Data e hora da conclusão, nula enquanto a meta está em andamento&quot;, example = &quot;2026-12-20T18:00:00&quot;)
+    private LocalDateTime dataConclusao;
+
+    @Schema(description = &quot;Data e hora da última edição, nula se a meta nunca foi editada&quot;, example = &quot;2026-10-13T21:02:10&quot;)
+    private LocalDateTime dataModificacao;
+
+
+
+<span class="fc" id="L59">    public Long getId() { return id; }</span>
+<span class="fc" id="L60">    public void setId(Long id) { this.id = id; }</span>
+
+<span class="fc" id="L62">    public String getNome() { return nome; }</span>
+<span class="fc" id="L63">    public void setNome(String nome) { this.nome = nome; }</span>
+
+<span class="fc" id="L65">    public String getTipoDado() { return tipoDado; }</span>
+<span class="fc" id="L66">    public void setTipoDado(String tipoDado) { this.tipoDado = tipoDado; }</span>
+
+<span class="fc" id="L68">    public String getIndicador() { return indicador; }</span>
+<span class="fc" id="L69">    public void setIndicador(String indicador) { this.indicador = indicador; }</span>
+
+<span class="fc" id="L71">    public String getDirecao() { return direcao; }</span>
+<span class="fc" id="L72">    public void setDirecao(String direcao) { this.direcao = direcao; }</span>
+
+<span class="fc" id="L74">    public Double getValorInicial() { return valorInicial; }</span>
+<span class="fc" id="L75">    public void setValorInicial(Double valorInicial) { this.valorInicial = valorInicial; }</span>
+
+<span class="fc" id="L77">    public Double getValorAtual() { return valorAtual; }</span>
+<span class="fc" id="L78">    public void setValorAtual(Double valorAtual) { this.valorAtual = valorAtual; }</span>
+
+<span class="fc" id="L80">    public String getUnidade() { return unidade; }</span>
+<span class="fc" id="L81">    public void setUnidade(String unidade) { this.unidade = unidade; }</span>
+
+<span class="fc" id="L83">    public Double getValorAlvo() { return valorAlvo; }</span>
+<span class="fc" id="L84">    public void setValorAlvo(Double valorAlvo) { this.valorAlvo = valorAlvo; }</span>
+
+<span class="fc" id="L86">    public Double getProgresso() { return progresso; }</span>
+<span class="fc" id="L87">    public void setProgresso(Double progresso) { this.progresso = progresso; }</span>
+
+<span class="fc" id="L89">    public String getStatus() { return status; }</span>
+<span class="fc" id="L90">    public void setStatus(String status) { this.status = status; }</span>
+
+<span class="fc" id="L92">    public LocalDateTime getDataCriacao() { return dataCriacao; }</span>
+<span class="fc" id="L93">    public void setDataCriacao(LocalDateTime dataCriacao) { this.dataCriacao = dataCriacao; }</span>
+
+<span class="fc" id="L95">    public LocalDate getDataLimite() { return dataLimite; }</span>
+<span class="fc" id="L96">    public void setDataLimite(LocalDate dataLimite) { this.dataLimite = dataLimite; }</span>
+
+<span class="fc" id="L98">    public LocalDateTime getDataConclusao() { return dataConclusao; }</span>
+<span class="fc" id="L99">    public void setDataConclusao(LocalDateTime dataConclusao) { this.dataConclusao = dataConclusao; }</span>
+
+<span class="fc" id="L101">    public LocalDateTime getDataModificacao() { return dataModificacao; }</span>
+<span class="fc" id="L102">    public void setDataModificacao(LocalDateTime dataModificacao) { this.dataModificacao = dataModificacao; }</span>
+    
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.15.202606040825</span></div></body></html>

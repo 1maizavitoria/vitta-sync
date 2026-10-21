@@ -51,15 +51,19 @@ public class JwtFilter extends OncePerRequestFilter {
 <span class="fc" id="L51">            return;</span>
         }
 
-<span class="pc bpc" id="L54" title="1 of 2 branches missed.">        if (jwtService.validarToken(token)) {</span>
-<span class="fc" id="L55">            String cpf = jwtService.extrairCpf(token);</span>
-<span class="fc" id="L56">            UsernamePasswordAuthenticationToken authentication =</span>
-                    new UsernamePasswordAuthenticationToken(cpf, null, null);
-<span class="fc" id="L58">            authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));</span>
-
-<span class="fc" id="L60">            SecurityContextHolder.getContext().setAuthentication(authentication);</span>
+<span class="pc bpc" id="L54" title="1 of 2 branches missed.">        if (!jwtService.validarToken(token)) {</span>
+<span class="nc" id="L55">            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);</span>
+<span class="nc" id="L56">            return;</span>
         }
-<span class="fc" id="L62">        filterChain.doFilter(request, response);</span>
-<span class="fc" id="L63">    }</span>
+
+<span class="fc" id="L59">        String cpf = jwtService.extrairCpf(token);</span>
+<span class="fc" id="L60">        UsernamePasswordAuthenticationToken authentication =</span>
+                new UsernamePasswordAuthenticationToken(cpf, null, null);
+<span class="fc" id="L62">        authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));</span>
+
+<span class="fc" id="L64">        SecurityContextHolder.getContext().setAuthentication(authentication);</span>
+
+<span class="fc" id="L66">        filterChain.doFilter(request, response);</span>
+<span class="fc" id="L67">    }</span>
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.15.202606040825</span></div></body></html>

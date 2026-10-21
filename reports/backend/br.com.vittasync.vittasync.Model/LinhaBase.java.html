@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="pt"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>LinhaBase.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report"></a> &gt; <a href="index.source.html" class="el_package">br.com.vittasync.vittasync.Model</a> &gt; <span class="el_source">LinhaBase.java</span></div><h1>LinhaBase.java</h1><pre class="source lang-java linenums">package br.com.vittasync.vittasync.Model;
+
+
+import jakarta.persistence.*;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+
+
+@Entity
+@Table(
+        name = &quot;LinhaBase&quot;,
+        uniqueConstraints = @UniqueConstraint(
+                name = &quot;uk_linha_base_paciente_sinal&quot;,
+                columnNames = {&quot;paciente_id&quot;, &quot;sinal&quot;}
+        )
+)
+public class LinhaBase {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Integer id;
+
+    @Column(name = &quot;paciente_id&quot;, nullable = false)
+    private Integer pacienteId;
+
+    @Column(name = &quot;sinal&quot;, nullable = false, length = 30)
+    private String sinal;
+
+    @Column(name = &quot;data_inicio&quot;, nullable = false)
+    private LocalDate dataInicio;
+
+    @Column(name = &quot;data_fim&quot;, nullable = false)
+    private LocalDate dataFim;
+
+    @Column(name = &quot;media&quot;, nullable = false)
+    private Double media;
+
+    @Column(name = &quot;desvio_padrao&quot;, nullable = false)
+    private Double desvioPadrao;
+
+    // nulos quando o desvio padrão é zero: sem faixa, o sinal não é comparado
+    @Column(name = &quot;limite_inferior&quot;)
+    private Double limiteInferior;
+
+    @Column(name = &quot;limite_superior&quot;)
+    private Double limiteSuperior;
+
+    @Column(name = &quot;data_formacao&quot;, nullable = false)
+    private LocalDateTime dataFormacao;
+
+<span class="fc" id="L51">    public LinhaBase() {}</span>
+
+
+<span class="fc" id="L54">    public Integer getId() { return id; }</span>
+<span class="fc" id="L55">    public void setId(Integer id) { this.id = id; }</span>
+
+<span class="fc" id="L57">    public Integer getPacienteId() { return pacienteId; }</span>
+<span class="fc" id="L58">    public void setPacienteId(Integer pacienteId) { this.pacienteId = pacienteId; }</span>
+
+<span class="fc" id="L60">    public String getSinal() { return sinal; }</span>
+<span class="fc" id="L61">    public void setSinal(String sinal) { this.sinal = sinal; }</span>
+
+<span class="fc" id="L63">    public LocalDate getDataInicio() { return dataInicio; }</span>
+<span class="fc" id="L64">    public void setDataInicio(LocalDate dataInicio) { this.dataInicio = dataInicio; }</span>
+
+<span class="fc" id="L66">    public LocalDate getDataFim() { return dataFim; }</span>
+<span class="fc" id="L67">    public void setDataFim(LocalDate dataFim) { this.dataFim = dataFim; }</span>
+
+<span class="fc" id="L69">    public Double getMedia() { return media; }</span>
+<span class="fc" id="L70">    public void setMedia(Double media) { this.media = media; }</span>
+
+<span class="fc" id="L72">    public Double getDesvioPadrao() { return desvioPadrao; }</span>
+<span class="fc" id="L73">    public void setDesvioPadrao(Double desvioPadrao) { this.desvioPadrao = desvioPadrao; }</span>
+
+<span class="fc" id="L75">    public Double getLimiteInferior() { return limiteInferior; }</span>
+<span class="fc" id="L76">    public void setLimiteInferior(Double limiteInferior) { this.limiteInferior = limiteInferior; }</span>
+
+<span class="fc" id="L78">    public Double getLimiteSuperior() { return limiteSuperior; }</span>
+<span class="fc" id="L79">    public void setLimiteSuperior(Double limiteSuperior) { this.limiteSuperior = limiteSuperior; }</span>
+
+<span class="fc" id="L81">    public LocalDateTime getDataFormacao() { return dataFormacao; }</span>
+<span class="fc" id="L82">    public void setDataFormacao(LocalDateTime dataFormacao) { this.dataFormacao = dataFormacao; }</span>
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.15.202606040825</span></div></body></html>

@@ -1,0 +1,194 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="pt"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>RelatorioService.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report"></a> &gt; <a href="index.source.html" class="el_package">br.com.vittasync.vittasync.Service</a> &gt; <span class="el_source">RelatorioService.java</span></div><h1>RelatorioService.java</h1><pre class="source lang-java linenums">package br.com.vittasync.vittasync.Service;
+
+
+import br.com.vittasync.vittasync.DTO.*;
+import br.com.vittasync.vittasync.Model.RelatorioLog;
+import br.com.vittasync.vittasync.Model.Usuario;
+import br.com.vittasync.vittasync.Repository.SinaisVitaisRepository;
+import br.com.vittasync.vittasync.Repository.HabitosRepository;
+import br.com.vittasync.vittasync.Repository.DiarioSintomasRepository;
+import br.com.vittasync.vittasync.Repository.RelatorioLogRepository;
+import br.com.vittasync.vittasync.Util.RelatorioPDFGenerator;
+import br.com.vittasync.vittasync.Util.RelatorioCSVGenerator;
+import org.springframework.stereotype.Service;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.ArrayList;
+import java.util.DoubleSummaryStatistics;
+import java.util.Map;
+import java.util.TreeMap;
+import java.util.function.Function;
+
+
+@Service
+public class RelatorioService {
+
+    private final SinaisVitaisRepository sinaisVitaisRepository;
+    private final HabitosRepository habitosRepository;
+    private final DiarioSintomasRepository diarioSintomasRepository;
+    private final RelatorioLogRepository relatorioLogRepository;
+
+    public RelatorioService(SinaisVitaisRepository sinaisVitaisRepository,
+                            HabitosRepository habitosRepository,
+                            DiarioSintomasRepository diarioSintomasRepository,
+<span class="fc" id="L35">                            RelatorioLogRepository relatorioLogRepository) {</span>
+<span class="fc" id="L36">        this.sinaisVitaisRepository = sinaisVitaisRepository;</span>
+<span class="fc" id="L37">        this.habitosRepository = habitosRepository;</span>
+<span class="fc" id="L38">        this.diarioSintomasRepository = diarioSintomasRepository;</span>
+<span class="fc" id="L39">        this.relatorioLogRepository = relatorioLogRepository;</span>
+<span class="fc" id="L40">    }</span>
+
+    public RelatorioPreviewDTO gerarPreview(Usuario paciente,
+                                            List&lt;String&gt; categorias,
+                                            LocalDate inicio,
+                                            LocalDate fim) {
+<span class="fc" id="L46">        RelatorioPacienteResumoDTO resumo = new RelatorioPacienteResumoDTO(</span>
+<span class="fc" id="L47">                paciente.getNome(),</span>
+<span class="fc" id="L48">                paciente.getCpf(),</span>
+<span class="fc" id="L49">                paciente.getPesoInicial(),</span>
+<span class="fc" id="L50">                paciente.getAltura(),</span>
+<span class="fc" id="L51">                paciente.getDataNascimento()</span>
+        );
+
+<span class="fc bfc" id="L54" title="All 2 branches covered.">        List&lt;LinhaTempoSinaisVitaisDTO&gt; sinais = categorias.contains(&quot;SINAIS&quot;)</span>
+<span class="fc" id="L55">                ? sinaisVitaisRepository.buscarParaRelatorio(</span>
+<span class="fc bfc" id="L56" title="All 2 branches covered.">                        paciente.getId(), inicio == null ? null : inicio.atStartOfDay(),</span>
+<span class="fc bfc" id="L57" title="All 4 branches covered.">                        fim == null || fim.equals(LocalDate.of(9999, 12, 31))</span>
+<span class="fc" id="L58">                                ? null : fim.plusDays(1).atStartOfDay())</span>
+<span class="fc" id="L59">                .stream()</span>
+<span class="fc" id="L60">                .map(s -&gt; new LinhaTempoSinaisVitaisDTO(</span>
+<span class="fc" id="L61">                        s.getId(),</span>
+<span class="fc" id="L62">                        s.getDataRegistro(),</span>
+<span class="fc" id="L63">                        s.getPeso(), s.getFcBpm(), s.getFrRpm(), s.getPaSistolica(),</span>
+<span class="fc" id="L64">                        s.getPaDiastolica(), s.getTempCelcius(), s.getSpo2Porcento()</span>
+                ))
+<span class="fc" id="L66">                .toList()</span>
+<span class="fc" id="L67">                : List.of();</span>
+
+<span class="fc bfc" id="L69" title="All 2 branches covered.">        List&lt;LinhaTempoHabitosDTO&gt; habitos = categorias.contains(&quot;HABITOS&quot;)</span>
+<span class="fc" id="L70">                ? habitosRepository.buscarParaRelatorio(paciente.getId(), inicio, fim)</span>
+<span class="fc" id="L71">                .stream()</span>
+<span class="fc" id="L72">                .map(h -&gt; new LinhaTempoHabitosDTO(</span>
+<span class="fc" id="L73">                        h.getId(),</span>
+<span class="fc" id="L74">                        h.getDataRegistro(),</span>
+<span class="fc" id="L75">                        h.getHorasSono(), h.getMinutosExercicio(), h.getIndiceRepouso(),</span>
+<span class="fc" id="L76">                        h.getRepouso(), h.getCanal(),</span>
+<span class="fc" id="L77">                        h.getDataReferencia()</span>
+                ))
+<span class="fc" id="L79">                .toList()</span>
+<span class="fc" id="L80">                : List.of();</span>
+
+<span class="fc bfc" id="L82" title="All 2 branches covered.">        List&lt;LinhaTempoSintomasDTO&gt; sintomas = categorias.contains(&quot;SINTOMAS&quot;)</span>
+<span class="fc" id="L83">                ? diarioSintomasRepository.buscarParaRelatorio(paciente.getId(), inicio, fim)</span>
+<span class="fc" id="L84">                .stream()</span>
+<span class="fc" id="L85">                .map(s -&gt; new LinhaTempoSintomasDTO(</span>
+<span class="fc" id="L86">                        s.getId(),</span>
+<span class="fc" id="L87">                        s.getDataRegistro(),</span>
+<span class="fc" id="L88">                        s.getSintoma(), s.getIntensidadeDor(),</span>
+<span class="fc" id="L89">                        s.getDataReferencia()</span>
+                ))
+<span class="fc" id="L91">                .toList()</span>
+<span class="fc" id="L92">                : List.of();</span>
+
+<span class="fc" id="L94">        RelatorioPreviewDTO preview = new RelatorioPreviewDTO(resumo, sinais, habitos, sintomas);</span>
+<span class="fc" id="L95">        preview.setDataInicio(inicio);</span>
+<span class="fc" id="L96">        preview.setDataFim(fim);</span>
+<span class="fc" id="L97">        preview.setDataEmissao(LocalDateTime.now());</span>
+<span class="fc" id="L98">        preview.setCategorias(categorias);</span>
+<span class="fc" id="L99">        preview.setResumo(new RelatorioResumoDTO(</span>
+<span class="fc bfc" id="L100" title="All 2 branches covered.">                categorias.contains(&quot;SINAIS&quot;) ? resumirSinais(sinais) : List.of(),</span>
+<span class="fc bfc" id="L101" title="All 2 branches covered.">                categorias.contains(&quot;HABITOS&quot;) ? resumirHabitos(habitos) : null));</span>
+<span class="fc" id="L102">        return preview;</span>
+    }
+
+    private List&lt;RelatorioResumoDTO.Indicador&gt; resumirSinais(List&lt;LinhaTempoSinaisVitaisDTO&gt; sinais) {
+<span class="fc" id="L106">        List&lt;RelatorioResumoDTO.Indicador&gt; indicadores = new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L107">        indicadores.add(resumirIndicador(sinais, &quot;fcBpm&quot;, &quot;Frequência cardíaca&quot;, &quot;bpm&quot;, LinhaTempoSinaisVitaisDTO::getFcBpm));</span>
+<span class="fc" id="L108">        indicadores.add(resumirIndicador(sinais, &quot;frRpm&quot;, &quot;Frequência respiratória&quot;, &quot;rpm&quot;, LinhaTempoSinaisVitaisDTO::getFrRpm));</span>
+<span class="fc" id="L109">        indicadores.add(resumirIndicador(sinais, &quot;paSistolica&quot;, &quot;Pressão sistólica&quot;, &quot;mmHg&quot;, LinhaTempoSinaisVitaisDTO::getPaSistolica));</span>
+<span class="fc" id="L110">        indicadores.add(resumirIndicador(sinais, &quot;paDiastolica&quot;, &quot;Pressão diastólica&quot;, &quot;mmHg&quot;, LinhaTempoSinaisVitaisDTO::getPaDiastolica));</span>
+<span class="fc" id="L111">        indicadores.add(resumirIndicador(sinais, &quot;tempCelcius&quot;, &quot;Temperatura&quot;, &quot;°C&quot;, LinhaTempoSinaisVitaisDTO::getTempCelcius));</span>
+<span class="fc" id="L112">        indicadores.add(resumirIndicador(sinais, &quot;spo2Porcento&quot;, &quot;Saturação&quot;, &quot;%&quot;, LinhaTempoSinaisVitaisDTO::getSpo2Porcento));</span>
+<span class="fc" id="L113">        return indicadores;</span>
+    }
+
+    private RelatorioResumoDTO.Indicador resumirIndicador(List&lt;LinhaTempoSinaisVitaisDTO&gt; sinais,
+            String chave, String nome, String unidade, Function&lt;LinhaTempoSinaisVitaisDTO, Number&gt; valor) {
+<span class="fc" id="L118">        DoubleSummaryStatistics total = new DoubleSummaryStatistics();</span>
+<span class="fc" id="L119">        Map&lt;LocalDate, DoubleSummaryStatistics&gt; porDia = new TreeMap&lt;&gt;();</span>
+<span class="fc bfc" id="L120" title="All 2 branches covered.">        for (LinhaTempoSinaisVitaisDTO sinal : sinais) {</span>
+<span class="fc" id="L121">            Number numero = valor.apply(sinal);</span>
+<span class="fc bfc" id="L122" title="All 2 branches covered.">            if (numero == null) continue;</span>
+<span class="fc" id="L123">            total.accept(numero.doubleValue());</span>
+<span class="fc bfc" id="L124" title="All 2 branches covered.">            if (sinal.getDataHora() != null) {</span>
+<span class="fc" id="L125">                porDia.computeIfAbsent(sinal.getDataHora().toLocalDate(), d -&gt; new DoubleSummaryStatistics())</span>
+<span class="fc" id="L126">                        .accept(numero.doubleValue());</span>
+            }
+<span class="fc" id="L128">        }</span>
+<span class="fc" id="L129">        List&lt;RelatorioResumoDTO.PontoDiario&gt; pontos = porDia.entrySet().stream()</span>
+<span class="fc" id="L130">                .map(e -&gt; new RelatorioResumoDTO.PontoDiario(e.getKey(), e.getValue().getAverage())).toList();</span>
+<span class="fc bfc" id="L131" title="All 2 branches covered.">        boolean vazio = total.getCount() == 0;</span>
+<span class="fc" id="L132">        return new RelatorioResumoDTO.Indicador(chave, nome, unidade,</span>
+<span class="fc bfc" id="L133" title="All 4 branches covered.">                vazio ? null : total.getAverage(), vazio ? null : total.getMin(),</span>
+<span class="fc bfc" id="L134" title="All 2 branches covered.">                vazio ? null : total.getMax(), total.getCount(), pontos);</span>
+    }
+
+    private RelatorioResumoDTO.Habitos resumirHabitos(List&lt;LinhaTempoHabitosDTO&gt; habitos) {
+<span class="fc" id="L138">        Map&lt;LocalDate, DoubleSummaryStatistics&gt; sonoPorDia = new TreeMap&lt;&gt;();</span>
+<span class="fc" id="L139">        Map&lt;LocalDate, Long&gt; exercicioPorDia = new TreeMap&lt;&gt;();</span>
+<span class="fc bfc" id="L140" title="All 2 branches covered.">        for (LinhaTempoHabitosDTO habito : habitos) {</span>
+<span class="fc bfc" id="L141" title="All 2 branches covered.">            if (habito.getDataReferencia() == null) continue;</span>
+<span class="fc bfc" id="L142" title="All 2 branches covered.">            if (habito.getHorasSono() != null) {</span>
+<span class="fc" id="L143">                sonoPorDia.computeIfAbsent(habito.getDataReferencia(), d -&gt; new DoubleSummaryStatistics())</span>
+<span class="fc" id="L144">                        .accept(habito.getHorasSono());</span>
+            }
+<span class="fc bfc" id="L146" title="All 2 branches covered.">            if (habito.getMinutosExercicio() != null) {</span>
+<span class="fc" id="L147">                exercicioPorDia.merge(habito.getDataReferencia(), habito.getMinutosExercicio().longValue(), Long::sum);</span>
+            }
+<span class="fc" id="L149">        }</span>
+<span class="fc bfc" id="L150" title="All 2 branches covered.">        Double mediaSono = sonoPorDia.isEmpty() ? null : sonoPorDia.values().stream()</span>
+<span class="fc" id="L151">                .mapToDouble(DoubleSummaryStatistics::getAverage).average().orElseThrow();</span>
+<span class="fc bfc" id="L152" title="All 2 branches covered.">        Long totalExercicio = exercicioPorDia.isEmpty() ? null : exercicioPorDia.values().stream()</span>
+<span class="fc" id="L153">                .mapToLong(Long::longValue).sum();</span>
+<span class="fc" id="L154">        return new RelatorioResumoDTO.Habitos(mediaSono, sonoPorDia.size(), totalExercicio, exercicioPorDia.size());</span>
+    }
+
+    public RelatorioPDFDTO gerarPDF(RelatorioPreviewDTO preview) {
+        try {
+<span class="fc" id="L159">            RelatorioPDFGenerator generator = new RelatorioPDFGenerator();</span>
+<span class="fc" id="L160">            byte[] pdfBytes = generator.gerarRelatorio(preview);</span>
+<span class="fc" id="L161">            return new RelatorioPDFDTO(pdfBytes);</span>
+<span class="fc" id="L162">        } catch (Exception e) {</span>
+<span class="fc" id="L163">            throw new RuntimeException(&quot;Erro ao gerar PDF&quot;, e);</span>
+        }
+    }
+
+    public RelatorioCSVDTO gerarCSV(RelatorioPreviewDTO preview) {
+<span class="fc" id="L168">        RelatorioCSVGenerator generator = new RelatorioCSVGenerator();</span>
+<span class="fc" id="L169">        byte[] csvBytes = generator.gerarRelatorio(preview);</span>
+<span class="fc" id="L170">        return new RelatorioCSVDTO(csvBytes);</span>
+    }
+
+    public void registrarExportacao(Usuario paciente,
+                                    Usuario usuario,
+                                    String formato,
+                                    List&lt;String&gt; categorias,
+                                    LocalDate inicio,
+                                    LocalDate fim) {
+<span class="fc" id="L179">        RelatorioLog log = new RelatorioLog();</span>
+<span class="fc" id="L180">        log.setPaciente(paciente);</span>
+<span class="fc" id="L181">        log.setUsuario(usuario);</span>
+<span class="fc" id="L182">        log.setFormato(formato);</span>
+<span class="fc" id="L183">        log.setCategorias(String.join(&quot;,&quot;, categorias));</span>
+<span class="fc" id="L184">        log.setDataInicio(inicio);</span>
+<span class="fc" id="L185">        log.setDataFim(fim);</span>
+<span class="fc" id="L186">        log.setDataExportacao(LocalDateTime.now());</span>
+<span class="fc" id="L187">        relatorioLogRepository.save(log);</span>
+<span class="fc" id="L188">    }</span>
+
+    public List&lt;RelatorioLog&gt; consultarLogs(Integer pacienteId) {
+<span class="fc" id="L191">        return relatorioLogRepository.findByPacienteIdOrderByDataExportacaoDesc(pacienteId);</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.15.202606040825</span></div></body></html>

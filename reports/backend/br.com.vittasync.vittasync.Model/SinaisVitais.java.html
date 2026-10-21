@@ -6,7 +6,10 @@ import java.time.LocalDateTime;
 
 
 @Entity
-@Table(name = &quot;SinaisVitais&quot;)
+@Table(
+        name = &quot;SinaisVitais&quot;,
+        indexes = @Index(name = &quot;idx_sinais_paciente_data&quot;, columnList = &quot;paciente_id, data_registro&quot;)
+)
 public class SinaisVitais {
 
     @Id
@@ -47,50 +50,50 @@ public class SinaisVitais {
     @Column(name = &quot;registrado_por_usuario_id&quot;)
     private Integer registradoPorUsuarioId;
 
-<span class="fc" id="L50">    public SinaisVitais() {}</span>
+<span class="fc" id="L53">    public SinaisVitais() {}</span>
 
-<span class="fc" id="L52">    public Integer getId() { return id; }</span>
-<span class="fc" id="L53">    public void setId(Integer id) { this.id = id; }</span>
 
-<span class="fc" id="L55">    public Usuario getPaciente() { return paciente; }</span>
-<span class="fc" id="L56">    public void setPaciente(Usuario paciente) { this.paciente = paciente; }</span>
+<span class="fc" id="L56">    public Integer getId() { return id; }</span>
+<span class="fc" id="L57">    public void setId(Integer id) { this.id = id; }</span>
 
-<span class="fc" id="L58">    public Double getPeso() { return peso; }</span>
-<span class="fc" id="L59">    public void setPeso(Double peso) {this.peso = peso;}</span>
+<span class="fc" id="L59">    public Usuario getPaciente() { return paciente; }</span>
+<span class="fc" id="L60">    public void setPaciente(Usuario paciente) { this.paciente = paciente; }</span>
 
-<span class="fc" id="L61">    public Integer getFcBpm() { return fcBpm; }</span>
-<span class="fc" id="L62">    public void setFcBpm(Integer fcBpm) { this.fcBpm = fcBpm; }</span>
+<span class="fc" id="L62">    public Double getPeso() { return peso; }</span>
+<span class="fc" id="L63">    public void setPeso(Double peso) {this.peso = peso;}</span>
 
-<span class="fc" id="L64">    public Integer getFrRpm() { return frRpm; }</span>
-<span class="fc" id="L65">    public void setFrRpm(Integer frRpm) { this.frRpm = frRpm; }</span>
+<span class="fc" id="L65">    public Integer getFcBpm() { return fcBpm; }</span>
+<span class="fc" id="L66">    public void setFcBpm(Integer fcBpm) { this.fcBpm = fcBpm; }</span>
 
-<span class="fc" id="L67">    public Integer getPaSistolica() { return paSistolica; }</span>
-<span class="fc" id="L68">    public void setPaSistolica(Integer paSistolica) { this.paSistolica = paSistolica; }</span>
+<span class="fc" id="L68">    public Integer getFrRpm() { return frRpm; }</span>
+<span class="fc" id="L69">    public void setFrRpm(Integer frRpm) { this.frRpm = frRpm; }</span>
 
-<span class="fc" id="L70">    public Integer getPaDiastolica() { return paDiastolica; }</span>
-<span class="fc" id="L71">    public void setPaDiastolica(Integer paDiastolica) { this.paDiastolica = paDiastolica; }</span>
+<span class="fc" id="L71">    public Integer getPaSistolica() { return paSistolica; }</span>
+<span class="fc" id="L72">    public void setPaSistolica(Integer paSistolica) { this.paSistolica = paSistolica; }</span>
 
-<span class="fc" id="L73">    public Double getTempCelcius() { return tempCelcius; }</span>
-<span class="fc" id="L74">    public void setTempCelcius(Double tempCelcius) { this.tempCelcius = tempCelcius; }</span>
+<span class="fc" id="L74">    public Integer getPaDiastolica() { return paDiastolica; }</span>
+<span class="fc" id="L75">    public void setPaDiastolica(Integer paDiastolica) { this.paDiastolica = paDiastolica; }</span>
 
-<span class="fc" id="L76">    public Integer getSpo2Porcento() { return spo2Porcento; }</span>
-<span class="fc" id="L77">    public void setSpo2Porcento(Integer spo2Porcento) { this.spo2Porcento = spo2Porcento; }</span>
+<span class="fc" id="L77">    public Double getTempCelcius() { return tempCelcius; }</span>
+<span class="fc" id="L78">    public void setTempCelcius(Double tempCelcius) { this.tempCelcius = tempCelcius; }</span>
 
-<span class="fc" id="L79">    public LocalDateTime getDataRegistro() { return dataRegistro; }</span>
-<span class="fc" id="L80">    public void setDataRegistro(LocalDateTime dataRegistro) { this.dataRegistro = dataRegistro; }</span>
+<span class="fc" id="L80">    public Integer getSpo2Porcento() { return spo2Porcento; }</span>
+<span class="fc" id="L81">    public void setSpo2Porcento(Integer spo2Porcento) { this.spo2Porcento = spo2Porcento; }</span>
 
-<span class="fc" id="L82">    public LocalDateTime getDataModificacao() { return dataModificacao; }</span>
-<span class="fc" id="L83">    public void setDataModificacao(LocalDateTime dataModificacao) { this.dataModificacao = dataModificacao; }</span>
+<span class="fc" id="L83">    public LocalDateTime getDataRegistro() { return dataRegistro; }</span>
+<span class="fc" id="L84">    public void setDataRegistro(LocalDateTime dataRegistro) { this.dataRegistro = dataRegistro; }</span>
+
+<span class="fc" id="L86">    public LocalDateTime getDataModificacao() { return dataModificacao; }</span>
+<span class="fc" id="L87">    public void setDataModificacao(LocalDateTime dataModificacao) { this.dataModificacao = dataModificacao; }</span>
 
     public Integer getRegistradoPorUsuarioId() {
-<span class="fc" id="L86">        return registradoPorUsuarioId;</span>
+<span class="fc" id="L90">        return registradoPorUsuarioId;</span>
     }
 
-    public void setRegistradoPorUsuarioId(
-            Integer registradoPorUsuarioId
-    ) {
-<span class="fc" id="L92">        this.registradoPorUsuarioId =</span>
+    public void setRegistradoPorUsuarioId(Integer registradoPorUsuarioId) {
+<span class="fc" id="L94">        this.registradoPorUsuarioId =</span>
                 registradoPorUsuarioId;
-<span class="fc" id="L94">    }</span>
+<span class="fc" id="L96">    }</span>
+
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.15.202606040825</span></div></body></html>

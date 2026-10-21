@@ -2,56 +2,67 @@
 
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import io.swagger.v3.oas.annotations.media.Schema;
 import java.time.LocalDate;
 import jakarta.validation.constraints.*;
 
 
-<span class="fc" id="L9">public class UsuarioUpdateDTO {</span>
+@Schema(description = &quot;Dados de perfil para editar um usuário&quot;)
+<span class="fc" id="L11">public class UsuarioUpdateDTO {</span>
 
+    @Schema(description = &quot;Nome completo, mínimo de 5 caracteres&quot;, example = &quot;Maria Souza&quot;)
     @NotBlank(message = &quot;Nome é obrigatório&quot;)
     @Size(min = 5, message = &quot;Nome deve ter pelo menos 5 caracteres&quot;)
     private String nome;
 
+    @Schema(description = &quot;E-mail do usuário&quot;, example = &quot;maria.souza@email.com&quot;)
     @NotBlank(message = &quot;Email é obrigatório&quot;)
     @Size(min = 5, message = &quot;Email deve ter pelo menos 5 caracteres&quot;)
     @Email(message = &quot;Email inválido&quot;)
     private String email;
 
+    @Schema(description = &quot;Telefone com DDD (apenas números)&quot;, example = &quot;41987654321&quot;)
     @NotBlank(message = &quot;Telefone é obrigatório&quot;)
     @Pattern(regexp = &quot;\\d{10,11}&quot;, message = &quot;Telefone deve ter DDD e número&quot;)
     private String telefone;
 
+    @Schema(description = &quot;Altura em metros&quot;, example = &quot;1.65&quot;)
     @Positive(message = &quot;Altura deve ser positiva&quot;)
     private Double altura;
 
+    @Schema(description = &quot;Peso em kg&quot;, example = &quot;74.0&quot;)
     @Positive(message = &quot;Peso deve ser positiva&quot;)
     private Double pesoInicial;
 
+    @Schema(description = &quot;Função do responsável em relação ao paciente, usado pelo tipo responsavel&quot;, example = &quot;Cuidadora&quot;)
     private String funcaoResponsavel;
 
+    @Schema(description = &quot;Data de nascimento&quot;, example = &quot;1958-04-22&quot;)
     @NotNull(message = &quot;Data de nascimento é obrigatória&quot;)
     @JsonFormat(pattern = &quot;yyyy-MM-dd&quot;)
     private LocalDate dataNascimento;
 
-<span class="fc" id="L36">    public String getNome() { return nome; }</span>
-<span class="fc" id="L37">    public void setNome(String nome) { this.nome = nome; }</span>
 
-<span class="fc" id="L39">    public String getEmail() { return email; }</span>
-<span class="fc" id="L40">    public void setEmail(String email) { this.email = email; }</span>
+<span class="fc" id="L46">    public String getNome() { return nome; }</span>
+<span class="fc" id="L47">    public void setNome(String nome) { this.nome = nome; }</span>
 
-<span class="fc" id="L42">    public String getTelefone() { return telefone; }</span>
-<span class="fc" id="L43">    public void setTelefone(String telefone) { this.telefone = telefone; }</span>
+<span class="fc" id="L49">    public String getEmail() { return email; }</span>
+<span class="fc" id="L50">    public void setEmail(String email) { this.email = email; }</span>
 
-<span class="fc" id="L45">    public Double getAltura() { return altura; }</span>
-<span class="fc" id="L46">    public void setAltura(Double altura) { this.altura = altura; }</span>
+<span class="fc" id="L52">    public String getTelefone() { return telefone; }</span>
+<span class="fc" id="L53">    public void setTelefone(String telefone) { this.telefone = telefone; }</span>
 
-<span class="fc" id="L48">    public Double getPesoInicial() { return pesoInicial; }</span>
-<span class="fc" id="L49">    public void setPesoInicial(Double pesoInicial) { this.pesoInicial = pesoInicial; }</span>
+<span class="fc" id="L55">    public Double getAltura() { return altura; }</span>
+<span class="fc" id="L56">    public void setAltura(Double altura) { this.altura = altura; }</span>
 
-<span class="fc" id="L51">    public String getFuncaoResponsavel() { return funcaoResponsavel; }</span>
-<span class="fc" id="L52">    public void setFuncaoResponsavel(String funcaoResponsavel) { this.funcaoResponsavel = funcaoResponsavel; }</span>
+<span class="fc" id="L58">    public Double getPesoInicial() { return pesoInicial; }</span>
+<span class="fc" id="L59">    public void setPesoInicial(Double pesoInicial) { this.pesoInicial = pesoInicial; }</span>
 
-<span class="fc" id="L54">    public LocalDate getDataNascimento() { return dataNascimento; }</span>
-<span class="fc" id="L55">    public void setDataNascimento(LocalDate dataNascimento) { this.dataNascimento = dataNascimento; }</span>
+<span class="fc" id="L61">    public String getFuncaoResponsavel() { return funcaoResponsavel; }</span>
+<span class="fc" id="L62">    public void setFuncaoResponsavel(String funcaoResponsavel) { this.funcaoResponsavel = funcaoResponsavel; }</span>
+
+<span class="fc" id="L64">    public LocalDate getDataNascimento() { return dataNascimento; }</span>
+<span class="fc" id="L65">    public void setDataNascimento(LocalDate dataNascimento) { this.dataNascimento = dataNascimento; }</span>
+
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.15.202606040825</span></div></body></html>

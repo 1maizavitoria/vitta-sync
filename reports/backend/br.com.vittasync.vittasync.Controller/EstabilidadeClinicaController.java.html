@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="pt"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>EstabilidadeClinicaController.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report"></a> &gt; <a href="index.source.html" class="el_package">br.com.vittasync.vittasync.Controller</a> &gt; <span class="el_source">EstabilidadeClinicaController.java</span></div><h1>EstabilidadeClinicaController.java</h1><pre class="source lang-java linenums">package br.com.vittasync.vittasync.Controller;
+
+
+import br.com.vittasync.vittasync.DTO.EstabilidadeClinicaDTO;
+import br.com.vittasync.vittasync.Exception.AcessoNegadoException;
+import br.com.vittasync.vittasync.Model.Usuario;
+import br.com.vittasync.vittasync.Service.EstabilidadeClinicaService;
+import br.com.vittasync.vittasync.Service.PermissaoService;
+import br.com.vittasync.vittasync.Service.UsuarioService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+import java.time.LocalDateTime;
+import java.util.List;
+
+
+@RestController
+@RequestMapping(&quot;/estabilidadeclinica&quot;)
+@Tag(name = &quot;Estabilidade clínica&quot;, description = &quot;Índices de estabilidade clínica do paciente calculados a partir dos sinais vitais &quot;
+        + &quot;e dos hábitos, classificados em saudável, moderado ou crítico&quot;)
+public class EstabilidadeClinicaController {
+
+    private final EstabilidadeClinicaService estabilidadeClinicaService;
+    private final UsuarioService usuarioService;
+    private final PermissaoService permissaoService;
+
+    public EstabilidadeClinicaController(
+            EstabilidadeClinicaService estabilidadeClinicaService,
+            UsuarioService usuarioService,
+            PermissaoService permissaoService
+<span class="fc" id="L35">    ) {</span>
+<span class="fc" id="L36">        this.estabilidadeClinicaService = estabilidadeClinicaService;</span>
+<span class="fc" id="L37">        this.usuarioService = usuarioService;</span>
+<span class="fc" id="L38">        this.permissaoService = permissaoService;</span>
+<span class="fc" id="L39">    }</span>
+
+    @Operation(
+            summary = &quot;Consultar estabilidade clínica do paciente&quot;,
+            description = &quot;Calcula e retorna os índices de estabilidade de cada sinal vital, do sono, do exercício e o índice geral, &quot;
+                    + &quot;usando todos os sinais vitais e os hábitos dos últimos 30 dias (cada fator precisa de pelo menos 3 registros). &quot;
+                    + &quot;Permitido ao próprio paciente e a todos os usuários vinculados a ele (responsáveis e profissionais de saúde).&quot;
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = &quot;200&quot;, description = &quot;Índices de estabilidade clínica do paciente&quot;),
+            @ApiResponse(responseCode = &quot;403&quot;, description = &quot;Usuário sem permissão para visualizar o paciente&quot;),
+            @ApiResponse(responseCode = &quot;404&quot;, description = &quot;Paciente não encontrado&quot;)
+    })
+    @GetMapping(&quot;/paciente/{cpf}&quot;)
+    public ResponseEntity&lt;List&lt;EstabilidadeClinicaDTO&gt;&gt; consultarEstabilidade(
+            @Parameter(description = &quot;CPF do paciente (apenas números)&quot;)
+            @PathVariable String cpf
+    ) {
+<span class="fc" id="L57">        Usuario usuarioLogado = usuarioService.getUsuarioLogado();</span>
+<span class="fc" id="L58">        Usuario paciente = usuarioService.searchByCpf(cpf);</span>
+
+<span class="fc bfc" id="L60" title="All 2 branches covered.">        if (!permissaoService.podeVisualizarPaciente(usuarioLogado.getId(), paciente.getId())) {</span>
+<span class="fc" id="L61">            throw new AcessoNegadoException(&quot;Usuário sem permissão para visualizar o paciente&quot;);</span>
+        }
+
+<span class="fc" id="L64">        List&lt;EstabilidadeClinicaDTO&gt; indices =</span>
+<span class="fc" id="L65">                estabilidadeClinicaService.consultarIndices(paciente.getId());</span>
+
+<span class="fc" id="L67">        return ResponseEntity.ok(indices);</span>
+    }
+
+    @Operation(
+            summary = &quot;Testar alerta de estabilidade&quot;,
+            description = &quot;Simula uma mudança de estabilidade para o fator e a categoria informados, junto de um índice geral moderado, &quot;
+                    + &quot;e dispara os alertas para os contatos de emergência que escolheram receber esse tipo de alerta. &quot;
+                    + &quot;Não grava nada no histórico, apenas confere o envio de e-mail e SMS. &quot;
+                    + &quot;Permitido ao próprio paciente e a todos os usuários vinculados a ele.&quot;
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = &quot;200&quot;, description = &quot;Alertas de teste disparados&quot;),
+            @ApiResponse(responseCode = &quot;403&quot;, description = &quot;Usuário sem permissão para visualizar o paciente&quot;),
+            @ApiResponse(responseCode = &quot;404&quot;, description = &quot;Paciente não encontrado&quot;)
+    })
+    @GetMapping(&quot;/teste-alerta/{cpf}/{tipo}/{categoria}&quot;)
+    public ResponseEntity&lt;Void&gt; testarAlerta(
+            @Parameter(description = &quot;CPF do paciente (apenas números)&quot;)
+            @PathVariable String cpf,
+            @Parameter(description = &quot;Fator simulado: fc_bpm, fr_rpm, pressao, temp_celcius, spo2, peso, sono ou exercicio&quot;)
+            @PathVariable String tipo,
+            @Parameter(description = &quot;Categoria simulada: saudavel, moderado ou critico&quot;)
+            @PathVariable String categoria
+    ) {
+<span class="fc" id="L91">        Usuario usuarioLogado = usuarioService.getUsuarioLogado();</span>
+<span class="fc" id="L92">        Usuario paciente = usuarioService.searchByCpf(cpf);</span>
+
+<span class="fc bfc" id="L94" title="All 2 branches covered.">        if (!permissaoService.podeVisualizarPaciente(usuarioLogado.getId(), paciente.getId())) {</span>
+<span class="fc" id="L95">            throw new AcessoNegadoException(&quot;Usuário sem permissão para visualizar o paciente&quot;);</span>
+        }
+
+<span class="fc" id="L98">        EstabilidadeClinicaDTO indiceTeste = new EstabilidadeClinicaDTO(</span>
+                tipo,
+<span class="fc" id="L100">                7,</span>
+                categoria,
+<span class="fc" id="L102">                1.0,</span>
+<span class="fc" id="L103">                LocalDateTime.now()</span>
+        );
+
+<span class="fc" id="L106">        EstabilidadeClinicaDTO geral = new EstabilidadeClinicaDTO(</span>
+                &quot;geral&quot;,
+<span class="fc" id="L108">                6,</span>
+                &quot;moderado&quot;,
+<span class="fc" id="L110">                1.0,</span>
+<span class="fc" id="L111">                LocalDateTime.now()</span>
+        );
+
+<span class="fc" id="L114">        List&lt;EstabilidadeClinicaDTO&gt; indicesTeste = List.of(indiceTeste, geral);</span>
+
+<span class="fc" id="L116">        estabilidadeClinicaService.testarDisparoAlerta(paciente.getId(), indicesTeste);</span>
+
+<span class="fc" id="L118">        return ResponseEntity.ok().build();</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.15.202606040825</span></div></body></html>

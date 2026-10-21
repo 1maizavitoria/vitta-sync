@@ -5,69 +5,115 @@ import br.com.vittasync.vittasync.DTO.LoginDTO;
 import br.com.vittasync.vittasync.DTO.RedefinirSenhaDTO;
 import br.com.vittasync.vittasync.DTO.SolicitarRedefinicaoDTO;
 import br.com.vittasync.vittasync.Service.AuthService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 
 @RestController
 @RequestMapping(&quot;/auth&quot;)
+@Tag(name = &quot;Autenticação&quot;, description = &quot;Login em duas etapas com código de verificação enviado por e-mail ou SMS &quot;
+        + &quot;e redefinição de senha, endpoints públicos que não exigem token&quot;)
 public class AuthController {
 
     private final AuthService authService;
 
-<span class="fc" id="L18">    public AuthController(AuthService authService) {</span>
-<span class="fc" id="L19">        this.authService = authService;</span>
-<span class="fc" id="L20">    }</span>
+<span class="fc" id="L25">    public AuthController(AuthService authService) {</span>
+<span class="fc" id="L26">        this.authService = authService;</span>
+<span class="fc" id="L27">    }</span>
 
+    @Operation(
+            summary = &quot;Realizar login&quot;,
+            description = &quot;Confere o CPF e a senha do usuário e, se estiverem corretos, envia um código de verificação &quot;
+                    + &quot;de 5 dígitos pelo canal escolhido (e-mail ou SMS), válido por 10 minutos. &quot;
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = &quot;200&quot;, description = &quot;Código de verificação enviado&quot;),
+            @ApiResponse(responseCode = &quot;400&quot;, description = &quot;Senha incorreta ou canal inválido&quot;),
+            @ApiResponse(responseCode = &quot;404&quot;, description = &quot;Usuário não encontrado&quot;)
+    })
     @PostMapping(&quot;/login&quot;)
     public ResponseEntity&lt;Void&gt; login(
             @RequestBody LoginDTO loginDTO
     ) {
 
-<span class="fc" id="L27">        authService.login(</span>
-<span class="fc" id="L28">                loginDTO.getCpf(),</span>
-<span class="fc" id="L29">                loginDTO.getSenha(),</span>
-<span class="fc" id="L30">                loginDTO.getCanal()</span>
+<span class="fc" id="L44">        authService.login(</span>
+<span class="fc" id="L45">                loginDTO.getCpf(),</span>
+<span class="fc" id="L46">                loginDTO.getSenha(),</span>
+<span class="fc" id="L47">                loginDTO.getCanal()</span>
         );
 
-<span class="fc" id="L33">        return ResponseEntity.ok().build();</span>
+<span class="fc" id="L50">        return ResponseEntity.ok().build();</span>
     }
 
+    @Operation(
+            summary = &quot;Validar código de login&quot;,
+            description = &quot;Valida o código de verificação recebido no login e retorna o token JWT do usuário. &quot;
+                    + &quot;O token deve ser enviado no cabeçalho ''Authorization'' (Bearer) dos endpoints &quot;
+                    + &quot;(no Swagger basta colar no campo/botão ''Authorize'').&quot;
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = &quot;200&quot;, description = &quot;Token JWT do usuário&quot;),
+            @ApiResponse(responseCode = &quot;400&quot;, description = &quot;Código inválido, já utilizado ou expirado&quot;)
+    })
     @PostMapping(&quot;/validar-codigo-login&quot;)
     public ResponseEntity&lt;String&gt; validarCodigoLogin(
+            @Parameter(description = &quot;Código de verificação de 5 dígitos recebido por e-mail ou SMS&quot;)
             @RequestParam String codigo
     ) {
 
-<span class="fc" id="L41">        String token =</span>
-<span class="fc" id="L42">                authService.validarCodigoLogin(codigo);</span>
+<span class="fc" id="L69">        String token =</span>
+<span class="fc" id="L70">                authService.validarCodigoLogin(codigo);</span>
 
-<span class="fc" id="L44">        return ResponseEntity.ok(token);</span>
+<span class="fc" id="L72">        return ResponseEntity.ok(token);</span>
     }
 
+    @Operation(
+            summary = &quot;Solicitar redefinição de senha&quot;,
+            description = &quot;Envia um código de verificação para redefinir a senha pelo canal escolhido (e-mail ou SMS), &quot;
+                    + &quot;o código é válido por 10 minutos e deve ser usado em ''redefinir-senha''.&quot;
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = &quot;200&quot;, description = &quot;Código de redefinição enviado&quot;),
+            @ApiResponse(responseCode = &quot;400&quot;, description = &quot;Canal inválido&quot;),
+            @ApiResponse(responseCode = &quot;404&quot;, description = &quot;Nenhum usuário cadastrado com o e-mail informado&quot;)
+    })
     @PostMapping(&quot;/enviar-codigo-redefinir-senha&quot;)
     public ResponseEntity&lt;Void&gt; enviarCodigoRedefinirSenha(
             @RequestBody SolicitarRedefinicaoDTO dto
     ) {
 
-<span class="fc" id="L52">        authService.enviarCodigoRedefinirSenha(</span>
-<span class="fc" id="L53">                dto.getEmail(),</span>
-<span class="fc" id="L54">                dto.getCanal()</span>
+<span class="fc" id="L90">        authService.enviarCodigoRedefinirSenha(</span>
+<span class="fc" id="L91">                dto.getEmail(),</span>
+<span class="fc" id="L92">                dto.getCanal()</span>
         );
 
-<span class="fc" id="L57">        return ResponseEntity.ok().build();</span>
+<span class="fc" id="L95">        return ResponseEntity.ok().build();</span>
     }
 
+    @Operation(
+            summary = &quot;Redefinir senha&quot;,
+            description = &quot;Valida o código de redefinição recebido e troca a senha do usuário pela nova senha informada.&quot;
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = &quot;200&quot;, description = &quot;Senha redefinida com sucesso&quot;),
+            @ApiResponse(responseCode = &quot;400&quot;, description = &quot;Código inválido, já utilizado ou expirado&quot;)
+    })
     @PostMapping(&quot;/redefinir-senha&quot;)
     public ResponseEntity&lt;Void&gt; redefinirSenha(
             @RequestBody RedefinirSenhaDTO dto
     ) {
 
-<span class="fc" id="L65">        authService.redefinirSenha(</span>
-<span class="fc" id="L66">                dto.getCodigo(),</span>
-<span class="fc" id="L67">                dto.getNovaSenha()</span>
+<span class="fc" id="L111">        authService.redefinirSenha(</span>
+<span class="fc" id="L112">                dto.getCodigo(),</span>
+<span class="fc" id="L113">                dto.getNovaSenha()</span>
         );
 
-<span class="fc" id="L70">        return ResponseEntity.ok().build();</span>
+<span class="fc" id="L116">        return ResponseEntity.ok().build();</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.15.202606040825</span></div></body></html>

@@ -1,11 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="pt"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>EventoPaciente.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report"></a> &gt; <a href="index.source.html" class="el_package">br.com.vittasync.vittasync.Model</a> &gt; <span class="el_source">EventoPaciente.java</span></div><h1>EventoPaciente.java</h1><pre class="source lang-java linenums">package br.com.vittasync.vittasync.Model;
 
-import jakarta.persistence.*;
 
+import jakarta.persistence.*;
 import java.sql.Timestamp;
 
+
 @Entity
-@Table(name = &quot;EventoPaciente&quot;)
+@Table(
+        name = &quot;EventoPaciente&quot;,
+        indexes = @Index(name = &quot;idx_evento_paciente_criado&quot;, columnList = &quot;paciente_id, criado_em&quot;)
+)
 public class EventoPaciente {
 
     @Id
@@ -27,6 +31,9 @@ public class EventoPaciente {
     @Column(name = &quot;descricao&quot;)
     private String descricao;
 
+    @Column(name = &quot;metadata&quot;, columnDefinition = &quot;TEXT&quot;)
+    private String metadata;
+
     @Column(name = &quot;visualizado&quot;)
     private Boolean visualizado;
 
@@ -36,75 +43,38 @@ public class EventoPaciente {
     @Column(name = &quot;prioridade&quot;)
     private String prioridade;
 
-<span class="fc" id="L39">    public EventoPaciente() {</span>
-<span class="fc" id="L40">    }</span>
+<span class="fc" id="L46">    public EventoPaciente() {</span>
+<span class="fc" id="L47">    }</span>
 
-    public Long getId() {
-<span class="fc" id="L43">        return id;</span>
-    }
 
-    public Integer getPacienteId() {
-<span class="fc" id="L47">        return pacienteId;</span>
-    }
+<span class="fc" id="L50">    public Long getId() {return id;}</span>
 
-    public void setPacienteId(Integer pacienteId) {
-<span class="fc" id="L51">        this.pacienteId = pacienteId;</span>
-<span class="fc" id="L52">    }</span>
+<span class="fc" id="L52">    public Integer getPacienteId() {return pacienteId;}</span>
+<span class="fc" id="L53">    public void setPacienteId(Integer pacienteId) {this.pacienteId = pacienteId;}</span>
 
-    public Integer getUsuarioId() {
-<span class="fc" id="L55">        return usuarioId;</span>
-    }
+<span class="fc" id="L55">    public Integer getUsuarioId() {return usuarioId;}</span>
+<span class="fc" id="L56">    public void setUsuarioId(Integer usuarioId) {this.usuarioId = usuarioId;}</span>
 
-    public void setUsuarioId(Integer usuarioId) {
-<span class="fc" id="L59">        this.usuarioId = usuarioId;</span>
-<span class="fc" id="L60">    }</span>
+<span class="fc" id="L58">    public String getTipoEvento() {return tipoEvento;}</span>
+<span class="fc" id="L59">    public void setTipoEvento(String tipoEvento) {this.tipoEvento = tipoEvento;}</span>
 
-    public String getTipoEvento() {
-<span class="fc" id="L63">        return tipoEvento;</span>
-    }
+<span class="fc" id="L61">    public String getTitulo() {return titulo;}</span>
+<span class="fc" id="L62">    public void setTitulo(String titulo) {this.titulo = titulo;}</span>
 
-    public void setTipoEvento(String tipoEvento) {
-<span class="fc" id="L67">        this.tipoEvento = tipoEvento;</span>
-<span class="fc" id="L68">    }</span>
+<span class="fc" id="L64">    public String getDescricao() {return descricao;}</span>
+<span class="fc" id="L65">    public void setDescricao(String descricao) {this.descricao = descricao;}</span>
 
-    public String getTitulo() {
-<span class="fc" id="L71">        return titulo;</span>
-    }
+<span class="fc" id="L67">    public String getMetadata() {return metadata;}</span>
+<span class="fc" id="L68">    public void setMetadata(String metadata) {this.metadata = metadata;}</span>
 
-    public void setTitulo(String titulo) {
-<span class="fc" id="L75">        this.titulo = titulo;</span>
-<span class="fc" id="L76">    }</span>
+<span class="fc" id="L70">    public Boolean getVisualizado() {return visualizado;}</span>
+<span class="fc" id="L71">    public void setVisualizado(Boolean visualizado) {this.visualizado = visualizado;}</span>
 
-    public String getDescricao() {
-<span class="fc" id="L79">        return descricao;</span>
-    }
+<span class="fc" id="L73">    public Timestamp getCriadoEm() {return criadoEm;}</span>
+<span class="fc" id="L74">    public void setCriadoEm(Timestamp criadoEm) {this.criadoEm = criadoEm;}</span>
 
-    public void setDescricao(String descricao) {
-<span class="fc" id="L83">        this.descricao = descricao;</span>
-<span class="fc" id="L84">    }</span>
-
-    public Boolean getVisualizado() {
-<span class="fc" id="L87">        return visualizado;</span>
-    }
-
-    public void setVisualizado(Boolean visualizado) {
-<span class="fc" id="L91">        this.visualizado = visualizado;</span>
-<span class="fc" id="L92">    }</span>
-
-    public Timestamp getCriadoEm() {
-<span class="fc" id="L95">        return criadoEm;</span>
-    }
-
-    public void setCriadoEm(Timestamp criadoEm) {
-<span class="fc" id="L99">        this.criadoEm = criadoEm;</span>
-<span class="fc" id="L100">    }</span>
-
-    public String getPrioridade() {
-<span class="fc" id="L103">        return prioridade;</span>
-    }
-
-    public void setPrioridade(String prioridade) {
-<span class="fc" id="L107">        this.prioridade = prioridade;</span>
-<span class="fc" id="L108">    }</span>
+<span class="fc" id="L76">    public String getPrioridade() {return prioridade;}</span>
+<span class="fc" id="L77">    public void setPrioridade(String prioridade) {this.prioridade = prioridade;}</span>
+    
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.15.202606040825</span></div></body></html>

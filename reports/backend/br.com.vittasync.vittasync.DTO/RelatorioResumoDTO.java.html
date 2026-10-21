@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="pt"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>RelatorioResumoDTO.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report"></a> &gt; <a href="index.source.html" class="el_package">br.com.vittasync.vittasync.DTO</a> &gt; <span class="el_source">RelatorioResumoDTO.java</span></div><h1>RelatorioResumoDTO.java</h1><pre class="source lang-java linenums">package br.com.vittasync.vittasync.DTO;
+
+
+import io.swagger.v3.oas.annotations.media.Schema;
+import java.time.LocalDate;
+import java.util.List;
+
+
+@Schema(description = &quot;Resumo estatístico do relatório&quot;)
+<span class="fc" id="L10">public record RelatorioResumoDTO(</span>
+        @Schema(description = &quot;Resumo de cada sinal vital no período&quot;) List&lt;Indicador&gt; sinaisVitais,
+        @Schema(description = &quot;Resumo dos hábitos no período&quot;) Habitos habitos) {
+
+    @Schema(description = &quot;Média de um sinal vital em um dia&quot;)
+<span class="fc" id="L15">    public record PontoDiario(</span>
+            @Schema(description = &quot;Dia&quot;, example = &quot;2026-10-12&quot;) LocalDate data,
+            @Schema(description = &quot;Média do dia&quot;, example = &quot;78.5&quot;) double media) {}
+
+    @Schema(description = &quot;Resumo de um sinal vital no período&quot;)
+<span class="fc" id="L20">    public record Indicador(</span>
+            @Schema(description = &quot;Campo do sinal vital&quot;, example = &quot;fcBpm&quot;, allowableValues = {&quot;fcBpm&quot;, &quot;frRpm&quot;, &quot;paSistolica&quot;, &quot;paDiastolica&quot;, &quot;tempCelcius&quot;, &quot;spo2Porcento&quot;}) String chave,
+            @Schema(description = &quot;Nome do sinal vital&quot;, example = &quot;Frequência cardíaca&quot;) String nome,
+            @Schema(description = &quot;Unidade de medida&quot;, example = &quot;bpm&quot;) String unidade,
+            @Schema(description = &quot;Média no período&quot;, example = &quot;77.4&quot;) Double media,
+            @Schema(description = &quot;Menor valor no período&quot;, example = &quot;68.0&quot;) Double minimo,
+            @Schema(description = &quot;Maior valor no período&quot;, example = &quot;91.0&quot;) Double maximo,
+            @Schema(description = &quot;Quantidade de medições&quot;, example = &quot;12&quot;) long quantidade,
+            @Schema(description = &quot;Média de cada dia do período&quot;) List&lt;PontoDiario&gt; evolucaoDiaria) {}
+
+    @Schema(description = &quot;Resumo dos hábitos no período&quot;)
+<span class="fc" id="L31">    public record Habitos(</span>
+            @Schema(description = &quot;Média de horas de sono&quot;, example = &quot;7.2&quot;) Double mediaHorasSono,
+            @Schema(description = &quot;Dias com sono registrado&quot;, example = &quot;10&quot;) long diasComSono,
+            @Schema(description = &quot;Total de minutos de exercício&quot;, example = &quot;240&quot;) Long totalMinutosExercicio,
+            @Schema(description = &quot;Dias com exercício registrado&quot;, example = &quot;8&quot;) long diasComExercicio) {}
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.15.202606040825</span></div></body></html>

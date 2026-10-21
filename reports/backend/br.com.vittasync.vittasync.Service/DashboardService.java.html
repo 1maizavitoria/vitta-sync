@@ -1,0 +1,316 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="pt"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>DashboardService.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report"></a> &gt; <a href="index.source.html" class="el_package">br.com.vittasync.vittasync.Service</a> &gt; <span class="el_source">DashboardService.java</span></div><h1>DashboardService.java</h1><pre class="source lang-java linenums">package br.com.vittasync.vittasync.Service;
+
+
+import br.com.vittasync.vittasync.DTO.DashboardCategoriaDTO;
+import br.com.vittasync.vittasync.DTO.DashboardPontoDTO;
+import br.com.vittasync.vittasync.DTO.DashboardResponseDTO;
+import br.com.vittasync.vittasync.DTO.DashboardSerieDTO;
+import br.com.vittasync.vittasync.DTO.EstabilidadeClinicaDTO;
+import br.com.vittasync.vittasync.DTO.LinhaBaseDTO;
+import br.com.vittasync.vittasync.Exception.DadosInvalidosException;
+import br.com.vittasync.vittasync.Model.Habitos;
+import br.com.vittasync.vittasync.Model.LinhaBase;
+import br.com.vittasync.vittasync.Model.SinaisVitais;
+import br.com.vittasync.vittasync.Model.Usuario;
+import br.com.vittasync.vittasync.Repository.EventoPacienteRepository;
+import br.com.vittasync.vittasync.Repository.HabitosRepository;
+import br.com.vittasync.vittasync.Repository.LinhaBaseRepository;
+import br.com.vittasync.vittasync.Repository.SinaisVitaisRepository;
+import org.springframework.stereotype.Service;
+import java.sql.Timestamp;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.util.*;
+
+
+@Service
+public class DashboardService {
+
+<span class="fc" id="L30">    private static final List&lt;String&gt; TODAS_CATEGORIAS = List.of(</span>
+            &quot;pressao&quot;,
+            &quot;frequencia_cardiaca&quot;,
+            &quot;frequencia_respiratoria&quot;,
+            &quot;temperatura&quot;,
+            &quot;saturacao&quot;,
+            &quot;peso&quot;,
+            &quot;sono&quot;,
+            &quot;exercicio&quot;
+    );
+
+    private final SinaisVitaisRepository sinaisVitaisRepository;
+    private final HabitosRepository habitosRepository;
+    private final EstabilidadeClinicaService estabilidadeClinicaService;
+    private final LinhaBaseService linhaBaseService;
+    private final LinhaBaseRepository linhaBaseRepository;
+    private final EventoPacienteRepository eventoPacienteRepository;
+
+    public DashboardService(
+            SinaisVitaisRepository sinaisVitaisRepository,
+            HabitosRepository habitosRepository,
+            EstabilidadeClinicaService estabilidadeClinicaService,
+            LinhaBaseService linhaBaseService,
+            LinhaBaseRepository linhaBaseRepository,
+            EventoPacienteRepository eventoPacienteRepository
+<span class="fc" id="L55">    ) {</span>
+<span class="fc" id="L56">        this.sinaisVitaisRepository = sinaisVitaisRepository;</span>
+<span class="fc" id="L57">        this.habitosRepository = habitosRepository;</span>
+<span class="fc" id="L58">        this.estabilidadeClinicaService = estabilidadeClinicaService;</span>
+<span class="fc" id="L59">        this.linhaBaseService = linhaBaseService;</span>
+<span class="fc" id="L60">        this.linhaBaseRepository = linhaBaseRepository;</span>
+<span class="fc" id="L61">        this.eventoPacienteRepository = eventoPacienteRepository;</span>
+<span class="fc" id="L62">    }</span>
+
+    public DashboardResponseDTO consultar(
+            Usuario paciente,
+            LocalDate inicioInformado,
+            LocalDate fimInformado,
+            String categoriasInformadas
+    ) {
+<span class="fc bfc" id="L70" title="All 2 branches covered.">        LocalDate fim = fimInformado != null ? fimInformado : LocalDate.now();</span>
+<span class="fc bfc" id="L71" title="All 2 branches covered.">        LocalDate inicio = inicioInformado != null ? inicioInformado : fim.minusDays(6);</span>
+
+<span class="fc bfc" id="L73" title="All 2 branches covered.">        if (inicio.isAfter(fim)) {</span>
+<span class="fc" id="L74">            throw new DadosInvalidosException(&quot;A data inicial não pode ser posterior à data final&quot;);</span>
+        }
+
+<span class="fc" id="L77">        Set&lt;String&gt; categorias = resolverCategorias(categoriasInformadas);</span>
+
+<span class="fc" id="L79">        List&lt;SinaisVitais&gt; sinais = sinaisVitaisRepository</span>
+<span class="fc" id="L80">                .findByPacienteIdAndDataRegistroBetweenOrderByDataRegistroAsc(</span>
+<span class="fc" id="L81">                        paciente.getId(),</span>
+<span class="fc" id="L82">                        inicio.atStartOfDay(),</span>
+<span class="fc" id="L83">                        fim.atTime(LocalTime.MAX)</span>
+                );
+
+<span class="fc" id="L86">        List&lt;Habitos&gt; habitos = habitosRepository</span>
+<span class="fc" id="L87">                .findByPacienteIdAndDataReferenciaBetweenOrderByDataReferenciaAsc(</span>
+<span class="fc" id="L88">                        paciente.getId(),</span>
+                        inicio,
+                        fim
+                );
+
+<span class="fc" id="L93">        List&lt;DashboardCategoriaDTO&gt; categoriasResposta = new ArrayList&lt;&gt;();</span>
+<span class="fc bfc" id="L94" title="All 2 branches covered.">        for (String categoria : TODAS_CATEGORIAS) {</span>
+<span class="fc bfc" id="L95" title="All 2 branches covered.">            if (categorias.contains(categoria)) {</span>
+<span class="fc" id="L96">                categoriasResposta.add(montarCategoria(categoria, sinais, habitos));</span>
+            }
+<span class="fc" id="L98">        }</span>
+
+<span class="fc" id="L100">        List&lt;EstabilidadeClinicaDTO&gt; estabilidadeClinica =</span>
+<span class="fc" id="L101">                estabilidadeClinicaService.calcularIndices(paciente.getId(), sinais, habitos);</span>
+
+<span class="fc" id="L103">        List&lt;Map&lt;String, Object&gt;&gt; resumoDiario = sinaisVitaisRepository.buscarResumoDiario(</span>
+<span class="fc" id="L104">                paciente.getId(),</span>
+<span class="fc" id="L105">                inicio.atStartOfDay(),</span>
+<span class="fc" id="L106">                fim.atTime(LocalTime.MAX)</span>
+        );
+
+<span class="fc" id="L109">        List&lt;Map&lt;String, Object&gt;&gt; resumoHabitos = habitosRepository.buscarResumoDiario(</span>
+<span class="fc" id="L110">                paciente.getId(),</span>
+                inicio,
+                fim
+        );
+
+<span class="fc" id="L115">        List&lt;Map&lt;String, Object&gt;&gt; eventosPorTipo = eventoPacienteRepository.contarPorTipo(</span>
+<span class="fc" id="L116">                paciente.getId(),</span>
+<span class="fc" id="L117">                Timestamp.valueOf(inicio.atStartOfDay()),</span>
+<span class="fc" id="L118">                Timestamp.valueOf(fim.atTime(LocalTime.MAX))</span>
+        );
+
+<span class="fc" id="L121">        return new DashboardResponseDTO(</span>
+<span class="fc" id="L122">                paciente.getCpf(),</span>
+<span class="fc" id="L123">                paciente.getNome(),</span>
+                inicio,
+                fim,
+                categoriasResposta,
+                estabilidadeClinica,
+<span class="fc" id="L128">                montarLinhaBase(paciente.getId()),</span>
+                resumoDiario,
+                resumoHabitos,
+                eventosPorTipo
+        );
+    }
+
+    private List&lt;LinhaBaseDTO&gt; montarLinhaBase(Integer pacienteId) {
+<span class="fc" id="L136">        List&lt;SinaisVitais&gt; historico = sinaisVitaisRepository.findByPacienteIdOrderByDataRegistroAsc(pacienteId);</span>
+
+<span class="fc" id="L138">        Map&lt;String, LinhaBase&gt; linhasBasePorSinal = new HashMap&lt;&gt;();</span>
+<span class="fc bfc" id="L139" title="All 2 branches covered.">        for (LinhaBase linhaBase : linhaBaseRepository.findByPacienteId(pacienteId)) {</span>
+<span class="fc" id="L140">            linhasBasePorSinal.put(linhaBase.getSinal(), linhaBase);</span>
+<span class="fc" id="L141">        }</span>
+
+<span class="fc" id="L143">        List&lt;LinhaBaseDTO&gt; linhasBase = new ArrayList&lt;&gt;();</span>
+<span class="fc bfc" id="L144" title="All 2 branches covered.">        for (String sinal : LinhaBaseService.SINAIS) {</span>
+<span class="fc" id="L145">            LinhaBase linhaBase = linhasBasePorSinal.get(sinal);</span>
+<span class="fc" id="L146">            SinaisVitais ultimoRegistro = buscarUltimoRegistro(historico, sinal);</span>
+<span class="fc bfc" id="L147" title="All 2 branches covered.">            Number ultimoValor = ultimoRegistro != null ? linhaBaseService.valorSinal(ultimoRegistro, sinal) : null;</span>
+<span class="fc bfc" id="L148" title="All 2 branches covered.">            LocalDateTime dataUltimoValor = ultimoRegistro != null ? ultimoRegistro.getDataRegistro() : null;</span>
+
+<span class="fc bfc" id="L150" title="All 2 branches covered.">            if (linhaBase == null) {</span>
+<span class="fc" id="L151">                linhasBase.add(new LinhaBaseDTO(</span>
+                        sinal,
+                        &quot;em_formacao&quot;,
+<span class="fc" id="L154">                        linhaBaseService.calcularProgresso(pacienteId, sinal),</span>
+<span class="fc" id="L155">                        LinhaBaseService.diasNecessarios,</span>
+                        null, null, null, null, null, null,
+                        ultimoValor,
+                        dataUltimoValor,
+                        null
+                ));
+<span class="fc" id="L161">                continue;</span>
+            }
+
+            // só compara medições feitas depois da formação da referência; as que formaram a referência ficam com comparacao null
+<span class="fc bfc" id="L165" title="All 4 branches covered.">            boolean medicaoNova = dataUltimoValor != null &amp;&amp; dataUltimoValor.isAfter(linhaBase.getDataFormacao());</span>
+
+<span class="fc" id="L167">            linhasBase.add(new LinhaBaseDTO(</span>
+                    sinal,
+<span class="fc bfc" id="L169" title="All 2 branches covered.">                    linhaBase.getLimiteInferior() == null ? &quot;sem_variacao&quot; : &quot;formada&quot;,</span>
+<span class="fc" id="L170">                    LinhaBaseService.diasNecessarios,</span>
+<span class="fc" id="L171">                    LinhaBaseService.diasNecessarios,</span>
+<span class="fc" id="L172">                    linhaBase.getDataInicio(),</span>
+<span class="fc" id="L173">                    linhaBase.getDataFim(),</span>
+<span class="fc" id="L174">                    linhaBase.getMedia(),</span>
+<span class="fc" id="L175">                    linhaBase.getDesvioPadrao(),</span>
+<span class="fc" id="L176">                    linhaBase.getLimiteInferior(),</span>
+<span class="fc" id="L177">                    linhaBase.getLimiteSuperior(),</span>
+                    ultimoValor,
+                    dataUltimoValor,
+<span class="fc bfc" id="L180" title="All 2 branches covered.">                    medicaoNova ? linhaBaseService.comparar(linhaBase, ultimoValor) : null</span>
+            ));
+<span class="fc" id="L182">        }</span>
+<span class="fc" id="L183">        return linhasBase;</span>
+    }
+
+    private SinaisVitais buscarUltimoRegistro(List&lt;SinaisVitais&gt; historico, String sinal) {
+<span class="pc bfc" id="L187" title="All 2 branches covered.">        for (int i = historico.size() - 1; i &gt;= 0; i--) {</span>
+<span class="pc bpc" id="L188" title="1 of 2 branches missed.">            if (linhaBaseService.valorSinal(historico.get(i), sinal) != null) {</span>
+<span class="fc" id="L189">                return historico.get(i);</span>
+            }
+        }
+<span class="fc" id="L192">        return null;</span>
+    }
+
+    private Set&lt;String&gt; resolverCategorias(String categoriasInformadas) {
+<span class="pc bpc" id="L196" title="1 of 4 branches missed.">        if (categoriasInformadas == null || categoriasInformadas.isBlank()) {</span>
+<span class="fc" id="L197">            return new LinkedHashSet&lt;&gt;(TODAS_CATEGORIAS);</span>
+        }
+
+<span class="fc" id="L200">        Set&lt;String&gt; categorias = new LinkedHashSet&lt;&gt;();</span>
+<span class="fc bfc" id="L201" title="All 2 branches covered.">        for (String valor : categoriasInformadas.split(&quot;,&quot;)) {</span>
+<span class="fc" id="L202">            String categoria = valor.trim().toLowerCase(Locale.ROOT);</span>
+<span class="fc bfc" id="L203" title="All 4 branches covered.">            if (categoria.isBlank() || !TODAS_CATEGORIAS.contains(categoria)) {</span>
+<span class="fc" id="L204">                throw new DadosInvalidosException(&quot;Categoria de dashboard inválida&quot;);</span>
+            }
+<span class="fc" id="L206">            categorias.add(categoria);</span>
+        }
+<span class="fc" id="L208">        return categorias;</span>
+    }
+
+    private DashboardCategoriaDTO montarCategoria(
+            String categoria,
+            List&lt;SinaisVitais&gt; sinais,
+            List&lt;Habitos&gt; habitos
+    ) {
+<span class="pc bpc" id="L216" title="1 of 9 branches missed.">        return switch (categoria) {</span>
+<span class="fc" id="L217">            case &quot;pressao&quot; -&gt; new DashboardCategoriaDTO(</span>
+                    &quot;pressao&quot;,
+                    &quot;Pressão arterial&quot;,
+                    &quot;mmHg&quot;,
+<span class="fc" id="L221">                    List.of(</span>
+<span class="fc" id="L222">                            serieSinais(&quot;sistolica&quot;, &quot;Sistólica&quot;, sinais, &quot;paSistolica&quot;),</span>
+<span class="fc" id="L223">                            serieSinais(&quot;diastolica&quot;, &quot;Diastólica&quot;, sinais, &quot;paDiastolica&quot;)</span>
+                    )
+            );
+<span class="fc" id="L226">            case &quot;frequencia_cardiaca&quot; -&gt; categoriaSinal(</span>
+                    categoria, &quot;Frequência cardíaca&quot;, &quot;bpm&quot;, &quot;frequencia_cardiaca&quot;, &quot;Frequência cardíaca&quot;, sinais
+            );
+<span class="fc" id="L229">            case &quot;frequencia_respiratoria&quot; -&gt; categoriaSinal(</span>
+                    categoria, &quot;Frequência respiratória&quot;, &quot;rpm&quot;, &quot;frequencia_respiratoria&quot;, &quot;Frequência respiratória&quot;, sinais
+            );
+<span class="fc" id="L232">            case &quot;temperatura&quot; -&gt; categoriaSinal(</span>
+                    categoria, &quot;Temperatura corporal&quot;, &quot;°C&quot;, &quot;temperatura&quot;, &quot;Temperatura&quot;, sinais
+            );
+<span class="fc" id="L235">            case &quot;saturacao&quot; -&gt; categoriaSinal(</span>
+                    categoria, &quot;Saturação de oxigênio&quot;, &quot;%&quot;, &quot;saturacao&quot;, &quot;Saturação&quot;, sinais
+            );
+<span class="fc" id="L238">            case &quot;peso&quot; -&gt; categoriaSinal(</span>
+                    categoria, &quot;Peso&quot;, &quot;kg&quot;, &quot;peso&quot;, &quot;Peso&quot;, sinais
+            );
+<span class="fc" id="L241">            case &quot;sono&quot; -&gt; new DashboardCategoriaDTO(</span>
+                    &quot;sono&quot;,
+                    &quot;Sono&quot;,
+                    &quot;horas&quot;,
+<span class="fc" id="L245">                    List.of(serieHabitos(&quot;sono&quot;, &quot;Horas de sono&quot;, habitos, true))</span>
+            );
+<span class="fc" id="L247">            case &quot;exercicio&quot; -&gt; new DashboardCategoriaDTO(</span>
+                    &quot;exercicio&quot;,
+                    &quot;Atividade física&quot;,
+                    &quot;minutos&quot;,
+<span class="fc" id="L251">                    List.of(serieHabitos(&quot;exercicio&quot;, &quot;Minutos de exercício&quot;, habitos, false))</span>
+            );
+<span class="nc" id="L253">            default -&gt; throw new DadosInvalidosException(&quot;Categoria de dashboard inválida&quot;);</span>
+        };
+    }
+
+    private DashboardCategoriaDTO categoriaSinal(
+            String codigo,
+            String nome,
+            String unidade,
+            String codigoSerie,
+            String nomeSerie,
+            List&lt;SinaisVitais&gt; sinais
+    ) {
+<span class="fc" id="L265">        return new DashboardCategoriaDTO(</span>
+                codigo,
+                nome,
+                unidade,
+<span class="fc" id="L269">                List.of(serieSinais(codigoSerie, nomeSerie, sinais, codigo))</span>
+        );
+    }
+
+    private DashboardSerieDTO serieSinais(
+            String codigo,
+            String nome,
+            List&lt;SinaisVitais&gt; sinais,
+            String campo
+    ) {
+<span class="fc" id="L279">        List&lt;DashboardPontoDTO&gt; pontos = new ArrayList&lt;&gt;();</span>
+<span class="fc bfc" id="L280" title="All 2 branches covered.">        for (SinaisVitais sinal : sinais) {</span>
+<span class="pc bpc" id="L281" title="1 of 8 branches missed.">            Number valor = switch (campo) {</span>
+<span class="fc" id="L282">                case &quot;paSistolica&quot; -&gt; sinal.getPaSistolica();</span>
+<span class="fc" id="L283">                case &quot;paDiastolica&quot; -&gt; sinal.getPaDiastolica();</span>
+<span class="fc" id="L284">                case &quot;frequencia_cardiaca&quot; -&gt; sinal.getFcBpm();</span>
+<span class="fc" id="L285">                case &quot;frequencia_respiratoria&quot; -&gt; sinal.getFrRpm();</span>
+<span class="fc" id="L286">                case &quot;temperatura&quot; -&gt; sinal.getTempCelcius();</span>
+<span class="fc" id="L287">                case &quot;saturacao&quot; -&gt; sinal.getSpo2Porcento();</span>
+<span class="fc" id="L288">                case &quot;peso&quot; -&gt; sinal.getPeso();</span>
+<span class="pc" id="L289">                default -&gt; null;</span>
+            };
+
+<span class="pc bpc" id="L292" title="1 of 2 branches missed.">            if (valor != null) {</span>
+<span class="fc" id="L293">                pontos.add(new DashboardPontoDTO(sinal.getDataRegistro(), valor));</span>
+            }
+<span class="fc" id="L295">        }</span>
+<span class="fc" id="L296">        return new DashboardSerieDTO(codigo, nome, pontos);</span>
+    }
+
+    private DashboardSerieDTO serieHabitos(
+            String codigo,
+            String nome,
+            List&lt;Habitos&gt; habitos,
+            boolean usarSono
+    ) {
+<span class="fc" id="L305">        List&lt;DashboardPontoDTO&gt; pontos = new ArrayList&lt;&gt;();</span>
+<span class="fc bfc" id="L306" title="All 2 branches covered.">        for (Habitos habito : habitos) {</span>
+<span class="fc bfc" id="L307" title="All 2 branches covered.">            Number valor = usarSono ? habito.getHorasSono() : habito.getMinutosExercicio();</span>
+<span class="fc bfc" id="L308" title="All 2 branches covered.">            if (valor != null) {</span>
+<span class="fc" id="L309">                LocalDateTime data = habito.getDataReferencia().atStartOfDay();</span>
+<span class="fc" id="L310">                pontos.add(new DashboardPontoDTO(data, valor));</span>
+            }
+<span class="fc" id="L312">        }</span>
+<span class="fc" id="L313">        return new DashboardSerieDTO(codigo, nome, pontos);</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.15.202606040825</span></div></body></html>

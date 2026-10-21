@@ -1,0 +1,371 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="pt"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>EstabilidadeClinicaService.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report"></a> &gt; <a href="index.source.html" class="el_package">br.com.vittasync.vittasync.Service</a> &gt; <span class="el_source">EstabilidadeClinicaService.java</span></div><h1>EstabilidadeClinicaService.java</h1><pre class="source lang-java linenums">package br.com.vittasync.vittasync.Service;
+
+
+import br.com.vittasync.vittasync.DTO.EstabilidadeClinicaDTO;
+import br.com.vittasync.vittasync.Model.ContatoEmergencia;
+import br.com.vittasync.vittasync.Model.SinaisVitais;
+import br.com.vittasync.vittasync.Model.Habitos;
+import br.com.vittasync.vittasync.Model.EstabilidadeClinica;
+import br.com.vittasync.vittasync.Repository.EstabilidadeClinicaRepository;
+import br.com.vittasync.vittasync.Repository.ContatoEmergenciaRepository;
+import br.com.vittasync.vittasync.Repository.HabitosRepository;
+import br.com.vittasync.vittasync.Repository.SinaisVitaisRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Service;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.*;
+import java.util.stream.Collectors;
+
+
+@Service
+public class EstabilidadeClinicaService {
+
+    private final EstabilidadeClinicaRepository estabilidadeClinicaRepository;
+    private final ContatoEmergenciaRepository contatoEmergenciaRepository;
+    private final NotificacaoService notificacaoService;
+    private final SinaisVitaisRepository sinaisVitaisRepository;
+    private final HabitosRepository habitosRepository;
+
+<span class="fc" id="L31">    private static final Logger logger = LoggerFactory.getLogger(EstabilidadeClinicaService.class);</span>
+
+<span class="fc" id="L33">    private boolean usarProcedure = true;</span>
+
+    private static final int minimoRegistros = 3;
+    private static final int minimoFatoresIndiceGeral = 3;
+    private static final int sonoMinimoSaudavel = 7;
+    private static final int sonoMaximoSaudavel = 9;
+    private static final int exercicioMinimoSaudavel = 60;
+    private static final int semExercicioCriticoDias = 10;
+
+    public EstabilidadeClinicaService(
+            EstabilidadeClinicaRepository estabilidadeClinicaRepository,
+            ContatoEmergenciaRepository contatoEmergenciaRepository,
+            NotificacaoService notificacaoService,
+            SinaisVitaisRepository sinaisVitaisRepository,
+            HabitosRepository habitosRepository
+<span class="fc" id="L48">    ) {</span>
+<span class="fc" id="L49">        this.estabilidadeClinicaRepository = estabilidadeClinicaRepository;</span>
+<span class="fc" id="L50">        this.contatoEmergenciaRepository = contatoEmergenciaRepository;</span>
+<span class="fc" id="L51">        this.notificacaoService = notificacaoService;</span>
+<span class="fc" id="L52">        this.sinaisVitaisRepository = sinaisVitaisRepository;</span>
+<span class="fc" id="L53">        this.habitosRepository = habitosRepository;</span>
+<span class="fc" id="L54">    }</span>
+
+    // índices do paciente com todos os sinais vitais e os hábitos dos últimos 30 dias
+    public List&lt;EstabilidadeClinicaDTO&gt; consultarIndices(Integer pacienteId) {
+<span class="fc" id="L58">        List&lt;SinaisVitais&gt; sinais = sinaisVitaisRepository.findByPacienteIdOrderByDataRegistroAsc(pacienteId);</span>
+<span class="fc" id="L59">        List&lt;Habitos&gt; habitos = habitosRepository.findByPacienteIdAndDataReferenciaBetweenOrderByDataReferenciaAsc(</span>
+                pacienteId,
+<span class="fc" id="L61">                LocalDate.now().minusDays(30),</span>
+<span class="fc" id="L62">                LocalDate.now()</span>
+        );
+
+<span class="fc" id="L65">        return calcularIndices(pacienteId, sinais, habitos);</span>
+    }
+
+    public void verificarMudancaEstabilidade(Integer pacienteId) {
+<span class="fc" id="L69">        List&lt;EstabilidadeClinicaDTO&gt; indices = null;</span>
+
+<span class="fc bfc" id="L71" title="All 2 branches covered.">        if (usarProcedure) {</span>
+            try {
+<span class="fc" id="L73">                indices = calcularIndicesPorMedias(estabilidadeClinicaRepository.buscarMediasEstabilidade(pacienteId).get(0));</span>
+<span class="fc" id="L74">            } catch (RuntimeException e) {</span>
+<span class="fc" id="L75">                usarProcedure = false;</span>
+<span class="fc" id="L76">                logger.warn(&quot;Procedure sp_medias_estabilidade indisponível, os índices serão calculados no Java&quot;);</span>
+<span class="fc" id="L77">            }</span>
+        }
+
+<span class="fc bfc" id="L80" title="All 2 branches covered.">        if (indices == null) {</span>
+<span class="fc" id="L81">            indices = calcularIndices(pacienteId,</span>
+<span class="fc" id="L82">                    sinaisVitaisRepository.findByPacienteId(pacienteId),</span>
+<span class="fc" id="L83">                    habitosRepository.findByPacienteId(pacienteId));</span>
+        }
+
+<span class="fc" id="L86">        registrarMudanca(pacienteId, indices);</span>
+<span class="fc" id="L87">    }</span>
+
+    public void verificarMudancaEstabilidade(Integer pacienteId,
+                                             List&lt;SinaisVitais&gt; sinais,
+                                             List&lt;Habitos&gt; habitos) {
+<span class="fc" id="L92">        registrarMudanca(pacienteId, calcularIndices(pacienteId, sinais, habitos));</span>
+<span class="fc" id="L93">    }</span>
+
+    private void registrarMudanca(Integer pacienteId, List&lt;EstabilidadeClinicaDTO&gt; indices) {
+<span class="fc" id="L96">        EstabilidadeClinicaDTO geralNovo = indices.stream()</span>
+<span class="fc" id="L97">                .filter(i -&gt; &quot;geral&quot;.equals(i.getTipo()))</span>
+<span class="fc" id="L98">                .findFirst()</span>
+<span class="fc" id="L99">                .orElse(new EstabilidadeClinicaDTO(&quot;geral&quot;, null, &quot;n/a&quot;, 1.0, LocalDateTime.now()));</span>
+
+<span class="fc" id="L101">        String categoriaAnterior = estabilidadeClinicaRepository.findUltimaCategoriaGeral(pacienteId);</span>
+<span class="fc" id="L102">        String categoriaNova = geralNovo.getCategoria();</span>
+
+<span class="fc bfc" id="L104" title="All 4 branches covered.">        if (categoriaAnterior == null || !categoriaAnterior.equals(categoriaNova)) {</span>
+<span class="fc" id="L105">            dispararAlertasDetalhados(pacienteId, indices, geralNovo);</span>
+
+<span class="fc" id="L107">            EstabilidadeClinica registro = new EstabilidadeClinica();</span>
+<span class="fc" id="L108">            registro.setPacienteId(pacienteId);</span>
+<span class="fc" id="L109">            registro.setTipo(&quot;geral&quot;);</span>
+<span class="fc" id="L110">            registro.setIndice(geralNovo.getIndice());</span>
+<span class="fc" id="L111">            registro.setCategoria(categoriaNova);</span>
+<span class="fc" id="L112">            registro.setDataCalculo(LocalDateTime.now());</span>
+<span class="fc" id="L113">            estabilidadeClinicaRepository.save(registro);</span>
+        }
+<span class="fc" id="L115">    }</span>
+
+    /**
+     * Calcula todos os índices de estabilidade clínica (sinais vitais + hábitos).
+     */
+    public List&lt;EstabilidadeClinicaDTO&gt; calcularIndices(Integer pacienteId,
+                                                        List&lt;SinaisVitais&gt; sinais,
+                                                        List&lt;Habitos&gt; habitos) {
+<span class="fc" id="L123">        List&lt;EstabilidadeClinicaDTO&gt; indices = new ArrayList&lt;&gt;();</span>
+
+<span class="fc" id="L125">        indices.add(calcularIndiceSinal(&quot;fc_bpm&quot;, sinais.stream().map(SinaisVitais::getFcBpm).toList(), 1.0));</span>
+<span class="fc" id="L126">        indices.add(calcularIndiceSinal(&quot;fr_rpm&quot;, sinais.stream().map(SinaisVitais::getFrRpm).toList(), 1.0));</span>
+<span class="fc" id="L127">        indices.add(calcularIndicePressao(sinais, 1.0));</span>
+<span class="fc" id="L128">        indices.add(calcularIndiceSinal(&quot;temp_celcius&quot;, sinais.stream().map(SinaisVitais::getTempCelcius).toList(), 1.0));</span>
+<span class="fc" id="L129">        indices.add(calcularIndiceSinal(&quot;spo2&quot;, sinais.stream().map(SinaisVitais::getSpo2Porcento).toList(), 1.0));</span>
+<span class="fc" id="L130">        indices.add(calcularIndiceSinal(&quot;peso&quot;, sinais.stream().map(SinaisVitais::getPeso).toList(), 1.0));</span>
+<span class="fc" id="L131">        indices.add(calcularIndiceSono(habitos));</span>
+<span class="fc" id="L132">        indices.add(calcularIndiceExercicio(habitos));</span>
+
+<span class="fc" id="L134">        return adicionarIndiceGeral(indices);</span>
+    }
+
+    private List&lt;EstabilidadeClinicaDTO&gt; calcularIndicesPorMedias(Object[] m) {
+<span class="fc" id="L138">        List&lt;EstabilidadeClinicaDTO&gt; indices = new ArrayList&lt;&gt;();</span>
+
+<span class="fc" id="L140">        indices.add(calcularIndiceSinal(&quot;fc_bpm&quot;, quantidade(m[0]), media(m[1]), 1.0));</span>
+<span class="fc" id="L141">        indices.add(calcularIndiceSinal(&quot;fr_rpm&quot;, quantidade(m[2]), media(m[3]), 1.0));</span>
+<span class="fc" id="L142">        indices.add(combinarPressao(</span>
+<span class="fc" id="L143">                calcularIndiceSinal(&quot;pa_sistolica&quot;, quantidade(m[4]), media(m[5]), 1.0),</span>
+<span class="fc" id="L144">                calcularIndiceSinal(&quot;pa_diastolica&quot;, quantidade(m[6]), media(m[7]), 1.0),</span>
+                1.0));
+<span class="fc" id="L146">        indices.add(calcularIndiceSinal(&quot;temp_celcius&quot;, quantidade(m[8]), media(m[9]), 1.0));</span>
+<span class="fc" id="L147">        indices.add(calcularIndiceSinal(&quot;spo2&quot;, quantidade(m[10]), media(m[11]), 1.0));</span>
+<span class="fc" id="L148">        indices.add(calcularIndiceSinal(&quot;peso&quot;, quantidade(m[12]), media(m[13]), 1.0));</span>
+<span class="fc" id="L149">        indices.add(calcularIndiceSono(quantidade(m[14]), media(m[15])));</span>
+<span class="fc" id="L150">        indices.add(calcularIndiceExercicio(quantidade(m[16]), quantidade(m[17]), media(m[18])));</span>
+
+<span class="fc" id="L152">        return adicionarIndiceGeral(indices);</span>
+    }
+
+    private long quantidade(Object valor) {
+<span class="fc bfc" id="L156" title="All 2 branches covered.">        return valor == null ? 0 : ((Number) valor).longValue();</span>
+    }
+
+    private Double media(Object valor) {
+<span class="fc bfc" id="L160" title="All 2 branches covered.">        return valor == null ? null : ((Number) valor).doubleValue();</span>
+    }
+
+    private List&lt;EstabilidadeClinicaDTO&gt; adicionarIndiceGeral(List&lt;EstabilidadeClinicaDTO&gt; indices) {
+<span class="fc" id="L164">        Integer indiceGeral = calcularIndiceGeral(indices);</span>
+<span class="fc" id="L165">        EstabilidadeClinicaDTO geral = new EstabilidadeClinicaDTO(</span>
+                &quot;geral&quot;,
+                indiceGeral,
+<span class="fc" id="L168">                classificar(indiceGeral),</span>
+<span class="fc" id="L169">                1.0,</span>
+<span class="fc" id="L170">                LocalDateTime.now()</span>
+        );
+<span class="fc" id="L172">        indices.add(geral);</span>
+
+<span class="fc" id="L174">        return indices;</span>
+    }
+
+    private Integer calcularIndiceGeral(List&lt;EstabilidadeClinicaDTO&gt; indices) {
+<span class="fc bfc" id="L178" title="All 2 branches covered.">        long qtdValidos = indices.stream().filter(i -&gt; i.getIndice() != null).count();</span>
+<span class="fc bfc" id="L179" title="All 2 branches covered.">        double somaPesos = indices.stream().filter(i -&gt; i.getIndice() != null).mapToDouble(EstabilidadeClinicaDTO::getPeso).sum();</span>
+<span class="fc bfc" id="L180" title="All 2 branches covered.">        double somaValores = indices.stream().filter(i -&gt; i.getIndice() != null).mapToDouble(i -&gt; i.getIndice() * i.getPeso()).sum();</span>
+
+<span class="pc bpc" id="L182" title="1 of 4 branches missed.">        return qtdValidos &gt;= minimoFatoresIndiceGeral &amp;&amp; somaPesos &gt; 0 ? (int) Math.round(somaValores / somaPesos) : null;</span>
+    }
+
+    private void dispararAlertasDetalhados(Integer pacienteId,
+                                           List&lt;EstabilidadeClinicaDTO&gt; indices,
+                                           EstabilidadeClinicaDTO geral) {
+<span class="fc" id="L188">        List&lt;ContatoEmergencia&gt; contatos = contatoEmergenciaRepository.findByPacienteIdOrderByDataRegistroAsc(pacienteId);</span>
+
+<span class="fc bfc" id="L190" title="All 2 branches covered.">        for (ContatoEmergencia contato : contatos) {</span>
+<span class="fc" id="L191">            Map&lt;String, Map&lt;String, List&lt;EstabilidadeClinicaDTO&gt;&gt;&gt; agrupadosPorCategoria = new HashMap&lt;&gt;();</span>
+
+<span class="fc bfc" id="L193" title="All 2 branches covered.">            for (EstabilidadeClinicaDTO indice : indices) {</span>
+<span class="fc bfc" id="L194" title="All 2 branches covered.">                if (indice.getIndice() == null) continue;</span>
+
+<span class="fc" id="L196">                String tipo = indice.getTipo();</span>
+<span class="fc" id="L197">                String categoria = indice.getCategoria().toLowerCase();</span>
+
+<span class="fc" id="L199">                boolean deveNotificar = verificarFlags(contato, tipo, categoria);</span>
+
+<span class="fc bfc" id="L201" title="All 2 branches covered.">                if (deveNotificar) {</span>
+<span class="fc" id="L202">                    agrupadosPorCategoria</span>
+<span class="fc" id="L203">                            .computeIfAbsent(categoria, k -&gt; new HashMap&lt;&gt;())</span>
+<span class="fc" id="L204">                            .computeIfAbsent(tipo, k -&gt; new ArrayList&lt;&gt;())</span>
+<span class="fc" id="L205">                            .add(indice);</span>
+                }
+<span class="fc" id="L207">            }</span>
+
+<span class="fc bfc" id="L209" title="All 2 branches covered.">            for (var entry : agrupadosPorCategoria.entrySet()) {</span>
+<span class="fc" id="L210">                String categoria = entry.getKey();</span>
+<span class="fc" id="L211">                Map&lt;String, List&lt;EstabilidadeClinicaDTO&gt;&gt; tipos = entry.getValue();</span>
+
+<span class="fc" id="L213">                StringBuilder mensagem = new StringBuilder(&quot;Alterações de estabilidade detectadas:\n&quot;);</span>
+
+<span class="fc" id="L215">                tipos.forEach((tipo, lista) -&gt; {</span>
+<span class="fc" id="L216">                    mensagem.append(&quot;- &quot;).append(tipo).append(&quot;: &quot;);</span>
+<span class="fc" id="L217">                    mensagem.append(lista.stream()</span>
+<span class="fc" id="L218">                            .map(i -&gt; i.getIndice() + &quot; (&quot; + i.getCategoria() + &quot;)&quot;)</span>
+<span class="fc" id="L219">                            .collect(Collectors.joining(&quot;, &quot;)));</span>
+<span class="fc" id="L220">                    mensagem.append(&quot;\n&quot;);</span>
+<span class="fc" id="L221">                });</span>
+
+<span class="fc" id="L223">                mensagem.append(&quot;\nEstabilidade geral: &quot;)</span>
+<span class="fc" id="L224">                        .append(geral.getIndice())</span>
+<span class="fc" id="L225">                        .append(&quot; (&quot;).append(geral.getCategoria()).append(&quot;)&quot;);</span>
+
+<span class="fc" id="L227">                notificacaoService.enviarAlertaEmergencia(contato, mensagem.toString(), categoria);</span>
+<span class="fc" id="L228">            }</span>
+<span class="fc" id="L229">        }</span>
+<span class="fc" id="L230">    }</span>
+
+    private boolean verificarFlags(ContatoEmergencia contato, String tipo, String categoria) {
+<span class="fc bfc" id="L233" title="All 4 branches covered.">        return switch (tipo) {</span>
+<span class="fc bfc" id="L234" title="All 4 branches covered.">            case &quot;fc_bpm&quot;, &quot;fr_rpm&quot;, &quot;pressao&quot;, &quot;temp_celcius&quot;, &quot;spo2&quot;, &quot;peso&quot; -&gt; switch (categoria) {</span>
+<span class="fc" id="L235">                case &quot;saudavel&quot; -&gt; Boolean.TRUE.equals(contato.getReceberAlertaSinaisVitaisSaudavel());</span>
+<span class="fc" id="L236">                case &quot;moderado&quot; -&gt; Boolean.TRUE.equals(contato.getReceberAlertaSinaisVitaisModerado());</span>
+<span class="fc" id="L237">                case &quot;critico&quot; -&gt; Boolean.TRUE.equals(contato.getReceberAlertaSinaisVitaisCritico());</span>
+<span class="fc" id="L238">                default -&gt; false;</span>
+            };
+<span class="fc bfc" id="L240" title="All 4 branches covered.">            case &quot;sono&quot;, &quot;exercicio&quot; -&gt; switch (categoria) {</span>
+<span class="fc" id="L241">                case &quot;saudavel&quot; -&gt; Boolean.TRUE.equals(contato.getReceberAlertaHabitosSaudavel());</span>
+<span class="fc" id="L242">                case &quot;moderado&quot; -&gt; Boolean.TRUE.equals(contato.getReceberAlertaHabitosModerado());</span>
+<span class="fc" id="L243">                case &quot;critico&quot; -&gt; Boolean.TRUE.equals(contato.getReceberAlertaHabitosCritico());</span>
+<span class="fc" id="L244">                default -&gt; false;</span>
+            };
+<span class="fc bfc" id="L246" title="All 4 branches covered.">            case &quot;geral&quot; -&gt; switch (categoria) {</span>
+<span class="fc" id="L247">                case &quot;saudavel&quot; -&gt; Boolean.TRUE.equals(contato.getReceberAlertaGeralSaudavel());</span>
+<span class="fc" id="L248">                case &quot;moderado&quot; -&gt; Boolean.TRUE.equals(contato.getReceberAlertaGeralModerado());</span>
+<span class="fc" id="L249">                case &quot;critico&quot; -&gt; Boolean.TRUE.equals(contato.getReceberAlertaGeralCritico());</span>
+<span class="fc" id="L250">                default -&gt; false;</span>
+            };
+<span class="fc" id="L252">            default -&gt; false;</span>
+        };
+    }
+
+    private EstabilidadeClinicaDTO calcularIndicePressao(List&lt;SinaisVitais&gt; sinais, double peso) {
+<span class="fc" id="L257">        EstabilidadeClinicaDTO sistolica = calcularIndiceSinal(</span>
+                &quot;pa_sistolica&quot;,
+<span class="fc" id="L259">                sinais.stream().map(SinaisVitais::getPaSistolica).toList(),</span>
+                peso
+        );
+<span class="fc" id="L262">        EstabilidadeClinicaDTO diastolica = calcularIndiceSinal(</span>
+                &quot;pa_diastolica&quot;,
+<span class="fc" id="L264">                sinais.stream().map(SinaisVitais::getPaDiastolica).toList(),</span>
+                peso
+        );
+
+<span class="fc" id="L268">        return combinarPressao(sistolica, diastolica, peso);</span>
+    }
+
+    private EstabilidadeClinicaDTO combinarPressao(EstabilidadeClinicaDTO sistolica,
+                                                   EstabilidadeClinicaDTO diastolica,
+                                                   double peso) {
+<span class="pc bpc" id="L274" title="1 of 4 branches missed.">        if (sistolica.getIndice() == null || diastolica.getIndice() == null) {</span>
+<span class="fc" id="L275">            return new EstabilidadeClinicaDTO(&quot;pressao&quot;, null, &quot;n/a&quot;, peso, LocalDateTime.now());</span>
+        }
+
+<span class="fc" id="L278">        int indice = Math.min(sistolica.getIndice(), diastolica.getIndice());</span>
+<span class="fc" id="L279">        return new EstabilidadeClinicaDTO(&quot;pressao&quot;, indice, classificar(indice), peso, LocalDateTime.now());</span>
+    }
+
+    private EstabilidadeClinicaDTO calcularIndiceSinal(String tipo, List&lt;? extends Number&gt; valores, double peso) {
+<span class="pc bpc" id="L283" title="1 of 2 branches missed.">        List&lt;? extends Number&gt; preenchidos = valores.stream().filter(v -&gt; v != null).toList();</span>
+<span class="pc bpc" id="L284" title="1 of 2 branches missed.">        Double media = preenchidos.isEmpty() ? null</span>
+<span class="fc" id="L285">                : preenchidos.stream().mapToDouble(Number::doubleValue).average().getAsDouble();</span>
+
+<span class="fc" id="L287">        return calcularIndiceSinal(tipo, preenchidos.size(), media, peso);</span>
+    }
+
+    private EstabilidadeClinicaDTO calcularIndiceSinal(String tipo, long quantidade, Double media, double peso) {
+<span class="pc bpc" id="L291" title="1 of 4 branches missed.">        if (quantidade &lt; minimoRegistros || media == null) {</span>
+<span class="fc" id="L292">            return new EstabilidadeClinicaDTO(tipo, null, &quot;n/a&quot;, peso, LocalDateTime.now());</span>
+        }
+
+<span class="fc" id="L295">        int indice = normalizar(media, tipo);</span>
+<span class="fc" id="L296">        return new EstabilidadeClinicaDTO(tipo, indice, classificar(indice), peso, LocalDateTime.now());</span>
+    }
+
+    private EstabilidadeClinicaDTO calcularIndiceSono(List&lt;Habitos&gt; habitos) {
+<span class="pc bpc" id="L300" title="1 of 2 branches missed.">        List&lt;Integer&gt; horas = habitos.stream().map(Habitos::getHorasSono).filter(h -&gt; h != null).toList();</span>
+<span class="fc bfc" id="L301" title="All 2 branches covered.">        Double media = horas.isEmpty() ? null : horas.stream().mapToDouble(Integer::doubleValue).average().getAsDouble();</span>
+
+<span class="fc" id="L303">        return calcularIndiceSono(horas.size(), media);</span>
+    }
+
+    private EstabilidadeClinicaDTO calcularIndiceSono(long quantidade, Double mediaSono) {
+<span class="pc bpc" id="L307" title="1 of 4 branches missed.">        if (quantidade &lt; minimoRegistros || mediaSono == null) {</span>
+<span class="fc" id="L308">            return new EstabilidadeClinicaDTO(&quot;sono&quot;, null, &quot;n/a&quot;, 1.0, LocalDateTime.now());</span>
+        }
+
+<span class="pc bpc" id="L311" title="1 of 4 branches missed.">        int indice = (mediaSono &gt;= sonoMinimoSaudavel &amp;&amp; mediaSono &lt;= sonoMaximoSaudavel) ? 9 :</span>
+<span class="pc bpc" id="L312" title="1 of 4 branches missed.">                (mediaSono &lt; 5 || mediaSono &gt; 11) ? 3 : 6;</span>
+
+<span class="fc" id="L314">        return new EstabilidadeClinicaDTO(&quot;sono&quot;, indice, classificar(indice), 1.0, LocalDateTime.now());</span>
+    }
+
+    private EstabilidadeClinicaDTO calcularIndiceExercicio(List&lt;Habitos&gt; habitos) {
+<span class="fc bfc" id="L318" title="All 2 branches covered.">        List&lt;Integer&gt; minutos = habitos.stream().map(Habitos::getMinutosExercicio).filter(m -&gt; m != null).toList();</span>
+<span class="fc bfc" id="L319" title="All 2 branches covered.">        long diasSemExercicio = minutos.stream().filter(m -&gt; m == 0).count();</span>
+<span class="fc bfc" id="L320" title="All 2 branches covered.">        Double media = minutos.isEmpty() ? null : minutos.stream().mapToDouble(Integer::doubleValue).average().getAsDouble();</span>
+
+<span class="fc" id="L322">        return calcularIndiceExercicio(minutos.size(), diasSemExercicio, media);</span>
+    }
+
+    private EstabilidadeClinicaDTO calcularIndiceExercicio(long quantidade, long diasSemExercicio, Double mediaExercicio) {
+<span class="pc bpc" id="L326" title="1 of 4 branches missed.">        if (quantidade &lt; minimoRegistros || mediaExercicio == null) {</span>
+<span class="fc" id="L327">            return new EstabilidadeClinicaDTO(&quot;exercicio&quot;, null, &quot;n/a&quot;, 1.0, LocalDateTime.now());</span>
+        }
+
+        int indice;
+<span class="fc bfc" id="L331" title="All 2 branches covered.">        if (diasSemExercicio &gt;= semExercicioCriticoDias) {</span>
+<span class="fc" id="L332">            indice = 3; // crítico</span>
+<span class="fc bfc" id="L333" title="All 2 branches covered.">        } else if (mediaExercicio &gt;= exercicioMinimoSaudavel) {</span>
+<span class="fc" id="L334">            indice = 9; // saudável</span>
+        } else {
+<span class="fc" id="L336">            indice = 6; // moderado</span>
+        }
+
+<span class="fc" id="L339">        return new EstabilidadeClinicaDTO(&quot;exercicio&quot;, indice, classificar(indice), 1.0, LocalDateTime.now());</span>
+    }
+
+    private int normalizar(double valor, String tipo) {
+<span class="pc bpc" id="L343" title="1 of 8 branches missed.">        return switch (tipo) {</span>
+<span class="pc bpc" id="L344" title="2 of 8 branches missed.">            case &quot;fc_bpm&quot; -&gt; (valor &gt;= 60 &amp;&amp; valor &lt;= 100) ? 9 : (valor &lt; 50 || valor &gt; 120) ? 3 : 6;</span>
+<span class="pc bpc" id="L345" title="2 of 8 branches missed.">            case &quot;fr_rpm&quot; -&gt; (valor &gt;= 12 &amp;&amp; valor &lt;= 20) ? 9 : (valor &lt; 8 || valor &gt; 30) ? 3 : 6;</span>
+<span class="pc bpc" id="L346" title="2 of 8 branches missed.">            case &quot;pa_sistolica&quot; -&gt; (valor &gt;= 90 &amp;&amp; valor &lt;= 120) ? 9 : (valor &lt; 80 || valor &gt; 140) ? 3 : 6;</span>
+<span class="pc bpc" id="L347" title="2 of 8 branches missed.">            case &quot;pa_diastolica&quot; -&gt; (valor &gt;= 60 &amp;&amp; valor &lt;= 80) ? 9 : (valor &lt; 50 || valor &gt; 100) ? 3 : 6;</span>
+<span class="pc bpc" id="L348" title="2 of 8 branches missed.">            case &quot;temp_celcius&quot; -&gt; (valor &gt;= 36 &amp;&amp; valor &lt;= 37.5) ? 9 : (valor &lt; 35 || valor &gt; 39) ? 3 : 6;</span>
+<span class="fc bfc" id="L349" title="All 4 branches covered.">            case &quot;spo2&quot; -&gt; (valor &gt;= 95) ? 9 : (valor &lt; 90) ? 3 : 6;</span>
+<span class="fc" id="L350">            case &quot;peso&quot; -&gt; 6;</span>
+<span class="nc" id="L351">            default -&gt; 6;</span>
+        };
+    }
+
+    private String classificar(Integer indice) {
+<span class="fc bfc" id="L356" title="All 2 branches covered.">        if (indice == null) return &quot;n/a&quot;;</span>
+<span class="fc bfc" id="L357" title="All 2 branches covered.">        if (indice &gt;= 8) return &quot;saudavel&quot;;</span>
+<span class="fc bfc" id="L358" title="All 2 branches covered.">        if (indice &gt;= 5) return &quot;moderado&quot;;</span>
+<span class="fc" id="L359">        return &quot;critico&quot;;</span>
+    }
+
+    public void testarDisparoAlerta(Integer pacienteId, List&lt;EstabilidadeClinicaDTO&gt; indicesTeste) {
+<span class="fc" id="L363">        EstabilidadeClinicaDTO geral = indicesTeste.stream()</span>
+<span class="fc" id="L364">                .filter(i -&gt; &quot;geral&quot;.equals(i.getTipo()))</span>
+<span class="fc" id="L365">                .findFirst()</span>
+<span class="fc" id="L366">                .orElse(new EstabilidadeClinicaDTO(&quot;geral&quot;, null, &quot;n/a&quot;, 1.0, LocalDateTime.now()));</span>
+
+<span class="fc" id="L368">        dispararAlertasDetalhados(pacienteId, indicesTeste, geral);</span>
+<span class="fc" id="L369">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.15.202606040825</span></div></body></html>

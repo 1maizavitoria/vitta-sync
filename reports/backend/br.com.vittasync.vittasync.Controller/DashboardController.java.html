@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="pt"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>DashboardController.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report"></a> &gt; <a href="index.source.html" class="el_package">br.com.vittasync.vittasync.Controller</a> &gt; <span class="el_source">DashboardController.java</span></div><h1>DashboardController.java</h1><pre class="source lang-java linenums">package br.com.vittasync.vittasync.Controller;
+
+
+import br.com.vittasync.vittasync.DTO.DashboardResponseDTO;
+import br.com.vittasync.vittasync.Exception.AcessoNegadoException;
+import br.com.vittasync.vittasync.Model.Usuario;
+import br.com.vittasync.vittasync.Service.DashboardService;
+import br.com.vittasync.vittasync.Service.PermissaoService;
+import br.com.vittasync.vittasync.Service.UsuarioService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+import java.time.LocalDate;
+
+
+@RestController
+@RequestMapping(&quot;/dashboard&quot;)
+@Tag(name = &quot;Dashboard&quot;, description = &quot;Dashboard para visualização da saúde do paciente em um período: séries dos sinais vitais e hábitos, &quot;
+        + &quot;estabilidade clínica, linha de base personalizada e resumos diários calculados pelo banco&quot;)
+public class DashboardController {
+
+    private final DashboardService dashboardService;
+    private final UsuarioService usuarioService;
+    private final PermissaoService permissaoService;
+
+    public DashboardController(
+            DashboardService dashboardService,
+            UsuarioService usuarioService,
+            PermissaoService permissaoService
+<span class="fc" id="L39">    ) {</span>
+<span class="fc" id="L40">        this.dashboardService = dashboardService;</span>
+<span class="fc" id="L41">        this.usuarioService = usuarioService;</span>
+<span class="fc" id="L42">        this.permissaoService = permissaoService;</span>
+<span class="fc" id="L43">    }</span>
+
+    @Operation(
+            summary = &quot;Consultar dashboard do paciente&quot;,
+            description = &quot;Retorna os dados do dashboard do paciente no período informado, sem preencher as datas o período padrão são os &quot;
+                    + &quot;últimos 7 dias. Inclui as séries de cada categoria escolhida, os índices de estabilidade clínica, a linha de &quot;
+                    + &quot;base dos 7 sinais vitais (independente dos filtros), as médias diárias dos sinais vitais e dos hábitos e a &quot;
+                    + &quot;quantidade de eventos por tipo. Permitido ao próprio paciente e a todos os usuários vinculados a ele.&quot;
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = &quot;200&quot;, description = &quot;Dados do dashboard do paciente&quot;),
+            @ApiResponse(responseCode = &quot;400&quot;, description = &quot;Data inicial posterior à data final ou categoria inválida&quot;),
+            @ApiResponse(responseCode = &quot;403&quot;, description = &quot;Usuário sem permissão para visualizar o paciente&quot;),
+            @ApiResponse(responseCode = &quot;404&quot;, description = &quot;Paciente não encontrado&quot;)
+    })
+    @GetMapping(&quot;/pacientes/{cpf}&quot;)
+    public ResponseEntity&lt;DashboardResponseDTO&gt; consultar(
+            @Parameter(description = &quot;CPF do paciente (apenas números)&quot;)
+            @PathVariable String cpf,
+            @Parameter(description = &quot;Data inicial do período (yyyy-MM-dd), padrão: 6 dias antes da data final&quot;)
+            @RequestParam(required = false)
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate inicio,
+            @Parameter(description = &quot;Data final do período (yyyy-MM-dd), padrão: hoje&quot;)
+            @RequestParam(required = false)
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fim,
+            @Parameter(description = &quot;Categorias separadas por vírgula, sem informar retorna todas: pressao, frequencia_cardiaca, &quot;
+                    + &quot;frequencia_respiratoria, temperatura, saturacao, peso, sono, exercicio&quot;)
+            @RequestParam(required = false) String categorias
+    ) {
+<span class="fc" id="L72">        Usuario usuarioLogado = usuarioService.getUsuarioLogado();</span>
+<span class="fc" id="L73">        Usuario paciente = usuarioService.searchByCpf(cpf);</span>
+
+<span class="fc bfc" id="L75" title="All 2 branches covered.">        if (!permissaoService.podeVisualizarPaciente(usuarioLogado.getId(), paciente.getId())) {</span>
+<span class="fc" id="L76">            throw new AcessoNegadoException(&quot;Usuário sem permissão para visualizar o paciente&quot;);</span>
+        }
+
+<span class="fc" id="L79">        return ResponseEntity.ok(</span>
+<span class="fc" id="L80">                dashboardService.consultar(paciente, inicio, fim, categorias)</span>
+        );
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.15.202606040825</span></div></body></html>

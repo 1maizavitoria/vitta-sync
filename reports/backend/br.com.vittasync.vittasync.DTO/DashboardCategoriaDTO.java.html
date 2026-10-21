@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="pt"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>DashboardCategoriaDTO.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report"></a> &gt; <a href="index.source.html" class="el_package">br.com.vittasync.vittasync.DTO</a> &gt; <span class="el_source">DashboardCategoriaDTO.java</span></div><h1>DashboardCategoriaDTO.java</h1><pre class="source lang-java linenums">package br.com.vittasync.vittasync.DTO;
+
+
+import io.swagger.v3.oas.annotations.media.Schema;
+import java.util.List;
+
+
+@Schema(description = &quot;Categoria do dashboard com as suas séries de medições&quot;)
+public class DashboardCategoriaDTO {
+
+    @Schema(description = &quot;Código da categoria&quot;, example = &quot;pressao&quot;)
+    private String codigo;
+
+    @Schema(description = &quot;Nome de exibição da categoria&quot;, example = &quot;Pressão arterial&quot;)
+    private String nome;
+
+    @Schema(description = &quot;Unidade de medida da categoria&quot;, example = &quot;mmHg&quot;)
+    private String unidade;
+
+    @Schema(description = &quot;Séries da categoria, a pressão tem duas: sistólica e diastólica&quot;)
+    private List&lt;DashboardSerieDTO&gt; series;
+
+    public DashboardCategoriaDTO(
+            String codigo,
+            String nome,
+            String unidade,
+            List&lt;DashboardSerieDTO&gt; series
+<span class="fc" id="L28">    ) {</span>
+<span class="fc" id="L29">        this.codigo = codigo;</span>
+<span class="fc" id="L30">        this.nome = nome;</span>
+<span class="fc" id="L31">        this.unidade = unidade;</span>
+<span class="fc" id="L32">        this.series = series;</span>
+<span class="fc" id="L33">    }</span>
+
+
+<span class="fc" id="L36">    public String getCodigo() {return codigo;}</span>
+
+<span class="fc" id="L38">    public String getNome() {return nome;}</span>
+
+<span class="fc" id="L40">    public String getUnidade() {return unidade;}</span>
+
+<span class="fc" id="L42">    public List&lt;DashboardSerieDTO&gt; getSeries() {return series;}</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.15.202606040825</span></div></body></html>

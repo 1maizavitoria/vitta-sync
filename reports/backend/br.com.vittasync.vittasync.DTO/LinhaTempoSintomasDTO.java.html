@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="pt"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>LinhaTempoSintomasDTO.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report"></a> &gt; <a href="index.source.html" class="el_package">br.com.vittasync.vittasync.DTO</a> &gt; <span class="el_source">LinhaTempoSintomasDTO.java</span></div><h1>LinhaTempoSintomasDTO.java</h1><pre class="source lang-java linenums">package br.com.vittasync.vittasync.DTO;
+
+
+import io.swagger.v3.oas.annotations.media.Schema;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+
+
+@Schema(description = &quot;Sintoma na linha do tempo&quot;)
+public class LinhaTempoSintomasDTO {
+    @Schema(description = &quot;ID do sintoma&quot;, example = &quot;21&quot;)
+    private Integer id;
+
+    @Schema(description = &quot;Data e hora em que o registro foi cadastrado&quot;, example = &quot;2026-10-13T20:15:42&quot;)
+    private LocalDateTime dataHora;
+
+    @Schema(description = &quot;Descrição do sintoma&quot;, example = &quot;Dor de cabeça&quot;)
+    private String sintoma;
+
+    @Schema(description = &quot;Intensidade da dor de 1 a 10&quot;, example = &quot;6&quot;)
+    private Integer intensidadeDor;
+
+    @Schema(description = &quot;Dia em que o sintoma ocorreu&quot;, example = &quot;2026-10-13&quot;)
+    private LocalDate dataReferencia;
+
+
+<span class="fc" id="L27">    public LinhaTempoSintomasDTO(Integer id, LocalDateTime dataHora, String sintoma, Integer intensidadeDor, LocalDate dataReferencia) {</span>
+<span class="fc" id="L28">        this.id = id;</span>
+<span class="fc" id="L29">        this.dataHora = dataHora;</span>
+<span class="fc" id="L30">        this.sintoma = sintoma;</span>
+<span class="fc" id="L31">        this.intensidadeDor = intensidadeDor;</span>
+<span class="fc" id="L32">        this.dataReferencia = dataReferencia;</span>
+<span class="fc" id="L33">    }</span>
+
+
+<span class="fc" id="L36">    public Integer getId() { return id; }</span>
+    
+<span class="fc" id="L38">    public LocalDateTime getDataHora() { return dataHora; }</span>
+    
+<span class="fc" id="L40">    public String getSintoma() { return sintoma; }</span>
+    
+<span class="fc" id="L42">    public Integer getIntensidadeDor() { return intensidadeDor; }</span>
+   
+<span class="fc" id="L44">    public LocalDate getDataReferencia() { return dataReferencia; }</span>
+    
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.15.202606040825</span></div></body></html>

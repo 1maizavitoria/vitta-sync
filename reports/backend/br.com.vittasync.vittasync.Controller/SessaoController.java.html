@@ -2,31 +2,40 @@
 
 
 import br.com.vittasync.vittasync.Service.SessaoService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 
 @RestController
 @RequestMapping(&quot;/sessao&quot;)
+@Tag(name = &quot;Sessão&quot;, description = &quot;Encerramento da sessão do usuário logado&quot;)
 public class SessaoController {
 
     private final SessaoService sessaoService;
 
-<span class="fc" id="L15">    public SessaoController(SessaoService sessaoService) {this.sessaoService = sessaoService;}</span>
+<span class="fc" id="L21">    public SessaoController(SessaoService sessaoService) {this.sessaoService = sessaoService;}</span>
 
+    @Operation(
+            summary = &quot;Realizar logout&quot;,
+            description = &quot;Encerra a sessão do token usado na requisição, depois disso o token deixa de ser aceito e é preciso fazer login novamente. &quot;
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = &quot;200&quot;, description = &quot;Logout realizado com sucesso&quot;),
+            @ApiResponse(responseCode = &quot;401&quot;, description = &quot;Token ausente, inválido ou já encerrado&quot;)
+    })
     @PostMapping(&quot;/logout&quot;)
-    public ResponseEntity&lt;String&gt; logout(@RequestHeader(&quot;Authorization&quot;) String authHeader) {
+    public ResponseEntity&lt;String&gt; logout(@Parameter(hidden = true)
+                                         @RequestHeader(&quot;Authorization&quot;) String authHeader) {
 
-<span class="pc bpc" id="L20" title="1 of 2 branches missed.">        String token = authHeader.startsWith(&quot;Bearer &quot;) ? authHeader.substring(7) : authHeader;</span>
+<span class="pc bpc" id="L35" title="1 of 2 branches missed.">        String token = authHeader.startsWith(&quot;Bearer &quot;) ? authHeader.substring(7) : authHeader;</span>
 
-        try {
-<span class="fc" id="L23">            sessaoService.logout(token);</span>
-<span class="fc" id="L24">            return ResponseEntity.ok(&quot;Logout realizado com sucesso.&quot;);</span>
-        }
-
-<span class="fc" id="L27">        catch (RuntimeException e) {</span>
-<span class="fc" id="L28">            return ResponseEntity.status(401).body(e.getMessage());</span>
-        }
+<span class="fc" id="L37">        sessaoService.logout(token);</span>
+<span class="fc" id="L38">        return ResponseEntity.ok(&quot;Logout realizado com sucesso.&quot;);</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.15.202606040825</span></div></body></html>

@@ -1,56 +1,82 @@
 <?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="pt"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>UsuarioOutputDTO.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report"></a> &gt; <a href="index.source.html" class="el_package">br.com.vittasync.vittasync.DTO</a> &gt; <span class="el_source">UsuarioOutputDTO.java</span></div><h1>UsuarioOutputDTO.java</h1><pre class="source lang-java linenums">package br.com.vittasync.vittasync.DTO;
 
+
+import io.swagger.v3.oas.annotations.media.Schema;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 
-<span class="fc" id="L7">public class UsuarioOutputDTO {</span>
+@Schema(description = &quot;Dados de perfil do usuário&quot;)
+<span class="fc" id="L10">public class UsuarioOutputDTO {</span>
 
+    @Schema(description = &quot;CPF do usuário (apenas números)&quot;, example = &quot;52998224725&quot;)
     private String cpf;
+
+    @Schema(description = &quot;Nome completo&quot;, example = &quot;Maria Souza&quot;)
     private String nome;
+
+    @Schema(description = &quot;E-mail do usuário&quot;, example = &quot;maria.souza@email.com&quot;)
     private String email;
+
+    @Schema(description = &quot;Telefone com DDD (apenas números)&quot;, example = &quot;41987654321&quot;)
     private String telefone;
+
+    @Schema(description = &quot;Peso em kg&quot;, example = &quot;74.0&quot;)
     private Double pesoInicial;
+
+    @Schema(description = &quot;Altura em metros&quot;, example = &quot;1.65&quot;)
     private Double altura;
+
+    @Schema(description = &quot;Tipo da conta&quot;, example = &quot;paciente&quot;, allowableValues = {&quot;paciente&quot;, &quot;responsavel&quot;, &quot;saude&quot;})
     private String tipo;
+
+    @Schema(description = &quot;Registro no conselho profissional, preenchido apenas para o tipo saude&quot;, example = &quot;CRM-PR 12345&quot;)
     private String conselho;
+
+    @Schema(description = &quot;Função do responsável em relação ao paciente&quot;, example = &quot;Cuidadora&quot;)
     private String funcaoResponsavel;
+
+    @Schema(description = &quot;Data de nascimento&quot;, example = &quot;1958-04-22&quot;)
     private LocalDate dataNascimento;
+
+    @Schema(description = &quot;Data e hora do cadastro&quot;, example = &quot;2026-09-02T14:10:00&quot;)
     private LocalDateTime dataCadastro;
 
 
 
-<span class="fc" id="L23">    public String getCpf() { return cpf; }</span>
-<span class="fc" id="L24">    public void setCpf(String cpf) { this.cpf = cpf; }</span>
 
-<span class="fc" id="L26">    public String getNome() { return nome; }</span>
-<span class="fc" id="L27">    public void setNome(String nome) { this.nome = nome; }</span>
+<span class="fc" id="L48">    public String getCpf() { return cpf; }</span>
+<span class="fc" id="L49">    public void setCpf(String cpf) { this.cpf = cpf; }</span>
 
-<span class="fc" id="L29">    public String getEmail() { return email; }</span>
-<span class="fc" id="L30">    public void setEmail(String email) { this.email = email; }</span>
+<span class="fc" id="L51">    public String getNome() { return nome; }</span>
+<span class="fc" id="L52">    public void setNome(String nome) { this.nome = nome; }</span>
 
-<span class="fc" id="L32">    public String getTelefone() { return telefone; }</span>
-<span class="fc" id="L33">    public void setTelefone(String telefone) { this.telefone = telefone; }</span>
+<span class="fc" id="L54">    public String getEmail() { return email; }</span>
+<span class="fc" id="L55">    public void setEmail(String email) { this.email = email; }</span>
 
-<span class="fc" id="L35">    public Double getPesoInicial() { return pesoInicial; }</span>
-<span class="fc" id="L36">    public void setPesoInicial(Double pesoInicial) { this.pesoInicial = pesoInicial; }</span>
+<span class="fc" id="L57">    public String getTelefone() { return telefone; }</span>
+<span class="fc" id="L58">    public void setTelefone(String telefone) { this.telefone = telefone; }</span>
 
-<span class="fc" id="L38">    public Double getAltura() { return altura; }</span>
-<span class="fc" id="L39">    public void setAltura(Double altura) { this.altura = altura; }</span>
+<span class="fc" id="L60">    public Double getPesoInicial() { return pesoInicial; }</span>
+<span class="fc" id="L61">    public void setPesoInicial(Double pesoInicial) { this.pesoInicial = pesoInicial; }</span>
 
-<span class="fc" id="L41">    public String getFuncaoResponsavel() { return funcaoResponsavel; }</span>
-<span class="fc" id="L42">    public void setFuncaoResponsavel(String funcaoResponsavel) { this.funcaoResponsavel = funcaoResponsavel; }</span>
+<span class="fc" id="L63">    public Double getAltura() { return altura; }</span>
+<span class="fc" id="L64">    public void setAltura(Double altura) { this.altura = altura; }</span>
 
-<span class="fc" id="L44">    public String getTipo() { return tipo; }</span>
-<span class="fc" id="L45">    public void setTipo(String tipo) { this.tipo = tipo; }</span>
+<span class="fc" id="L66">    public String getFuncaoResponsavel() { return funcaoResponsavel; }</span>
+<span class="fc" id="L67">    public void setFuncaoResponsavel(String funcaoResponsavel) { this.funcaoResponsavel = funcaoResponsavel; }</span>
 
-<span class="fc" id="L47">    public String getConselho() { return conselho; }</span>
-<span class="fc" id="L48">    public void setConselho(String conselho) { this.conselho = conselho; }</span>
+<span class="fc" id="L69">    public String getTipo() { return tipo; }</span>
+<span class="fc" id="L70">    public void setTipo(String tipo) { this.tipo = tipo; }</span>
 
-<span class="fc" id="L50">    public LocalDate getDataNascimento() { return dataNascimento; }</span>
-<span class="fc" id="L51">    public void setDataNascimento(LocalDate dataNascimento) { this.dataNascimento = dataNascimento; }</span>
+<span class="fc" id="L72">    public String getConselho() { return conselho; }</span>
+<span class="fc" id="L73">    public void setConselho(String conselho) { this.conselho = conselho; }</span>
 
-<span class="fc" id="L53">    public LocalDateTime getDataCadastro() { return dataCadastro; }</span>
-<span class="fc" id="L54">    public void setDataCadastro(LocalDateTime dataCadastro) { this.dataCadastro = dataCadastro; }</span>
+<span class="fc" id="L75">    public LocalDate getDataNascimento() { return dataNascimento; }</span>
+<span class="fc" id="L76">    public void setDataNascimento(LocalDate dataNascimento) { this.dataNascimento = dataNascimento; }</span>
+
+<span class="fc" id="L78">    public LocalDateTime getDataCadastro() { return dataCadastro; }</span>
+<span class="fc" id="L79">    public void setDataCadastro(LocalDateTime dataCadastro) { this.dataCadastro = dataCadastro; }</span>
+    
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.15.202606040825</span></div></body></html>

@@ -7,7 +7,10 @@ import java.time.LocalDateTime;
 
 
 @Entity
-@Table(name = &quot;DiarioSintomas&quot;)
+@Table(
+        name = &quot;DiarioSintomas&quot;,
+        indexes = @Index(name = &quot;idx_sintomas_paciente_data&quot;, columnList = &quot;paciente_id, data_referencia&quot;)
+)
 public class DiarioSintomas {
 
     @Id
@@ -36,30 +39,32 @@ public class DiarioSintomas {
     @Column(name = &quot;registrado_por_usuario_id&quot;)
     private Integer registradoPorUsuarioId;
 
-<span class="fc" id="L39">    public DiarioSintomas() {}</span>
+<span class="fc" id="L42">    public DiarioSintomas() {}</span>
 
-<span class="fc" id="L41">    public Integer getId() { return id; }</span>
-<span class="fc" id="L42">    public void setId(Integer id) { this.id = id; }</span>
+    
+<span class="fc" id="L45">    public Integer getId() { return id; }</span>
+<span class="fc" id="L46">    public void setId(Integer id) { this.id = id; }</span>
 
-<span class="fc" id="L44">    public Usuario getPaciente() { return paciente; }</span>
-<span class="fc" id="L45">    public void setPaciente(Usuario paciente) { this.paciente = paciente; }</span>
+<span class="fc" id="L48">    public Usuario getPaciente() { return paciente; }</span>
+<span class="fc" id="L49">    public void setPaciente(Usuario paciente) { this.paciente = paciente; }</span>
 
-<span class="fc" id="L47">    public String getSintoma() { return sintoma; }</span>
-<span class="fc" id="L48">    public void setSintoma(String sintoma) { this.sintoma = sintoma; }</span>
+<span class="fc" id="L51">    public String getSintoma() { return sintoma; }</span>
+<span class="fc" id="L52">    public void setSintoma(String sintoma) { this.sintoma = sintoma; }</span>
 
-<span class="fc" id="L50">    public Integer getIntensidadeDor() { return intensidadeDor; }</span>
-<span class="fc" id="L51">    public void setIntensidadeDor(Integer intensidadeDor) { this.intensidadeDor = intensidadeDor; }</span>
+<span class="fc" id="L54">    public Integer getIntensidadeDor() { return intensidadeDor; }</span>
+<span class="fc" id="L55">    public void setIntensidadeDor(Integer intensidadeDor) { this.intensidadeDor = intensidadeDor; }</span>
 
-<span class="fc" id="L53">    public LocalDate getDataReferencia() { return dataReferencia; }</span>
-<span class="fc" id="L54">    public void setDataReferencia(LocalDate dataReferencia) { this.dataReferencia = dataReferencia; }</span>
+<span class="fc" id="L57">    public LocalDate getDataReferencia() { return dataReferencia; }</span>
+<span class="fc" id="L58">    public void setDataReferencia(LocalDate dataReferencia) { this.dataReferencia = dataReferencia; }</span>
 
-<span class="fc" id="L56">    public LocalDateTime getDataRegistro() { return dataRegistro; }</span>
-<span class="fc" id="L57">    public void setDataRegistro(LocalDateTime dataRegistro) { this.dataRegistro = dataRegistro; }</span>
+<span class="fc" id="L60">    public LocalDateTime getDataRegistro() { return dataRegistro; }</span>
+<span class="fc" id="L61">    public void setDataRegistro(LocalDateTime dataRegistro) { this.dataRegistro = dataRegistro; }</span>
 
-<span class="fc" id="L59">    public LocalDateTime getDataModificacao() { return dataModificacao; }</span>
-<span class="fc" id="L60">    public void setDataModificacao(LocalDateTime dataModificacao) { this.dataModificacao = dataModificacao; }</span>
+<span class="fc" id="L63">    public LocalDateTime getDataModificacao() { return dataModificacao; }</span>
+<span class="fc" id="L64">    public void setDataModificacao(LocalDateTime dataModificacao) { this.dataModificacao = dataModificacao; }</span>
 
-<span class="fc" id="L62">    public Integer getRegistradoPorUsuarioId() { return registradoPorUsuarioId; }</span>
-<span class="fc" id="L63">    public void setRegistradoPorUsuarioId(Integer registradoPorUsuarioId) { this.registradoPorUsuarioId = registradoPorUsuarioId; }</span>
+<span class="fc" id="L66">    public Integer getRegistradoPorUsuarioId() { return registradoPorUsuarioId; }</span>
+<span class="fc" id="L67">    public void setRegistradoPorUsuarioId(Integer registradoPorUsuarioId) { this.registradoPorUsuarioId = registradoPorUsuarioId; }</span>
+
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.15.202606040825</span></div></body></html>

@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="pt"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>LinhaTempoController.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report"></a> &gt; <a href="index.source.html" class="el_package">br.com.vittasync.vittasync.Controller</a> &gt; <span class="el_source">LinhaTempoController.java</span></div><h1>LinhaTempoController.java</h1><pre class="source lang-java linenums">package br.com.vittasync.vittasync.Controller;
+
+
+import br.com.vittasync.vittasync.DTO.LinhaTempoResponseDTO;
+import br.com.vittasync.vittasync.Model.Usuario;
+import br.com.vittasync.vittasync.Service.UsuarioService;
+import br.com.vittasync.vittasync.Service.LinhaTempoService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+import java.time.LocalDate;
+
+
+@RestController
+@RequestMapping(&quot;/api/linha-tempo&quot;)
+@Tag(name = &quot;Linha do tempo&quot;, description = &quot;Histórico do paciente em um período juntando sinais vitais, hábitos e sintomas em ordem cronológica&quot;)
+public class LinhaTempoController {
+
+    private final LinhaTempoService linhaTempoService;
+    private final UsuarioService usuarioService;
+
+    public LinhaTempoController(LinhaTempoService linhaTempoService,
+<span class="fc" id="L27">                                UsuarioService usuarioService) {</span>
+<span class="fc" id="L28">        this.linhaTempoService = linhaTempoService;</span>
+<span class="fc" id="L29">        this.usuarioService = usuarioService;</span>
+<span class="fc" id="L30">    }</span>
+
+    @Operation(
+            summary = &quot;Consultar linha do tempo do paciente&quot;,
+            description = &quot;Retorna os sinais vitais, hábitos e sintomas do paciente no período separados por categoria e também juntos em ''itens'', &quot;
+                    + &quot;do mais recente ao mais antigo, sem datas informadas considera os últimos 7 dias. &quot;
+                    + &quot;Permitido ao próprio paciente e a todos os usuários vinculados a ele (responsáveis e profissionais de saúde).&quot;
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = &quot;200&quot;, description = &quot;Linha do tempo do paciente no período&quot;),
+            @ApiResponse(responseCode = &quot;400&quot;, description = &quot;Data inicial posterior à data final&quot;),
+            @ApiResponse(responseCode = &quot;403&quot;, description = &quot;Usuário sem permissão para visualizar o paciente&quot;),
+            @ApiResponse(responseCode = &quot;404&quot;, description = &quot;Paciente não encontrado&quot;)
+    })
+    @GetMapping(&quot;/paciente/{cpf}&quot;)
+    public ResponseEntity&lt;LinhaTempoResponseDTO&gt; consultarLinhaTempo(
+            @Parameter(description = &quot;CPF do paciente (apenas números)&quot;)
+            @PathVariable String cpf,
+            @Parameter(description = &quot;Data inicial do período (yyyy-MM-dd), padrão 6 dias antes da data final&quot;)
+            @RequestParam(required = false) LocalDate inicio,
+            @Parameter(description = &quot;Data final do período (yyyy-MM-dd), padrão hoje&quot;)
+            @RequestParam(required = false) LocalDate fim
+    ) {
+<span class="fc" id="L53">        Usuario usuarioLogado = usuarioService.getUsuarioLogado();</span>
+<span class="fc" id="L54">        Usuario paciente = usuarioService.searchByCpf(cpf);</span>
+
+<span class="fc" id="L56">        return ResponseEntity.ok(</span>
+<span class="fc" id="L57">                linhaTempoService.consultarLinhaTempo(</span>
+<span class="fc" id="L58">                        usuarioLogado.getId(),</span>
+<span class="fc" id="L59">                        paciente.getId(),</span>
+                        inicio,
+                        fim
+                )
+        );
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.15.202606040825</span></div></body></html>

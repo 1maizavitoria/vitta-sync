@@ -2,12 +2,12 @@
 
 
 import br.com.vittasync.vittasync.Exception.RecursoNaoEncontradoException;
-import br.com.vittasync.vittasync.Model.DiarioSintomas;
 import br.com.vittasync.vittasync.Model.Habitos;
+import br.com.vittasync.vittasync.Model.ContatoEmergencia;
 import br.com.vittasync.vittasync.Repository.HabitosRepository;
 import br.com.vittasync.vittasync.Util.EventoPrioridades;
+import br.com.vittasync.vittasync.Util.EventoTipos;
 import org.springframework.stereotype.Service;
-
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -18,86 +18,146 @@ public class HabitosService {
     private final HabitosRepository repository;
     private final EventoPacienteService eventoPacienteService;
     private final EventoClinicoService eventoClinicoService;
+    private final NotificacaoService notificacaoService;
+    private final ContatoEmergenciaService contatoEmergenciaService;
 
     public HabitosService(
             HabitosRepository repository,
             EventoPacienteService eventoPacienteService,
-            EventoClinicoService eventoClinicoService
-<span class="fc" id="L26">    ) {</span>
-<span class="fc" id="L27">        this.repository = repository;</span>
-<span class="fc" id="L28">        this.eventoPacienteService = eventoPacienteService;</span>
-<span class="fc" id="L29">        this.eventoClinicoService = eventoClinicoService;</span>
-<span class="fc" id="L30">    }</span>
+            EventoClinicoService eventoClinicoService,
+            NotificacaoService notificacaoService,
+            ContatoEmergenciaService contatoEmergenciaService
+<span class="fc" id="L30">    ) {</span>
+<span class="fc" id="L31">        this.repository = repository;</span>
+<span class="fc" id="L32">        this.eventoPacienteService = eventoPacienteService;</span>
+<span class="fc" id="L33">        this.eventoClinicoService = eventoClinicoService;</span>
+<span class="fc" id="L34">        this.notificacaoService = notificacaoService;</span>
+<span class="fc" id="L35">        this.contatoEmergenciaService = contatoEmergenciaService;</span>
+<span class="fc" id="L36">    }</span>
 
     public Habitos create(Habitos habito, Integer usuarioLogadoId) {
-<span class="fc" id="L33">        habito.setDataRegistro(LocalDateTime.now());</span>
-<span class="fc" id="L34">        habito.setDataModificacao(null);</span>
-<span class="fc" id="L35">        Habitos salvo =</span>
-<span class="fc" id="L36">                repository.save(habito);</span>
+<span class="fc" id="L39">        habito.setDataRegistro(LocalDateTime.now());</span>
+<span class="fc" id="L40">        habito.setDataModificacao(null);</span>
 
-<span class="fc" id="L38">        eventoPacienteService.criarEvento(</span>
-<span class="fc" id="L39">                habito.getPaciente().getId(),</span>
+<span class="fc" id="L42">        calcularIndiceRepouso(habito);</span>
+
+<span class="fc" id="L44">        Habitos salvo = repository.save(habito);</span>
+
+<span class="fc" id="L46">        eventoPacienteService.criarEvento(</span>
+<span class="fc" id="L47">                habito.getPaciente().getId(),</span>
                 usuarioLogadoId,
-                &quot;habito_registrado&quot;,
+                EventoTipos.HABITOS_CRIADOS,
                 &quot;Hábito registrado&quot;,
                 &quot;Um novo hábito foi registrado&quot;,
+<span class="fc" id="L52">                EventoPacienteService.metadata(</span>
+                        &quot;patientName&quot;,
+<span class="fc" id="L54">                        habito.getPaciente().getNome()</span>
+                ),
                 EventoPrioridades.NORMAL
         );
 
-<span class="fc" id="L47">        eventoClinicoService.analisarHabitos(</span>
-                salvo,
-                usuarioLogadoId
-        );
+<span class="fc" id="L59">        eventoClinicoService.analisarHabitos(salvo, usuarioLogadoId);</span>
 
-<span class="fc" id="L52">        return salvo;</span>
+<span class="fc bfc" id="L61" title="All 2 branches covered.">        if (Boolean.TRUE.equals(salvo.getRepouso())) {</span>
+<span class="fc" id="L62">            List&lt;ContatoEmergencia&gt; contatos = contatoEmergenciaService.listar(usuarioLogadoId, habito.getPaciente());</span>
+<span class="fc bfc" id="L63" title="All 2 branches covered.">            for (ContatoEmergencia contato : contatos) {</span>
+<span class="fc" id="L64">                notificacaoService.enviarAlertaRepouso(</span>
+                        contato,
+<span class="pc bpc" id="L66" title="1 of 2 branches missed.">                        salvo.getCanal() != null ? salvo.getCanal() : &quot;email&quot;</span>
+                );
+<span class="fc" id="L68">            }</span>
+        }
+
+<span class="fc" id="L71">        return salvo;</span>
     }
 
     public Habitos update(Integer id, Habitos novosDados, Integer usuarioLogadoId) {
-<span class="fc" id="L56">        Habitos existente = repository.findById(id)</span>
-<span class="fc" id="L57">                .orElseThrow(() -&gt; new RecursoNaoEncontradoException(&quot;Hábito(s) não encontrado(s)&quot;));</span>
-<span class="fc" id="L58">        existente.setHorasSono(novosDados.getHorasSono());</span>
-<span class="fc" id="L59">        existente.setMinutosExercicio(novosDados.getMinutosExercicio());</span>
-<span class="fc" id="L60">        existente.setDataReferencia(novosDados.getDataReferencia());</span>
-<span class="fc" id="L61">        existente.setDataModificacao(LocalDateTime.now());</span>
-<span class="fc" id="L62">        Habitos atualizado =</span>
-<span class="fc" id="L63">                repository.save(existente);</span>
+<span class="fc" id="L75">        Habitos existente = repository.findById(id)</span>
+<span class="fc" id="L76">                .orElseThrow(() -&gt; new RecursoNaoEncontradoException(&quot;Hábito(s) não encontrado(s)&quot;));</span>
 
-<span class="fc" id="L65">        eventoPacienteService.criarEvento(</span>
-<span class="fc" id="L66">                existente.getPaciente().getId(),</span>
+<span class="fc" id="L78">        existente.setHorasSono(novosDados.getHorasSono());</span>
+<span class="fc" id="L79">        existente.setMinutosExercicio(novosDados.getMinutosExercicio());</span>
+<span class="fc" id="L80">        existente.setDataReferencia(novosDados.getDataReferencia());</span>
+<span class="fc" id="L81">        existente.setCanal(novosDados.getCanal());</span>
+<span class="fc" id="L82">        existente.setDataModificacao(LocalDateTime.now());</span>
+
+<span class="fc" id="L84">        calcularIndiceRepouso(existente);</span>
+
+<span class="fc" id="L86">        Habitos atualizado = repository.save(existente);</span>
+
+<span class="fc" id="L88">        eventoPacienteService.criarEvento(</span>
+<span class="fc" id="L89">                existente.getPaciente().getId(),</span>
                 usuarioLogadoId,
-                &quot;habito_editado&quot;,
-                &quot;Habito atualizado&quot;,
-                &quot;Um habito foi atualizado&quot;,
+                EventoTipos.HABITOS_EDITADOS,
+                &quot;Hábito atualizado&quot;,
+                &quot;Um hábito foi atualizado&quot;,
+<span class="fc" id="L94">                EventoPacienteService.metadata(</span>
+                        &quot;patientName&quot;,
+<span class="fc" id="L96">                        existente.getPaciente().getNome()</span>
+                ),
                 EventoPrioridades.NORMAL
         );
 
-<span class="fc" id="L74">        return atualizado;</span>
+<span class="fc bfc" id="L101" title="All 2 branches covered.">        if (Boolean.TRUE.equals(atualizado.getRepouso())) {</span>
+<span class="fc" id="L102">            List&lt;ContatoEmergencia&gt; contatos = contatoEmergenciaService.listar(usuarioLogadoId, existente.getPaciente());</span>
+<span class="fc bfc" id="L103" title="All 2 branches covered.">            for (ContatoEmergencia contato : contatos) {</span>
+<span class="fc" id="L104">                notificacaoService.enviarAlertaRepouso(</span>
+                        contato,
+<span class="pc bpc" id="L106" title="1 of 2 branches missed.">                        atualizado.getCanal() != null ? atualizado.getCanal() : &quot;email&quot;</span>
+                );
+<span class="fc" id="L108">            }</span>
+        }
+
+<span class="fc" id="L111">        return atualizado;</span>
     }
 
     public void delete(Integer id, Integer usuarioLogadoId) {
-<span class="fc bfc" id="L78" title="All 2 branches covered.">        if (!repository.existsById(id)) {</span>
-<span class="fc" id="L79">            throw new RecursoNaoEncontradoException(&quot;Hábito(s) não encontrado(s)&quot;);</span>
+<span class="fc bfc" id="L115" title="All 2 branches covered.">        if (!repository.existsById(id)) {</span>
+<span class="fc" id="L116">            throw new RecursoNaoEncontradoException(&quot;Hábito(s) não encontrado(s)&quot;);</span>
         }
-<span class="fc" id="L81">        Habitos habitos =</span>
-<span class="fc" id="L82">                repository.findById(id)</span>
-<span class="fc" id="L83">                        .orElseThrow(() -&gt;</span>
-<span class="nc" id="L84">                                new RecursoNaoEncontradoException(</span>
-                                        &quot;Habitos não encontrado&quot;
-                                )
-                        );
-<span class="fc" id="L88">        eventoPacienteService.criarEvento(</span>
-<span class="fc" id="L89">                habitos.getPaciente().getId(),</span>
+
+<span class="fc" id="L119">        Habitos habitos = repository.findById(id)</span>
+<span class="pc" id="L120">                .orElseThrow(() -&gt; new RecursoNaoEncontradoException(&quot;Hábito(s) não encontrado(s)&quot;));</span>
+
+<span class="fc" id="L122">        eventoPacienteService.criarEvento(</span>
+<span class="fc" id="L123">                habitos.getPaciente().getId(),</span>
                 usuarioLogadoId,
-                &quot;habito_removido&quot;,
+                EventoTipos.HABITOS_REMOVIDOS,
                 &quot;Hábito removido&quot;,
                 &quot;Um registro de hábito foi removido&quot;,
+<span class="fc" id="L128">                EventoPacienteService.metadata(</span>
+                        &quot;patientName&quot;,
+<span class="fc" id="L130">                        habitos.getPaciente().getNome()</span>
+                ),
                 EventoPrioridades.NORMAL
         );
-<span class="fc" id="L96">        repository.deleteById(id);</span>
-<span class="fc" id="L97">    }</span>
+
+<span class="fc" id="L135">        repository.deleteById(id);</span>
+<span class="fc" id="L136">    }</span>
 
     public List&lt;Habitos&gt; findByPacienteCpf(String cpf) {
-<span class="fc" id="L100">        return repository.findByPacienteCpf(cpf);</span>
+<span class="fc" id="L139">        return repository.findByPacienteCpf(cpf);</span>
     }
+
+    public List&lt;Habitos&gt; findByPacienteId(Integer pacienteId) {
+<span class="fc" id="L143">        return repository.findByPacienteId(pacienteId);</span>
+    }
+
+    private void calcularIndiceRepouso(Habitos habito) {
+<span class="fc bfc" id="L147" title="All 4 branches covered.">        if (habito.getHorasSono() == null || habito.getMinutosExercicio() == null) {</span>
+<span class="fc" id="L148">            habito.setIndiceRepouso(0.0);</span>
+<span class="fc" id="L149">            habito.setRepouso(false);</span>
+<span class="fc" id="L150">            return;</span>
+        }
+
+<span class="fc" id="L153">        double indiceSono = habito.getHorasSono() / 8.0; //8h/dia</span>
+
+<span class="fc" id="L155">        double indiceExercicio = Math.min(habito.getMinutosExercicio() / 30.0, 1.0); //30min/dia</span>
+
+<span class="fc" id="L157">        double indiceFinal = indiceSono + indiceExercicio;</span>
+
+<span class="fc" id="L159">        habito.setIndiceRepouso(indiceFinal);</span>
+<span class="fc bfc" id="L160" title="All 2 branches covered.">        habito.setRepouso(indiceFinal &lt; 1.5);</span>
+<span class="fc" id="L161">    }</span>
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.15.202606040825</span></div></body></html>

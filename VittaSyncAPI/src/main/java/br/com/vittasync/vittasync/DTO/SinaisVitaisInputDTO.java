@@ -37,7 +37,7 @@ public class SinaisVitaisInputDTO {
     @NotNull(message = "Saturação O2 é obrigatória")
     private Integer spo2Porcento;
 
-    @Schema(hidden = true)
+
     private LocalDateTime dataRegistro;
 
     @Schema(hidden = true)

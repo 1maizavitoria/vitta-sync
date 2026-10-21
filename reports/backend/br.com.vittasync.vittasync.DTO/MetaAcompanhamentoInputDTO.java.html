@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="pt"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>MetaAcompanhamentoInputDTO.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report"></a> &gt; <a href="index.source.html" class="el_package">br.com.vittasync.vittasync.DTO</a> &gt; <span class="el_source">MetaAcompanhamentoInputDTO.java</span></div><h1>MetaAcompanhamentoInputDTO.java</h1><pre class="source lang-java linenums">package br.com.vittasync.vittasync.DTO;
+
+
+import io.swagger.v3.oas.annotations.media.Schema;
+import java.time.LocalDate;
+
+
+@Schema(description = &quot;Dados de uma meta de acompanhamento do paciente&quot;)
+<span class="fc" id="L9">public class MetaAcompanhamentoInputDTO {</span>
+
+    @Schema(description = &quot;Nome da meta&quot;, example = &quot;Perder peso até o fim do ano&quot;)
+    private String nome;
+
+    @Schema(description = &quot;Origem dos dados da meta&quot;, example = &quot;sinais_vitais&quot;, allowableValues = {&quot;sinais_vitais&quot;, &quot;habitos&quot;, &quot;personalizado&quot;})
+    private String tipoDado;
+
+    @Schema(description = &quot;Indicador acompanhado pela meta&quot;, example = &quot;peso&quot;, allowableValues = {&quot;peso&quot;, &quot;horas_sono&quot;, &quot;minutos_exercicio&quot;, &quot;personalizado&quot;})
+    private String indicador;
+
+    @Schema(description = &quot;Se o objetivo é aumentar ou reduzir o valor&quot;, example = &quot;reduzir&quot;, allowableValues = {&quot;aumentar&quot;, &quot;reduzir&quot;})
+    private String direcao;
+
+    @Schema(description = &quot;Valor no início da meta, ignorado em metas personalizadas&quot;, example = &quot;80.0&quot;)
+    private Double valorInicial;
+
+    @Schema(description = &quot;Valor atual, ignorado em metas personalizadas e substituído pelo último registro do paciente nas demais&quot;, example = &quot;78.5&quot;)
+    private Double valorAtual;
+
+    @Schema(description = &quot;Unidade do valor&quot;, example = &quot;kg&quot;)
+    private String unidade;
+
+    @Schema(description = &quot;Valor que se deseja alcançar&quot;, example = &quot;75.0&quot;)
+    private Double valorAlvo;
+
+    @Schema(description = &quot;Prazo da meta&quot;, example = &quot;2026-12-31&quot;)
+    private LocalDate dataLimite;
+
+
+
+<span class="fc" id="L40">    public String getNome() { return nome; }</span>
+<span class="fc" id="L41">    public void setNome(String nome) { this.nome = nome; }</span>
+
+<span class="fc" id="L43">    public String getTipoDado() { return tipoDado; }</span>
+<span class="fc" id="L44">    public void setTipoDado(String tipoDado) { this.tipoDado = tipoDado; }</span>
+
+<span class="fc" id="L46">    public String getIndicador() { return indicador; }</span>
+<span class="fc" id="L47">    public void setIndicador(String indicador) { this.indicador = indicador; }</span>
+
+<span class="fc" id="L49">    public String getDirecao() { return direcao; }</span>
+<span class="fc" id="L50">    public void setDirecao(String direcao) { this.direcao = direcao; }</span>
+
+<span class="fc" id="L52">    public Double getValorInicial() { return valorInicial; }</span>
+<span class="fc" id="L53">    public void setValorInicial(Double valorInicial) { this.valorInicial = valorInicial; }</span>
+
+<span class="fc" id="L55">    public Double getValorAtual() { return valorAtual; }</span>
+<span class="fc" id="L56">    public void setValorAtual(Double valorAtual) { this.valorAtual = valorAtual; }</span>
+
+<span class="fc" id="L58">    public String getUnidade() { return unidade; }</span>
+<span class="fc" id="L59">    public void setUnidade(String unidade) { this.unidade = unidade; }</span>
+
+<span class="fc" id="L61">    public Double getValorAlvo() { return valorAlvo; }</span>
+<span class="fc" id="L62">    public void setValorAlvo(Double valorAlvo) { this.valorAlvo = valorAlvo; }</span>
+
+<span class="fc" id="L64">    public LocalDate getDataLimite() { return dataLimite; }</span>
+<span class="fc" id="L65">    public void setDataLimite(LocalDate dataLimite) { this.dataLimite = dataLimite; }</span>
+    
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.15.202606040825</span></div></body></html>

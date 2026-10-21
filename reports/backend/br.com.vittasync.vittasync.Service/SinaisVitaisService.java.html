@@ -1,14 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="pt"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>SinaisVitaisService.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report"></a> &gt; <a href="index.source.html" class="el_package">br.com.vittasync.vittasync.Service</a> &gt; <span class="el_source">SinaisVitaisService.java</span></div><h1>SinaisVitaisService.java</h1><pre class="source lang-java linenums">package br.com.vittasync.vittasync.Service;
 
+
 import br.com.vittasync.vittasync.Exception.RecursoNaoEncontradoException;
 import br.com.vittasync.vittasync.Model.SinaisVitais;
 import br.com.vittasync.vittasync.Repository.SinaisVitaisRepository;
 import br.com.vittasync.vittasync.Util.EventoPrioridades;
 import br.com.vittasync.vittasync.Util.EventoTipos;
 import org.springframework.stereotype.Service;
-
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Set;
 
 
 @Service
@@ -17,92 +18,120 @@ public class SinaisVitaisService {
     private final SinaisVitaisRepository repository;
     private final EventoPacienteService eventoPacienteService;
     private final EventoClinicoService eventoClinicoService;
+    private final LinhaBaseService linhaBaseService;
+    private final LinhaBaseAlertaService linhaBaseAlertaService;
 
     public SinaisVitaisService(
             SinaisVitaisRepository repository,
             EventoPacienteService eventoPacienteService,
-            EventoClinicoService eventoClinicoService
-<span class="fc" id="L25">    ) {</span>
-<span class="fc" id="L26">        this.repository = repository;</span>
-<span class="fc" id="L27">        this.eventoPacienteService = eventoPacienteService;</span>
-<span class="fc" id="L28">        this.eventoClinicoService = eventoClinicoService;</span>
-<span class="fc" id="L29">    }</span>
+            EventoClinicoService eventoClinicoService,
+            LinhaBaseService linhaBaseService,
+            LinhaBaseAlertaService linhaBaseAlertaService
+<span class="fc" id="L30">    ) {</span>
+<span class="fc" id="L31">        this.repository = repository;</span>
+<span class="fc" id="L32">        this.eventoPacienteService = eventoPacienteService;</span>
+<span class="fc" id="L33">        this.eventoClinicoService = eventoClinicoService;</span>
+<span class="fc" id="L34">        this.linhaBaseService = linhaBaseService;</span>
+<span class="fc" id="L35">        this.linhaBaseAlertaService = linhaBaseAlertaService;</span>
+<span class="fc" id="L36">    }</span>
 
-    public SinaisVitais create(
-            SinaisVitais sinais,
-            Integer usuarioLogadoId
-    ) {
+    public SinaisVitais create(SinaisVitais sinais, Integer usuarioLogadoId) {
+<span class="fc" id="L39">        sinais.setRegistradoPorUsuarioId(usuarioLogadoId);</span>
+<span class="fc" id="L40">        sinais.setDataRegistro(LocalDateTime.now());</span>
+<span class="fc" id="L41">        sinais.setDataModificacao(null);</span>
 
-<span class="fc" id="L36">        sinais.setRegistradoPorUsuarioId(usuarioLogadoId);</span>
-<span class="fc" id="L37">        sinais.setDataRegistro(LocalDateTime.now());</span>
-<span class="fc" id="L38">        sinais.setDataModificacao(null);</span>
+<span class="fc" id="L43">        SinaisVitais salvo = repository.save(sinais);</span>
 
-<span class="fc" id="L40">        SinaisVitais salvo = repository.save(sinais);</span>
-
-<span class="fc" id="L42">        eventoPacienteService.criarEvento(</span>
-<span class="fc" id="L43">                sinais.getPaciente().getId(),</span>
+<span class="fc" id="L45">        eventoPacienteService.criarEvento(</span>
+<span class="fc" id="L46">                sinais.getPaciente().getId(),</span>
                 usuarioLogadoId,
                 EventoTipos.SINAIS_VITAIS_CRIADOS,
                 &quot;Sinais vitais registrados&quot;,
                 &quot;Novos sinais vitais foram registrados&quot;,
+<span class="fc" id="L51">                EventoPacienteService.metadata(</span>
+                        &quot;patientName&quot;,
+<span class="fc" id="L53">                        sinais.getPaciente().getNome()</span>
+                ),
                 EventoPrioridades.NORMAL
         );
 
-<span class="fc" id="L51">        eventoClinicoService.analisarSinaisVitais(</span>
-                salvo,
-                usuarioLogadoId
-        );
+<span class="fc" id="L58">        Set&lt;Integer&gt; contatosEmergenciaAcionados = eventoClinicoService.analisarSinaisVitais(salvo, usuarioLogadoId);</span>
+<span class="fc" id="L59">        linhaBaseService.atualizarLinhasBase(salvo.getPaciente().getId());</span>
+<span class="fc" id="L60">        linhaBaseAlertaService.notificarDesvios(salvo, usuarioLogadoId, contatosEmergenciaAcionados);</span>
 
-<span class="fc" id="L56">        return salvo;</span>
+<span class="fc" id="L62">        return salvo;</span>
     }
 
     public SinaisVitais update(Integer id, SinaisVitais novosDados, Integer usuarioLogadoId) {
-<span class="fc" id="L60">        SinaisVitais existente = repository.findById(id)</span>
-<span class="fc" id="L61">                .orElseThrow(() -&gt; new RecursoNaoEncontradoException(&quot;Sinais vitais não encontrados&quot;));</span>
-<span class="fc" id="L62">        existente.setPeso(novosDados.getPeso());</span>
-<span class="fc" id="L63">        existente.setFcBpm(novosDados.getFcBpm());</span>
-<span class="fc" id="L64">        existente.setFrRpm(novosDados.getFrRpm());</span>
-<span class="fc" id="L65">        existente.setPaSistolica(novosDados.getPaSistolica());</span>
-<span class="fc" id="L66">        existente.setPaDiastolica(novosDados.getPaDiastolica());</span>
-<span class="fc" id="L67">        existente.setTempCelcius(novosDados.getTempCelcius());</span>
-<span class="fc" id="L68">        existente.setSpo2Porcento(novosDados.getSpo2Porcento());</span>
-<span class="fc" id="L69">        existente.setDataModificacao(LocalDateTime.now());</span>
-<span class="fc" id="L70">        SinaisVitais atualizado = repository.save(existente);</span>
-<span class="fc" id="L71">        eventoPacienteService.criarEvento(</span>
-<span class="fc" id="L72">                existente.getPaciente().getId(),</span>
+<span class="fc" id="L66">        SinaisVitais existente = repository.findById(id)</span>
+<span class="fc" id="L67">                .orElseThrow(() -&gt; new RecursoNaoEncontradoException(&quot;Sinais vitais não encontrados&quot;));</span>
+
+<span class="fc" id="L69">        existente.setPeso(novosDados.getPeso());</span>
+<span class="fc" id="L70">        existente.setFcBpm(novosDados.getFcBpm());</span>
+<span class="fc" id="L71">        existente.setFrRpm(novosDados.getFrRpm());</span>
+<span class="fc" id="L72">        existente.setPaSistolica(novosDados.getPaSistolica());</span>
+<span class="fc" id="L73">        existente.setPaDiastolica(novosDados.getPaDiastolica());</span>
+<span class="fc" id="L74">        existente.setTempCelcius(novosDados.getTempCelcius());</span>
+<span class="fc" id="L75">        existente.setSpo2Porcento(novosDados.getSpo2Porcento());</span>
+<span class="fc" id="L76">        existente.setDataModificacao(LocalDateTime.now());</span>
+
+<span class="fc" id="L78">        SinaisVitais atualizado = repository.save(existente);</span>
+
+<span class="fc" id="L80">        eventoPacienteService.criarEvento(</span>
+<span class="fc" id="L81">                existente.getPaciente().getId(),</span>
                 usuarioLogadoId,
                 EventoTipos.SINAIS_VITAIS_EDITADOS,
                 &quot;Sinais vitais atualizados&quot;,
                 &quot;Sinais vitais foram atualizados&quot;,
+<span class="fc" id="L86">                EventoPacienteService.metadata(</span>
+                        &quot;patientName&quot;,
+<span class="fc" id="L88">                        existente.getPaciente().getNome()</span>
+                ),
                 EventoPrioridades.NORMAL
         );
-<span class="fc" id="L79">        return atualizado;</span>
+
+<span class="fc" id="L93">        eventoClinicoService.analisarSinaisVitais(atualizado, usuarioLogadoId);</span>
+<span class="fc" id="L94">        linhaBaseService.atualizarLinhasBase(atualizado.getPaciente().getId());</span>
+
+<span class="fc" id="L96">        return atualizado;</span>
     }
 
     public void delete(Integer id, Integer usuarioLogadoId) {
-<span class="fc bfc" id="L83" title="All 2 branches covered.">        if (!repository.existsById(id)) {</span>
-<span class="fc" id="L84">            throw new RecursoNaoEncontradoException(&quot;Sinais vitais não encontrados&quot;);</span>
+<span class="fc bfc" id="L100" title="All 2 branches covered.">        if (!repository.existsById(id)) {</span>
+<span class="fc" id="L101">            throw new RecursoNaoEncontradoException(&quot;Sinais vitais não encontrados&quot;);</span>
         }
-<span class="fc" id="L86">        SinaisVitais sinais =</span>
-<span class="fc" id="L87">                repository.findById(id)</span>
-<span class="fc" id="L88">                        .orElseThrow(() -&gt;</span>
-<span class="nc" id="L89">                                new RecursoNaoEncontradoException(</span>
-                                        &quot;Sinais vitais não encontrados&quot;
-                                )
-                        );
-<span class="fc" id="L93">        eventoPacienteService.criarEvento(</span>
-<span class="fc" id="L94">                sinais.getPaciente().getId(),</span>
+
+<span class="fc" id="L104">        SinaisVitais sinais = repository.findById(id)</span>
+<span class="pc" id="L105">                .orElseThrow(() -&gt; new RecursoNaoEncontradoException(&quot;Sinais vitais não encontrados&quot;));</span>
+
+<span class="fc" id="L107">        eventoPacienteService.criarEvento(</span>
+<span class="fc" id="L108">                sinais.getPaciente().getId(),</span>
                 usuarioLogadoId,
                 EventoTipos.SINAIS_VITAIS_REMOVIDOS,
                 &quot;Sinais vitais removidos&quot;,
                 &quot;Um registro de sinais vitais foi removido&quot;,
+<span class="fc" id="L113">                EventoPacienteService.metadata(</span>
+                        &quot;patientName&quot;,
+<span class="fc" id="L115">                        sinais.getPaciente().getNome()</span>
+                ),
                 EventoPrioridades.NORMAL
         );
-<span class="fc" id="L101">        repository.deleteById(id);</span>
-<span class="fc" id="L102">    }</span>
+
+<span class="fc" id="L120">        repository.deleteById(id);</span>
+<span class="fc" id="L121">        linhaBaseService.atualizarLinhasBase(sinais.getPaciente().getId());</span>
+<span class="fc" id="L122">    }</span>
 
     public List&lt;SinaisVitais&gt; findByPacienteCpf(String cpf) {
-<span class="fc" id="L105">        return repository.findByPacienteCpf(cpf);</span>
+<span class="fc" id="L125">        return repository.findByPacienteCpf(cpf);</span>
+    }
+
+
+    public List&lt;SinaisVitais&gt; findByPacienteId(Integer pacienteId) {
+<span class="nc" id="L130">        return repository.findByPacienteId(pacienteId);</span>
+    }
+
+    public List&lt;Integer&gt; findTodosPacientesIds() {
+<span class="fc" id="L134">        return repository.findTodosPacientesIds();</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.15.202606040825</span></div></body></html>

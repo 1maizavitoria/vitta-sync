@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="pt"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>MetaAcompanhamento.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report"></a> &gt; <a href="index.source.html" class="el_package">br.com.vittasync.vittasync.Model</a> &gt; <span class="el_source">MetaAcompanhamento.java</span></div><h1>MetaAcompanhamento.java</h1><pre class="source lang-java linenums">package br.com.vittasync.vittasync.Model;
+
+
+import jakarta.persistence.*;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+
+
+@Entity
+@Table(name = &quot;MetaAcompanhamento&quot;)
+<span class="fc" id="L11">public class MetaAcompanhamento {</span>
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @ManyToOne
+    @JoinColumn(name = &quot;paciente_id&quot;, nullable = false)
+    private Usuario paciente;
+
+    @Column(nullable = false, length = 150)
+    private String nome;
+
+    @Column(name = &quot;tipo_dado&quot;, nullable = false, length = 50)
+    private String tipoDado; // sinais_vitais, habitos, personalizado
+
+    @Column(name = &quot;indicador&quot;, length = 50)
+    private String indicador; // peso, horas_sono, minutos_exercicio, personalizado
+
+    @Column(name = &quot;direcao&quot;, length = 20)
+    private String direcao; // aumentar, reduzir
+
+    @Column(name = &quot;valor_inicial&quot;)
+    private Double valorInicial;
+
+    @Column(name = &quot;valor_atual&quot;)
+    private Double valorAtual;
+
+    @Column(name = &quot;unidade&quot;, length = 30)
+    private String unidade;
+
+    @Column(name = &quot;valor_alvo&quot;, nullable = false)
+    private Double valorAlvo;
+
+    @Column(name = &quot;data_limite&quot;, nullable = false)
+    private LocalDate dataLimite;
+
+    @Column(name = &quot;progresso&quot;)
+    private Double progresso; // porcentagem
+
+    @Column(name = &quot;data_criacao&quot;)
+    private LocalDateTime dataCriacao;
+
+    @Column(name = &quot;data_modificacao&quot;)
+    private LocalDateTime dataModificacao;
+
+    @Column(name = &quot;data_conclusao&quot;)
+    private LocalDateTime dataConclusao;
+
+    @Column(name = &quot;status&quot;, length = 30)
+    private String status; // em_andamento, concluido, concluido_atrasado, nao_atingida
+
+
+<span class="fc" id="L64">    public Long getId() { return id; }</span>
+<span class="fc" id="L65">    public void setId(Long id) { this.id = id; }</span>
+
+<span class="fc" id="L67">    public Usuario getPaciente() { return paciente; }</span>
+<span class="fc" id="L68">    public void setPaciente(Usuario paciente) { this.paciente = paciente; }</span>
+
+<span class="fc" id="L70">    public String getNome() { return nome; }</span>
+<span class="fc" id="L71">    public void setNome(String nome) { this.nome = nome; }</span>
+
+<span class="fc" id="L73">    public String getTipoDado() { return tipoDado; }</span>
+<span class="fc" id="L74">    public void setTipoDado(String tipoDado) { this.tipoDado = tipoDado; }</span>
+
+<span class="fc" id="L76">    public String getIndicador() { return indicador; }</span>
+<span class="fc" id="L77">    public void setIndicador(String indicador) { this.indicador = indicador; }</span>
+
+<span class="fc" id="L79">    public String getDirecao() { return direcao; }</span>
+<span class="fc" id="L80">    public void setDirecao(String direcao) { this.direcao = direcao; }</span>
+
+<span class="fc" id="L82">    public Double getValorInicial() { return valorInicial; }</span>
+<span class="fc" id="L83">    public void setValorInicial(Double valorInicial) { this.valorInicial = valorInicial; }</span>
+
+<span class="fc" id="L85">    public Double getValorAtual() { return valorAtual; }</span>
+<span class="fc" id="L86">    public void setValorAtual(Double valorAtual) { this.valorAtual = valorAtual; }</span>
+
+<span class="fc" id="L88">    public String getUnidade() { return unidade; }</span>
+<span class="fc" id="L89">    public void setUnidade(String unidade) { this.unidade = unidade; }</span>
+
+<span class="fc" id="L91">    public Double getValorAlvo() { return valorAlvo; }</span>
+<span class="fc" id="L92">    public void setValorAlvo(Double valorAlvo) { this.valorAlvo = valorAlvo; }</span>
+
+<span class="fc" id="L94">    public LocalDate getDataLimite() { return dataLimite; }</span>
+<span class="fc" id="L95">    public void setDataLimite(LocalDate dataLimite) { this.dataLimite = dataLimite; }</span>
+
+<span class="fc" id="L97">    public Double getProgresso() { return progresso; }</span>
+<span class="fc" id="L98">    public void setProgresso(Double progresso) { this.progresso = progresso; }</span>
+
+<span class="fc" id="L100">    public LocalDateTime getDataCriacao() { return dataCriacao; }</span>
+<span class="fc" id="L101">    public void setDataCriacao(LocalDateTime dataCriacao) { this.dataCriacao = dataCriacao; }</span>
+
+<span class="fc" id="L103">    public LocalDateTime getDataModificacao() { return dataModificacao; }</span>
+<span class="fc" id="L104">    public void setDataModificacao(LocalDateTime dataModificacao) { this.dataModificacao = dataModificacao; }</span>
+
+<span class="fc" id="L106">    public LocalDateTime getDataConclusao() { return dataConclusao; }</span>
+<span class="fc" id="L107">    public void setDataConclusao(LocalDateTime dataConclusao) { this.dataConclusao = dataConclusao; }</span>
+
+<span class="fc" id="L109">    public String getStatus() { return status; }</span>
+<span class="fc" id="L110">    public void setStatus(String status) { this.status = status; }</span>
+    
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.15.202606040825</span></div></body></html>

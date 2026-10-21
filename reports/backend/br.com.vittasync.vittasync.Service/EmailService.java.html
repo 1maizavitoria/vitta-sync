@@ -19,105 +19,62 @@ import org.springframework.stereotype.Service;
                 + &quot;Este código é válido por 10 minutos.\n\n&quot;
                 + &quot;Se você não solicitou este código, ignore este email.\n\n&quot;
                 + &quot;Atenciosamente,\n&quot;
-                + &quot;Equipe Vittasync&quot;;
-
-<span class="fc" id="L24">        SimpleMailMessage message = new SimpleMailMessage();</span>
-<span class="fc" id="L25">        message.setFrom(&quot;no.reply.vittasync@gmail.com&quot;);</span>
-<span class="fc" id="L26">        message.setTo(to);</span>
-<span class="fc" id="L27">        message.setSubject(&quot;Código de Verificação VittaSync&quot;);</span>
-<span class="fc" id="L28">        message.setText(mensagem);</span>
-
-<span class="fc" id="L30">        mailSender.send(message);</span>
-<span class="fc" id="L31">    }</span>
-
-    public void enviarLembrete(
-            String to,
-            String nomePaciente,
-            String mensagemLembrete
-    ) {
-
-<span class="fc" id="L39">        String mensagem =</span>
-                &quot;Olá, &quot;
-                        + nomePaciente
-                        + &quot;\n\n&quot;
-
-                        + mensagemLembrete
-                        + &quot;\n\n&quot;
-
-                        + &quot;Este lembrete foi enviado &quot;
-                        + &quot;pela plataforma VittaSync &quot;
-                        + &quot;para auxiliar no acompanhamento &quot;
-                        + &quot;contínuo da saúde.\n\n&quot;
-
-                        + &quot;Atenciosamente,\n&quot;
-                        + &quot;Equipe VittaSync&quot;;
-
-<span class="fc" id="L55">        SimpleMailMessage message =</span>
-                new SimpleMailMessage();
-
-<span class="fc" id="L58">        message.setFrom(</span>
-                &quot;no.reply.vittasync@gmail.com&quot;
-        );
-
-<span class="fc" id="L62">        message.setTo(to);</span>
-
-<span class="fc" id="L64">        message.setSubject(</span>
-                &quot;Lembrete de medição - VittaSync&quot;
-        );
-
-<span class="fc" id="L68">        message.setText(mensagem);</span>
-
-<span class="fc" id="L70">        mailSender.send(message);</span>
-<span class="fc" id="L71">    }</span>
-
-    public void enviarConviteVinculo(
-            String to,
-            String nomeConvidado,
-            String nomePaciente,
-            String codigo,
-            String link
-    ) {
-
-<span class="fc" id="L81">        String mensagem = &quot;Olá, &quot;</span>
-                + nomeConvidado + &quot;\n\n&quot;
-
-                + nomePaciente
-                + &quot; convidou você para participar &quot;
-                + &quot;do contexto compartilhado de saúde &quot;
-                + &quot;na plataforma VittaSync.\n\n&quot;
-
-                + &quot;Código de vínculo: &quot;
-                + codigo + &quot;\n\n&quot;
-
-                + &quot;Ou utilize o link abaixo:\n&quot;
-                + link + &quot;\n\n&quot;
-
-                + &quot;Este convite possui tempo limitado.\n\n&quot;
-
-                + &quot;Se você não reconhece este convite, &quot;
-                + &quot;ignore este email.\n\n&quot;
-
-                + &quot;Atenciosamente,\n&quot;
                 + &quot;Equipe VittaSync&quot;;
 
-<span class="fc" id="L103">        SimpleMailMessage message =</span>
-                new SimpleMailMessage();
+<span class="fc" id="L24">        enviarEmailPersonalizado(to, &quot;Código de Verificação VittaSync&quot;, mensagem);</span>
+<span class="fc" id="L25">    }</span>
 
-<span class="fc" id="L106">        message.setFrom(</span>
-                &quot;no.reply.vittasync@gmail.com&quot;
-        );
+    public void enviarLembrete(String to, String nomePaciente, String mensagemLembrete) {
+<span class="fc" id="L28">        String mensagem = &quot;Olá, &quot; + nomePaciente + &quot;\n\n&quot;</span>
+                + mensagemLembrete + &quot;\n\n&quot;
+                + &quot;Este lembrete foi enviado pela plataforma VittaSync &quot;
+                + &quot;para auxiliar no acompanhamento contínuo da saúde.\n\n&quot;
+                + &quot;Atenciosamente,\nEquipe VittaSync&quot;;
 
-<span class="fc" id="L110">        message.setTo(to);</span>
+<span class="fc" id="L34">        enviarEmailPersonalizado(to, &quot;Lembrete de medição - VittaSync&quot;, mensagem);</span>
+<span class="fc" id="L35">    }</span>
 
-<span class="fc" id="L112">        message.setSubject(</span>
-                &quot;Convite de vínculo com &quot;
-                        + nomePaciente
-                        + &quot; - VittaSync&quot;
-        );
+    public void enviarConviteVinculo(String to, String nomeConvidado, String nomePaciente, String codigo, String link) {
+<span class="fc" id="L38">        String mensagem = &quot;Olá, &quot; + nomeConvidado + &quot;\n\n&quot;</span>
+                + nomePaciente + &quot; convidou você para participar do contexto compartilhado de saúde &quot;
+                + &quot;na plataforma VittaSync.\n\n&quot;
+                + &quot;Código de vínculo: &quot; + codigo + &quot;\n\n&quot;
+                + &quot;Ou utilize o link abaixo:\n&quot; + link + &quot;\n\n&quot;
+                + &quot;Este convite possui tempo limitado.\n\n&quot;
+                + &quot;Se você não reconhece este convite, ignore este email.\n\n&quot;
+                + &quot;Atenciosamente,\nEquipe VittaSync&quot;;
 
-<span class="fc" id="L118">        message.setText(mensagem);</span>
+<span class="fc" id="L47">        enviarEmailPersonalizado(to, &quot;Convite de vínculo com &quot; + nomePaciente + &quot; - VittaSync&quot;, mensagem);</span>
+<span class="fc" id="L48">    }</span>
 
-<span class="fc" id="L120">        mailSender.send(message);</span>
-<span class="fc" id="L121">    }</span>
+    public void enviarAlertaClinico(String to, String nomeContato, String nomePaciente, String titulo, String detalhes) {
+<span class="fc" id="L51">        String mensagem = &quot;Olá, &quot; + nomeContato + &quot;\n\n&quot;</span>
+                + &quot;Foram detectadas alterações na estabilidade clínica do paciente &quot;
+                + nomePaciente + &quot;:\n\n&quot;
+                + detalhes + &quot;\n\n&quot;
+                + &quot;Atenciosamente,\nEquipe VittaSync&quot;;
+
+<span class="fc" id="L57">        enviarEmailPersonalizado(to, titulo, mensagem);</span>
+<span class="fc" id="L58">    }</span>
+
+    public void enviarAlertaRepouso(String to, String nomePaciente) {
+<span class="fc" id="L61">        String assunto = &quot;🔵 VittaSync - Repouso recomendado para paciente &quot; + nomePaciente;</span>
+<span class="fc" id="L62">        String corpo = &quot;Olá,\n\n&quot;</span>
+                + &quot;🔵 VittaSync - Paciente &quot; + nomePaciente + &quot;\n\n&quot;
+                + &quot;O paciente &quot; + nomePaciente + &quot; precisa de repouso devido ao desequilíbrio entre sono e exercício.\n\n&quot;
+                + &quot;Este alerta foi enviado pela plataforma VittaSync para auxiliar no acompanhamento contínuo da saúde.\n\n&quot;
+                + &quot;Atenciosamente,\nEquipe VittaSync&quot;;
+
+<span class="fc" id="L68">        enviarEmailPersonalizado(to, assunto, corpo);</span>
+<span class="fc" id="L69">    }</span>
+
+    public void enviarEmailPersonalizado(String to, String subject, String corpo) {
+<span class="fc" id="L72">        SimpleMailMessage message = new SimpleMailMessage();</span>
+<span class="fc" id="L73">        message.setFrom(&quot;no.reply.vittasync@gmail.com&quot;);</span>
+<span class="fc" id="L74">        message.setTo(to);</span>
+<span class="fc" id="L75">        message.setSubject(subject);</span>
+<span class="fc" id="L76">        message.setText(corpo);</span>
+<span class="fc" id="L77">        mailSender.send(message);</span>
+<span class="fc" id="L78">    }</span>
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.15.202606040825</span></div></body></html>

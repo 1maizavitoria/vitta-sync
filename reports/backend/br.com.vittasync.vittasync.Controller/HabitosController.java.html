@@ -3,163 +3,196 @@
 
 import br.com.vittasync.vittasync.DTO.HabitosInputDTO;
 import br.com.vittasync.vittasync.DTO.HabitosOutputDTO;
+import br.com.vittasync.vittasync.Exception.AcessoNegadoException;
 import br.com.vittasync.vittasync.Model.Habitos;
 import br.com.vittasync.vittasync.Model.Usuario;
+import br.com.vittasync.vittasync.Model.SinaisVitais;
 import br.com.vittasync.vittasync.Service.*;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
 import java.util.List;
 import java.util.stream.Collectors;
 
 
 @RestController
 @RequestMapping(&quot;/habitos&quot;)
+@Tag(name = &quot;Hábitos&quot;, description = &quot;Cadastro, edição, exclusão e consulta dos hábitos diários do paciente: horas de sono e minutos de exercício&quot;)
 public class HabitosController {
 
     private final HabitosService service;
-    private final JwtService jwtService;
     private final UsuarioService usuarioService;
     private final PermissaoService permissaoService;
     private final EventoPacienteService eventoPacienteService;
+    private final SinaisVitaisService sinaisVitaisService;
+    private final EstabilidadeClinicaService estabilidadeClinicaService;
 
     public HabitosController(
             HabitosService service,
-            JwtService jwtService,
             UsuarioService usuarioService,
             PermissaoService permissaoService,
-            EventoPacienteService eventoPacienteService
-<span class="fc" id="L32">    ) {</span>
-<span class="fc" id="L33">        this.service = service;</span>
-<span class="fc" id="L34">        this.jwtService = jwtService;</span>
-<span class="fc" id="L35">        this.usuarioService = usuarioService;</span>
-<span class="fc" id="L36">        this.permissaoService = permissaoService;</span>
-<span class="fc" id="L37">        this.eventoPacienteService = eventoPacienteService;</span>
-<span class="fc" id="L38">    }</span>
+            EventoPacienteService eventoPacienteService,
+            SinaisVitaisService sinaisVitaisService,
+            EstabilidadeClinicaService estabilidadeClinicaService
+<span class="fc" id="L41">    ) {</span>
+<span class="fc" id="L42">        this.service = service;</span>
+<span class="fc" id="L43">        this.usuarioService = usuarioService;</span>
+<span class="fc" id="L44">        this.permissaoService = permissaoService;</span>
+<span class="fc" id="L45">        this.eventoPacienteService = eventoPacienteService;</span>
+<span class="fc" id="L46">        this.sinaisVitaisService = sinaisVitaisService;</span>
+<span class="fc" id="L47">        this.estabilidadeClinicaService = estabilidadeClinicaService;</span>
+<span class="fc" id="L48">    }</span>
 
+
+    @Operation(
+            summary = &quot;Cadastrar hábitos&quot;,
+            description = &quot;Cadastra as horas de sono e os minutos de exercício do paciente em um dia, a data do registro e o índice de repouso &quot;
+                    + &quot;são calculados automaticamente pelo servidor. Quando o índice indica necessidade de repouso, os contatos de emergência são avisados pelo canal escolhido, &quot;
+                    + &quot;também gera alertas de sono crítico (menos de 4 horas) e sedentarismo (menos de 10 minutos) e recalcula a estabilidade clínica. &quot;
+                    + &quot;Permitido ao próprio paciente e aos responsáveis vinculados.&quot;
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = &quot;200&quot;, description = &quot;Hábitos cadastrados com sucesso&quot;),
+            @ApiResponse(responseCode = &quot;403&quot;, description = &quot;Usuário sem permissão para alterar os dados do paciente&quot;),
+            @ApiResponse(responseCode = &quot;404&quot;, description = &quot;Paciente não encontrado&quot;)
+    })
     @PostMapping(&quot;/cadastrar/{cpf}&quot;)
-    public ResponseEntity&lt;HabitosOutputDTO&gt; create(@PathVariable String cpf,
-                                                   @RequestHeader(&quot;Authorization&quot;) String authHeader,
-                                                   @RequestBody HabitosInputDTO dto) {
-
-<span class="fc" id="L45">        String token = authHeader.replace(&quot;Bearer &quot;, &quot;&quot;);</span>
-<span class="fc" id="L46">        String cpfDoToken = jwtService.extrairCpf(token);</span>
-<span class="fc" id="L47">        Usuario paciente = usuarioService.searchByCpf(cpf);</span>
-
-<span class="fc" id="L49">        Usuario usuarioLogado = usuarioService.searchByCpf(cpfDoToken);</span>
-
-<span class="fc" id="L51">        if (</span>
-<span class="pc bpc" id="L52" title="1 of 2 branches missed.">                !permissaoService.podeEditarPaciente(</span>
-<span class="fc" id="L53">                        usuarioLogado.getId(),</span>
-<span class="fc" id="L54">                        paciente.getId()</span>
-                )
-        ) {
-<span class="nc" id="L57">            return ResponseEntity.status(403).build();</span>
-        }
-
-
-<span class="fc" id="L61">        Habitos entity = new Habitos();</span>
-<span class="fc" id="L62">        entity.setPaciente(paciente);</span>
-<span class="fc" id="L63">        entity.setHorasSono(dto.getHorasSono());</span>
-<span class="fc" id="L64">        entity.setMinutosExercicio(dto.getMinutosExercicio());</span>
-<span class="fc" id="L65">        entity.setDataReferencia(dto.getDataReferencia());</span>
-
-<span class="fc" id="L67">        Habitos salvo = service.create(entity, usuarioLogado.getId());</span>
-<span class="fc" id="L68">        return ResponseEntity.ok(toOutputDTO(salvo));</span>
-    }
-
-    @PutMapping(&quot;/editar/{id}/{cpf}&quot;)
-    public ResponseEntity&lt;HabitosOutputDTO&gt; update(@PathVariable Integer id,
+    public ResponseEntity&lt;HabitosOutputDTO&gt; create(@Parameter(description = &quot;CPF do paciente (apenas números)&quot;)
                                                    @PathVariable String cpf,
-                                                   @RequestHeader(&quot;Authorization&quot;) String authHeader,
                                                    @RequestBody HabitosInputDTO dto) {
 
-<span class="fc" id="L77">        String token = authHeader.replace(&quot;Bearer &quot;, &quot;&quot;);</span>
-<span class="fc" id="L78">        String cpfDoToken = jwtService.extrairCpf(token);</span>
-<span class="fc" id="L79">        Usuario paciente = usuarioService.searchByCpf(cpf);</span>
+<span class="fc" id="L68">        Usuario paciente = usuarioService.searchByCpf(cpf);</span>
+<span class="fc" id="L69">        Usuario usuarioLogado = usuarioService.getUsuarioLogado();</span>
 
-<span class="fc" id="L81">        Usuario usuarioLogado =</span>
-<span class="fc" id="L82">                usuarioService.searchByCpf(cpfDoToken);</span>
-
-<span class="fc" id="L84">        if (</span>
-<span class="pc bpc" id="L85" title="1 of 2 branches missed.">                !permissaoService.podeEditarPaciente(</span>
-<span class="fc" id="L86">                        usuarioLogado.getId(),</span>
-<span class="fc" id="L87">                        paciente.getId()</span>
-                )
-        ) {
-<span class="nc" id="L90">            return ResponseEntity.status(403).build();</span>
+<span class="pc bpc" id="L71" title="1 of 2 branches missed.">        if (!permissaoService.podeEditarPaciente(usuarioLogado.getId(), paciente.getId())) {</span>
+<span class="nc" id="L72">            throw new AcessoNegadoException(&quot;Usuário sem permissão para editar o paciente&quot;);</span>
         }
 
-<span class="fc" id="L93">        Habitos entity = new Habitos();</span>
+<span class="fc" id="L75">        Habitos entity = new Habitos();</span>
+<span class="fc" id="L76">        entity.setPaciente(paciente);</span>
+<span class="fc" id="L77">        entity.setHorasSono(dto.getHorasSono());</span>
+<span class="fc" id="L78">        entity.setMinutosExercicio(dto.getMinutosExercicio());</span>
+<span class="fc" id="L79">        entity.setDataReferencia(dto.getDataReferencia());</span>
+<span class="fc" id="L80">        entity.setCanal(dto.getCanal());</span>
 
-<span class="fc" id="L95">        entity.setHorasSono(dto.getHorasSono());</span>
-<span class="fc" id="L96">        entity.setMinutosExercicio(dto.getMinutosExercicio());</span>
-<span class="fc" id="L97">        entity.setDataReferencia(dto.getDataReferencia());</span>
+<span class="fc" id="L82">        Habitos salvo = service.create(entity, usuarioLogado.getId());</span>
 
-<span class="fc" id="L99">        Habitos atualizado = service.update(id, entity, usuarioLogado.getId());</span>
-<span class="fc" id="L100">        return ResponseEntity.ok(toOutputDTO(atualizado));</span>
+<span class="fc" id="L84">        List&lt;SinaisVitais&gt; sinaisPaciente = sinaisVitaisService.findByPacienteCpf(cpf);</span>
+<span class="fc" id="L85">        List&lt;Habitos&gt; habitosPaciente = service.findByPacienteCpf(cpf);</span>
+<span class="fc" id="L86">        estabilidadeClinicaService.verificarMudancaEstabilidade(paciente.getId(), sinaisPaciente, habitosPaciente);</span>
+
+<span class="fc" id="L88">        return ResponseEntity.ok(toOutputDTO(salvo));</span>
     }
 
+
+    @Operation(
+            summary = &quot;Editar hábitos&quot;,
+            description = &quot;Substitui os dados de um registro de hábitos, a estabilidade clínica é recalculada junto do índice de repouso, a data de modificação &quot;
+                    + &quot;é preenchida automaticamente pelo servidor. &quot;
+                    + &quot;Permitido ao próprio paciente e aos responsáveis vinculados.&quot;
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = &quot;200&quot;, description = &quot;Hábitos atualizados com sucesso&quot;),
+            @ApiResponse(responseCode = &quot;403&quot;, description = &quot;Usuário sem permissão para alterar os dados do paciente&quot;),
+            @ApiResponse(responseCode = &quot;404&quot;, description = &quot;Paciente ou hábitos não encontrados&quot;)
+    })
+    @PutMapping(&quot;/editar/{id}/{cpf}&quot;)
+    public ResponseEntity&lt;HabitosOutputDTO&gt; update(@Parameter(description = &quot;ID do registro de hábitos&quot;)
+                                                   @PathVariable Integer id,
+                                                   @Parameter(description = &quot;CPF do paciente (apenas números)&quot;)
+                                                   @PathVariable String cpf,
+                                                   @RequestBody HabitosInputDTO dto) {
+
+<span class="fc" id="L110">        Usuario paciente = usuarioService.searchByCpf(cpf);</span>
+<span class="fc" id="L111">        Usuario usuarioLogado = usuarioService.getUsuarioLogado();</span>
+
+<span class="pc bpc" id="L113" title="1 of 2 branches missed.">        if (!permissaoService.podeEditarPaciente(usuarioLogado.getId(), paciente.getId())) {</span>
+<span class="nc" id="L114">            throw new AcessoNegadoException(&quot;Usuário sem permissão para editar o paciente&quot;);</span>
+        }
+
+<span class="fc" id="L117">        Habitos entity = new Habitos();</span>
+<span class="fc" id="L118">        entity.setHorasSono(dto.getHorasSono());</span>
+<span class="fc" id="L119">        entity.setMinutosExercicio(dto.getMinutosExercicio());</span>
+<span class="fc" id="L120">        entity.setDataReferencia(dto.getDataReferencia());</span>
+<span class="fc" id="L121">        entity.setCanal(dto.getCanal());</span>
+
+<span class="fc" id="L123">        Habitos atualizado = service.update(id, entity, usuarioLogado.getId());</span>
+
+<span class="fc" id="L125">        List&lt;SinaisVitais&gt; sinaisPaciente = sinaisVitaisService.findByPacienteCpf(cpf);</span>
+<span class="fc" id="L126">        List&lt;Habitos&gt; habitosPaciente = service.findByPacienteCpf(cpf);</span>
+<span class="fc" id="L127">        estabilidadeClinicaService.verificarMudancaEstabilidade(paciente.getId(), sinaisPaciente, habitosPaciente);</span>
+
+<span class="fc" id="L129">        return ResponseEntity.ok(toOutputDTO(atualizado));</span>
+    }
+
+
+    @Operation(
+            summary = &quot;Excluir hábitos&quot;,
+            description = &quot;Exclui um registro de hábitos do paciente e registra o evento na linha do tempo do paciente. &quot;
+                    + &quot;Permitido ao próprio paciente e aos responsáveis vinculados.&quot;
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = &quot;204&quot;, description = &quot;Hábitos excluídos com sucesso&quot;),
+            @ApiResponse(responseCode = &quot;403&quot;, description = &quot;Usuário sem permissão para alterar os dados do paciente&quot;),
+            @ApiResponse(responseCode = &quot;404&quot;, description = &quot;Paciente ou hábitos não encontrados&quot;)
+    })
     @DeleteMapping(&quot;/deletar/{id}/{cpf}&quot;)
-    public ResponseEntity&lt;Void&gt; delete(@PathVariable Integer id,
-                                       @PathVariable String cpf,
-                                       @RequestHeader(&quot;Authorization&quot;) String authHeader) {
-<span class="fc" id="L107">        String token = authHeader.replace(&quot;Bearer &quot;, &quot;&quot;);</span>
-<span class="fc" id="L108">        String cpfDoToken = jwtService.extrairCpf(token);</span>
+    public ResponseEntity&lt;Void&gt; delete(@Parameter(description = &quot;ID do registro de hábitos&quot;)
+                                       @PathVariable Integer id,
+                                       @Parameter(description = &quot;CPF do paciente (apenas números)&quot;)
+                                       @PathVariable String cpf) {
+<span class="fc" id="L148">        Usuario usuarioLogado = usuarioService.getUsuarioLogado();</span>
+<span class="fc" id="L149">        Usuario paciente = usuarioService.searchByCpf(cpf);</span>
 
-<span class="fc" id="L110">        Usuario usuarioLogado =</span>
-<span class="fc" id="L111">                usuarioService.searchByCpf(cpfDoToken);</span>
-
-<span class="fc" id="L113">        Usuario paciente =</span>
-<span class="fc" id="L114">                usuarioService.searchByCpf(cpf);</span>
-
-<span class="fc" id="L116">        if (</span>
-<span class="pc bpc" id="L117" title="1 of 2 branches missed.">                !permissaoService.podeEditarPaciente(</span>
-<span class="fc" id="L118">                        usuarioLogado.getId(),</span>
-<span class="fc" id="L119">                        paciente.getId()</span>
-                )
-        ) {
-<span class="nc" id="L122">            return ResponseEntity.status(403).build();</span>
+<span class="pc bpc" id="L151" title="1 of 2 branches missed.">        if (!permissaoService.podeEditarPaciente(usuarioLogado.getId(), paciente.getId())) {</span>
+<span class="nc" id="L152">            throw new AcessoNegadoException(&quot;Usuário sem permissão para editar o paciente&quot;);</span>
         }
 
-<span class="fc" id="L125">        service.delete(id, usuarioLogado.getId());</span>
-<span class="fc" id="L126">        return ResponseEntity.noContent().build();</span>
+<span class="fc" id="L155">        service.delete(id, usuarioLogado.getId());</span>
+<span class="fc" id="L156">        return ResponseEntity.noContent().build();</span>
     }
 
+
+    @Operation(
+            summary = &quot;Listar hábitos do paciente&quot;,
+            description = &quot;Retorna todos os registros de hábitos do paciente. &quot;
+                    + &quot;Permitido ao próprio paciente e a todos os usuários vinculados a ele (responsáveis e profissionais de saúde).&quot;
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = &quot;200&quot;, description = &quot;Lista de hábitos do paciente&quot;),
+            @ApiResponse(responseCode = &quot;403&quot;, description = &quot;Usuário sem permissão para visualizar o paciente&quot;),
+            @ApiResponse(responseCode = &quot;404&quot;, description = &quot;Paciente não encontrado&quot;)
+    })
     @GetMapping(&quot;/getHabitos/{cpf}&quot;)
-    public ResponseEntity&lt;List&lt;HabitosOutputDTO&gt;&gt; list(@PathVariable String cpf,
-                                                       @RequestHeader(&quot;Authorization&quot;) String authHeader) {
-<span class="fc" id="L132">        String token = authHeader.replace(&quot;Bearer &quot;, &quot;&quot;);</span>
-<span class="fc" id="L133">        String cpfDoToken = jwtService.extrairCpf(token);</span>
+    public ResponseEntity&lt;List&lt;HabitosOutputDTO&gt;&gt; list(@Parameter(description = &quot;CPF do paciente (apenas números)&quot;)
+                                                       @PathVariable String cpf) {
+<span class="fc" id="L173">        Usuario usuarioLogado = usuarioService.getUsuarioLogado();</span>
+<span class="fc" id="L174">        Usuario paciente = usuarioService.searchByCpf(cpf);</span>
 
-<span class="fc" id="L135">        Usuario usuarioLogado =</span>
-<span class="fc" id="L136">                usuarioService.searchByCpf(cpfDoToken);</span>
-
-<span class="fc" id="L138">        Usuario paciente =</span>
-<span class="fc" id="L139">                usuarioService.searchByCpf(cpf);</span>
-
-<span class="fc" id="L141">        if (</span>
-<span class="fc bfc" id="L142" title="All 2 branches covered.">                !permissaoService.podeVisualizarPaciente(</span>
-<span class="fc" id="L143">                        usuarioLogado.getId(),</span>
-<span class="fc" id="L144">                        paciente.getId()</span>
-                )
-        ) {
-<span class="fc" id="L147">            return ResponseEntity.status(403).build();</span>
+<span class="fc bfc" id="L176" title="All 2 branches covered.">        if (!permissaoService.podeVisualizarPaciente(usuarioLogado.getId(), paciente.getId())) {</span>
+<span class="fc" id="L177">            throw new AcessoNegadoException(&quot;Usuário sem permissão para visualizar o paciente&quot;);</span>
         }
 
-<span class="fc" id="L150">        List&lt;Habitos&gt; lista = service.findByPacienteCpf(cpf);</span>
-<span class="fc" id="L151">        return ResponseEntity.ok(lista.stream().map(this::toOutputDTO).collect(Collectors.toList()));</span>
+<span class="fc" id="L180">        List&lt;Habitos&gt; lista = service.findByPacienteCpf(cpf);</span>
+<span class="fc" id="L181">        return ResponseEntity.ok(lista.stream().map(this::toOutputDTO).collect(Collectors.toList()));</span>
     }
 
     private HabitosOutputDTO toOutputDTO(Habitos entity) {
-<span class="fc" id="L155">        HabitosOutputDTO dto = new HabitosOutputDTO();</span>
-<span class="fc" id="L156">        dto.setId(entity.getId());</span>
-<span class="fc" id="L157">        dto.setHorasSono(entity.getHorasSono());</span>
-<span class="fc" id="L158">        dto.setMinutosExercicio(entity.getMinutosExercicio());</span>
-<span class="fc" id="L159">        dto.setDataReferencia(entity.getDataReferencia());</span>
-<span class="fc" id="L160">        dto.setDataRegistro(entity.getDataRegistro());</span>
-<span class="fc" id="L161">        dto.setDataModificacao(entity.getDataModificacao());</span>
-<span class="fc" id="L162">        return dto;</span>
+<span class="fc" id="L185">        HabitosOutputDTO dto = new HabitosOutputDTO();</span>
+<span class="fc" id="L186">        dto.setId(entity.getId());</span>
+<span class="fc" id="L187">        dto.setHorasSono(entity.getHorasSono());</span>
+<span class="fc" id="L188">        dto.setMinutosExercicio(entity.getMinutosExercicio());</span>
+<span class="fc" id="L189">        dto.setIndiceRepouso(entity.getIndiceRepouso());</span>
+<span class="fc" id="L190">        dto.setRepouso(entity.getRepouso());</span>
+<span class="fc" id="L191">        dto.setCanal(entity.getCanal());</span>
+<span class="fc" id="L192">        dto.setDataReferencia(entity.getDataReferencia());</span>
+<span class="fc" id="L193">        dto.setDataRegistro(entity.getDataRegistro());</span>
+<span class="fc" id="L194">        dto.setDataModificacao(entity.getDataModificacao());</span>
+<span class="fc" id="L195">        return dto;</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.15.202606040825</span></div></body></html>

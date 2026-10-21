@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="pt"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>LinhaTempoItemDTO.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report"></a> &gt; <a href="index.source.html" class="el_package">br.com.vittasync.vittasync.DTO</a> &gt; <span class="el_source">LinhaTempoItemDTO.java</span></div><h1>LinhaTempoItemDTO.java</h1><pre class="source lang-java linenums">package br.com.vittasync.vittasync.DTO;
+
+
+import io.swagger.v3.oas.annotations.media.Schema;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+
+
+@Schema(description = &quot;Registro da linha do tempo&quot;)
+public class LinhaTempoItemDTO {
+
+    @Schema(description = &quot;ID do registro original&quot;, example = &quot;41&quot;)
+    private Integer id;
+
+    @Schema(description = &quot;Tipo do registro&quot;, example = &quot;SINAL_VITAL&quot;, allowableValues = {&quot;SINAL_VITAL&quot;, &quot;HABITO&quot;, &quot;SINTOMA&quot;})
+    private String tipo;
+
+    @Schema(description = &quot;Dia a que o registro se refere&quot;, example = &quot;2026-10-13&quot;)
+    private LocalDate dataReferencia;
+
+    @Schema(description = &quot;Data e hora em que o registro foi cadastrado&quot;, example = &quot;2026-10-13T20:15:42&quot;)
+    private LocalDateTime dataRegistro;
+
+    @Schema(description = &quot;Dados completos do registro, no mesmo formato da lista da categoria correspondente&quot;)
+    private Object dados;
+
+
+    public LinhaTempoItemDTO(
+            Integer id,
+            String tipo,
+            LocalDate dataReferencia,
+            LocalDateTime dataRegistro,
+            Object dados
+<span class="fc" id="L34">    ) {</span>
+<span class="fc" id="L35">        this.id = id;</span>
+<span class="fc" id="L36">        this.tipo = tipo;</span>
+<span class="fc" id="L37">        this.dataReferencia = dataReferencia;</span>
+<span class="fc" id="L38">        this.dataRegistro = dataRegistro;</span>
+<span class="fc" id="L39">        this.dados = dados;</span>
+<span class="fc" id="L40">    }</span>
+
+    
+<span class="fc" id="L43">    public Integer getId() { return id; }</span>
+    
+<span class="fc" id="L45">    public String getTipo() { return tipo; }</span>
+    
+<span class="fc" id="L47">    public LocalDate getDataReferencia() { return dataReferencia; }</span>
+    
+<span class="fc" id="L49">    public LocalDateTime getDataRegistro() { return dataRegistro; }</span>
+    
+<span class="fc" id="L51">    public Object getDados() { return dados; }</span>
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.15.202606040825</span></div></body></html>

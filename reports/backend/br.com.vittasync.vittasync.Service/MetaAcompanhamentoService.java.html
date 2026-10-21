@@ -1,0 +1,263 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="pt"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>MetaAcompanhamentoService.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report"></a> &gt; <a href="index.source.html" class="el_package">br.com.vittasync.vittasync.Service</a> &gt; <span class="el_source">MetaAcompanhamentoService.java</span></div><h1>MetaAcompanhamentoService.java</h1><pre class="source lang-java linenums">package br.com.vittasync.vittasync.Service;
+
+
+import br.com.vittasync.vittasync.DTO.MetaAcompanhamentoInputDTO;
+import br.com.vittasync.vittasync.Exception.DadosInvalidosException;
+import br.com.vittasync.vittasync.Exception.RecursoNaoEncontradoException;
+import br.com.vittasync.vittasync.Model.MetaAcompanhamento;
+import br.com.vittasync.vittasync.Model.Usuario;
+import br.com.vittasync.vittasync.Repository.HabitosRepository;
+import br.com.vittasync.vittasync.Repository.MetaAcompanhamentoRepository;
+import br.com.vittasync.vittasync.Repository.SinaisVitaisRepository;
+import org.springframework.stereotype.Service;
+import java.time.LocalDateTime;
+import java.util.List;
+
+
+@Service
+public class MetaAcompanhamentoService {
+    private final MetaAcompanhamentoRepository repository;
+    private final EventoPacienteService eventoPacienteService;
+    private final SinaisVitaisRepository sinaisVitaisRepository;
+    private final HabitosRepository habitosRepository;
+
+    public MetaAcompanhamentoService(
+            MetaAcompanhamentoRepository repository,
+            EventoPacienteService eventoPacienteService,
+            SinaisVitaisRepository sinaisVitaisRepository,
+            HabitosRepository habitosRepository
+<span class="fc" id="L29">    ) {</span>
+<span class="fc" id="L30">        this.repository = repository;</span>
+<span class="fc" id="L31">        this.eventoPacienteService = eventoPacienteService;</span>
+<span class="fc" id="L32">        this.sinaisVitaisRepository = sinaisVitaisRepository;</span>
+<span class="fc" id="L33">        this.habitosRepository = habitosRepository;</span>
+<span class="fc" id="L34">    }</span>
+
+    public MetaAcompanhamento create(MetaAcompanhamentoInputDTO dto, Usuario paciente, Integer usuarioLogadoId) {
+<span class="fc" id="L37">        MetaAcompanhamento meta = new MetaAcompanhamento();</span>
+<span class="fc" id="L38">        meta.setPaciente(paciente);</span>
+<span class="fc" id="L39">        meta.setNome(dto.getNome());</span>
+<span class="fc" id="L40">        meta.setTipoDado(dto.getTipoDado());</span>
+<span class="fc" id="L41">        aplicarConfiguracao(meta, dto);</span>
+<span class="fc" id="L42">        meta.setValorAlvo(dto.getValorAlvo());</span>
+<span class="fc" id="L43">        meta.setDataLimite(dto.getDataLimite());</span>
+<span class="fc" id="L44">        meta.setDataCriacao(LocalDateTime.now());</span>
+<span class="fc" id="L45">        meta.setStatus(&quot;em_andamento&quot;);</span>
+<span class="fc" id="L46">        atualizarValoresEProgresso(meta, usuarioLogadoId);</span>
+
+<span class="fc" id="L48">        MetaAcompanhamento salvo = repository.save(meta);</span>
+<span class="fc" id="L49">        eventoPacienteService.criarEvento(</span>
+<span class="fc" id="L50">                paciente.getId(), usuarioLogadoId, &quot;META_CRIADA&quot;, &quot;Meta criada&quot;,</span>
+                &quot;Nova meta de acompanhamento registrada&quot;,
+<span class="fc" id="L52">                EventoPacienteService.metadata(&quot;patientName&quot;, paciente.getNome(), &quot;goalName&quot;, meta.getNome()),</span>
+                &quot;normal&quot;
+        );
+<span class="fc" id="L55">        return salvo;</span>
+    }
+
+    public MetaAcompanhamento update(Long id, MetaAcompanhamentoInputDTO dto, Usuario paciente, Integer usuarioLogadoId) {
+<span class="fc" id="L59">        MetaAcompanhamento meta = buscarMetaDoPaciente(id, paciente.getId());</span>
+<span class="fc" id="L60">        meta.setNome(dto.getNome());</span>
+<span class="fc" id="L61">        meta.setTipoDado(dto.getTipoDado());</span>
+<span class="fc" id="L62">        aplicarConfiguracao(meta, dto);</span>
+<span class="fc" id="L63">        meta.setValorAlvo(dto.getValorAlvo());</span>
+<span class="fc" id="L64">        meta.setDataLimite(dto.getDataLimite());</span>
+<span class="fc" id="L65">        meta.setDataModificacao(LocalDateTime.now());</span>
+<span class="fc" id="L66">        atualizarValoresEProgresso(meta, usuarioLogadoId);</span>
+
+<span class="fc" id="L68">        MetaAcompanhamento atualizada = repository.save(meta);</span>
+<span class="fc" id="L69">        eventoPacienteService.criarEvento(</span>
+<span class="fc" id="L70">                paciente.getId(), usuarioLogadoId, &quot;META_ATUALIZADA&quot;, &quot;Meta atualizada&quot;,</span>
+                &quot;Meta de acompanhamento foi modificada&quot;,
+<span class="fc" id="L72">                EventoPacienteService.metadata(&quot;patientName&quot;, paciente.getNome(), &quot;goalName&quot;, meta.getNome()),</span>
+                &quot;normal&quot;
+        );
+<span class="fc" id="L75">        return atualizada;</span>
+    }
+
+    public void delete(Long id, Integer pacienteId, Integer usuarioLogadoId) {
+<span class="fc" id="L79">        MetaAcompanhamento meta = buscarMetaDoPaciente(id, pacienteId);</span>
+<span class="fc" id="L80">        eventoPacienteService.criarEvento(</span>
+                pacienteId, usuarioLogadoId, &quot;META_REMOVIDA&quot;, &quot;Meta removida&quot;,
+                &quot;Meta de acompanhamento foi excluída&quot;,
+<span class="fc" id="L83">                EventoPacienteService.metadata(&quot;patientName&quot;, meta.getPaciente().getNome(), &quot;goalName&quot;, meta.getNome()),</span>
+                &quot;normal&quot;
+        );
+<span class="fc" id="L86">        repository.delete(meta);</span>
+<span class="fc" id="L87">    }</span>
+
+    public MetaAcompanhamento concluirMeta(Long id, Integer pacienteId, Integer usuarioLogadoId) {
+<span class="fc" id="L90">        MetaAcompanhamento meta = buscarMetaDoPaciente(id, pacienteId);</span>
+<span class="fc bfc" id="L91" title="All 2 branches covered.">        meta.setStatus(meta.getDataLimite().isBefore(LocalDateTime.now().toLocalDate())</span>
+<span class="fc" id="L92">                ? &quot;concluido_atrasado&quot; : &quot;concluido&quot;);</span>
+<span class="fc" id="L93">        meta.setDataConclusao(LocalDateTime.now());</span>
+<span class="fc" id="L94">        MetaAcompanhamento concluida = repository.save(meta);</span>
+<span class="fc" id="L95">        eventoPacienteService.criarEvento(</span>
+                pacienteId, usuarioLogadoId, &quot;META_CONCLUIDA&quot;, &quot;Meta alcançada&quot;,
+                &quot;Meta de acompanhamento concluída com sucesso&quot;,
+<span class="fc" id="L98">                EventoPacienteService.metadata(&quot;patientName&quot;, meta.getPaciente().getNome(), &quot;goalName&quot;, meta.getNome()),</span>
+                &quot;alta&quot;
+        );
+<span class="fc" id="L101">        return concluida;</span>
+    }
+
+    public MetaAcompanhamento atualizarValorManual(
+            Long id,
+            Integer pacienteId,
+            Double valorAtual,
+            Integer usuarioLogadoId
+    ) {
+<span class="fc" id="L110">        MetaAcompanhamento meta = buscarMetaDoPaciente(id, pacienteId);</span>
+<span class="fc bfc" id="L111" title="All 2 branches covered.">        if (!&quot;personalizado&quot;.equalsIgnoreCase(meta.getIndicador())) {</span>
+<span class="fc" id="L112">            throw new DadosInvalidosException(&quot;Somente metas personalizadas aceitam atualização manual&quot;);</span>
+        }
+<span class="fc bfc" id="L114" title="All 2 branches covered.">        if (valorAtual == null) throw new DadosInvalidosException(&quot;O valor atual é obrigatório&quot;);</span>
+<span class="fc" id="L115">        meta.setValorAtual(valorAtual);</span>
+<span class="fc" id="L116">        meta.setProgresso(calcularProgresso(meta));</span>
+<span class="fc" id="L117">        meta.setDataModificacao(LocalDateTime.now());</span>
+<span class="fc" id="L118">        concluirAutomaticamenteSeAtingida(meta, usuarioLogadoId);</span>
+<span class="fc" id="L119">        return repository.save(meta);</span>
+    }
+
+    public List&lt;MetaAcompanhamento&gt; listarPorPaciente(Integer pacienteId, Integer usuarioLogadoId) {
+<span class="fc" id="L123">        List&lt;MetaAcompanhamento&gt; metas = repository.findByPacienteId(pacienteId);</span>
+<span class="fc" id="L124">        metas.forEach(meta -&gt; atualizarValoresEProgresso(meta, usuarioLogadoId));</span>
+<span class="fc" id="L125">        return repository.saveAll(metas);</span>
+    }
+
+    private MetaAcompanhamento buscarMetaDoPaciente(Long id, Integer pacienteId) {
+<span class="fc" id="L129">        MetaAcompanhamento meta = repository.findById(id)</span>
+<span class="fc" id="L130">                .orElseThrow(() -&gt; new RecursoNaoEncontradoException(&quot;Meta não encontrada&quot;));</span>
+<span class="fc bfc" id="L131" title="All 2 branches covered.">        if (!meta.getPaciente().getId().equals(pacienteId)) {</span>
+<span class="fc" id="L132">            throw new RecursoNaoEncontradoException(&quot;Meta não encontrada&quot;);</span>
+        }
+<span class="fc" id="L134">        return meta;</span>
+    }
+
+    private void aplicarConfiguracao(MetaAcompanhamento meta, MetaAcompanhamentoInputDTO dto) {
+<span class="fc" id="L138">        boolean metaPersonalizada = &quot;personalizado&quot;.equalsIgnoreCase(dto.getIndicador());</span>
+<span class="fc bfc" id="L139" title="All 2 branches covered.">        boolean mudouParaPersonalizada = metaPersonalizada</span>
+<span class="pc bpc" id="L140" title="1 of 2 branches missed.">                &amp;&amp; !&quot;personalizado&quot;.equalsIgnoreCase(meta.getIndicador());</span>
+
+<span class="fc" id="L142">        meta.setIndicador(dto.getIndicador());</span>
+<span class="fc" id="L143">        meta.setDirecao(dto.getDirecao());</span>
+<span class="fc" id="L144">        meta.setUnidade(dto.getUnidade());</span>
+
+<span class="fc bfc" id="L146" title="All 2 branches covered.">        if (metaPersonalizada) {</span>
+<span class="fc" id="L147">            meta.setValorInicial(0.0);</span>
+<span class="pc bpc" id="L148" title="1 of 4 branches missed.">            if (meta.getId() == null || mudouParaPersonalizada) {</span>
+<span class="fc" id="L149">                meta.setValorAtual(0.0);</span>
+            }
+<span class="fc" id="L151">            return;</span>
+        }
+
+<span class="fc" id="L154">        meta.setValorInicial(dto.getValorInicial());</span>
+<span class="fc" id="L155">        meta.setValorAtual(dto.getValorAtual());</span>
+<span class="fc" id="L156">    }</span>
+
+    private void atualizarValoresEProgresso(MetaAcompanhamento meta, Integer usuarioLogadoId) {
+<span class="fc" id="L159">        Double valorAtual = buscarValorAtual(meta);</span>
+<span class="fc bfc" id="L160" title="All 2 branches covered.">        if (valorAtual != null) meta.setValorAtual(valorAtual);</span>
+<span class="fc bfc" id="L161" title="All 4 branches covered.">        if (meta.getValorInicial() == null &amp;&amp; meta.getValorAtual() != null) {</span>
+<span class="fc" id="L162">            meta.setValorInicial(meta.getValorAtual());</span>
+        }
+<span class="fc" id="L164">        meta.setProgresso(calcularProgresso(meta));</span>
+<span class="fc" id="L165">        concluirAutomaticamenteSeAtingida(meta, usuarioLogadoId);</span>
+<span class="fc" id="L166">    }</span>
+
+    private void concluirAutomaticamenteSeAtingida(MetaAcompanhamento meta, Integer usuarioLogadoId) {
+<span class="fc bfc" id="L169" title="All 2 branches covered.">        if (!&quot;em_andamento&quot;.equalsIgnoreCase(meta.getStatus())) {</span>
+<span class="fc" id="L170">            return;</span>
+        }
+
+<span class="fc" id="L173">        boolean prazoEncerrado = meta.getDataLimite().isBefore(LocalDateTime.now().toLocalDate());</span>
+<span class="fc" id="L174">        boolean personalizada = &quot;personalizado&quot;.equalsIgnoreCase(meta.getIndicador());</span>
+<span class="fc bfc" id="L175" title="All 4 branches covered.">        boolean limiteMaximo = personalizada &amp;&amp; &quot;reduzir&quot;.equalsIgnoreCase(meta.getDirecao());</span>
+<span class="fc" id="L176">        String novoStatus = null;</span>
+
+<span class="pc bpc" id="L178" title="1 of 6 branches missed.">        if (limiteMaximo &amp;&amp; meta.getValorAtual() != null &amp;&amp; meta.getValorAtual() &gt; meta.getValorAlvo()) {</span>
+<span class="fc" id="L179">            novoStatus = &quot;nao_atingida&quot;;</span>
+<span class="fc bfc" id="L180" title="All 4 branches covered.">        } else if (limiteMaximo &amp;&amp; prazoEncerrado) {</span>
+<span class="fc" id="L181">            novoStatus = &quot;concluido&quot;;</span>
+<span class="fc bfc" id="L182" title="All 4 branches covered.">        } else if (personalizada &amp;&amp; prazoEncerrado</span>
+<span class="pc bpc" id="L183" title="2 of 4 branches missed.">                &amp;&amp; (meta.getProgresso() == null || meta.getProgresso() &lt; 100.0)) {</span>
+<span class="fc" id="L184">            novoStatus = &quot;nao_atingida&quot;;</span>
+<span class="pc bpc" id="L185" title="1 of 4 branches missed.">        } else if (meta.getProgresso() != null &amp;&amp; meta.getProgresso() &gt;= 100.0) {</span>
+<span class="fc bfc" id="L186" title="All 2 branches covered.">            novoStatus = prazoEncerrado ? &quot;concluido_atrasado&quot; : &quot;concluido&quot;;</span>
+        }
+
+<span class="fc bfc" id="L189" title="All 2 branches covered.">        if (novoStatus == null) {</span>
+<span class="fc" id="L190">            return;</span>
+        }
+
+<span class="fc" id="L193">        meta.setStatus(novoStatus);</span>
+<span class="fc" id="L194">        meta.setDataConclusao(LocalDateTime.now());</span>
+
+<span class="fc bfc" id="L196" title="All 2 branches covered.">        if (&quot;nao_atingida&quot;.equals(novoStatus)) {</span>
+<span class="fc" id="L197">            eventoPacienteService.criarEvento(</span>
+<span class="fc" id="L198">                    meta.getPaciente().getId(), usuarioLogadoId,</span>
+                    &quot;META_NAO_ATINGIDA&quot;, &quot;Meta não atingida&quot;,
+<span class="fc bfc" id="L200" title="All 2 branches covered.">                    limiteMaximo ? &quot;Limite da meta ultrapassado&quot; : &quot;Prazo encerrado antes de atingir a meta&quot;,</span>
+<span class="fc" id="L201">                    EventoPacienteService.metadata(</span>
+<span class="fc" id="L202">                            &quot;patientName&quot;, meta.getPaciente().getNome(),</span>
+<span class="fc" id="L203">                            &quot;goalName&quot;, meta.getNome()</span>
+                    ),
+                    &quot;alta&quot;
+            );
+<span class="fc" id="L207">            return;</span>
+        }
+
+<span class="fc" id="L210">        eventoPacienteService.criarEvento(</span>
+<span class="fc" id="L211">                meta.getPaciente().getId(), usuarioLogadoId, &quot;META_CONCLUIDA&quot;, &quot;Meta alcançada&quot;,</span>
+                &quot;Meta de acompanhamento concluída automaticamente&quot;,
+<span class="fc" id="L213">                EventoPacienteService.metadata(</span>
+<span class="fc" id="L214">                        &quot;patientName&quot;, meta.getPaciente().getNome(),</span>
+<span class="fc" id="L215">                        &quot;goalName&quot;, meta.getNome()</span>
+                ),
+                &quot;alta&quot;
+        );
+<span class="fc" id="L219">    }</span>
+
+    private Double buscarValorAtual(MetaAcompanhamento meta) {
+<span class="fc bfc" id="L222" title="All 2 branches covered.">        if (meta.getIndicador() == null) return meta.getValorAtual();</span>
+<span class="fc" id="L223">        Integer pacienteId = meta.getPaciente().getId();</span>
+<span class="fc bfc" id="L224" title="All 5 branches covered.">        return switch (meta.getIndicador().toLowerCase()) {</span>
+<span class="fc" id="L225">            case &quot;peso&quot; -&gt; sinaisVitaisRepository.findFirstByPacienteIdOrderByDataRegistroDesc(pacienteId)</span>
+<span class="fc" id="L226">                    .map(registro -&gt; registro.getPeso()).orElse(meta.getValorAtual());</span>
+<span class="fc" id="L227">            case &quot;horas_sono&quot; -&gt; habitosRepository.findFirstByPacienteIdOrderByDataRegistroDesc(pacienteId)</span>
+<span class="pc bpc" id="L228" title="1 of 2 branches missed.">                    .map(registro -&gt; registro.getHorasSono() == null ? null : registro.getHorasSono().doubleValue())</span>
+<span class="fc" id="L229">                    .orElse(meta.getValorAtual());</span>
+<span class="fc" id="L230">            case &quot;minutos_exercicio&quot; -&gt; habitosRepository.findFirstByPacienteIdOrderByDataRegistroDesc(pacienteId)</span>
+<span class="pc bpc" id="L231" title="1 of 2 branches missed.">                    .map(registro -&gt; registro.getMinutosExercicio() == null ? null : registro.getMinutosExercicio().doubleValue())</span>
+<span class="fc" id="L232">                    .orElse(meta.getValorAtual());</span>
+<span class="fc" id="L233">            case &quot;personalizado&quot; -&gt; meta.getValorAtual();</span>
+<span class="fc" id="L234">            default -&gt; throw new DadosInvalidosException(&quot;Indicador de meta inválido&quot;);</span>
+        };
+    }
+
+    private double calcularProgresso(MetaAcompanhamento meta) {
+<span class="fc" id="L239">        Double inicial = meta.getValorInicial();</span>
+<span class="fc" id="L240">        Double atual = meta.getValorAtual();</span>
+<span class="fc" id="L241">        Double alvo = meta.getValorAlvo();</span>
+<span class="pc bpc" id="L242" title="1 of 4 branches missed.">        if (atual == null || alvo == null) return 0.0;</span>
+
+<span class="fc bfc" id="L244" title="All 2 branches covered.">        if (&quot;personalizado&quot;.equalsIgnoreCase(meta.getIndicador())) {</span>
+<span class="fc bfc" id="L245" title="All 2 branches covered.">            if (alvo == 0) return 0.0;</span>
+<span class="fc" id="L246">            double percentualAcumulado = (atual / alvo) * 100.0;</span>
+<span class="fc bfc" id="L247" title="All 2 branches covered.">            return &quot;reduzir&quot;.equalsIgnoreCase(meta.getDirecao())</span>
+<span class="fc" id="L248">                    ? Math.max(0.0, percentualAcumulado)</span>
+<span class="fc" id="L249">                    : Math.max(0.0, Math.min(percentualAcumulado, 100.0));</span>
+        }
+
+        double progresso;
+<span class="fc bfc" id="L253" title="All 2 branches covered.">        if (&quot;reduzir&quot;.equalsIgnoreCase(meta.getDirecao())) {</span>
+<span class="pc bpc" id="L254" title="2 of 6 branches missed.">            if (inicial == null || inicial.equals(alvo)) return atual &lt;= alvo ? 100.0 : 0.0;</span>
+<span class="fc" id="L255">            progresso = ((inicial - atual) / (inicial - alvo)) * 100.0;</span>
+        } else {
+<span class="fc bfc" id="L257" title="All 2 branches covered.">            if (alvo == 0) return 0.0;</span>
+<span class="fc" id="L258">            progresso = (atual / alvo) * 100.0;</span>
+        }
+<span class="fc" id="L260">        return Math.max(0.0, Math.min(progresso, 100.0));</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.15.202606040825</span></div></body></html>

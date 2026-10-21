@@ -1,8 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="pt"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ConviteVinculo.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report"></a> &gt; <a href="index.source.html" class="el_package">br.com.vittasync.vittasync.Model</a> &gt; <span class="el_source">ConviteVinculo.java</span></div><h1>ConviteVinculo.java</h1><pre class="source lang-java linenums">package br.com.vittasync.vittasync.Model;
 
-import jakarta.persistence.*;
 
+import jakarta.persistence.*;
 import java.sql.Timestamp;
+
 
 @Entity
 @Table(name = &quot;ConviteVinculo&quot;)
@@ -27,51 +28,26 @@ public class ConviteVinculo {
     @Column(name = &quot;criado_em&quot;)
     private Timestamp criadoEm;
 
-<span class="fc" id="L30">    public ConviteVinculo() {</span>
-<span class="fc" id="L31">    }</span>
+<span class="fc" id="L31">    public ConviteVinculo() {</span>
+<span class="fc" id="L32">    }</span>
 
-    public Long getId() {
-<span class="fc" id="L34">        return id;</span>
-    }
 
-    public Integer getPacienteId() {
-<span class="fc" id="L38">        return pacienteId;</span>
-    }
+<span class="fc" id="L35">    public Long getId() {return id;}</span>
 
-    public void setPacienteId(Integer pacienteId) {
-<span class="fc" id="L42">        this.pacienteId = pacienteId;</span>
-<span class="fc" id="L43">    }</span>
+<span class="fc" id="L37">    public Integer getPacienteId() {return pacienteId;}</span>
+<span class="fc" id="L38">    public void setPacienteId(Integer pacienteId) {this.pacienteId = pacienteId;}</span>
 
-    public String getCodigo() {
-<span class="fc" id="L46">        return codigo;</span>
-    }
+<span class="fc" id="L40">    public String getCodigo() {return codigo;}</span>
+<span class="fc" id="L41">    public void setCodigo(String codigo) {this.codigo = codigo;}</span>
 
-    public void setCodigo(String codigo) {
-<span class="fc" id="L50">        this.codigo = codigo;</span>
-<span class="fc" id="L51">    }</span>
+<span class="fc" id="L43">    public Timestamp getExpiraEm() {return expiraEm;}</span>
+<span class="fc" id="L44">    public void setExpiraEm(Timestamp expiraEm) {this.expiraEm = expiraEm;}</span>
 
-    public Timestamp getExpiraEm() {
-<span class="fc" id="L54">        return expiraEm;</span>
-    }
+<span class="fc" id="L46">    public Boolean getAtivo() {return ativo;}</span>
+<span class="fc" id="L47">    public void setAtivo(Boolean ativo) {this.ativo = ativo;}</span>
 
-    public void setExpiraEm(Timestamp expiraEm) {
-<span class="fc" id="L58">        this.expiraEm = expiraEm;</span>
-<span class="fc" id="L59">    }</span>
-
-    public Boolean getAtivo() {
-<span class="fc" id="L62">        return ativo;</span>
-    }
-
-    public void setAtivo(Boolean ativo) {
-<span class="fc" id="L66">        this.ativo = ativo;</span>
-<span class="fc" id="L67">    }</span>
-
-    public Timestamp getCriadoEm() {
-<span class="fc" id="L70">        return criadoEm;</span>
-    }
-
-    public void setCriadoEm(Timestamp criadoEm) {
-<span class="fc" id="L74">        this.criadoEm = criadoEm;</span>
-<span class="fc" id="L75">    }</span>
+<span class="fc" id="L49">    public Timestamp getCriadoEm() {return criadoEm;}</span>
+<span class="fc" id="L50">    public void setCriadoEm(Timestamp criadoEm) {this.criadoEm = criadoEm;}</span>
+    
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.15.202606040825</span></div></body></html>

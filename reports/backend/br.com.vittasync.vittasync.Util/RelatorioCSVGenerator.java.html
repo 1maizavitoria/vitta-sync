@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="pt"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>RelatorioCSVGenerator.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report"></a> &gt; <a href="index.source.html" class="el_package">br.com.vittasync.vittasync.Util</a> &gt; <span class="el_source">RelatorioCSVGenerator.java</span></div><h1>RelatorioCSVGenerator.java</h1><pre class="source lang-java linenums">package br.com.vittasync.vittasync.Util;
+
+
+import br.com.vittasync.vittasync.DTO.RelatorioPreviewDTO;
+import java.nio.charset.StandardCharsets;
+
+
+<span class="fc" id="L8">public class RelatorioCSVGenerator {</span>
+    public byte[] gerarRelatorio(RelatorioPreviewDTO preview) {
+<span class="fc" id="L10">        StringBuilder csv = new StringBuilder(&quot;\uFEFF&quot;);</span>
+<span class="fc" id="L11">        linha(csv, &quot;categoria&quot;, &quot;id_registro&quot;, &quot;paciente&quot;, &quot;data_registro&quot;, &quot;data_referencia&quot;,</span>
+                &quot;peso_kg&quot;, &quot;fc_bpm&quot;, &quot;fr_rpm&quot;, &quot;pa_sistolica_mmHg&quot;, &quot;pa_diastolica_mmHg&quot;,
+                &quot;temperatura_C&quot;, &quot;spo2_percentual&quot;, &quot;sono_horas&quot;, &quot;exercicio_minutos&quot;,
+                &quot;indice_repouso&quot;, &quot;repouso&quot;, &quot;canal&quot;, &quot;sintoma&quot;, &quot;intensidade_dor&quot;);
+<span class="fc bfc" id="L15" title="All 2 branches covered.">        if (preview.getCategorias().contains(&quot;SINAIS&quot;)) {</span>
+<span class="fc" id="L16">            preview.getSinaisVitais().forEach(s -&gt; linha(csv,</span>
+<span class="fc" id="L17">                    &quot;SINAIS&quot;, s.getId(), preview.getPaciente().getNome(), s.getDataHora(), null,</span>
+<span class="fc" id="L18">                    s.getPeso(), s.getFcBpm(), s.getFrRpm(), s.getPaSistolica(), s.getPaDiastolica(),</span>
+<span class="fc" id="L19">                    s.getTempCelcius(), s.getSpo2Porcento(), null, null, null, null, null, null, null));</span>
+        }
+<span class="fc bfc" id="L21" title="All 2 branches covered.">        if (preview.getCategorias().contains(&quot;HABITOS&quot;)) {</span>
+<span class="fc" id="L22">            preview.getHabitos().forEach(h -&gt; linha(csv,</span>
+<span class="fc" id="L23">                    &quot;HABITOS&quot;, h.getId(), preview.getPaciente().getNome(), h.getDataHora(), h.getDataReferencia(),</span>
+<span class="fc" id="L24">                    null, null, null, null, null, null, null, h.getHorasSono(), h.getMinutosExercicio(),</span>
+<span class="fc" id="L25">                    h.getIndiceRepouso(), h.getRepouso(), h.getCanal(), null, null));</span>
+        }
+<span class="fc bfc" id="L27" title="All 2 branches covered.">        if (preview.getCategorias().contains(&quot;SINTOMAS&quot;)) {</span>
+<span class="fc" id="L28">            preview.getSintomas().forEach(s -&gt; linha(csv,</span>
+<span class="fc" id="L29">                    &quot;SINTOMAS&quot;, s.getId(), preview.getPaciente().getNome(), s.getDataHora(), s.getDataReferencia(),</span>
+                    null, null, null, null, null, null, null, null, null, null, null, null,
+<span class="fc" id="L31">                    s.getSintoma(), s.getIntensidadeDor()));</span>
+        }
+<span class="fc" id="L33">        return csv.toString().getBytes(StandardCharsets.UTF_8);</span>
+    }
+
+    private void linha(StringBuilder csv, Object... valores) {
+<span class="fc bfc" id="L37" title="All 2 branches covered.">        for (int i = 0; i &lt; valores.length; i++) {</span>
+<span class="fc bfc" id="L38" title="All 2 branches covered.">            if (i &gt; 0) csv.append(';');</span>
+<span class="fc" id="L39">            Object valor = valores[i];</span>
+<span class="fc bfc" id="L40" title="All 2 branches covered.">            if (valor == null) continue;</span>
+<span class="fc" id="L41">            String texto = valor.toString();</span>
+<span class="fc" id="L42">            String inicio = texto.stripLeading();</span>
+<span class="fc bfc" id="L43" title="All 4 branches covered.">            if (valor instanceof String &amp;&amp; !texto.isEmpty()</span>
+<span class="fc bfc" id="L44" title="All 4 branches covered.">                    &amp;&amp; ((!inicio.isEmpty() &amp;&amp; &quot;=+-@&quot;.indexOf(inicio.charAt(0)) &gt;= 0)</span>
+<span class="fc bfc" id="L45" title="All 2 branches covered.">                        || &quot;\t\r\n&quot;.indexOf(texto.charAt(0)) &gt;= 0)) {</span>
+<span class="fc" id="L46">                texto = &quot;'&quot; + texto;</span>
+            }
+<span class="fc" id="L48">            csv.append('&quot;').append(texto.replace(&quot;\&quot;&quot;, &quot;\&quot;\&quot;&quot;)).append('&quot;');</span>
+        }
+<span class="fc" id="L50">        csv.append(&quot;\r\n&quot;);</span>
+<span class="fc" id="L51">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.15.202606040825</span></div></body></html>

@@ -1,0 +1,233 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="pt"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>MetaAcompanhamentoController.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report"></a> &gt; <a href="index.source.html" class="el_package">br.com.vittasync.vittasync.Controller</a> &gt; <span class="el_source">MetaAcompanhamentoController.java</span></div><h1>MetaAcompanhamentoController.java</h1><pre class="source lang-java linenums">package br.com.vittasync.vittasync.Controller;
+
+
+import br.com.vittasync.vittasync.DTO.MetaAcompanhamentoInputDTO;
+import br.com.vittasync.vittasync.DTO.MetaAcompanhamentoOutputDTO;
+import br.com.vittasync.vittasync.Exception.AcessoNegadoException;
+import br.com.vittasync.vittasync.Model.MetaAcompanhamento;
+import br.com.vittasync.vittasync.Model.Usuario;
+import br.com.vittasync.vittasync.Service.*;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.ExampleObject;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
+
+@RestController
+@RequestMapping(&quot;/metaacompanhamento&quot;)
+@Tag(name = &quot;Metas de acompanhamento&quot;, description = &quot;Metas de saúde do paciente com prazo e progresso calculado: peso, horas de sono, &quot;
+        + &quot;minutos de exercício ou metas personalizadas&quot;)
+public class MetaAcompanhamentoController {
+
+    private final MetaAcompanhamentoService service;
+    private final UsuarioService usuarioService;
+    private final PermissaoService permissaoService;
+
+    public MetaAcompanhamentoController(
+            MetaAcompanhamentoService service,
+            UsuarioService usuarioService,
+            PermissaoService permissaoService
+<span class="fc" id="L38">    ) {</span>
+<span class="fc" id="L39">        this.service = service;</span>
+<span class="fc" id="L40">        this.usuarioService = usuarioService;</span>
+<span class="fc" id="L41">        this.permissaoService = permissaoService;</span>
+<span class="fc" id="L42">    }</span>
+
+
+    @Operation(
+            summary = &quot;Cadastrar meta&quot;,
+            description = &quot;Cadastra uma meta para o paciente com indicador, direção, valor alvo e prazo, a meta começa ''em_andamento'' &quot;
+                    + &quot;e o valor atual de peso, sono e exercício é buscado automaticamente do último registro do paciente, &quot;
+                    + &quot;metas personalizadas começam com valor 0. &quot;
+                    + &quot;Permitido ao próprio paciente, aos responsáveis vinculados e aos profissionais de saúde vinculados.&quot;
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = &quot;200&quot;, description = &quot;Meta cadastrada com sucesso&quot;),
+            @ApiResponse(responseCode = &quot;403&quot;, description = &quot;Usuário sem permissão para alterar os dados do paciente&quot;),
+            @ApiResponse(responseCode = &quot;404&quot;, description = &quot;Paciente não encontrado&quot;)
+    })
+    @PostMapping(&quot;/cadastrar/{cpf}&quot;)
+    public ResponseEntity&lt;MetaAcompanhamentoOutputDTO&gt; cadastrar(@Parameter(description = &quot;CPF do paciente (apenas números)&quot;)
+                                                                 @PathVariable String cpf,
+                                                                 @RequestBody MetaAcompanhamentoInputDTO dto) {
+<span class="fc" id="L61">        Usuario usuarioLogado = usuarioService.getUsuarioLogado();</span>
+<span class="fc" id="L62">        Usuario paciente = usuarioService.searchByCpf(cpf);</span>
+
+<span class="fc bfc" id="L64" title="All 2 branches covered.">        if (!permissaoService.podeCriarEditarMeta(usuarioLogado.getId(), paciente.getId())) {</span>
+<span class="fc" id="L65">            throw new AcessoNegadoException(&quot;Usuário sem permissão para acessar o paciente&quot;);</span>
+        }
+
+<span class="fc" id="L68">        MetaAcompanhamento salvo = service.create(dto, paciente, usuarioLogado.getId());</span>
+<span class="fc" id="L69">        return ResponseEntity.ok(toOutputDTO(salvo));</span>
+    }
+
+    @Operation(
+            summary = &quot;Editar meta&quot;,
+            description = &quot;Substitui os dados de uma meta do paciente e recalcula o progresso, a data de modificação é preenchida automaticamente pelo servidor. &quot;
+                    + &quot;Permitido ao próprio paciente, aos responsáveis vinculados e aos profissionais de saúde vinculados.&quot;
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = &quot;200&quot;, description = &quot;Meta atualizada com sucesso&quot;),
+            @ApiResponse(responseCode = &quot;403&quot;, description = &quot;Usuário sem permissão para alterar os dados do paciente&quot;),
+            @ApiResponse(responseCode = &quot;404&quot;, description = &quot;Paciente ou meta não encontrados&quot;)
+    })
+    @PutMapping(&quot;/editar/{id}/{cpf}&quot;)
+    public ResponseEntity&lt;MetaAcompanhamentoOutputDTO&gt; editar(@Parameter(description = &quot;ID da meta&quot;)
+                                                              @PathVariable Long id,
+                                                              @Parameter(description = &quot;CPF do paciente (apenas números)&quot;)
+                                                              @PathVariable String cpf,
+                                                              @RequestBody MetaAcompanhamentoInputDTO dto) {
+<span class="fc" id="L88">        Usuario usuarioLogado = usuarioService.getUsuarioLogado();</span>
+<span class="fc" id="L89">        Usuario paciente = usuarioService.searchByCpf(cpf);</span>
+
+<span class="fc bfc" id="L91" title="All 2 branches covered.">        if (!permissaoService.podeCriarEditarMeta(usuarioLogado.getId(), paciente.getId())) {</span>
+<span class="fc" id="L92">            throw new AcessoNegadoException(&quot;Usuário sem permissão para acessar o paciente&quot;);</span>
+        }
+
+<span class="fc" id="L95">        MetaAcompanhamento atualizado = service.update(id, dto, paciente, usuarioLogado.getId());</span>
+<span class="fc" id="L96">        return ResponseEntity.ok(toOutputDTO(atualizado));</span>
+    }
+
+    @Operation(
+            summary = &quot;Excluir meta&quot;,
+            description = &quot;Exclui uma meta do paciente e registra o evento na linha do tempo do paciente. &quot;
+                    + &quot;Permitido ao próprio paciente e aos responsáveis vinculados.&quot;
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = &quot;204&quot;, description = &quot;Meta excluída com sucesso&quot;),
+            @ApiResponse(responseCode = &quot;403&quot;, description = &quot;Usuário sem permissão para alterar os dados do paciente&quot;),
+            @ApiResponse(responseCode = &quot;404&quot;, description = &quot;Paciente ou meta não encontrados&quot;)
+    })
+    @DeleteMapping(&quot;/deletar/{id}/{cpf}&quot;)
+    public ResponseEntity&lt;Void&gt; deletar(@Parameter(description = &quot;ID da meta&quot;)
+                                        @PathVariable Long id,
+                                        @Parameter(description = &quot;CPF do paciente (apenas números)&quot;)
+                                        @PathVariable String cpf) {
+<span class="fc" id="L114">        Usuario usuarioLogado = usuarioService.getUsuarioLogado();</span>
+<span class="fc" id="L115">        Usuario paciente = usuarioService.searchByCpf(cpf);</span>
+
+<span class="fc bfc" id="L117" title="All 2 branches covered.">        if (!permissaoService.podeEditarPaciente(usuarioLogado.getId(), paciente.getId())) {</span>
+<span class="fc" id="L118">            throw new AcessoNegadoException(&quot;Usuário sem permissão para acessar o paciente&quot;);</span>
+        }
+
+<span class="fc" id="L121">        service.delete(id, paciente.getId(), usuarioLogado.getId());</span>
+<span class="fc" id="L122">        return ResponseEntity.noContent().build();</span>
+    }
+
+    @Operation(
+            summary = &quot;Concluir meta&quot;,
+            description = &quot;Conclui manualmente uma meta do paciente, o status fica ''concluido'' ou ''concluido_atrasado'' quando o prazo já passou. &quot;
+                    + &quot;Permitido ao próprio paciente, aos responsáveis vinculados e aos profissionais de saúde vinculados.&quot;
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = &quot;200&quot;, description = &quot;Meta concluída com sucesso&quot;),
+            @ApiResponse(responseCode = &quot;403&quot;, description = &quot;Usuário sem permissão para alterar os dados do paciente&quot;),
+            @ApiResponse(responseCode = &quot;404&quot;, description = &quot;Paciente ou meta não encontrados&quot;)
+    })
+    @PostMapping(&quot;/concluir/{id}/{cpf}&quot;)
+    public ResponseEntity&lt;MetaAcompanhamentoOutputDTO&gt; concluir(@Parameter(description = &quot;ID da meta&quot;)
+                                                                @PathVariable Long id,
+                                                                @Parameter(description = &quot;CPF do paciente (apenas números)&quot;)
+                                                                @PathVariable String cpf) {
+<span class="fc" id="L140">        Usuario usuarioLogado = usuarioService.getUsuarioLogado();</span>
+<span class="fc" id="L141">        Usuario paciente = usuarioService.searchByCpf(cpf);</span>
+
+<span class="fc bfc" id="L143" title="All 2 branches covered.">        if (!permissaoService.podeCriarEditarMeta(usuarioLogado.getId(), paciente.getId())) {</span>
+<span class="fc" id="L144">            throw new AcessoNegadoException(&quot;Usuário sem permissão para acessar o paciente&quot;);</span>
+        }
+
+<span class="fc" id="L147">        MetaAcompanhamento concluida = service.concluirMeta(id, paciente.getId(), usuarioLogado.getId());</span>
+<span class="fc" id="L148">        return ResponseEntity.ok(toOutputDTO(concluida));</span>
+    }
+
+    @Operation(
+            summary = &quot;Listar metas do paciente&quot;,
+            description = &quot;Retorna todas as metas do paciente com o valor atual e o progresso atualizados, metas que atingiram o alvo &quot;
+                    + &quot;ou passaram do prazo têm o status atualizado automaticamente. &quot;
+                    + &quot;Permitido ao próprio paciente e a todos os usuários vinculados a ele (responsáveis e profissionais de saúde).&quot;
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = &quot;200&quot;, description = &quot;Lista de metas do paciente&quot;),
+            @ApiResponse(responseCode = &quot;403&quot;, description = &quot;Usuário sem permissão para visualizar o paciente&quot;),
+            @ApiResponse(responseCode = &quot;404&quot;, description = &quot;Paciente não encontrado&quot;)
+    })
+    @GetMapping(&quot;/getMetas/{cpf}&quot;)
+    public ResponseEntity&lt;List&lt;MetaAcompanhamentoOutputDTO&gt;&gt; listar(@Parameter(description = &quot;CPF do paciente (apenas números)&quot;)
+                                                                    @PathVariable String cpf) {
+<span class="fc" id="L165">        Usuario usuarioLogado = usuarioService.getUsuarioLogado();</span>
+<span class="fc" id="L166">        Usuario paciente = usuarioService.searchByCpf(cpf);</span>
+
+<span class="fc bfc" id="L168" title="All 2 branches covered.">        if (!permissaoService.podeVisualizarPaciente(usuarioLogado.getId(), paciente.getId())) {</span>
+<span class="fc" id="L169">            throw new AcessoNegadoException(&quot;Usuário sem permissão para acessar o paciente&quot;);</span>
+        }
+
+<span class="fc" id="L172">        List&lt;MetaAcompanhamento&gt; lista = service.listarPorPaciente(paciente.getId(), usuarioLogado.getId());</span>
+<span class="fc" id="L173">        return ResponseEntity.ok(lista.stream().map(this::toOutputDTO).collect(Collectors.toList()));</span>
+    }
+
+    @Operation(
+            summary = &quot;Atualizar valor da meta personalizada&quot;,
+            description = &quot;Atualiza manualmente o valor atual de uma meta personalizada e recalcula o progresso, &quot;
+                    + &quot;metas de peso, sono e exercício são atualizadas automaticamente pelos registros do paciente. &quot;
+                    + &quot;Permitido ao próprio paciente e aos responsáveis vinculados.&quot;
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = &quot;200&quot;, description = &quot;Valor da meta atualizado com sucesso&quot;),
+            @ApiResponse(responseCode = &quot;400&quot;, description = &quot;Meta não é personalizada ou valor atual não informado&quot;),
+            @ApiResponse(responseCode = &quot;403&quot;, description = &quot;Usuário sem permissão para alterar os dados do paciente&quot;),
+            @ApiResponse(responseCode = &quot;404&quot;, description = &quot;Paciente ou meta não encontrados&quot;)
+    })
+    @PutMapping(&quot;/atualizar-valor/{id}/{cpf}&quot;)
+    public ResponseEntity&lt;MetaAcompanhamentoOutputDTO&gt; atualizarValorManual(
+            @Parameter(description = &quot;ID da meta&quot;)
+            @PathVariable Long id,
+            @Parameter(description = &quot;CPF do paciente (apenas números)&quot;)
+            @PathVariable String cpf,
+            @io.swagger.v3.oas.annotations.parameters.RequestBody(
+                    description = &quot;Novo valor atual da meta&quot;,
+                    content = @Content(examples = @ExampleObject(value = &quot;{\&quot;valorAtual\&quot;: 5}&quot;))
+            )
+            @RequestBody Map&lt;String, Double&gt; body) {
+<span class="fc" id="L199">        Usuario usuarioLogado = usuarioService.getUsuarioLogado();</span>
+<span class="fc" id="L200">        Usuario paciente = usuarioService.searchByCpf(cpf);</span>
+<span class="fc bfc" id="L201" title="All 2 branches covered.">        if (!permissaoService.podeEditarPaciente(usuarioLogado.getId(), paciente.getId())) {</span>
+<span class="fc" id="L202">            throw new AcessoNegadoException(&quot;Usuário sem permissão para acessar o paciente&quot;);</span>
+        }
+<span class="fc" id="L204">        MetaAcompanhamento meta = service.atualizarValorManual(</span>
+                id,
+<span class="fc" id="L206">                paciente.getId(),</span>
+<span class="fc" id="L207">                body.get(&quot;valorAtual&quot;),</span>
+<span class="fc" id="L208">                usuarioLogado.getId()</span>
+        );
+<span class="fc" id="L210">        return ResponseEntity.ok(toOutputDTO(meta));</span>
+    }
+
+    private MetaAcompanhamentoOutputDTO toOutputDTO(MetaAcompanhamento entity) {
+<span class="fc" id="L214">        MetaAcompanhamentoOutputDTO dto = new MetaAcompanhamentoOutputDTO();</span>
+<span class="fc" id="L215">        dto.setId(entity.getId());</span>
+<span class="fc" id="L216">        dto.setNome(entity.getNome());</span>
+<span class="fc" id="L217">        dto.setTipoDado(entity.getTipoDado());</span>
+<span class="fc" id="L218">        dto.setIndicador(entity.getIndicador());</span>
+<span class="fc" id="L219">        dto.setDirecao(entity.getDirecao());</span>
+<span class="fc" id="L220">        dto.setValorInicial(entity.getValorInicial());</span>
+<span class="fc" id="L221">        dto.setValorAtual(entity.getValorAtual());</span>
+<span class="fc" id="L222">        dto.setUnidade(entity.getUnidade());</span>
+<span class="fc" id="L223">        dto.setValorAlvo(entity.getValorAlvo());</span>
+<span class="fc" id="L224">        dto.setProgresso(entity.getProgresso());</span>
+<span class="fc" id="L225">        dto.setStatus(entity.getStatus());</span>
+<span class="fc" id="L226">        dto.setDataCriacao(entity.getDataCriacao());</span>
+<span class="fc" id="L227">        dto.setDataLimite(entity.getDataLimite());</span>
+<span class="fc" id="L228">        dto.setDataConclusao(entity.getDataConclusao());</span>
+<span class="fc" id="L229">        dto.setDataModificacao(entity.getDataModificacao());</span>
+<span class="fc" id="L230">        return dto;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.15.202606040825</span></div></body></html>

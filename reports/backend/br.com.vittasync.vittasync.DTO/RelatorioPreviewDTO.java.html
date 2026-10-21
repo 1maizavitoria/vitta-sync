@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="pt"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>RelatorioPreviewDTO.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report"></a> &gt; <a href="index.source.html" class="el_package">br.com.vittasync.vittasync.DTO</a> &gt; <span class="el_source">RelatorioPreviewDTO.java</span></div><h1>RelatorioPreviewDTO.java</h1><pre class="source lang-java linenums">package br.com.vittasync.vittasync.DTO;
+
+
+import io.swagger.v3.oas.annotations.media.Schema;
+import java.util.List;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+
+
+@Schema(description = &quot;Dados do relatório para pré-visualização&quot;)
+public class RelatorioPreviewDTO {
+    @Schema(description = &quot;Data inicial do período&quot;, example = &quot;2026-10-01&quot;)
+    private LocalDate dataInicio;
+
+    @Schema(description = &quot;Data final do período&quot;, example = &quot;2026-10-13&quot;)
+    private LocalDate dataFim;
+
+    @Schema(description = &quot;Data e hora em que o relatório foi gerado&quot;, example = &quot;2026-10-13T21:30:00&quot;)
+    private LocalDateTime dataEmissao;
+
+    @Schema(description = &quot;Categorias incluídas no relatório&quot;, example = &quot;[\&quot;SINAIS\&quot;, \&quot;HABITOS\&quot;]&quot;)
+    private List&lt;String&gt; categorias;
+
+    @Schema(description = &quot;Resumo estatístico dos sinais vitais e hábitos do período&quot;)
+    private RelatorioResumoDTO resumo;
+
+    @Schema(description = &quot;Dados básicos do paciente&quot;)
+    private RelatorioPacienteResumoDTO paciente;
+
+    @Schema(description = &quot;Sinais vitais do período&quot;)
+    private List&lt;LinhaTempoSinaisVitaisDTO&gt; sinaisVitais;
+
+    @Schema(description = &quot;Hábitos do período&quot;)
+    private List&lt;LinhaTempoHabitosDTO&gt; habitos;
+
+    @Schema(description = &quot;Sintomas do período&quot;)
+    private List&lt;LinhaTempoSintomasDTO&gt; sintomas;
+
+
+    public RelatorioPreviewDTO(RelatorioPacienteResumoDTO paciente,
+                               List&lt;LinhaTempoSinaisVitaisDTO&gt; sinaisVitais,
+                               List&lt;LinhaTempoHabitosDTO&gt; habitos,
+<span class="fc" id="L43">                               List&lt;LinhaTempoSintomasDTO&gt; sintomas) {</span>
+<span class="fc" id="L44">        this.paciente = paciente;</span>
+<span class="fc" id="L45">        this.sinaisVitais = sinaisVitais;</span>
+<span class="fc" id="L46">        this.habitos = habitos;</span>
+<span class="fc" id="L47">        this.sintomas = sintomas;</span>
+<span class="fc" id="L48">    }</span>
+
+
+<span class="fc" id="L51">    public RelatorioPacienteResumoDTO getPaciente() {return paciente;}</span>
+<span class="fc" id="L52">    public void setPaciente(RelatorioPacienteResumoDTO paciente) {this.paciente = paciente;}</span>
+
+<span class="fc" id="L54">    public List&lt;LinhaTempoSinaisVitaisDTO&gt; getSinaisVitais() { return sinaisVitais; }</span>
+<span class="fc" id="L55">    public void setSinaisVitais(List&lt;LinhaTempoSinaisVitaisDTO&gt; sinaisVitais) {this.sinaisVitais = sinaisVitais;}</span>
+
+<span class="fc" id="L57">    public List&lt;LinhaTempoHabitosDTO&gt; getHabitos() { return habitos; }</span>
+<span class="fc" id="L58">    public void setHabitos(List&lt;LinhaTempoHabitosDTO&gt; habitos) { this.habitos = habitos; }</span>
+
+<span class="fc" id="L60">    public List&lt;LinhaTempoSintomasDTO&gt; getSintomas() { return sintomas; }</span>
+<span class="fc" id="L61">    public void setSintomas(List&lt;LinhaTempoSintomasDTO&gt; sintomas) { this.sintomas = sintomas; }</span>
+
+<span class="fc" id="L63">    public LocalDate getDataInicio() { return dataInicio; }</span>
+<span class="fc" id="L64">    public void setDataInicio(LocalDate dataInicio) { this.dataInicio = dataInicio; }</span>
+    
+<span class="fc" id="L66">    public LocalDate getDataFim() { return dataFim; }</span>
+<span class="fc" id="L67">    public void setDataFim(LocalDate dataFim) { this.dataFim = dataFim; }</span>
+    
+<span class="fc" id="L69">    public LocalDateTime getDataEmissao() { return dataEmissao; }</span>
+<span class="fc" id="L70">    public void setDataEmissao(LocalDateTime dataEmissao) { this.dataEmissao = dataEmissao; }</span>
+    
+<span class="fc" id="L72">    public List&lt;String&gt; getCategorias() { return categorias; }</span>
+<span class="fc" id="L73">    public void setCategorias(List&lt;String&gt; categorias) { this.categorias = List.copyOf(categorias); }</span>
+    
+<span class="fc" id="L75">    public RelatorioResumoDTO getResumo() { return resumo; }</span>
+<span class="fc" id="L76">    public void setResumo(RelatorioResumoDTO resumo) { this.resumo = resumo; }</span>
+    
+    @Schema(description = &quot;Indica que não há registros no período para as categorias escolhidas&quot;, example = &quot;false&quot;)
+    public boolean isSemRegistros() {
+<span class="pc bpc" id="L80" title="1 of 6 branches missed.">        return sinaisVitais.isEmpty() &amp;&amp; habitos.isEmpty() &amp;&amp; sintomas.isEmpty();</span>
+    }
+
+    @Schema(description = &quot;Mensagem exibida quando não há registros, nula quando há&quot;, example = &quot;Nenhum registro encontrado para os filtros selecionados.&quot;)
+    public String getMensagem() {
+<span class="fc bfc" id="L85" title="All 2 branches covered.">        return isSemRegistros() ? &quot;Nenhum registro encontrado para os filtros selecionados.&quot; : null;</span>
+    }
+    
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.15.202606040825</span></div></body></html>

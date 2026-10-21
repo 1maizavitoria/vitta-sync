@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="pt"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>EventoTipos.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report"></a> &gt; <a href="index.source.html" class="el_package">br.com.vittasync.vittasync.Util</a> &gt; <span class="el_source">EventoTipos.java</span></div><h1>EventoTipos.java</h1><pre class="source lang-java linenums">package br.com.vittasync.vittasync.Util;
+
+
+public class EventoTipos {
+
+    public static final String DESVIO_LINHA_BASE = &quot;desvio_linha_base&quot;;
+
+    public static final String SINAIS_VITAIS_CRIADOS = &quot;sinais_vitais_criados&quot;;
+    public static final String SINAIS_VITAIS_EDITADOS = &quot;sinais_vitais_editados&quot;;
+    public static final String SINAIS_VITAIS_REMOVIDOS = &quot;sinais_vitais_removidos&quot;;
+
+    public static final String HABITOS_CRIADOS = &quot;habito_registrado&quot;;
+    public static final String HABITOS_EDITADOS = &quot;habito_editado&quot;;
+    public static final String HABITOS_REMOVIDOS = &quot;habito_removido&quot;;
+
+    public static final String SINTOMAS_CRIADOS = &quot;sintoma_registrado&quot;;
+    public static final String SINTOMAS_EDITADOS = &quot;sintoma_editado&quot;;
+    public static final String SINTOMAS_REMOVIDOS = &quot;sintoma_removido&quot;;
+
+    public static final String VINCULO_CRIADO = &quot;vinculo_criado&quot;;
+    public static final String VINCULO_REMOVIDO = &quot;vinculo_removido&quot;;
+
+    public static final String LEMBRETE_CRIADO = &quot;lembrete_criado&quot;;
+    public static final String LEMBRETE_ATUALIZADO = &quot;lembrete_atualizado&quot;;
+
+    public static final String PRESSAO_ANORMAL = &quot;pressao_anormal&quot;;
+    public static final String FEBRE_DETECTADA = &quot;febre_detectada&quot;;
+    public static final String SPO2_BAIXA = &quot;spo2_baixa&quot;;
+    public static final String SPO2_CRITICA = &quot;spo2_critica&quot;;
+
+    public static final String TAQUICARDIA_DETECTADA = &quot;taquicardia_detectada&quot;;
+    public static final String BRADICARDIA_DETECTADA = &quot;bradicardia_detectada&quot;;
+
+    public static final String TAQUIPNEIA_DETECTADA = &quot;taquipneia_detectada&quot;;
+    public static final String BRADIPNEIA_DETECTADA = &quot;bradipneia_detectada&quot;;
+
+    public static final String DOR_INTENSA_DETECTADA = &quot;dor_intensa_detectada&quot;;
+    public static final String DOR_CRITICA_DETECTADA = &quot;dor_critica_detectada&quot;;
+
+    public static final String SONO_CRITICO = &quot;sono_critico&quot;;
+    public static final String SEDENTARISMO_DETECTADO = &quot;sedentarismo_detectado&quot;;
+
+    public static final String DOCUMENTO_ENVIADO = &quot;documento_enviado&quot;;
+
+    public static final String DOCUMENTO_REMOVIDO = &quot;documento_removido&quot;;
+
+    public static final String META_CRIADA = &quot;meta_criada&quot;;
+    public static final String META_ATUALIZADA = &quot;meta_atualizada&quot;;
+    public static final String META_REMOVIDA = &quot;meta_removida&quot;;
+    public static final String META_CONCLUIDA = &quot;meta_concluida&quot;;
+
+
+    private EventoTipos() {
+    }
+
+    public static String toFrontendCode(String tipoEvento) {
+<span class="fc bfc" id="L57" title="All 2 branches covered.">        if (tipoEvento == null) {</span>
+<span class="fc" id="L58">            return null;</span>
+        }
+
+<span class="fc bfc" id="L61" title="All 32 branches covered.">        return switch (tipoEvento) {</span>
+<span class="fc" id="L62">            case DOCUMENTO_ENVIADO -&gt; &quot;DOCUMENT_UPLOADED&quot;;</span>
+<span class="fc" id="L63">            case DOCUMENTO_REMOVIDO -&gt; &quot;DOCUMENT_REMOVED&quot;;</span>
+<span class="fc" id="L64">            case SINAIS_VITAIS_CRIADOS -&gt; &quot;VITAL_SIGNS_CREATED&quot;;</span>
+<span class="fc" id="L65">            case SINAIS_VITAIS_EDITADOS -&gt; &quot;VITAL_SIGNS_UPDATED&quot;;</span>
+<span class="fc" id="L66">            case SINAIS_VITAIS_REMOVIDOS -&gt; &quot;VITAL_SIGNS_REMOVED&quot;;</span>
+<span class="fc" id="L67">            case HABITOS_CRIADOS -&gt; &quot;HABITS_CREATED&quot;;</span>
+<span class="fc" id="L68">            case HABITOS_EDITADOS -&gt; &quot;HABITS_UPDATED&quot;;</span>
+<span class="fc" id="L69">            case HABITOS_REMOVIDOS -&gt; &quot;HABITS_REMOVED&quot;;</span>
+<span class="fc" id="L70">            case SINTOMAS_CRIADOS -&gt; &quot;SYMPTOMS_CREATED&quot;;</span>
+<span class="fc" id="L71">            case SINTOMAS_EDITADOS -&gt; &quot;SYMPTOMS_UPDATED&quot;;</span>
+<span class="fc" id="L72">            case SINTOMAS_REMOVIDOS -&gt; &quot;SYMPTOMS_REMOVED&quot;;</span>
+<span class="fc" id="L73">            case VINCULO_CRIADO -&gt; &quot;LINK_CREATED&quot;;</span>
+<span class="fc" id="L74">            case VINCULO_REMOVIDO -&gt; &quot;LINK_REMOVED&quot;;</span>
+<span class="fc" id="L75">            case LEMBRETE_CRIADO -&gt; &quot;REMINDER_CREATED&quot;;</span>
+<span class="fc" id="L76">            case LEMBRETE_ATUALIZADO -&gt; &quot;REMINDER_UPDATED&quot;;</span>
+<span class="fc" id="L77">            case PRESSAO_ANORMAL -&gt; &quot;HIGH_BLOOD_PRESSURE&quot;;</span>
+<span class="fc" id="L78">            case FEBRE_DETECTADA -&gt; &quot;FEVER_DETECTED&quot;;</span>
+<span class="fc" id="L79">            case SPO2_BAIXA -&gt; &quot;LOW_OXYGEN_SATURATION&quot;;</span>
+<span class="fc" id="L80">            case SPO2_CRITICA -&gt; &quot;CRITICAL_OXYGEN_SATURATION&quot;;</span>
+<span class="fc" id="L81">            case TAQUICARDIA_DETECTADA -&gt; &quot;HIGH_HEART_RATE&quot;;</span>
+<span class="fc" id="L82">            case BRADICARDIA_DETECTADA -&gt; &quot;LOW_HEART_RATE&quot;;</span>
+<span class="fc" id="L83">            case TAQUIPNEIA_DETECTADA -&gt; &quot;HIGH_RESPIRATORY_RATE&quot;;</span>
+<span class="fc" id="L84">            case BRADIPNEIA_DETECTADA -&gt; &quot;LOW_RESPIRATORY_RATE&quot;;</span>
+<span class="fc" id="L85">            case DOR_INTENSA_DETECTADA -&gt; &quot;INTENSE_PAIN_DETECTED&quot;;</span>
+<span class="fc" id="L86">            case DOR_CRITICA_DETECTADA -&gt; &quot;CRITICAL_PAIN_DETECTED&quot;;</span>
+<span class="fc" id="L87">            case SONO_CRITICO -&gt; &quot;CRITICAL_SLEEP&quot;;</span>
+<span class="fc" id="L88">            case SEDENTARISMO_DETECTADO -&gt; &quot;LOW_PHYSICAL_ACTIVITY&quot;;</span>
+<span class="fc" id="L89">            case META_CRIADA -&gt; &quot;GOAL_CREATED&quot;;</span>
+<span class="fc" id="L90">            case META_ATUALIZADA -&gt; &quot;GOAL_UPDATED&quot;;</span>
+<span class="fc" id="L91">            case META_REMOVIDA -&gt; &quot;GOAL_REMOVED&quot;;</span>
+<span class="fc" id="L92">            case META_CONCLUIDA -&gt; &quot;GOAL_COMPLETED&quot;;</span>
+<span class="fc" id="L93">            default -&gt; tipoEvento;</span>
+        };
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.15.202606040825</span></div></body></html>

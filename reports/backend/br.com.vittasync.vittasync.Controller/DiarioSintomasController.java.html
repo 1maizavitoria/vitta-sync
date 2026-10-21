@@ -4,11 +4,16 @@ import br.com.vittasync.vittasync.Service.PermissaoService;
 
 import br.com.vittasync.vittasync.DTO.DiarioSintomasInputDTO;
 import br.com.vittasync.vittasync.DTO.DiarioSintomasOutputDTO;
+import br.com.vittasync.vittasync.Exception.AcessoNegadoException;
 import br.com.vittasync.vittasync.Model.DiarioSintomas;
 import br.com.vittasync.vittasync.Model.Usuario;
 import br.com.vittasync.vittasync.Service.DiarioSintomasService;
-import br.com.vittasync.vittasync.Service.JwtService;
 import br.com.vittasync.vittasync.Service.UsuarioService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -17,150 +22,180 @@ import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping(&quot;/diariosintomas&quot;)
+@Tag(name = &quot;Diário de sintomas&quot;, description = &quot;Cadastro, edição, exclusão e consulta dos sintomas relatados pelo paciente &quot;
+        + &quot;com intensidade da dor de 1 a 10&quot;)
 public class DiarioSintomasController {
 
     private final DiarioSintomasService service;
-    private final JwtService jwtService;
     private final UsuarioService usuarioService;
     private final PermissaoService permissaoService;
 
     public DiarioSintomasController(
             DiarioSintomasService service,
-            JwtService jwtService,
             UsuarioService usuarioService,
             PermissaoService permissaoService
-<span class="fc" id="L32">    ) {</span>
-<span class="fc" id="L33">        this.service = service;</span>
-<span class="fc" id="L34">        this.jwtService = jwtService;</span>
-<span class="fc" id="L35">        this.usuarioService = usuarioService;</span>
-<span class="fc" id="L36">        this.permissaoService = permissaoService;</span>
-<span class="fc" id="L37">    }</span>
+<span class="fc" id="L37">    ) {</span>
+<span class="fc" id="L38">        this.service = service;</span>
+<span class="fc" id="L39">        this.usuarioService = usuarioService;</span>
+<span class="fc" id="L40">        this.permissaoService = permissaoService;</span>
+<span class="fc" id="L41">    }</span>
 
+    @Operation(
+            summary = &quot;Cadastrar sintoma&quot;,
+            description = &quot;Cadastra um sintoma do paciente com nome, intensidade da dor e o dia em que ocorreu, &quot;
+                    + &quot;a data do registro é automaticamente definida pelo servidor. Após salvar, o sistema analisa alertas de dor &quot;
+                    + &quot;intensa ou crítica. Permitido ao próprio paciente e aos responsáveis vinculados.&quot;
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = &quot;200&quot;, description = &quot;Sintoma cadastrado com sucesso&quot;),
+            @ApiResponse(responseCode = &quot;403&quot;, description = &quot;Usuário sem permissão para alterar os dados do paciente&quot;),
+            @ApiResponse(responseCode = &quot;404&quot;, description = &quot;Paciente não encontrado&quot;)
+    })
     @PostMapping(&quot;/cadastrar/{cpf}&quot;)
-    public ResponseEntity&lt;DiarioSintomasOutputDTO&gt; create(@PathVariable String cpf,
-                                                          @RequestHeader(&quot;Authorization&quot;) String authHeader,
-                                                          @RequestBody DiarioSintomasInputDTO dto) {
-<span class="fc" id="L43">        String token = authHeader.replace(&quot;Bearer &quot;, &quot;&quot;);</span>
-<span class="fc" id="L44">        String cpfDoToken = jwtService.extrairCpf(token);</span>
-
-<span class="fc" id="L46">        Usuario usuarioLogado =</span>
-<span class="fc" id="L47">                usuarioService.searchByCpf(cpfDoToken);</span>
-
-<span class="fc" id="L49">        Usuario paciente =</span>
-<span class="fc" id="L50">                usuarioService.searchByCpf(cpf);</span>
-
-<span class="fc" id="L52">        if (</span>
-<span class="pc bpc" id="L53" title="1 of 2 branches missed.">                !permissaoService.podeEditarPaciente(</span>
-<span class="fc" id="L54">                        usuarioLogado.getId(),</span>
-<span class="fc" id="L55">                        paciente.getId()</span>
-                )
-        ) {
-<span class="nc" id="L58">            return ResponseEntity.status(403).build();</span>
-        }
-
-<span class="fc" id="L61">        DiarioSintomas entity = new DiarioSintomas();</span>
-<span class="fc" id="L62">        entity.setPaciente(paciente);</span>
-<span class="fc" id="L63">        entity.setSintoma(dto.getSintoma());</span>
-<span class="fc" id="L64">        entity.setIntensidadeDor(dto.getIntensidadeDor());</span>
-<span class="fc" id="L65">        entity.setDataReferencia(dto.getDataReferencia());</span>
-
-<span class="fc" id="L67">        DiarioSintomas salvo = service.create(entity, usuarioLogado.getId());</span>
-<span class="fc" id="L68">        return ResponseEntity.ok(toOutputDTO(salvo));</span>
-    }
-
-    @PutMapping(&quot;/editar/{id}/{cpf}&quot;)
-    public ResponseEntity&lt;DiarioSintomasOutputDTO&gt; update(@PathVariable Integer id,
+    public ResponseEntity&lt;DiarioSintomasOutputDTO&gt; create(@Parameter(description = &quot;CPF do paciente (apenas números)&quot;)
                                                           @PathVariable String cpf,
-                                                          @RequestHeader(&quot;Authorization&quot;) String authHeader,
                                                           @RequestBody DiarioSintomasInputDTO dto) {
-<span class="fc" id="L76">        String token = authHeader.replace(&quot;Bearer &quot;, &quot;&quot;);</span>
-<span class="fc" id="L77">        String cpfDoToken = jwtService.extrairCpf(token);</span>
+<span class="fc" id="L58">        Usuario usuarioLogado =</span>
+<span class="fc" id="L59">                usuarioService.getUsuarioLogado();</span>
 
-<span class="fc" id="L79">        Usuario usuarioLogado =</span>
-<span class="fc" id="L80">                usuarioService.searchByCpf(cpfDoToken);</span>
+<span class="fc" id="L61">        Usuario paciente =</span>
+<span class="fc" id="L62">                usuarioService.searchByCpf(cpf);</span>
 
-<span class="fc" id="L82">        Usuario paciente =</span>
-<span class="fc" id="L83">                usuarioService.searchByCpf(cpf);</span>
-
-<span class="fc" id="L85">        if (</span>
-<span class="pc bpc" id="L86" title="1 of 2 branches missed.">                !permissaoService.podeEditarPaciente(</span>
-<span class="fc" id="L87">                        usuarioLogado.getId(),</span>
-<span class="fc" id="L88">                        paciente.getId()</span>
+<span class="fc" id="L64">        if (</span>
+<span class="pc bpc" id="L65" title="1 of 2 branches missed.">                !permissaoService.podeEditarPaciente(</span>
+<span class="fc" id="L66">                        usuarioLogado.getId(),</span>
+<span class="fc" id="L67">                        paciente.getId()</span>
                 )
         ) {
-<span class="nc" id="L91">            return ResponseEntity.status(403).build();</span>
+<span class="nc" id="L70">            throw new AcessoNegadoException(&quot;Usuário sem permissão para acessar o paciente&quot;);</span>
         }
 
-<span class="fc" id="L94">        DiarioSintomas entity = new DiarioSintomas();</span>
-<span class="fc" id="L95">        entity.setPaciente(paciente);</span>
-<span class="fc" id="L96">        entity.setSintoma(dto.getSintoma());</span>
-<span class="fc" id="L97">        entity.setIntensidadeDor(dto.getIntensidadeDor());</span>
-<span class="fc" id="L98">        entity.setDataReferencia(dto.getDataReferencia());</span>
+<span class="fc" id="L73">        DiarioSintomas entity = new DiarioSintomas();</span>
+<span class="fc" id="L74">        entity.setPaciente(paciente);</span>
+<span class="fc" id="L75">        entity.setSintoma(dto.getSintoma());</span>
+<span class="fc" id="L76">        entity.setIntensidadeDor(dto.getIntensidadeDor());</span>
+<span class="fc" id="L77">        entity.setDataReferencia(dto.getDataReferencia());</span>
 
-<span class="fc" id="L100">        DiarioSintomas atualizado = service.update(id, entity, usuarioLogado.getId());</span>
-<span class="fc" id="L101">        return ResponseEntity.ok(toOutputDTO(atualizado));</span>
+<span class="fc" id="L79">        DiarioSintomas salvo = service.create(entity, usuarioLogado.getId());</span>
+<span class="fc" id="L80">        return ResponseEntity.ok(toOutputDTO(salvo));</span>
     }
 
+    @Operation(
+            summary = &quot;Editar sintoma&quot;,
+            description = &quot;Substitui os dados de um sintoma já cadastrado, a data de modificação é preenchida automaticamente pelo servidor. &quot;
+                    + &quot;Permitido ao próprio paciente e aos responsáveis vinculados.&quot;
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = &quot;200&quot;, description = &quot;Sintoma atualizado com sucesso&quot;),
+            @ApiResponse(responseCode = &quot;403&quot;, description = &quot;Usuário sem permissão para alterar os dados do paciente&quot;),
+            @ApiResponse(responseCode = &quot;404&quot;, description = &quot;Paciente ou sintoma não encontrados&quot;)
+    })
+    @PutMapping(&quot;/editar/{id}/{cpf}&quot;)
+    public ResponseEntity&lt;DiarioSintomasOutputDTO&gt; update(@Parameter(description = &quot;ID do sintoma&quot;)
+                                                          @PathVariable Integer id,
+                                                          @Parameter(description = &quot;CPF do paciente (apenas números)&quot;)
+                                                          @PathVariable String cpf,
+                                                          @RequestBody DiarioSintomasInputDTO dto) {
+<span class="fc" id="L99">        Usuario usuarioLogado =</span>
+<span class="fc" id="L100">                usuarioService.getUsuarioLogado();</span>
+
+<span class="fc" id="L102">        Usuario paciente =</span>
+<span class="fc" id="L103">                usuarioService.searchByCpf(cpf);</span>
+
+<span class="fc" id="L105">        if (</span>
+<span class="pc bpc" id="L106" title="1 of 2 branches missed.">                !permissaoService.podeEditarPaciente(</span>
+<span class="fc" id="L107">                        usuarioLogado.getId(),</span>
+<span class="fc" id="L108">                        paciente.getId()</span>
+                )
+        ) {
+<span class="nc" id="L111">            throw new AcessoNegadoException(&quot;Usuário sem permissão para acessar o paciente&quot;);</span>
+        }
+
+<span class="fc" id="L114">        DiarioSintomas entity = new DiarioSintomas();</span>
+<span class="fc" id="L115">        entity.setPaciente(paciente);</span>
+<span class="fc" id="L116">        entity.setSintoma(dto.getSintoma());</span>
+<span class="fc" id="L117">        entity.setIntensidadeDor(dto.getIntensidadeDor());</span>
+<span class="fc" id="L118">        entity.setDataReferencia(dto.getDataReferencia());</span>
+
+<span class="fc" id="L120">        DiarioSintomas atualizado = service.update(id, entity, usuarioLogado.getId());</span>
+<span class="fc" id="L121">        return ResponseEntity.ok(toOutputDTO(atualizado));</span>
+    }
+
+    @Operation(
+            summary = &quot;Excluir sintoma&quot;,
+            description = &quot;Exclui um sintoma do paciente e registra o evento na linha do tempo do paciente. &quot;
+                    + &quot;Permitido ao próprio paciente e aos responsáveis vinculados.&quot;
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = &quot;204&quot;, description = &quot;Sintoma excluído com sucesso&quot;),
+            @ApiResponse(responseCode = &quot;403&quot;, description = &quot;Usuário sem permissão para alterar os dados do paciente&quot;),
+            @ApiResponse(responseCode = &quot;404&quot;, description = &quot;Paciente ou sintoma não encontrados&quot;)
+    })
     @DeleteMapping(&quot;/deletar/{id}/{cpf}&quot;)
-    public ResponseEntity&lt;Void&gt; delete(@PathVariable Integer id,
-                                       @PathVariable String cpf,
-                                       @RequestHeader(&quot;Authorization&quot;) String authHeader) {
-<span class="fc" id="L108">        String token = authHeader.replace(&quot;Bearer &quot;, &quot;&quot;);</span>
-<span class="fc" id="L109">        String cpfDoToken = jwtService.extrairCpf(token);</span>
+    public ResponseEntity&lt;Void&gt; delete(@Parameter(description = &quot;ID do sintoma&quot;)
+                                       @PathVariable Integer id,
+                                       @Parameter(description = &quot;CPF do paciente (apenas números)&quot;)
+                                       @PathVariable String cpf) {
+<span class="fc" id="L139">        Usuario usuarioLogado =</span>
+<span class="fc" id="L140">                usuarioService.getUsuarioLogado();</span>
 
-<span class="fc" id="L111">        Usuario usuarioLogado =</span>
-<span class="fc" id="L112">                usuarioService.searchByCpf(cpfDoToken);</span>
+<span class="fc" id="L142">        Usuario paciente =</span>
+<span class="fc" id="L143">                usuarioService.searchByCpf(cpf);</span>
 
-<span class="fc" id="L114">        Usuario paciente =</span>
-<span class="fc" id="L115">                usuarioService.searchByCpf(cpf);</span>
-
-<span class="fc" id="L117">        if (</span>
-<span class="pc bpc" id="L118" title="1 of 2 branches missed.">                !permissaoService.podeEditarPaciente(</span>
-<span class="fc" id="L119">                        usuarioLogado.getId(),</span>
-<span class="fc" id="L120">                        paciente.getId()</span>
+<span class="fc" id="L145">        if (</span>
+<span class="pc bpc" id="L146" title="1 of 2 branches missed.">                !permissaoService.podeEditarPaciente(</span>
+<span class="fc" id="L147">                        usuarioLogado.getId(),</span>
+<span class="fc" id="L148">                        paciente.getId()</span>
                 )
         ) {
-<span class="nc" id="L123">            return ResponseEntity.status(403).build();</span>
+<span class="nc" id="L151">            throw new AcessoNegadoException(&quot;Usuário sem permissão para acessar o paciente&quot;);</span>
         }
 
-<span class="fc" id="L126">        service.delete(id,usuarioLogado.getId());</span>
-<span class="fc" id="L127">        return ResponseEntity.noContent().build();</span>
+<span class="fc" id="L154">        service.delete(id,usuarioLogado.getId());</span>
+<span class="fc" id="L155">        return ResponseEntity.noContent().build();</span>
     }
 
+    @Operation(
+            summary = &quot;Listar sintomas do paciente&quot;,
+            description = &quot;Retorna todos os sintomas cadastrados do paciente. &quot;
+                    + &quot;Permitido ao próprio paciente e a todos os usuários vinculados a ele (responsáveis e profissionais de saúde).&quot;
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = &quot;200&quot;, description = &quot;Lista de sintomas do paciente&quot;),
+            @ApiResponse(responseCode = &quot;403&quot;, description = &quot;Usuário sem permissão para visualizar o paciente&quot;),
+            @ApiResponse(responseCode = &quot;404&quot;, description = &quot;Paciente não encontrado&quot;)
+    })
     @GetMapping(&quot;/getSintomas/{cpf}&quot;)
-    public ResponseEntity&lt;List&lt;DiarioSintomasOutputDTO&gt;&gt; list(@PathVariable String cpf,
-                                                              @RequestHeader(&quot;Authorization&quot;) String authHeader) {
-<span class="fc" id="L133">        String token = authHeader.replace(&quot;Bearer &quot;, &quot;&quot;);</span>
-<span class="fc" id="L134">        String cpfDoToken = jwtService.extrairCpf(token);</span>
+    public ResponseEntity&lt;List&lt;DiarioSintomasOutputDTO&gt;&gt; list(@Parameter(description = &quot;CPF do paciente (apenas números)&quot;)
+                                                              @PathVariable String cpf) {
+<span class="fc" id="L171">        Usuario usuarioLogado =</span>
+<span class="fc" id="L172">                usuarioService.getUsuarioLogado();</span>
 
-<span class="fc" id="L136">        Usuario usuarioLogado =</span>
-<span class="fc" id="L137">                usuarioService.searchByCpf(cpfDoToken);</span>
+<span class="fc" id="L174">        Usuario paciente =</span>
+<span class="fc" id="L175">                usuarioService.searchByCpf(cpf);</span>
 
-<span class="fc" id="L139">        Usuario paciente =</span>
-<span class="fc" id="L140">                usuarioService.searchByCpf(cpf);</span>
-
-<span class="fc" id="L142">        if (</span>
-<span class="fc bfc" id="L143" title="All 2 branches covered.">                !permissaoService.podeVisualizarPaciente(</span>
-<span class="fc" id="L144">                        usuarioLogado.getId(),</span>
-<span class="fc" id="L145">                        paciente.getId()</span>
+<span class="fc" id="L177">        if (</span>
+<span class="fc bfc" id="L178" title="All 2 branches covered.">                !permissaoService.podeVisualizarPaciente(</span>
+<span class="fc" id="L179">                        usuarioLogado.getId(),</span>
+<span class="fc" id="L180">                        paciente.getId()</span>
                 )
         ) {
-<span class="fc" id="L148">            return ResponseEntity.status(403).build();</span>
+<span class="fc" id="L183">            throw new AcessoNegadoException(&quot;Usuário sem permissão para acessar o paciente&quot;);</span>
         }
 
-<span class="fc" id="L151">        List&lt;DiarioSintomas&gt; lista = service.findByPacienteCpf(cpf);</span>
-<span class="fc" id="L152">        return ResponseEntity.ok(lista.stream().map(this::toOutputDTO).collect(Collectors.toList()));</span>
+<span class="fc" id="L186">        List&lt;DiarioSintomas&gt; lista = service.findByPacienteCpf(cpf);</span>
+<span class="fc" id="L187">        return ResponseEntity.ok(lista.stream().map(this::toOutputDTO).collect(Collectors.toList()));</span>
     }
 
     private DiarioSintomasOutputDTO toOutputDTO(DiarioSintomas entity) {
-<span class="fc" id="L156">        DiarioSintomasOutputDTO dto = new DiarioSintomasOutputDTO();</span>
-<span class="fc" id="L157">        dto.setId(entity.getId());</span>
-<span class="fc" id="L158">        dto.setSintoma(entity.getSintoma());</span>
-<span class="fc" id="L159">        dto.setIntensidadeDor(entity.getIntensidadeDor());</span>
-<span class="fc" id="L160">        dto.setDataReferencia(entity.getDataReferencia());</span>
-<span class="fc" id="L161">        dto.setDataRegistro(entity.getDataRegistro());</span>
-<span class="fc" id="L162">        dto.setDataModificacao(entity.getDataModificacao());</span>
-<span class="fc" id="L163">        return dto;</span>
+<span class="fc" id="L191">        DiarioSintomasOutputDTO dto = new DiarioSintomasOutputDTO();</span>
+<span class="fc" id="L192">        dto.setId(entity.getId());</span>
+<span class="fc" id="L193">        dto.setSintoma(entity.getSintoma());</span>
+<span class="fc" id="L194">        dto.setIntensidadeDor(entity.getIntensidadeDor());</span>
+<span class="fc" id="L195">        dto.setDataReferencia(entity.getDataReferencia());</span>
+<span class="fc" id="L196">        dto.setDataRegistro(entity.getDataRegistro());</span>
+<span class="fc" id="L197">        dto.setDataModificacao(entity.getDataModificacao());</span>
+<span class="fc" id="L198">        return dto;</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.15.202606040825</span></div></body></html>

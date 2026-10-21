@@ -58,20 +58,32 @@ public class ContatoEmergenciaService {
 
 <span class="fc" id="L59">        existente.setNome(contato.getNome());</span>
 <span class="fc" id="L60">        existente.setTelefone(contato.getTelefone());</span>
-<span class="fc" id="L61">        existente.setDataModificacao(LocalDateTime.now());</span>
+<span class="fc" id="L61">        existente.setEmail(contato.getEmail());</span>
+<span class="fc" id="L62">        existente.setReceberAlertaSinaisVitaisSaudavel(contato.getReceberAlertaSinaisVitaisSaudavel());</span>
+<span class="fc" id="L63">        existente.setReceberAlertaSinaisVitaisModerado(contato.getReceberAlertaSinaisVitaisModerado());</span>
+<span class="fc" id="L64">        existente.setReceberAlertaSinaisVitaisCritico(contato.getReceberAlertaSinaisVitaisCritico());</span>
+<span class="fc" id="L65">        existente.setReceberAlertaHabitosSaudavel(contato.getReceberAlertaHabitosSaudavel());</span>
+<span class="fc" id="L66">        existente.setReceberAlertaHabitosModerado(contato.getReceberAlertaHabitosModerado());</span>
+<span class="fc" id="L67">        existente.setReceberAlertaHabitosCritico(contato.getReceberAlertaHabitosCritico());</span>
+<span class="fc" id="L68">        existente.setReceberAlertaGeralSaudavel(contato.getReceberAlertaGeralSaudavel());</span>
+<span class="fc" id="L69">        existente.setReceberAlertaGeralModerado(contato.getReceberAlertaGeralModerado());</span>
+<span class="fc" id="L70">        existente.setReceberAlertaGeralCritico(contato.getReceberAlertaGeralCritico());</span>
+<span class="fc" id="L71">        existente.setCanalEmail(contato.getCanalEmail());</span>
+<span class="fc" id="L72">        existente.setCanalSms(contato.getCanalSms());</span>
+<span class="fc" id="L73">        existente.setDataModificacao(LocalDateTime.now());</span>
 
-<span class="fc" id="L63">        return repository.save(existente);</span>
+<span class="fc" id="L75">        return repository.save(existente);</span>
     }
 
     public void delete(Integer usuarioLogadoId, Integer id) {
-<span class="fc" id="L67">        ContatoEmergencia contato = repository.findById(id)</span>
-<span class="fc" id="L68">                .orElseThrow(() -&gt; new RecursoNaoEncontradoException(&quot;Contato de emergência não encontrado&quot;));</span>
+<span class="fc" id="L79">        ContatoEmergencia contato = repository.findById(id)</span>
+<span class="fc" id="L80">                .orElseThrow(() -&gt; new RecursoNaoEncontradoException(&quot;Contato de emergência não encontrado&quot;));</span>
 
-<span class="fc bfc" id="L70" title="All 2 branches covered.">        if (!permissaoService.podeEditarPaciente(usuarioLogadoId, contato.getPaciente().getId())) {</span>
-<span class="fc" id="L71">            throw new AcessoNegadoException(&quot;Você não tem permissão para remover contatos de emergência deste paciente.&quot;);</span>
+<span class="fc bfc" id="L82" title="All 2 branches covered.">        if (!permissaoService.podeEditarPaciente(usuarioLogadoId, contato.getPaciente().getId())) {</span>
+<span class="fc" id="L83">            throw new AcessoNegadoException(&quot;Você não tem permissão para remover contatos de emergência deste paciente.&quot;);</span>
         }
 
-<span class="fc" id="L74">        repository.delete(contato);</span>
-<span class="fc" id="L75">    }</span>
+<span class="fc" id="L86">        repository.delete(contato);</span>
+<span class="fc" id="L87">    }</span>
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.15.202606040825</span></div></body></html>

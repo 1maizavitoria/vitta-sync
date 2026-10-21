@@ -1,12 +1,40 @@
 <?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="pt"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>NotificacaoService.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report"></a> &gt; <a href="index.source.html" class="el_package">br.com.vittasync.vittasync.Service</a> &gt; <span class="el_source">NotificacaoService.java</span></div><h1>NotificacaoService.java</h1><pre class="source lang-java linenums">package br.com.vittasync.vittasync.Service;
 
 
+import br.com.vittasync.vittasync.Exception.DadosInvalidosException;
+import br.com.vittasync.vittasync.Model.ContatoEmergencia;
 import br.com.vittasync.vittasync.Model.Usuario;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 @Service
 public class NotificacaoService {
+
+<span class="fc" id="L16">    private static final Logger logger = LoggerFactory.getLogger(NotificacaoService.class);</span>
+
+    @Async
+    public void enviarDesvioLinhaBase(Integer contatoId, String nomeContato, String email,
+                                     String telefone, boolean canalEmail, boolean canalSms,
+                                     String nomePaciente, String detalhes) {
+<span class="fc bfc" id="L22" title="All 2 branches covered.">        if (canalEmail) {</span>
+            try {
+<span class="fc" id="L24">                emailService.enviarEmailPersonalizado(email,</span>
+                        &quot;VittaSync - Medição fora do padrão individual de &quot; + nomePaciente,
+                        &quot;Olá, &quot; + nomeContato + &quot;\n\nPaciente: &quot; + nomePaciente
+                                + &quot;\nMedição fora do padrão individual:\n&quot; + detalhes
+                                + &quot;\n\nEquipe VittaSync&quot;);
+<span class="fc" id="L29">            } catch (RuntimeException exception) {</span>
+<span class="fc" id="L30">                logger.error(&quot;Falha no e-mail de desvio da linha de base para contato {}&quot;, contatoId, exception);</span>
+<span class="fc" id="L31">            }</span>
+        }
+        // falha no e-mail não impede a tentativa pelo outro canal configurado.
+<span class="fc bfc" id="L34" title="All 2 branches covered.">        if (canalSms) {</span>
+<span class="fc" id="L35">            smsService.enviarDesvioLinhaBase(telefone, nomePaciente, detalhes);</span>
+        }
+<span class="fc" id="L37">    }</span>
 
     private final EmailService emailService;
     private final SmsService smsService;
@@ -14,96 +42,88 @@ public class NotificacaoService {
     public NotificacaoService(
             EmailService emailService,
             SmsService smsService
-<span class="fc" id="L17">    ) {</span>
-
-<span class="fc" id="L19">        this.emailService = emailService;</span>
-<span class="fc" id="L20">        this.smsService = smsService;</span>
-<span class="fc" id="L21">    }</span>
+<span class="fc" id="L45">    ) {</span>
+<span class="fc" id="L46">        this.emailService = emailService;</span>
+<span class="fc" id="L47">        this.smsService = smsService;</span>
+<span class="fc" id="L48">    }</span>
 
     public void enviarCodigo(
             Usuario usuario,
             String codigo,
             String canal
     ) {
-
-<span class="fc bfc" id="L29" title="All 3 branches covered.">        switch (canal.toLowerCase()) {</span>
-
-            case &quot;sms&quot;:
-
-<span class="fc" id="L33">                smsService.enviarCodigo(</span>
-<span class="fc" id="L34">                        usuario.getTelefone(),</span>
-                        codigo
-                );
-
-<span class="fc" id="L38">                break;</span>
-
-            case &quot;email&quot;:
-
-<span class="fc" id="L42">                emailService.enviarCodigo(</span>
-<span class="fc" id="L43">                        usuario.getEmail(),</span>
-                        codigo
-                );
-
-<span class="fc" id="L47">                break;</span>
-
-            default:
-
-<span class="fc" id="L51">                throw new RuntimeException(</span>
-                        &quot;Canal inválido&quot;
-                );
+<span class="fc bfc" id="L55" title="All 3 branches covered.">        switch (canal.toLowerCase()) {</span>
+<span class="fc" id="L56">            case &quot;sms&quot; -&gt; smsService.enviarCodigo(usuario.getTelefone(), codigo);</span>
+<span class="fc" id="L57">            case &quot;email&quot; -&gt; emailService.enviarCodigo(usuario.getEmail(), codigo);</span>
+<span class="fc" id="L58">            default -&gt; throw new DadosInvalidosException(&quot;Canal inválido&quot;);</span>
         }
-<span class="fc" id="L55">    }</span>
+<span class="fc" id="L60">    }</span>
 
     public void enviarLembrete(
             Usuario usuario,
             String mensagem,
             String canal
     ) {
-
-<span class="fc bfc" id="L63" title="All 4 branches covered.">        switch (canal.toLowerCase()) {</span>
-
-            case &quot;sms&quot;:
-
-<span class="fc" id="L67">                smsService.enviarLembrete(</span>
-<span class="fc" id="L68">                        usuario.getTelefone(),</span>
-<span class="fc" id="L69">                        usuario.getNome(),</span>
-                        mensagem
-                );
-
-<span class="fc" id="L73">                break;</span>
-
-            case &quot;email&quot;:
-
-<span class="fc" id="L77">                emailService.enviarLembrete(</span>
-<span class="fc" id="L78">                        usuario.getEmail(),</span>
-<span class="fc" id="L79">                        usuario.getNome(),</span>
-                        mensagem
-                );
-
-<span class="fc" id="L83">                break;</span>
-
-            case &quot;ambos&quot;:
-
-<span class="fc" id="L87">                smsService.enviarLembrete(</span>
-<span class="fc" id="L88">                        usuario.getTelefone(),</span>
-<span class="fc" id="L89">                        usuario.getNome(),</span>
-                        mensagem
-                );
-
-<span class="fc" id="L93">                emailService.enviarLembrete(</span>
-<span class="fc" id="L94">                        usuario.getEmail(),</span>
-<span class="fc" id="L95">                        usuario.getNome(),</span>
-                        mensagem
-                );
-
-<span class="fc" id="L99">                break;</span>
-
-            default:
-
-<span class="fc" id="L103">                throw new RuntimeException(</span>
-                        &quot;Canal inválido&quot;
-                );
+<span class="fc bfc" id="L67" title="All 4 branches covered.">        switch (canal.toLowerCase()) {</span>
+<span class="fc" id="L68">            case &quot;sms&quot; -&gt; smsService.enviarLembrete(usuario.getTelefone(), usuario.getNome(), mensagem);</span>
+<span class="fc" id="L69">            case &quot;email&quot; -&gt; emailService.enviarLembrete(usuario.getEmail(), usuario.getNome(), mensagem);</span>
+            case &quot;ambos&quot; -&gt; {
+<span class="fc" id="L71">                smsService.enviarLembrete(usuario.getTelefone(), usuario.getNome(), mensagem);</span>
+<span class="fc" id="L72">                emailService.enviarLembrete(usuario.getEmail(), usuario.getNome(), mensagem);</span>
+<span class="fc" id="L73">            }</span>
+<span class="fc" id="L74">            default -&gt; throw new DadosInvalidosException(&quot;Canal inválido&quot;);</span>
         }
-<span class="fc" id="L107">    }</span>
+<span class="fc" id="L76">    }</span>
+
+    @Async
+    public void enviarAlertaEmergencia(
+            ContatoEmergencia contato,
+            String mensagemAgrupada,
+            String categoria
+    ) {
+<span class="fc" id="L84">        String nomePaciente = contato.getPaciente().getNome();</span>
+
+
+<span class="fc bfc" id="L87" title="All 4 branches covered.">        String tituloEmail = switch (categoria.toLowerCase()) {</span>
+<span class="fc" id="L88">            case &quot;saudavel&quot; -&gt; &quot;🟢 VittaSync - Estabilidade SAUDÁVEL do paciente &quot; + nomePaciente;</span>
+<span class="fc" id="L89">            case &quot;moderado&quot; -&gt; &quot;🟡️ VittaSync - Estabilidade MODERADA do paciente &quot; + nomePaciente;</span>
+<span class="fc" id="L90">            case &quot;critico&quot; -&gt; &quot;🔴 VittaSync - Estabilidade CRÍTICA do paciente &quot; + nomePaciente;</span>
+<span class="fc" id="L91">            default -&gt; &quot;ℹ️ VittaSync - Paciente &quot; + nomePaciente;</span>
+        };
+
+<span class="fc bfc" id="L94" title="All 2 branches covered.">        if (Boolean.TRUE.equals(contato.getCanalEmail())) {</span>
+<span class="fc" id="L95">            String corpoEmail = &quot;Olá, &quot; + contato.getNome() + &quot;\n\n&quot;</span>
+                    + tituloEmail + &quot;\n\n&quot;
+                    + mensagemAgrupada + &quot;\n\n&quot;
+                    + &quot;Atenciosamente,\nEquipe VittaSync&quot;;
+
+<span class="fc" id="L100">            emailService.enviarEmailPersonalizado(contato.getEmail(), tituloEmail, corpoEmail);</span>
+        }
+
+<span class="fc bfc" id="L103" title="All 2 branches covered.">        if (Boolean.TRUE.equals(contato.getCanalSms())) {</span>
+<span class="fc" id="L104">            smsService.enviarAlertaClinico(</span>
+<span class="fc" id="L105">                    contato.getTelefone(),</span>
+<span class="fc" id="L106">                    contato.getNome(),</span>
+                    nomePaciente,
+                    categoria,
+                    mensagemAgrupada
+            );
+        }
+<span class="fc" id="L112">    }</span>
+
+    public void enviarAlertaRepouso(ContatoEmergencia contato, String canal) {
+<span class="fc" id="L115">        String nomePaciente = contato.getPaciente().getNome();</span>
+
+<span class="fc bfc" id="L117" title="All 4 branches covered.">        switch (canal.toLowerCase()) {</span>
+<span class="fc" id="L118">            case &quot;sms&quot; -&gt; smsService.enviarAlertaRepouso(contato.getTelefone(), nomePaciente);</span>
+<span class="fc" id="L119">            case &quot;email&quot; -&gt; emailService.enviarAlertaRepouso(contato.getEmail(), nomePaciente);</span>
+            case &quot;ambos&quot; -&gt; {
+<span class="fc" id="L121">                smsService.enviarAlertaRepouso(contato.getTelefone(), nomePaciente);</span>
+<span class="fc" id="L122">                emailService.enviarAlertaRepouso(contato.getEmail(), nomePaciente);</span>
+<span class="fc" id="L123">            }</span>
+<span class="fc" id="L124">            default -&gt; throw new DadosInvalidosException(&quot;Canal inválido&quot;);</span>
+        }
+<span class="fc" id="L126">    }</span>
+
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.15.202606040825</span></div></body></html>

@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="pt"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>EstabilidadeClinicaDTO.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report"></a> &gt; <a href="index.source.html" class="el_package">br.com.vittasync.vittasync.DTO</a> &gt; <span class="el_source">EstabilidadeClinicaDTO.java</span></div><h1>EstabilidadeClinicaDTO.java</h1><pre class="source lang-java linenums">package br.com.vittasync.vittasync.DTO;
+
+
+import io.swagger.v3.oas.annotations.media.Schema;
+import java.time.LocalDateTime;
+
+
+@Schema(description = &quot;Índice de estabilidade clínica de um fator ou o índice geral&quot;)
+public class EstabilidadeClinicaDTO {
+
+    @Schema(description = &quot;Fator avaliado&quot;, example = &quot;fc_bpm&quot;,
+            allowableValues = {&quot;fc_bpm&quot;, &quot;fr_rpm&quot;, &quot;pressao&quot;, &quot;temp_celcius&quot;, &quot;spo2&quot;, &quot;peso&quot;, &quot;sono&quot;, &quot;exercicio&quot;, &quot;geral&quot;})
+    private String tipo;
+
+    @Schema(description = &quot;Índice de 3 (crítico) a 9 (saudável), nulo quando há menos de 3 registros&quot;, example = &quot;9&quot;)
+    private Integer indice;
+
+    @Schema(description = &quot;Classificação do índice&quot;, example = &quot;saudavel&quot;, allowableValues = {&quot;saudavel&quot;, &quot;moderado&quot;, &quot;critico&quot;, &quot;n/a&quot;})
+    private String categoria;
+
+    @Schema(description = &quot;Peso do fator no cálculo do índice geral&quot;, example = &quot;1.0&quot;)
+    private Double peso;
+
+    @Schema(description = &quot;Data e hora do cálculo&quot;, example = &quot;2026-10-13T08:42:10&quot;)
+    private LocalDateTime dataCalculo;
+
+    public EstabilidadeClinicaDTO(
+            String tipo,
+            Integer indice,
+            String categoria,
+            Double peso,
+            LocalDateTime dataCalculo
+<span class="fc" id="L33">    ) {</span>
+<span class="fc" id="L34">        this.tipo = tipo;</span>
+<span class="fc" id="L35">        this.indice = indice;</span>
+<span class="fc" id="L36">        this.categoria = categoria;</span>
+<span class="fc" id="L37">        this.peso = peso;</span>
+<span class="fc" id="L38">        this.dataCalculo = dataCalculo;</span>
+<span class="fc" id="L39">    }</span>
+
+    
+<span class="fc" id="L42">    public String getTipo() {return tipo;}</span>
+
+<span class="fc" id="L44">    public Integer getIndice() {return indice;}</span>
+
+<span class="fc" id="L46">    public String getCategoria() {return categoria;}</span>
+
+<span class="fc" id="L48">    public Double getPeso() {return peso;}</span>
+
+<span class="fc" id="L50">    public LocalDateTime getDataCalculo() {return dataCalculo;}</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.15.202606040825</span></div></body></html>

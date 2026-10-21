@@ -8,7 +8,7 @@ import java.time.LocalTime;
 @Schema(description = "Dados do lembrete de medição do paciente")
 public class LembreteMedicaoInputDTO {
 
-    @Schema(description = "Dias da semana em inglês separados por vírgula", example = "MONDAY,WEDNESDAY,FRIDAY")
+    @Schema(description = "Dias da semana separados por vírgula", example = "segunda,quarta,sexta")
     private String diasSemana;
 
     @Schema(description = "Horário do envio (HH:mm:ss)", type = "string", example = "08:00:00")
