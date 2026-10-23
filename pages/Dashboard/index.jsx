@@ -18,7 +18,7 @@ import { useMemo } from "react";
 import { usePatient } from "../../context/PatientContext";
 import { useI18n } from "../../src/i18n";
 import { useThemeMode } from "../../src/theme/ThemeModeProvider";
-import { createLocalDashboardPreferencesRepository } from "../../src/features/dashboard/infrastructure/localDashboardPreferencesRepository";
+import { createRemoteDashboardPreferencesRepository } from "../../src/features/dashboard/infrastructure/remoteDashboardPreferencesRepository";
 import { useDashboardController } from "../../src/features/dashboard/presentation/useDashboardController";
 
 import SettingsOutlinedIcon from "@mui/icons-material/SettingsOutlined";
@@ -87,7 +87,7 @@ export default function Dashboard() {
     const { accessibilityMode } = useThemeMode();
     const loggedUserCpf = localStorage.getItem("CPF") || localStorage.getItem("cpf");
     const preferencesRepository = useMemo(
-        () => createLocalDashboardPreferencesRepository(loggedUserCpf),
+        () => createRemoteDashboardPreferencesRepository(loggedUserCpf),
         [loggedUserCpf]
     );
     const {

@@ -27,13 +27,8 @@ import type {
 
 import { customInstance } from '../../../../../services/api.js';
 type AwaitedInput<T> = PromiseLike<T> | T;
-
-      type Awaited<O> = O extends AwaitedInput<infer T> ? T : never;
-
-
+type Awaited<O> = O extends AwaitedInput<infer T> ? T : never;
 type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
-
-
 
 const withQueryKey = <T extends object, K>(query: T, queryKey: K): T & { queryKey: K } => {
   const result = { queryKey } as T & { queryKey: K };
@@ -55,47 +50,37 @@ const withQueryKey = <T extends object, K>(query: T, queryKey: K): T & { queryKe
  * @summary Consultar dashboard do paciente
  */
 export const consultar = (
-    cpf: string,
-    params?: ConsultarParams,
- options?: SecondParameter<typeof customInstance>,signal?: AbortSignal
+  cpf: string,
+  params?: ConsultarParams,
+  options?: SecondParameter<typeof customInstance>, signal?: AbortSignal
 ) => {
 
-
-      return customInstance<DashboardResponseDTO>(
-      {url: `/dashboard/pacientes/${cpf}`, method: 'GET',
-        params, signal
+  return customInstance<DashboardResponseDTO>(
+    {
+      url: `/dashboard/pacientes/${cpf}`, method: 'GET',
+      params, signal
     },
-      options);
-    }
-
-
-
+    options);
+}
 
 export const getConsultarQueryKey = (cpf: string,
-    params?: ConsultarParams,) => {
-    return [
+  params?: ConsultarParams,) => {
+  return [
     `/dashboard/pacientes/${cpf}`, ...(params ? [params] : [])
-    ] as const;
-    }
-
+  ] as const;
+}
 
 export const getConsultarQueryOptions = <TData = Awaited<ReturnType<typeof consultar>>, TError = DashboardResponseDTO>(cpf: string,
-    params?: ConsultarParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof consultar>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+  params?: ConsultarParams, options?: { query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof consultar>>, TError, TData>>, request?: SecondParameter<typeof customInstance> }
 ) => {
 
-const {query: queryOptions, request: requestOptions} = options ?? {};
+  const { query: queryOptions, request: requestOptions } = options ?? {};
 
-  const queryKey =  queryOptions?.queryKey ?? getConsultarQueryKey(cpf,params);
+  const queryKey = queryOptions?.queryKey ?? getConsultarQueryKey(cpf, params);
 
+  const queryFn: QueryFunction<Awaited<ReturnType<typeof consultar>>> = ({ signal }) => consultar(cpf, params, requestOptions, signal);
 
-
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof consultar>>> = ({ signal }) => consultar(cpf,params, requestOptions, signal);
-
-
-
-
-
-   return  { queryKey, queryFn, enabled: cpf !== null && cpf !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof consultar>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+  return { queryKey, queryFn, enabled: cpf !== null && cpf !== undefined, ...queryOptions } as UseQueryOptions<Awaited<ReturnType<typeof consultar>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
 }
 
 export type ConsultarQueryResult = NonNullable<Awaited<ReturnType<typeof consultar>>>
@@ -103,45 +88,51 @@ export type ConsultarQueryError = DashboardResponseDTO
 
 
 export function useConsultar<TData = Awaited<ReturnType<typeof consultar>>, TError = DashboardResponseDTO>(
- cpf: string,
-    params: undefined |  ConsultarParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof consultar>>, TError, TData>> & Pick<
-        DefinedInitialDataOptions<
-          Awaited<ReturnType<typeof consultar>>,
-          TError,
-          Awaited<ReturnType<typeof consultar>>
-        > , 'initialData'
-      >, request?: SecondParameter<typeof customInstance>}
- , queryClient?: QueryClient
-  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+  cpf: string,
+  params: undefined | ConsultarParams, options: {
+    query: Partial<UseQueryOptions<Awaited<ReturnType<typeof consultar>>, TError, TData>> & Pick<
+      DefinedInitialDataOptions<
+        Awaited<ReturnType<typeof consultar>>,
+        TError,
+        Awaited<ReturnType<typeof consultar>>
+      >, 'initialData'
+    >, request?: SecondParameter<typeof customInstance>
+  }
+  , queryClient?: QueryClient
+): DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
 export function useConsultar<TData = Awaited<ReturnType<typeof consultar>>, TError = DashboardResponseDTO>(
- cpf: string,
-    params?: ConsultarParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof consultar>>, TError, TData>> & Pick<
-        UndefinedInitialDataOptions<
-          Awaited<ReturnType<typeof consultar>>,
-          TError,
-          Awaited<ReturnType<typeof consultar>>
-        > , 'initialData'
-      >, request?: SecondParameter<typeof customInstance>}
- , queryClient?: QueryClient
-  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+  cpf: string,
+  params?: ConsultarParams, options?: {
+    query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof consultar>>, TError, TData>> & Pick<
+      UndefinedInitialDataOptions<
+        Awaited<ReturnType<typeof consultar>>,
+        TError,
+        Awaited<ReturnType<typeof consultar>>
+      >, 'initialData'
+    >, request?: SecondParameter<typeof customInstance>
+  }
+  , queryClient?: QueryClient
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
 export function useConsultar<TData = Awaited<ReturnType<typeof consultar>>, TError = DashboardResponseDTO>(
- cpf: string,
-    params?: ConsultarParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof consultar>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
- , queryClient?: QueryClient
-  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+  cpf: string,
+  params?: ConsultarParams, options?: { query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof consultar>>, TError, TData>>, request?: SecondParameter<typeof customInstance> }
+  , queryClient?: QueryClient
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 /**
  * @summary Consultar dashboard do paciente
  */
 
 export function useConsultar<TData = Awaited<ReturnType<typeof consultar>>, TError = DashboardResponseDTO>(
- cpf: string,
-    params?: ConsultarParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof consultar>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
- , queryClient?: QueryClient
- ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+  cpf: string,
+  params?: ConsultarParams, options?: { query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof consultar>>, TError, TData>>, request?: SecondParameter<typeof customInstance> }
+  , queryClient?: QueryClient
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
-  const queryOptions = getConsultarQueryOptions(cpf,params,options)
+  const queryOptions = getConsultarQueryOptions(cpf, params, options)
 
-  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+  const query = useQuery(queryOptions, queryClient) as UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 
   return withQueryKey(query, queryOptions.queryKey);
 }
